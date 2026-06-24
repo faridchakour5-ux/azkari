@@ -414,6 +414,17 @@
   </div>
   <div class="gnote">3 أسطر للذكر كل 4 ساعات، من العاشرة صباحاً حتى العاشرة ليلاً (10 · 14 · 18 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
 
+  <div class="gtitle">النسخ الاحتياطي</div>
+  <div class="group">
+    <div class="row" style="display:block; padding:14px 16px;">
+      <div id="backup-status" style="color:var(--text-2); font-size:14px; line-height:1.9;"></div>
+    </div>
+    <div class="btn-row" id="backup-save">💾 حفظ تقدّمي في ملف</div>
+    <div class="btn-row" id="backup-restore">♻️ استعادة من ملف</div>
+    <input type="file" id="backup-file" accept="application/json,.json" style="display:none">
+  </div>
+  <div class="gnote">تقدّمك (موضعك في الوِرد، الأذكار المُنجَزة، السلسلة، وأيام القراءة) يُحفَظ تلقائياً في هذا المتصفّح. احفظ نسخة في ملف لنقلها إلى جهاز آخر أو لاستعادتها إذا مُسحت بيانات المتصفّح.</div>
+
   <div class="gtitle">عن التطبيق</div>
   <div class="group">
     <div class="row"><span class="k">الأذكار</span><span class="v">حصن المسلم</span></div>
@@ -745,6 +756,7 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   window.scrollTo(0,0);
   flashSalat();
   if(t.dataset.s==='s-wird') openWird();
+  if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} }
 }));
 
 let __splashTimer=null;
@@ -1059,6 +1071,49 @@ syncSeg('#riwaya-seg','riwaya'); syncSeg('#font-seg','font'); renderSwatches();
 try{ renderAzkar(); }catch(e){} renderChips(); paintTasbih();
 renderStreak(); try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
 try{ renderWirdKpi(); $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m===wirdMode())); }catch(e){}
+
+/* ================= BACKUP / RESTORE ================= */
+function backupStatusHtml(){
+  const w=store.get('az_wird',{hafs:0,warsh:0});
+  const s=streakData(); const q=qreadData(); const t=todayKey();
+  let qdays=0; for(const k in q){ if(dayDiff(k,t)<7) qdays++; }
+  const pos = settings.riwaya==='warsh' ? (w.warsh||0) : (w.hafs||0);
+  let posTxt;
+  if(window.__wirdReady && WIRD && WIRD.__riwaya===settings.riwaya){
+    const N=WIRD.a.length; const pg = pos>=N?604:parseInt(WIRD.a[pos].p);
+    posTxt = pos>=N ? 'أتممت الختمة 🤍' : ('صفحة '+pg+' من 604 ('+Math.round(pos/N*100)+'٪)');
+  } else { posTxt = pos>0 ? ('عند الآية رقم '+pos+' — افتح الوِرد لرؤية الصفحة') : 'من البداية'; }
+  return '🔥 السلسلة: <b>'+(s.count||0)+'</b> يوم متتابع<br>'+
+         '📖 موضع الوِرد ('+(settings.riwaya==='warsh'?'ورش':'حفص')+'): <b>'+posTxt+'</b><br>'+
+         '✅ أيام القراءة (آخر أسبوع): <b>'+qdays+' / 7</b>';
+}
+function renderBackupStatus(){ const el=$('#backup-status'); if(el) el.innerHTML=backupStatusHtml(); }
+function exportBackup(){
+  const data={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); data[k]=localStorage.getItem(k); }
+  const payload={ _app:'azkari', _v:1, _date:new Date().toISOString(), data };
+  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='azkari-backup-'+todayKey()+'.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+  vibrate(10);
+}
+function importBackup(file){
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const obj=JSON.parse(r.result); const d=(obj && obj.data) ? obj.data : obj;
+    if(!d || typeof d!=='object') throw new Error('bad');
+    if(!('az_settings' in d) && !('az_wird' in d)) { if(!confirm('هذا الملف لا يبدو نسخةً من أذكاري. هل تريد المتابعة؟')) return; }
+    Object.keys(d).forEach(k=>{ if(typeof d[k]==='string') localStorage.setItem(k, d[k]); });
+    alert('تمت استعادة تقدّمك بنجاح ✓ سيُعاد تحميل التطبيق.');
+    location.reload();
+  }catch(e){ alert('تعذّرت قراءة الملف. تأكد أنه ملف نسخة احتياطية صحيح لأذكاري.'); } };
+  r.readAsText(file);
+}
+$('#backup-save') && $('#backup-save').addEventListener('click', exportBackup);
+$('#backup-restore') && $('#backup-restore').addEventListener('click', ()=> $('#backup-file').click());
+$('#backup-file') && $('#backup-file').addEventListener('change', e=>{ if(e.target.files[0]) importBackup(e.target.files[0]); });
+try{ renderBackupStatus(); }catch(e){}
+
 try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
 /* refresh on day change / resume */
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ try{ renderAzkar(); }catch(e){} } });
