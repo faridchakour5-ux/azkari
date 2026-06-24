@@ -263,6 +263,9 @@
   .wird-amount button.on{background:var(--accent); color:#fff;}
   .wird-card{background:var(--card); border-radius:18px; margin:12px 16px; padding:20px 18px;}
   .wird-sura{color:var(--accent); font-weight:800; font-size:15px; margin:10px 0 6px; text-align:center;}
+  .wird-basmala{font-family:'AmiriQuran',serif; text-align:center; color:var(--text);
+    font-size:calc(20px * var(--scale) * var(--qscale,1)); line-height:2; margin:2px 0 10px;}
+  body.riw-warsh .wird-basmala{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(22px * var(--scale) * var(--qscale,1));}
   .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.3; text-align:justify;}
   body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
   .qzoom{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 16px 0;}
@@ -901,12 +904,22 @@ function buildSuraSelect(){
   __suraBuiltRiwaya=settings.riwaya;
   sel.onchange=()=>{ settings.mushafSura=parseInt(sel.value)||0; settings.mushafPos=null; saveSettings(); window.scrollTo({top:0}); renderMushaf(); };
 }
+const BASMALA = {
+  hafs:  'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ',
+  warsh: 'بِسْمِ اِ۬للَّهِ اِ۬لرَّحْمَٰنِ اِ۬لرَّحِيمِ'
+};
+function basmalaHtml(si){
+  if(WIRD.sur[si].s===9) return '';                 // التوبة: بلا بسملة
+  const t = WIRD.a[WIRD.sur[si].i].t || '';
+  if(/^بِس[ْۡ]مِ/.test(t)) return '';                // الآية الأولى هي البسملة أصلاً (الفاتحة برواية حفص)
+  return '<div class="wird-basmala">'+(BASMALA[settings.riwaya]||BASMALA.hafs)+'</div>';
+}
 function renderMushaf(){
   if(!WIRD) return;
   const si=Math.min(Math.max(settings.mushafSura||0,0), WIRD.sur.length-1);
   const start=WIRD.sur[si].i;
   const end = si+1<WIRD.sur.length ? WIRD.sur[si+1].i : WIRD.a.length;
-  let html='<div class="wird-card"><div class="wird-sura">'+WIRD.sur[si].n+'</div><div class="wird-text">';
+  let html='<div class="wird-card"><div class="wird-sura">'+WIRD.sur[si].n+'</div>'+basmalaHtml(si)+'<div class="wird-text">';
   for(let i=start;i<end;i++){ html+=WIRD.a[i].t+'<span class="wird-num">۝'+(i-start+1)+'</span> '; }
   html+='</div></div>';
   $('#wird-body').innerHTML=html;
@@ -998,7 +1011,8 @@ function renderWird(){
   let html='<div class="wird-card">'; let i=s;
   while(i<e){
     const sura=suraOf(i);
-    html+='<div class="wird-sura">'+suraName(sura)+'</div><div class="wird-text">';
+    const atSuraStart = (i===WIRD.sur[sura].i);
+    html+='<div class="wird-sura">'+suraName(sura)+'</div>'+(atSuraStart?basmalaHtml(sura):'')+'<div class="wird-text">';
     while(i<e && suraOf(i)===sura){
       html+=WIRD.a[i].t+'<span class="wird-num">۝'+ayaNoOf(i)+'</span> ';
       i++;
