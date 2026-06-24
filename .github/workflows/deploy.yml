@@ -6,6 +6,7 @@ on:
       - main
       - master
       - claude/loving-cerf-346jn7
+      - claude/dreamy-tesla-jorpcc
   workflow_dispatch:
 
 permissions:
