@@ -30,29 +30,29 @@
     --sep:rgba(58,53,46,.16); --fill:rgba(120,105,80,.18); --fill-2:rgba(120,105,80,.12);
     --blur:rgba(239,230,212,.82); --accent:#2F9E44; --accent-2:#28893B;
   }
-  :root[data-bg="rose"]{
-    --bg:#F2DEE3; --group:#F2DEE3; --card:#FBEFF2; --card-2:#FBEFF2;
-    --text:#46343A; --text-2:rgba(70,52,58,.58); --text-3:rgba(70,52,58,.3);
-    --sep:rgba(70,52,58,.16); --fill:rgba(150,100,115,.16); --fill-2:rgba(150,100,115,.1);
-    --blur:rgba(242,222,227,.82); --accent:#2F9E44;
+  :root[data-bg="beige"]{
+    --bg:#F1E8D6; --group:#F1E8D6; --card:#FBF5E9; --card-2:#FBF5E9;
+    --text:#3E382E; --text-2:rgba(62,56,46,.58); --text-3:rgba(62,56,46,.3);
+    --sep:rgba(62,56,46,.16); --fill:rgba(130,112,82,.16); --fill-2:rgba(130,112,82,.1);
+    --blur:rgba(241,232,214,.82); --accent:#2F9E44;
+  }
+  :root[data-bg="greige"]{
+    --bg:#E4DACB; --group:#E4DACB; --card:#F1EADD; --card-2:#F1EADD;
+    --text:#3C372F; --text-2:rgba(60,55,47,.58); --text-3:rgba(60,55,47,.3);
+    --sep:rgba(60,55,47,.16); --fill:rgba(120,105,82,.16); --fill-2:rgba(120,105,82,.1);
+    --blur:rgba(228,218,203,.82); --accent:#2F9E44;
+  }
+  :root[data-bg="taupe"]{
+    --bg:#D8CCBE; --group:#D8CCBE; --card:#E8DFD3; --card-2:#E8DFD3;
+    --text:#3A352D; --text-2:rgba(58,53,45,.58); --text-3:rgba(58,53,45,.3);
+    --sep:rgba(58,53,45,.16); --fill:rgba(110,96,76,.16); --fill-2:rgba(110,96,76,.1);
+    --blur:rgba(216,204,190,.82); --accent:#2F9E44;
   }
   :root[data-bg="white"]{
     --bg:#F2F2F7; --group:#F2F2F7; --card:#FAFAF8; --card-2:#FAFAF8;
     --text:#2B2B2B; --text-2:rgba(43,43,43,.55); --text-3:rgba(43,43,43,.3);
     --sep:rgba(43,43,43,.16); --fill:rgba(120,120,128,.16); --fill-2:rgba(120,120,128,.1);
     --blur:rgba(242,242,247,.82); --accent:#2E9E4F;
-  }
-  :root[data-bg="mint"]{
-    --bg:#E2EFE7; --group:#E2EFE7; --card:#F3FAF6; --card-2:#F3FAF6;
-    --text:#2B3A31; --text-2:rgba(43,58,49,.55); --text-3:rgba(43,58,49,.3);
-    --sep:rgba(43,58,49,.15); --fill:rgba(90,140,110,.14); --fill-2:rgba(90,140,110,.09);
-    --blur:rgba(226,239,231,.82); --accent:#2E9E57;
-  }
-  :root[data-bg="sky"]{
-    --bg:#E2ECF3; --group:#E2ECF3; --card:#F2F8FC; --card-2:#F2F8FC;
-    --text:#2A343D; --text-2:rgba(42,52,61,.55); --text-3:rgba(42,52,61,.3);
-    --sep:rgba(42,52,61,.15); --fill:rgba(90,120,150,.14); --fill-2:rgba(90,120,150,.09);
-    --blur:rgba(226,236,243,.82); --accent:#2E9E4F;
   }
   :root[data-bg="dark"]{
     --bg:#121212; --group:#121212; --card:#1E1E1E; --card-2:#262626;
@@ -439,14 +439,14 @@ const store = {
 /* ---------- settings ---------- */
 const settings = store.get('az_settings', { riwaya:'hafs', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4' });
 
-const BG_COLORS = { sepia:'#EFE6D4', rose:'#F2DEE3', white:'#F2F2F7', mint:'#E2EFE7', sky:'#E2ECF3', dark:'#121212' };
+const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
-  {id:'sepia', name:'ورقية', c:'#EFE6D4'},
-  {id:'rose',  name:'وردي',  c:'#F2DEE3'},
-  {id:'white', name:'أبيض',  c:'#F2F2F7'},
-  {id:'mint',  name:'نعناعي',c:'#E2EFE7'},
-  {id:'sky',   name:'سماوي', c:'#E2ECF3'},
-  {id:'dark',  name:'داكن',  c:'#121212'},
+  {id:'sepia',  name:'ورقية', c:'#EFE6D4'},
+  {id:'beige',  name:'بيج',   c:'#F1E8D6'},
+  {id:'greige', name:'بيج غامق', c:'#E4DACB'},
+  {id:'taupe',  name:'توبي',  c:'#D8CCBE'},
+  {id:'white',  name:'أبيض',  c:'#F2F2F7'},
+  {id:'dark',   name:'داكن',  c:'#121212'},
 ];
 function applyBg(){
   const b = settings.bg || 'sepia';
