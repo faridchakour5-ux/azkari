@@ -36,6 +36,12 @@
     --sep:rgba(62,56,46,.16); --fill:rgba(130,112,82,.16); --fill-2:rgba(130,112,82,.1);
     --blur:rgba(241,232,214,.82); --accent:#2F9E44;
   }
+  :root[data-bg="peach"]{
+    --bg:#F5C7AF; --group:#F5C7AF; --card:#FBE2D5; --card-2:#FBE2D5;
+    --text:#4A352B; --text-2:rgba(74,53,43,.58); --text-3:rgba(74,53,43,.3);
+    --sep:rgba(74,53,43,.16); --fill:rgba(175,110,80,.18); --fill-2:rgba(175,110,80,.12);
+    --blur:rgba(245,199,175,.82); --accent:#2F9E44;
+  }
   :root[data-bg="greige"]{
     --bg:#E4DACB; --group:#E4DACB; --card:#F1EADD; --card-2:#F1EADD;
     --text:#3C372F; --text-2:rgba(60,55,47,.58); --text-3:rgba(60,55,47,.3);
@@ -485,10 +491,11 @@ const store = {
 /* ---------- settings ---------- */
 const settings = store.get('az_settings', { riwaya:'hafs', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4' });
 
-const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
+const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
   {id:'sepia',  name:'ورقية', c:'#EFE6D4'},
   {id:'beige',  name:'بيج',   c:'#F1E8D6'},
+  {id:'peach',  name:'خوخي',  c:'#F5C7AF'},
   {id:'greige', name:'بيج غامق', c:'#E4DACB'},
   {id:'taupe',  name:'توبي',  c:'#D8CCBE'},
   {id:'white',  name:'أبيض',  c:'#F2F2F7'},
