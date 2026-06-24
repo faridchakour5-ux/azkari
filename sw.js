@@ -1,0 +1,95 @@
+/* أذكاري — service worker v10 */
+const CACHE = 'azkari-v10';
+const ASSETS = [
+  './',
+  './index.html',
+  './data.js',
+  './adhan.min.js',
+  './wird_hafs.js',
+  './wird_warsh.js',
+  './manifest.json',
+  './fonts/ui-400.woff2',
+  './fonts/ui-600.woff2',
+  './fonts/ui-700.woff2',
+  './fonts/amiri-quran.woff2',
+  './fonts/maghribi.woff2',
+  './fonts/naskh.woff2',
+  './fonts/kufi.woff2',
+  './fonts/cairo.woff2',
+  './fonts/tajawal.woff2',
+  './fonts/ruqaa.woff2',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-180.png',
+  './icons/maskable-512.png'
+];
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE)
+      .then(c => c.addAll(ASSETS))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+/* network-first for JS data files, cache-first for fonts/icons */
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  const url = e.request.url;
+  const isData = /\/(data|wird_hafs|wird_warsh|adhan\.min)\.js/.test(url);
+
+  if (isData) {
+    // network-first: always try to get latest, fall back to cache
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+        }
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+  } else {
+    // cache-first for fonts, icons, html
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(res => {
+          if (res && res.status === 200 && res.type === 'basic') {
+            caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+          }
+          return res;
+        });
+      })
+    );
+  }
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) { if ('focus' in c) return c.focus(); }
+      if (clients.openWindow) return clients.openWindow('./index.html');
+    })
+  );
+});
+
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'notify') {
+    self.registration.showNotification(e.data.title || 'وقت الذكر 🤍', {
+      body: (e.data.lines || []).join('\n'),
+      dir: 'rtl', lang: 'ar',
+      icon: 'icons/icon-192.png', badge: 'icons/icon-192.png',
+      tag: 'azkar-reminder', renotify: true, vibrate: [40, 60, 40]
+    });
+  }
+});

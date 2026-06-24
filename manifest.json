@@ -1,0 +1,20 @@
+{
+  "name": "أذكاري — الصباح والمساء",
+  "short_name": "أذكاري",
+  "description": "أذكار الصباح والمساء والمسبحة، برواية حفص وورش.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "id": "/index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "categories": ["lifestyle", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
