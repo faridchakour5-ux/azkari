@@ -918,9 +918,13 @@ function basmalaHtml(si){
   return '<div class="wird-basmala">'+(BASMALA[settings.riwaya]||BASMALA.hafs)+'</div>';
 }
 function suraOrn(si){ return '﴾ سورة '+WIRD.sur[si].n+' ﴿'; }
+let __progScroll=false, __progScrollT=null;
 function scrollToSura(si, smooth){
   const el=document.getElementById('msura-'+si);
-  if(el) el.scrollIntoView({block:'start', behavior: smooth?'smooth':'auto'});
+  if(!el) return;
+  __progScroll=true; clearTimeout(__progScrollT);
+  el.scrollIntoView({block:'start', behavior: smooth?'smooth':'auto'});
+  __progScrollT=setTimeout(()=>{ __progScroll=false; }, smooth?900:150);
 }
 let __mushafRenderedRiwaya=null;
 function renderMushaf(force){
@@ -928,7 +932,9 @@ function renderMushaf(force){
   const body=$('#wird-body');
   // déjà rendu pour cette riwaya -> ne pas reconstruire, juste se positionner
   if(!force && body.dataset.mode==='mushaf' && __mushafRenderedRiwaya===settings.riwaya){
-    updateResumeBtn(settings.mushafSura||0); return;
+    updateResumeBtn(settings.mushafSura||0);
+    requestAnimationFrame(()=> scrollToSura(settings.mushafSura||0, false));
+    return;
   }
   body.dataset.mode='mushaf';
   body.innerHTML='<div class="khatma-done">…جارٍ تحميل المصحف</div>';
@@ -962,6 +968,7 @@ function buildMushaf(body){
   __mushafRenderedRiwaya=settings.riwaya;
   $('#wird-sub').textContent='المصحف كامل — '+WIRD.sur.length+' سورة';
   updateResumeBtn(settings.mushafSura||0);
+  requestAnimationFrame(()=> scrollToSura(settings.mushafSura||0, false));
 }
 /* remember reading position (surah + scroll) in mushaf mode */
 function updateResumeBtn(si){
@@ -972,6 +979,7 @@ function updateResumeBtn(si){
 }
 let __scrollSaveT=null;
 function saveMushafScroll(){
+  if(__progScroll) return;
   if(wirdMode()!=='mushaf' || !$('#s-wird').classList.contains('active')) return;
   clearTimeout(__scrollSaveT);
   __scrollSaveT=setTimeout(()=>{
