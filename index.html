@@ -257,8 +257,13 @@
   .wird-amount button.on{background:var(--accent); color:#fff;}
   .wird-card{background:var(--card); border-radius:18px; margin:12px 16px; padding:20px 18px;}
   .wird-sura{color:var(--accent); font-weight:800; font-size:15px; margin:10px 0 6px; text-align:center;}
-  .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale)); line-height:2.3; text-align:justify;}
-  body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px*var(--scale)); line-height:2.7;}
+  .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.3; text-align:justify;}
+  body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
+  .qzoom{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 16px 0;}
+  .qzoom button{width:42px; height:42px; border:0; border-radius:12px; background:var(--card); color:var(--accent);
+    font-weight:800; font-size:18px; line-height:1; box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  .qzoom button:active{transform:scale(.94);}
+  .qzoom .qval{min-width:54px; text-align:center; color:var(--text-2); font-size:13px; font-weight:700;}
   .wird-num{display:inline-block; color:var(--accent); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;}
   .wird-done{display:block; width:calc(100% - 32px); margin:6px 16px 0; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:17px; padding:15px; border-radius:16px;}
   .wird-done:active{opacity:.85;}
@@ -309,6 +314,11 @@
       <select id="sura-select" aria-label="اختر السورة"></select>
     </div>
     <button class="mushaf-resume" id="mushaf-resume" style="display:none">↩︎ تابِع القراءة من حيث وصلت</button>
+  </div>
+  <div class="qzoom" id="q-zoom" title="تكبير خط القرآن">
+    <button id="q-minus" aria-label="تصغير الخط">A−</button>
+    <span class="qval" id="q-zoom-val">100%</span>
+    <button id="q-plus" aria-label="تكبير الخط">A+</button>
   </div>
   <div id="wird-body"></div>
   <button class="wird-done" id="wird-done-btn">تمّ — الوِرد التالي</button>
@@ -490,6 +500,17 @@ function applyBg(){
   const mc = $('meta[name=theme-color]'); if(mc) mc.setAttribute('content', BG_COLORS[b]||'#EFE6D4');
 }
 function applyFont(){ document.documentElement.style.setProperty('--scale', settings.font); }
+const Q_MIN=0.8, Q_MAX=2.2;
+function applyQuranScale(){
+  let q=parseFloat(settings.quranScale)||1; q=Math.min(Q_MAX,Math.max(Q_MIN,q));
+  document.documentElement.style.setProperty('--qscale', q);
+  const v=$('#q-zoom-val'); if(v) v.textContent=Math.round(q*100)+'%';
+}
+function bumpQuranScale(delta){
+  let q=parseFloat(settings.quranScale)||1;
+  q=Math.round((Math.min(Q_MAX,Math.max(Q_MIN,q+delta)))*100)/100;
+  settings.quranScale=q; saveSettings(); applyQuranScale(); vibrate(6);
+}
 const DUA_FONTS=['plex','naskh','kufi','cairo','tajawal','ruqaa','maghribi'];
 function applyDuaFont(){
   DUA_FONTS.forEach(f=> document.body.classList.remove('dfont-'+f));
@@ -1134,6 +1155,9 @@ $('#backup-save') && $('#backup-save').addEventListener('click', exportBackup);
 $('#backup-restore') && $('#backup-restore').addEventListener('click', ()=> $('#backup-file').click());
 $('#backup-file') && $('#backup-file').addEventListener('change', e=>{ if(e.target.files[0]) importBackup(e.target.files[0]); });
 try{ renderBackupStatus(); }catch(e){}
+applyQuranScale();
+$('#q-plus')  && $('#q-plus').addEventListener('click', ()=> bumpQuranScale(0.1));
+$('#q-minus') && $('#q-minus').addEventListener('click', ()=> bumpQuranScale(-0.1));
 
 try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
 /* refresh on day change / resume */
