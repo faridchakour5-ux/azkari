@@ -84,9 +84,11 @@
   .head .sub{color:var(--text-2); font-size:15px; margin-top:2px;}
 
   /* Segmented control */
-  .seg{display:flex; background:var(--fill-2); border-radius:11px; padding:2px; margin:14px 20px 6px; position:relative;}
-  .seg button{flex:1; border:0; background:transparent; color:var(--text); font:inherit;
-    font-size:15px; font-weight:600; padding:7px 0; border-radius:9px; z-index:1; transition:color .2s;}
+  .seg{display:flex; background:var(--fill-2); border-radius:11px; padding:2px; margin:14px 20px 6px; position:relative;
+    overflow-x:auto; gap:2px; scrollbar-width:none;}
+  .seg::-webkit-scrollbar{display:none;}
+  .seg button{flex:1 0 auto; white-space:nowrap; border:0; background:transparent; color:var(--text); font:inherit;
+    font-size:15px; font-weight:600; padding:7px 14px; border-radius:9px; z-index:1; transition:color .2s;}
   .seg button.on{background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.18);}
 
   .progressbar{margin:10px 20px 0; height:6px; border-radius:3px; background:var(--fill); overflow:hidden;}
@@ -205,11 +207,11 @@
     padding:8px 0 calc(6px + env(safe-area-inset-bottom)); background:var(--blur);
     backdrop-filter:saturate(180%) blur(22px); -webkit-backdrop-filter:saturate(180%) blur(22px);
     border-top:.5px solid var(--sep); z-index:50;}
-  .tab{flex:1; border:0; background:transparent; color:var(--text-3); font:inherit; padding:0;
+  .tab{flex:1; border:0; background:transparent; color:#2F9E44; font:inherit; padding:0;
     display:flex; flex-direction:column; align-items:center; gap:3px;}
   .tab svg{width:26px; height:26px;}
   .tab span{font-size:10px; font-weight:600;}
-  .tab.on{color:var(--accent);}
+  .tab.on{color:#C71585;}
 
   .hint{margin:14px 20px; padding:12px 14px; background:var(--fill-2); border-radius:12px; color:var(--text-2); font-size:13px; line-height:1.6;}
 
@@ -236,6 +238,17 @@
   .week .d.done{background:var(--accent); color:#fff;}
 
   /* wird */
+  .wird-kpi{margin:10px 16px 0; background:var(--card); border-radius:16px; padding:12px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .wird-kpi .ic{font-size:24px; line-height:1;}
+  .wird-kpi .lbl b{display:block; font-size:16px; font-weight:800;}
+  .wird-kpi .lbl span{font-size:13px; color:var(--text-2);}
+  .wird-kpi.read{border:1.5px solid var(--accent);}
+  .wird-kpi .kweek{display:flex; gap:5px;}
+  .wird-kpi .kweek i{width:10px; height:10px; border-radius:50%; background:var(--fill); display:block;}
+  .wird-kpi .kweek i.on{background:var(--accent);}
+  .mushaf-pick{background:var(--card); border-radius:16px; margin:12px 16px 0; padding:6px 6px 6px 14px;}
+  .mushaf-pick select{flex:1; width:100%; font-size:16px; font-weight:700; padding:8px 6px; text-align:center; text-align-last:center;}
   .wird-amount{display:flex; gap:8px; overflow-x:auto; padding:10px 16px 4px; scrollbar-width:none;}
   .wird-amount::-webkit-scrollbar{display:none;}
   .wird-amount button{flex:0 0 auto; border:0; background:var(--card); color:var(--text); font:inherit; font-weight:600; font-size:14px; padding:8px 14px; border-radius:18px;}
@@ -267,10 +280,7 @@
   <button class="locbtn" id="loc-btn">📍 تفعيل مواقيت الصلاة حسب موقعك</button>
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
   <div id="streak-row" class="streakrow"></div>
-  <div class="seg" id="time-seg">
-    <button data-t="morning" class="on">الصباح</button>
-    <button data-t="evening">المساء</button>
-  </div>
+  <div class="seg" id="time-seg"></div>
   <div class="progressbar"><i id="pg-fill"></i></div>
   <div class="progresslabel"><span id="pg-text">0 من 0</span><span id="pg-reset-day"></span></div>
   <div class="list" id="az-list"></div>
@@ -279,12 +289,24 @@
 <!-- ===== الوِرد ===== -->
 <section id="s-wird" class="screen">
   <div class="head">
-    <h1>وِرد اليوم</h1>
+    <h1 id="wird-h1">وِرد اليوم</h1>
     <div class="sub" id="wird-sub">وردك اليومي من القرآن الكريم</div>
   </div>
-  <div class="progressbar"><i id="khatma-fill"></i></div>
-  <div class="wird-meta"><span id="khatma-page">صفحة 1 من 604</span><span id="khatma-pct">0%</span></div>
-  <div class="wird-amount" id="wird-amount"></div>
+  <div class="wird-kpi" id="wird-kpi"></div>
+  <div class="seg" id="wird-mode-seg">
+    <button data-m="wird" class="on">وِردي</button>
+    <button data-m="mushaf">المصحف كامل</button>
+  </div>
+  <div id="wird-daily">
+    <div class="progressbar"><i id="khatma-fill"></i></div>
+    <div class="wird-meta"><span id="khatma-page">صفحة 1 من 604</span><span id="khatma-pct">0%</span></div>
+    <div class="wird-amount" id="wird-amount"></div>
+  </div>
+  <div id="mushaf-controls" style="display:none">
+    <div class="selectwrap mushaf-pick">
+      <select id="sura-select" aria-label="اختر السورة"></select>
+    </div>
+  </div>
   <div id="wird-body"></div>
   <button class="wird-done" id="wird-done-btn">تمّ — الوِرد التالي</button>
   <div style="height:20px"></div>
@@ -473,7 +495,32 @@ function applyRiwaya(){
 function saveSettings(){ store.set('az_settings', settings); }
 
 /* ---------- AZKAR screen ---------- */
+const CATS = [
+  {id:'morning',  name:'الصباح',    title:'أذكار الصباح',    sub:'من بعد الفجر إلى الضحى'},
+  {id:'evening',  name:'المساء',    title:'أذكار المساء',    sub:'من بعد العصر إلى المغرب'},
+  {id:'sleep',    name:'النوم',     title:'أذكار النوم',     sub:'تُقال عند الأخذ بالمضجع'},
+  {id:'wakeup',   name:'الاستيقاظ', title:'أذكار الاستيقاظ', sub:'تُقال عند اليقظة من النوم'},
+  {id:'istiqama', name:'الاستقامة', title:'أدعية الاستقامة', sub:'لتثبيت القلب على الدين'},
+  {id:'travel',   name:'السفر',     title:'أذكار السفر',     sub:'تُقال في السفر وعند الرجوع'},
+  {id:'riding',   name:'الركوب',    title:'أذكار الركوب',    sub:'تُقال عند ركوب الدابّة أو المركبة'},
+];
+const catMeta = id => CATS.find(c=>c.id===id) || CATS[0];
 let currentTab = (new Date().getHours()>=4 && new Date().getHours()<16) ? 'morning':'evening';
+
+function buildCats(){
+  const seg=$('#time-seg'); seg.innerHTML='';
+  CATS.forEach(c=>{
+    const b=document.createElement('button');
+    b.dataset.t=c.id; b.textContent=c.name;
+    b.classList.toggle('on', c.id===currentTab);
+    b.addEventListener('click', ()=>{
+      $$('#time-seg button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on'); currentTab=c.id; window.__userPickedTime=true; renderAzkar();
+      b.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+    });
+    seg.appendChild(b);
+  });
+}
 
 function progressState(){
   const key = 'az_prog_'+todayKey();
@@ -485,8 +532,9 @@ function renderAzkar(){
   const list = AZKAR[currentTab];
   const prog = progressState();
   const wrap = $('#az-list'); wrap.innerHTML='';
-  $('#az-title').textContent = currentTab==='morning' ? 'أذكار الصباح':'أذكار المساء';
-  $('#az-sub').textContent = currentTab==='morning' ? 'من بعد الفجر إلى الضحى':'من بعد العصر إلى المغرب';
+  const meta = catMeta(currentTab);
+  $('#az-title').textContent = meta.title;
+  $('#az-sub').textContent = meta.sub;
 
   let doneCount=0;
   list.forEach((d,idx)=>{
@@ -537,7 +585,7 @@ function tapAzkar(card, d, pid){
     const list = AZKAR[currentTab];
     const doneCount = list.filter(x=> (prog[currentTab+'_'+x.id]||0)>=x.count).length;
     updateProgressBar(doneCount, list.length);
-    if(doneCount>=list.length) markDoneToday();
+    if(doneCount>=list.length && (currentTab==='morning'||currentTab==='evening')) markDoneToday();
   }
 }
 
@@ -549,12 +597,7 @@ function updateProgressBar(done,total){
 
 function escapeHtml(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-$$('#time-seg button').forEach(b=> b.addEventListener('click', ()=>{
-  $$('#time-seg button').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on'); currentTab=b.dataset.t; window.__userPickedTime=true; renderAzkar();
-}));
-// set initial seg
-$$('#time-seg button').forEach(b=> b.classList.toggle('on', b.dataset.t===currentTab));
+buildCats();
 
 /* ---------- TASBIH ---------- */
 const DHIKR_PRESETS = ['سبحان الله','الحمد لله','الله أكبر','لا إله إلا الله','أستغفر الله','لا حول ولا قوة إلا بالله'];
@@ -757,7 +800,7 @@ const WIRD_AMOUNTS=[
 ];
 
 async function openWird(){
-  if(WIRD && WIRD.__riwaya===settings.riwaya){ renderWird(); return; }
+  if(WIRD && WIRD.__riwaya===settings.riwaya){ renderWirdKpi(); applyWirdMode(); return; }
   if(wirdLoading) return;
   wirdLoading=true;
   $('#wird-body').innerHTML='<div class="khatma-done">…جارٍ تحميل المصحف</div>';
@@ -771,7 +814,71 @@ async function openWird(){
   catch(e){ $('#wird-body').innerHTML='<div class="khatma-done">تعذّر تحميل المصحف — اضغط هنا للمحاولة مجدداً</div>'; $('#wird-body').onclick=()=>{wirdLoading=false;$('#wird-body').onclick=null;openWird();}; wirdLoading=false; return; }
   wirdLoading=false;
   window.__wirdReady=true;
-  renderAmountChips(); renderWird();
+  renderAmountChips(); renderWirdKpi(); applyWirdMode();
+}
+
+/* ---- reading KPI: did I read Qur'an today? ---- */
+const QREAD_KEY='az_qread';
+function qreadData(){ return store.get(QREAD_KEY, {}); }
+function qreadToday(){ return !!qreadData()[todayKey()]; }
+function markQuranReadToday(){
+  const d=qreadData(); const t=todayKey(); d[t]=1;
+  const keep={}; for(const k in d){ if(dayDiff(k,t)<14) keep[k]=1; }
+  store.set(QREAD_KEY, keep); renderWirdKpi();
+}
+function renderWirdKpi(){
+  const el=$('#wird-kpi'); if(!el) return;
+  const read=qreadToday(); const d=qreadData(); const now=new Date();
+  let week='';
+  for(let off=6; off>=0; off--){
+    const dd=new Date(now); dd.setDate(now.getDate()-off);
+    const key=dd.toISOString().slice(0,10);
+    week+='<i class="'+(d[key]?'on':'')+'"></i>';
+  }
+  el.className='wird-kpi'+(read?' read':'');
+  el.innerHTML=
+    '<div style="display:flex; align-items:center; gap:10px">'+
+      '<span class="ic">'+(read?'✅':'📖')+'</span>'+
+      '<div class="lbl"><b>'+(read?'قرأتَ اليوم':'لم تقرأ بعد')+'</b>'+
+      '<span>'+(read?'تقبّل الله، واصِل وردك':'اقرأ وردك ثم اضغط «تمّ»')+'</span></div>'+
+    '</div>'+
+    '<div class="kweek" title="آخر 7 أيام">'+week+'</div>';
+}
+
+/* ---- mode: daily wird vs full mushaf ---- */
+function wirdMode(){ return settings.wirdMode||'wird'; }
+let __suraBuiltRiwaya=null;
+function buildSuraSelect(){
+  if(!WIRD) return;
+  const sel=$('#sura-select');
+  if(__suraBuiltRiwaya===settings.riwaya && sel.options.length) { sel.value=settings.mushafSura||0; return; }
+  sel.innerHTML='';
+  WIRD.sur.forEach((s,idx)=>{ const o=document.createElement('option'); o.value=idx; o.textContent=(idx+1)+'. '+s.n; sel.appendChild(o); });
+  sel.value = settings.mushafSura!=null ? settings.mushafSura : 0;
+  __suraBuiltRiwaya=settings.riwaya;
+  sel.onchange=()=>{ settings.mushafSura=parseInt(sel.value)||0; saveSettings(); renderMushaf(); window.scrollTo({top:0,behavior:'smooth'}); };
+}
+function renderMushaf(){
+  if(!WIRD) return;
+  const si=Math.min(Math.max(settings.mushafSura||0,0), WIRD.sur.length-1);
+  const start=WIRD.sur[si].i;
+  const end = si+1<WIRD.sur.length ? WIRD.sur[si+1].i : WIRD.a.length;
+  let html='<div class="wird-card"><div class="wird-sura">'+WIRD.sur[si].n+'</div><div class="wird-text">';
+  for(let i=start;i<end;i++){ html+=WIRD.a[i].t+'<span class="wird-num">۝'+(i-start+1)+'</span> '; }
+  html+='</div></div>';
+  $('#wird-body').innerHTML=html;
+  $('#wird-sub').textContent='سورة '+WIRD.sur[si].n+' — '+(end-start)+' آية';
+}
+function applyWirdMode(){
+  if(!WIRD) return;
+  const daily = wirdMode()==='wird';
+  $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', (b.dataset.m==='wird')===daily));
+  $('#wird-daily').style.display = daily?'':'none';
+  $('#mushaf-controls').style.display = daily?'none':'';
+  $('#wird-done-btn').style.display = daily?'':'none';
+  $('#wird-h1').textContent = daily?'وِرد اليوم':'المصحف الكريم';
+  if(daily){ renderWird(); }
+  else { buildSuraSelect(); renderMushaf(); }
 }
 
 function renderAmountChips(){
@@ -855,9 +962,17 @@ $('#wird-done-btn').addEventListener('click', ()=>{
   const [s,e]=wirdRange(pos);
   st[settings.riwaya]=e; saveWirdState(st);
   markWirdDoneToday();
+  markQuranReadToday();
   vibrate([15,40,15]);
   renderWird(); window.scrollTo({top:0,behavior:'smooth'});
 });
+
+$$('#wird-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{
+  const m=b.dataset.m; if(wirdMode()===m) return;
+  settings.wirdMode=m; saveSettings();
+  if(WIRD) applyWirdMode();
+  vibrate(6);
+}));
 
 /* ================= STREAK & weekly ================= */
 function streakData(){ return store.get('az_streak', { last:null, count:0, days:{} }); }
@@ -943,6 +1058,7 @@ applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
 syncSeg('#riwaya-seg','riwaya'); syncSeg('#font-seg','font'); renderSwatches();
 try{ renderAzkar(); }catch(e){} renderChips(); paintTasbih();
 renderStreak(); try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
+try{ renderWirdKpi(); $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m===wirdMode())); }catch(e){}
 try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
 /* refresh on day change / resume */
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ try{ renderAzkar(); }catch(e){} } });
