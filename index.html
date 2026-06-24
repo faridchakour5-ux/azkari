@@ -263,9 +263,12 @@
   .wird-amount button.on{background:var(--accent); color:#fff;}
   .wird-card{background:var(--card); border-radius:18px; margin:12px 16px; padding:20px 18px;}
   .wird-sura{color:var(--accent); font-weight:800; font-size:15px; margin:10px 0 6px; text-align:center;}
-  .wird-basmala{font-family:'AmiriQuran',serif; text-align:center; color:var(--text);
+  .wird-basmala{font-family:'AmiriQuran',serif; text-align:center; color:var(--accent);
     font-size:calc(20px * var(--scale) * var(--qscale,1)); line-height:2; margin:2px 0 10px;}
   body.riw-warsh .wird-basmala{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(22px * var(--scale) * var(--qscale,1));}
+  .mushaf-page{display:flex; align-items:center; gap:12px; margin:18px 4px; color:var(--text-3);
+    font-family:'PlexAr'; font-size:13px; font-weight:700;}
+  .mushaf-page::before,.mushaf-page::after{content:''; flex:1; height:1px; background:var(--sep);}
   .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.3; text-align:justify;}
   body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
   .qzoom{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 16px 0;}
@@ -902,7 +905,7 @@ function buildSuraSelect(){
   WIRD.sur.forEach((s,idx)=>{ const o=document.createElement('option'); o.value=idx; o.textContent=(idx+1)+'. '+s.n; sel.appendChild(o); });
   sel.value = settings.mushafSura!=null ? settings.mushafSura : 0;
   __suraBuiltRiwaya=settings.riwaya;
-  sel.onchange=()=>{ settings.mushafSura=parseInt(sel.value)||0; settings.mushafPos=null; saveSettings(); window.scrollTo({top:0}); renderMushaf(); };
+  sel.onchange=()=>{ settings.mushafSura=parseInt(sel.value)||0; saveSettings(); scrollToSura(settings.mushafSura, true); };
 }
 const BASMALA = {
   hafs:  'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ',
@@ -914,17 +917,51 @@ function basmalaHtml(si){
   if(/^بِس[ْۡ]مِ/.test(t)) return '';                // الآية الأولى هي البسملة أصلاً (الفاتحة برواية حفص)
   return '<div class="wird-basmala">'+(BASMALA[settings.riwaya]||BASMALA.hafs)+'</div>';
 }
-function renderMushaf(){
+function suraOrn(si){ return '﴾ سورة '+WIRD.sur[si].n+' ﴿'; }
+function scrollToSura(si, smooth){
+  const el=document.getElementById('msura-'+si);
+  if(el) el.scrollIntoView({block:'start', behavior: smooth?'smooth':'auto'});
+}
+let __mushafRenderedRiwaya=null;
+function renderMushaf(force){
   if(!WIRD) return;
-  const si=Math.min(Math.max(settings.mushafSura||0,0), WIRD.sur.length-1);
-  const start=WIRD.sur[si].i;
-  const end = si+1<WIRD.sur.length ? WIRD.sur[si+1].i : WIRD.a.length;
-  let html='<div class="wird-card"><div class="wird-sura">'+WIRD.sur[si].n+'</div>'+basmalaHtml(si)+'<div class="wird-text">';
-  for(let i=start;i<end;i++){ html+=WIRD.a[i].t+'<span class="wird-num">۝'+(i-start+1)+'</span> '; }
-  html+='</div></div>';
-  $('#wird-body').innerHTML=html;
-  $('#wird-sub').textContent='سورة '+WIRD.sur[si].n+' — '+(end-start)+' آية';
-  updateResumeBtn(si);
+  const body=$('#wird-body');
+  // déjà rendu pour cette riwaya -> ne pas reconstruire, juste se positionner
+  if(!force && body.dataset.mode==='mushaf' && __mushafRenderedRiwaya===settings.riwaya){
+    updateResumeBtn(settings.mushafSura||0); return;
+  }
+  body.dataset.mode='mushaf';
+  body.innerHTML='<div class="khatma-done">…جارٍ تحميل المصحف</div>';
+  setTimeout(()=> buildMushaf(body), 16);
+}
+function buildMushaf(body){
+  if(!WIRD || wirdMode()!=='mushaf') return;
+  const N=WIRD.a.length;
+  const parts=['<div class="wird-card">'];
+  let textOpen=false, curSura=-1, prevPage=parseInt(WIRD.a[0].p);
+  for(let i=0;i<N;i++){
+    const a=WIRD.a[i], pg=parseInt(a.p), si=suraOf(i);
+    if(pg!==prevPage){
+      if(textOpen){ parts.push('</div>'); textOpen=false; }
+      parts.push('<div class="mushaf-page">'+pg+'</div>');
+      prevPage=pg;
+    }
+    if(si!==curSura){
+      curSura=si;
+      if(textOpen){ parts.push('</div>'); textOpen=false; }
+      parts.push('<div class="wird-sura" id="msura-'+si+'">'+suraOrn(si)+'</div>');
+      const b=basmalaHtml(si); if(b) parts.push(b);
+    }
+    if(!textOpen){ parts.push('<div class="wird-text">'); textOpen=true; }
+    parts.push(a.t+'<span class="wird-num">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
+  }
+  if(textOpen) parts.push('</div>');
+  parts.push('</div>');
+  body.innerHTML=parts.join('');
+  body.dataset.mode='mushaf';
+  __mushafRenderedRiwaya=settings.riwaya;
+  $('#wird-sub').textContent='المصحف كامل — '+WIRD.sur.length+' سورة';
+  updateResumeBtn(settings.mushafSura||0);
 }
 /* remember reading position (surah + scroll) in mushaf mode */
 function updateResumeBtn(si){
@@ -993,6 +1030,7 @@ function wirdRange(start){
 
 function renderWird(){
   if(!WIRD) return;
+  $('#wird-body').dataset.mode='wird';
   const st=wirdState(); let pos=st[settings.riwaya]||0;
   const N=WIRD.a.length;
   // khatma progress by page
@@ -1012,7 +1050,7 @@ function renderWird(){
   while(i<e){
     const sura=suraOf(i);
     const atSuraStart = (i===WIRD.sur[sura].i);
-    html+='<div class="wird-sura">'+suraName(sura)+'</div>'+(atSuraStart?basmalaHtml(sura):'')+'<div class="wird-text">';
+    html+='<div class="wird-sura">'+suraOrn(sura)+'</div>'+(atSuraStart?basmalaHtml(sura):'')+'<div class="wird-text">';
     while(i<e && suraOf(i)===sura){
       html+=WIRD.a[i].t+'<span class="wird-num">۝'+ayaNoOf(i)+'</span> ';
       i++;
