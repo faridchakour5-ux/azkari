@@ -589,7 +589,8 @@ function isSahihayn(s){
 }
 function azkarList(cat){
   let list = AZKAR[cat] || [];
-  if(cat==='morning' || cat==='evening') list = list.filter(d=> isSahihayn(d.source));
+  // الصباح/المساء: القرآن (آية الكرسي والمعوذات) + الصحيح من البخاري ومسلم
+  if(cat==='morning' || cat==='evening') list = list.filter(d=> d.quran || isSahihayn(d.source));
   return list;
 }
 
@@ -600,7 +601,7 @@ function renderAzkar(){
   const meta = catMeta(currentTab);
   $('#az-title').textContent = meta.title;
   $('#az-sub').textContent = meta.sub;
-  $('#az-source').textContent = (currentTab==='morning'||currentTab==='evening') ? 'صحيح البخاري ومسلم' : '';
+  $('#az-source').textContent = (currentTab==='morning'||currentTab==='evening') ? 'القرآن وصحيح البخاري ومسلم' : '';
 
   let doneCount=0;
   list.forEach((d,idx)=>{
