@@ -90,6 +90,10 @@
   .head .sub{color:var(--text-2); font-size:15px; margin-top:2px;}
   .az-source{color:var(--accent); font-weight:700; font-size:13px; margin-top:4px;}
   .az-source:empty{display:none;}
+  .az-scope{display:flex; gap:8px; justify-content:center; margin:10px 16px 0;}
+  .az-scope button{flex:1; max-width:200px; border:0; border-radius:12px; background:var(--card); color:var(--text);
+    font:inherit; font-weight:700; font-size:14px; padding:9px 10px; box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  .az-scope button.on{background:var(--accent); color:#fff;}
 
   /* Segmented control */
   .seg{display:flex; background:var(--fill-2); border-radius:11px; padding:2px; margin:14px 20px 6px; position:relative;
@@ -303,6 +307,10 @@
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
   <div id="streak-row" class="streakrow"></div>
   <div class="seg" id="time-seg"></div>
+  <div class="az-scope" id="az-scope" style="display:none">
+    <button data-scope="sahih" class="on">القرآن والصحيحان</button>
+    <button data-scope="all">جميع الأذكار</button>
+  </div>
   <div class="progressbar"><i id="pg-fill"></i></div>
   <div class="progresslabel"><span id="pg-text">0 من 0</span><span id="pg-reset-day"></span></div>
   <div class="list" id="az-list"></div>
@@ -589,8 +597,11 @@ function isSahihayn(s){
 }
 function azkarList(cat){
   let list = AZKAR[cat] || [];
-  // الصباح/المساء: القرآن (آية الكرسي والمعوذات) + الصحيح من البخاري ومسلم
-  if(cat==='morning' || cat==='evening') list = list.filter(d=> d.quran || isSahihayn(d.source));
+  // الصباح/المساء: افتراضيًّا القرآن (آية الكرسي والمعوذات) + الصحيح من البخاري ومسلم،
+  // وعند اختيار «جميع الأذكار» تُعرض كاملةً (حصن المسلم).
+  if((cat==='morning' || cat==='evening') && (settings.azkarScope||'sahih')!=='all'){
+    list = list.filter(d=> d.quran || isSahihayn(d.source));
+  }
   return list;
 }
 
@@ -601,7 +612,11 @@ function renderAzkar(){
   const meta = catMeta(currentTab);
   $('#az-title').textContent = meta.title;
   $('#az-sub').textContent = meta.sub;
-  $('#az-source').textContent = (currentTab==='morning'||currentTab==='evening') ? 'القرآن وصحيح البخاري ومسلم' : '';
+  const isME = (currentTab==='morning'||currentTab==='evening');
+  const scope = settings.azkarScope||'sahih';
+  $('#az-scope').style.display = isME ? '' : 'none';
+  $$('#az-scope button').forEach(b=> b.classList.toggle('on', b.dataset.scope===scope));
+  $('#az-source').textContent = !isME ? '' : (scope==='all' ? 'جميع الأذكار — حصن المسلم' : 'القرآن وصحيح البخاري ومسلم');
 
   let doneCount=0;
   list.forEach((d,idx)=>{
@@ -665,6 +680,10 @@ function updateProgressBar(done,total){
 function escapeHtml(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 buildCats();
+$$('#az-scope button').forEach(b=> b.addEventListener('click', ()=>{
+  const sc=b.dataset.scope; if((settings.azkarScope||'sahih')===sc) return;
+  settings.azkarScope=sc; saveSettings(); renderAzkar(); vibrate(6);
+}));
 
 /* ---------- TASBIH ---------- */
 const DHIKR_PRESETS = ['سبحان الله','الحمد لله','الله أكبر','لا إله إلا الله','أستغفر الله','لا حول ولا قوة إلا بالله'];

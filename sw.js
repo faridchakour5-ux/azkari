@@ -1,5 +1,5 @@
-/* أذكاري — service worker v26 */
-const CACHE = 'azkari-v26';
+/* أذكاري — service worker v27 */
+const CACHE = 'azkari-v27';
 const ASSETS = [
   './',
   './index.html',
