@@ -88,6 +88,8 @@
   .riwaya-quick button.on{background:var(--accent); color:#fff;}
   .head h1{margin:0; font-size:calc(34px * var(--scale)); font-weight:800; letter-spacing:-.5px;}
   .head .sub{color:var(--text-2); font-size:15px; margin-top:2px;}
+  .az-source{color:var(--accent); font-weight:700; font-size:13px; margin-top:4px;}
+  .az-source:empty{display:none;}
 
   /* Segmented control */
   .seg{display:flex; background:var(--fill-2); border-radius:11px; padding:2px; margin:14px 20px 6px; position:relative;
@@ -295,6 +297,7 @@
   <div class="head">
     <h1 id="az-title">أذكار الصباح</h1>
     <div class="sub" id="az-sub">حصِّن نفسك بذكر الله</div>
+    <div class="az-source" id="az-source"></div>
   </div>
   <button class="locbtn" id="loc-btn">📍 تفعيل مواقيت الصلاة حسب موقعك</button>
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
@@ -576,13 +579,28 @@ function progressState(){
 }
 function saveProgress(p){ store.set('az_prog_'+todayKey(), p); }
 
+// أذكار الصباح/المساء: عرض الصحيح من البخاري ومسلم فقط (دون الأدب المفرد أو غيره)
+function isSahihayn(s){
+  s = s || '';
+  return /صحيح البخاري|صحيح مسلم/.test(s)
+      || /البخاري\s*[،:(]/.test(s)
+      || /البخاري\s*مع/.test(s)
+      || /مسلم\s*[،:(]\s*\d/.test(s);
+}
+function azkarList(cat){
+  let list = AZKAR[cat] || [];
+  if(cat==='morning' || cat==='evening') list = list.filter(d=> isSahihayn(d.source));
+  return list;
+}
+
 function renderAzkar(){
-  const list = AZKAR[currentTab];
+  const list = azkarList(currentTab);
   const prog = progressState();
   const wrap = $('#az-list'); wrap.innerHTML='';
   const meta = catMeta(currentTab);
   $('#az-title').textContent = meta.title;
   $('#az-sub').textContent = meta.sub;
+  $('#az-source').textContent = (currentTab==='morning'||currentTab==='evening') ? 'صحيح البخاري ومسلم' : '';
 
   let doneCount=0;
   list.forEach((d,idx)=>{
@@ -630,7 +648,7 @@ function tapAzkar(card, d, pid){
   rem.textContent = AR(Math.max(d.count-done,0));
   if(done>=d.count){
     card.classList.add('done'); vibrate([15,40,15]);
-    const list = AZKAR[currentTab];
+    const list = azkarList(currentTab);
     const doneCount = list.filter(x=> (prog[currentTab+'_'+x.id]||0)>=x.count).length;
     updateProgressBar(doneCount, list.length);
     if(doneCount>=list.length && (currentTab==='morning'||currentTab==='evening')) markDoneToday();
