@@ -1,0 +1,30 @@
+name: Sync Cloudflare branch
+
+# Garde le branche de production de Cloudflare Pages (la branche par défaut)
+# toujours synchronisée avec la branche de travail, à chaque push.
+
+on:
+  push:
+    branches:
+      - claude/dreamy-tesla-jorpcc
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-cloudflare
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout work branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: claude/dreamy-tesla-jorpcc
+
+      - name: Mirror work branch -> default (Cloudflare) branch
+        run: git push --force origin HEAD:claude/loving-cerf-346jn7
