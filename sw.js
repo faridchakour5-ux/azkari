@@ -1,5 +1,5 @@
-/* أذكاري — service worker v27 */
-const CACHE = 'azkari-v27';
+/* أذكاري — service worker v28 */
+const CACHE = 'azkari-v28';
 const ASSETS = [
   './',
   './index.html',
@@ -40,14 +40,16 @@ self.addEventListener('activate', e => {
   );
 });
 
-/* network-first for JS data files, cache-first for fonts/icons */
+/* network-first pour le HTML et les données JS (toujours la dernière version en ligne),
+   cache-first pour les polices/icônes. Tout reste disponible hors-ligne via le cache. */
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = e.request.url;
+  const isNav  = e.request.mode === 'navigate' || /\.html(\?|$)/.test(url);
   const isData = /\/(data|wird_hafs|wird_warsh|adhan\.min)\.js/.test(url);
 
-  if (isData) {
-    // network-first: always try to get latest, fall back to cache
+  if (isNav || isData) {
+    // network-first : récupère la dernière version, repli sur le cache si hors-ligne
     e.respondWith(
       fetch(e.request).then(res => {
         if (res && res.status === 200) {
@@ -55,10 +57,12 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(e.request, copy));
         }
         return res;
-      }).catch(() => caches.match(e.request))
+      }).catch(() =>
+        caches.match(e.request).then(r => r || (isNav ? caches.match('./index.html').then(x => x || caches.match('./')) : r))
+      )
     );
   } else {
-    // cache-first for fonts, icons, html
+    // cache-first pour polices, icônes, manifest
     e.respondWith(
       caches.match(e.request).then(cached => {
         if (cached) return cached;
