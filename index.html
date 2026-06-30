@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="أذكاري">
+<meta name="apple-mobile-web-app-title" content="صلاتي">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<title>أذكاري</title>
+<title>صلاتي</title>
 <style>
   @font-face{font-family:'PlexAr'; src:url('fonts/ui-400.woff2') format('woff2'); font-weight:400; font-display:swap;}
   @font-face{font-family:'PlexAr'; src:url('fonts/ui-600.woff2') format('woff2'); font-weight:600; font-display:swap;}
@@ -463,8 +463,10 @@
 
   <div class="gtitle">عن التطبيق</div>
   <div class="group">
+    <div class="row"><span class="k">التطبيق</span><span class="v">صلاتي</span></div>
     <div class="row"><span class="k">الأذكار</span><span class="v">حصن المسلم</span></div>
     <div class="row"><span class="k">نص القرآن</span><span class="v" id="quran-src">رواية حفص</span></div>
+    <a class="row" href="privacy.html" style="text-decoration:none; color:inherit;"><span class="k">سياسة الخصوصية</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
   </div>
   <div class="gnote">الأذكار من كتاب «حصن المسلم». الخط المغربي مأخوذ من المصحف المحمدي (رواية ورش). اللهم تقبّل واغفر لنا.</div>
   <div style="height:30px"></div>
@@ -1249,11 +1251,11 @@ function importBackup(file){
   r.onload=()=>{ try{
     const obj=JSON.parse(r.result); const d=(obj && obj.data) ? obj.data : obj;
     if(!d || typeof d!=='object') throw new Error('bad');
-    if(!('az_settings' in d) && !('az_wird' in d)) { if(!confirm('هذا الملف لا يبدو نسخةً من أذكاري. هل تريد المتابعة؟')) return; }
+    if(!('az_settings' in d) && !('az_wird' in d)) { if(!confirm('هذا الملف لا يبدو نسخةً من تطبيق صلاتي. هل تريد المتابعة؟')) return; }
     Object.keys(d).forEach(k=>{ if(typeof d[k]==='string') localStorage.setItem(k, d[k]); });
     alert('تمت استعادة تقدّمك بنجاح ✓ سيُعاد تحميل التطبيق.');
     location.reload();
-  }catch(e){ alert('تعذّرت قراءة الملف. تأكد أنه ملف نسخة احتياطية صحيح لأذكاري.'); } };
+  }catch(e){ alert('تعذّرت قراءة الملف. تأكد أنه ملف نسخة احتياطية صحيح لتطبيق صلاتي.'); } };
   r.readAsText(file);
 }
 $('#backup-save') && $('#backup-save').addEventListener('click', exportBackup);

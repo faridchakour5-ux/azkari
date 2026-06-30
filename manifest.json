@@ -1,7 +1,7 @@
 {
-  "name": "أذكاري — الصباح والمساء",
-  "short_name": "أذكاري",
-  "description": "أذكار الصباح والمساء والمسبحة، برواية حفص وورش.",
+  "name": "صلاتي — أذكار ومصحف",
+  "short_name": "صلاتي",
+  "description": "أذكار الصباح والمساء، المصحف كامل، والمسبحة — برواية حفص وورش. يعمل دون إنترنت.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",
@@ -13,8 +13,8 @@
   "theme_color": "#ffffff",
   "categories": ["lifestyle", "education"],
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

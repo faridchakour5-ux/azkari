@@ -1,8 +1,9 @@
-/* أذكاري — service worker v28 */
-const CACHE = 'azkari-v28';
+/* صلاتي — service worker v29 */
+const CACHE = 'azkari-v29';
 const ASSETS = [
   './',
   './index.html',
+  './privacy.html',
   './data.js',
   './adhan.min.js',
   './wird_hafs.js',
