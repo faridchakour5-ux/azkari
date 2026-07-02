@@ -26,7 +26,7 @@
   :root{
     --scale:1;
     /* default palette: sepia (ورقية) */
-    --bg:#EFE6D4; --group:#EFE6D4; --card:#FBF6EC; --card-2:#FBF6EC;
+    --bg:#EFE6D4; --group:#EFE6D4; --card:#F6EDDB; --card-2:#F6EDDB;
     --text:#3A352E; --text-2:rgba(58,53,46,.58); --text-3:rgba(58,53,46,.3);
     --sep:rgba(58,53,46,.16); --fill:rgba(120,105,80,.18); --fill-2:rgba(120,105,80,.12);
     --blur:rgba(239,230,212,.82); --accent:#2F9E44; --accent-2:#28893B;
@@ -37,25 +37,25 @@
     --tab-idle:#2F9E44; --tab-on:#C71585; --tab-on-bg:rgba(199,21,133,.10);
   }
   :root[data-bg="beige"]{
-    --bg:#F1E8D6; --group:#F1E8D6; --card:#FBF5E9; --card-2:#FBF5E9;
+    --bg:#F1E8D6; --group:#F1E8D6; --card:#F7EFDF; --card-2:#F7EFDF;
     --text:#3E382E; --text-2:rgba(62,56,46,.58); --text-3:rgba(62,56,46,.3);
     --sep:rgba(62,56,46,.16); --fill:rgba(130,112,82,.16); --fill-2:rgba(130,112,82,.1);
     --blur:rgba(241,232,214,.82); --accent:#2F9E44;
   }
   :root[data-bg="peach"]{
-    --bg:#F5C7AF; --group:#F5C7AF; --card:#FBE2D5; --card-2:#FBE2D5;
+    --bg:#F5C7AF; --group:#F5C7AF; --card:#F9D6C2; --card-2:#F9D6C2;
     --text:#4A352B; --text-2:rgba(74,53,43,.58); --text-3:rgba(74,53,43,.3);
     --sep:rgba(74,53,43,.16); --fill:rgba(175,110,80,.18); --fill-2:rgba(175,110,80,.12);
     --blur:rgba(245,199,175,.82); --accent:#2F9E44;
   }
   :root[data-bg="greige"]{
-    --bg:#E4DACB; --group:#E4DACB; --card:#F1EADD; --card-2:#F1EADD;
+    --bg:#E4DACB; --group:#E4DACB; --card:#ECE4D5; --card-2:#ECE4D5;
     --text:#3C372F; --text-2:rgba(60,55,47,.58); --text-3:rgba(60,55,47,.3);
     --sep:rgba(60,55,47,.16); --fill:rgba(120,105,82,.16); --fill-2:rgba(120,105,82,.1);
     --blur:rgba(228,218,203,.82); --accent:#2F9E44;
   }
   :root[data-bg="taupe"]{
-    --bg:#D8CCBE; --group:#D8CCBE; --card:#E8DFD3; --card-2:#E8DFD3;
+    --bg:#D8CCBE; --group:#D8CCBE; --card:#E1D7C9; --card-2:#E1D7C9;
     --text:#3A352D; --text-2:rgba(58,53,45,.58); --text-3:rgba(58,53,45,.3);
     --sep:rgba(58,53,45,.16); --fill:rgba(110,96,76,.16); --fill-2:rgba(110,96,76,.1);
     --blur:rgba(216,204,190,.82); --accent:#2F9E44;
@@ -426,8 +426,8 @@
   <div class="group">
     <div class="row"><span class="k">الرواية</span>
       <div class="miniseg" id="riwaya-seg">
-        <button data-r="hafs" class="on">حفص</button>
-        <button data-r="warsh">ورش</button>
+        <button data-r="warsh" class="on">ورش</button>
+        <button data-r="hafs">حفص</button>
       </div>
     </div>
   </div>
@@ -549,8 +549,10 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'hafs', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4' };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4 };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
+// migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
+if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
@@ -898,7 +900,7 @@ function initRiwayaPills(){
   $$('.head').forEach(h=>{
     if(h.querySelector('.riwaya-quick')) return;
     const q=document.createElement('div'); q.className='riwaya-quick';
-    q.innerHTML='<button data-r="hafs">حفص</button><button data-r="warsh">ورش</button>';
+    q.innerHTML='<button data-r="warsh">ورش</button><button data-r="hafs">حفص</button>';
     h.appendChild(q);
   });
   $$('.riwaya-quick button').forEach(b=> b.addEventListener('click', ()=>{
