@@ -4,12 +4,12 @@ L'application est une PWA. Pour le Play Store, on l'emballe en **TWA** (Trusted 
 
 ## 0. Prérequis
 - Compte **Google Play Developer** (25 $, une seule fois) : https://play.google.com/console
-- URL publique de l'app : `https://adkar1.pages.dev/`
-- URL politique de confidentialité : `https://adkar1.pages.dev/privacy.html`
+- URL publique de l'app : `https://salatee.netlify.app/`
+- URL politique de confidentialité : `https://salatee.netlify.app/privacy.html`
 
 ## 1. Générer le package Android (le plus simple : PWABuilder)
 1. Aller sur https://www.pwabuilder.com
-2. Coller `https://adkar1.pages.dev/` → **Start**.
+2. Coller `https://salatee.netlify.app/` → **Start**.
 3. Onglet **Android** → **Generate Package**.
    - Package ID : `app.salaty.twa` (doit correspondre à `assetlinks.json`).
    - App name : `صلاتي`.
@@ -23,7 +23,7 @@ L'application est une PWA. Pour le Play Store, on l'emballe en **TWA** (Trusted 
 1. Ouvrir le `assetlinks.json` fourni par PWABuilder, copier la valeur **sha256_cert_fingerprints**.
 2. La coller dans `/.well-known/assetlinks.json` du dépôt (remplacer le texte
    `REMPLACER_PAR_EMPREINTE_SHA256_DE_LA_CLE_DE_SIGNATURE`), garder `package_name` = `app.salaty.twa`.
-3. Pousser → le fichier sera servi sur `https://adkar1.pages.dev/.well-known/assetlinks.json`.
+3. Pousser → le fichier sera servi sur `https://salatee.netlify.app/.well-known/assetlinks.json`.
    (Sinon la barre d'adresse du navigateur restera visible dans l'app.)
 
 > ⚠️ Si Play active **« Play App Signing »** (recommandé), Google re-signe l'app : récupère
@@ -34,7 +34,7 @@ L'application est une PWA. Pour le Play Store, on l'emballe en **TWA** (Trusted 
 - **Create app** → nom `صلاتي`, langue par défaut Arabe, type App, gratuit.
 - **Téléverser l'AAB** dans une release (Internal testing d'abord, puis Production).
 - Remplir les sections obligatoires :
-  - **Privacy policy** : `https://adkar1.pages.dev/privacy.html`
+  - **Privacy policy** : `https://salatee.netlify.app/privacy.html`
   - **Data safety** : « Aucune donnée collectée / Aucune donnée partagée » (tout est local).
   - **Content rating** : questionnaire (app religieuse, tout public).
   - **App category** : Lifestyle (ou Books & Reference).
