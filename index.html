@@ -143,6 +143,8 @@
   .card .txt{font-size:calc(20px * var(--scale)); line-height:2.0; font-weight:500; white-space:pre-wrap; word-spacing:1px;}
   .card.quran .txt{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale)); line-height:2.25;}
   body.riw-warsh .card.quran .txt{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale)); line-height:2.7;}
+  /* خط حفص بالمغربي: نفس شكل الحروف، والرموز الحفصية تُستكمل من الخط الاحتياطي */
+  body.qmaghribi .card.quran .txt{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale)); line-height:2.7;}
 
   /* selectable writing style for non-Qur'anic dhikr text */
   body.dfont-plex   .card:not(.quran) .txt, body.dfont-plex   #font-preview{font-family:'PlexAr',sans-serif;}
@@ -312,11 +314,13 @@
   .wird-basmala{font-family:'AmiriQuran',serif; text-align:center; color:var(--accent);
     font-size:calc(20px * var(--scale) * var(--qscale,1)); line-height:2; margin:2px 0 10px;}
   body.riw-warsh .wird-basmala{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(22px * var(--scale) * var(--qscale,1));}
+  body.qmaghribi .wird-basmala{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(22px * var(--scale) * var(--qscale,1));}
   .mushaf-page{display:flex; align-items:center; gap:12px; margin:18px 4px; color:var(--text-3);
     font-family:'PlexAr'; font-size:13px; font-weight:700;}
   .mushaf-page::before,.mushaf-page::after{content:''; flex:1; height:1px; background:var(--sep);}
   .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.3; text-align:justify;}
   body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
+  body.qmaghribi .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
   .qzoom{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 16px 0;}
   .qzoom button{width:42px; height:42px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--accent);
     font-weight:800; font-size:18px; line-height:1; box-shadow:var(--shadow-1); transition:transform .13s ease;}
@@ -428,6 +432,12 @@
       <div class="miniseg" id="riwaya-seg">
         <button data-r="warsh" class="on">ورش</button>
         <button data-r="hafs">حفص</button>
+      </div>
+    </div>
+    <div class="row"><span class="k">خط حفص</span>
+      <div class="miniseg" id="hafsfont-seg">
+        <button data-r="maghribi" class="on">مغربي</button>
+        <button data-r="naskh">نسخ</button>
       </div>
     </div>
   </div>
@@ -549,7 +559,7 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4 };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'maghribi' };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
@@ -570,6 +580,17 @@ function applyBg(){
   const mc = $('meta[name=theme-color]'); if(mc) mc.setAttribute('content', BG_COLORS[b]||'#EFE6D4');
 }
 function applyFont(){ document.documentElement.style.setProperty('--scale', settings.font); }
+function applyHafsFont(){
+  const mag = (settings.hafsFont||'maghribi')==='maghribi';
+  document.body.classList.toggle('qmaghribi', mag);
+  // mettre à jour les libellés sans recharger le mushaf
+  const src=$('#quran-src');
+  if(src && settings.riwaya!=='warsh') src.textContent = mag ? 'حفص — الخط المغربي' : 'حفص — خط النسخ';
+  const note=$('#riwaya-note');
+  if(note && settings.riwaya!=='warsh') note.textContent = mag
+    ? 'رواية حفص عن عاصم بحروف الخط المغربي — وتُستكمل رموز حفص الخاصة من خط النسخ.'
+    : 'رواية حفص عن عاصم بخط النسخ — المعتمدة في أغلب العالم الإسلامي.';
+}
 const Q_MIN=0.8, Q_MAX=2.2;
 function applyQuranScale(){
   let q=parseFloat(settings.quranScale)||1; q=Math.min(Q_MAX,Math.max(Q_MIN,q));
@@ -589,10 +610,13 @@ function applyDuaFont(){
 function applyRiwaya(){
   document.body.classList.toggle('riw-warsh', settings.riwaya==='warsh');
   document.body.classList.toggle('riw-hafs', settings.riwaya==='hafs');
-  $('#quran-src').textContent = settings.riwaya==='warsh' ? 'ورش — الخط المغربي' : 'حفص — خط النسخ';
+  const hafsMag = (settings.hafsFont||'maghribi')==='maghribi';
+  $('#quran-src').textContent = settings.riwaya==='warsh' ? 'ورش — الخط المغربي' : (hafsMag ? 'حفص — الخط المغربي' : 'حفص — خط النسخ');
   $('#riwaya-note').textContent = settings.riwaya==='warsh'
     ? 'الآيات بالخط المغربي من المصحف المحمدي. الأدعية موحَّدة في الروايتين.'
-    : 'رواية حفص عن عاصم بخط النسخ — المعتمدة في أغلب العالم الإسلامي.';
+    : (hafsMag
+        ? 'رواية حفص عن عاصم بحروف الخط المغربي — وتُستكمل رموز حفص الخاصة من خط النسخ.'
+        : 'رواية حفص عن عاصم بخط النسخ — المعتمدة في أغلب العالم الإسلامي.');
   if(currentTab==='evening'||currentTab==='morning') renderAzkar();
   if(window.__wirdReady){ WIRD=null; if($('#s-wird').classList.contains('active')) openWird(); }
   if(typeof syncRiwayaPills==='function') syncRiwayaPills();
@@ -775,6 +799,7 @@ function bindSeg(sel, key, after){
 function syncSeg(sel,key){ $$(sel+' button').forEach(b=> b.classList.toggle('on',(b.dataset.r||b.dataset.th||b.dataset.f)===settings[key])); }
 
 bindSeg('#riwaya-seg','riwaya', applyRiwaya);
+bindSeg('#hafsfont-seg','hafsFont', applyHafsFont);
 function renderSwatches(){
   const wrap=$('#bg-swatches'); if(!wrap) return; wrap.innerHTML='';
   BG_LIST.forEach(b=>{
@@ -1260,7 +1285,8 @@ $('#loc-btn').addEventListener('click', ()=>{
 
 
 applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
-syncSeg('#riwaya-seg','riwaya'); syncSeg('#font-seg','font'); renderSwatches();
+syncSeg('#riwaya-seg','riwaya'); syncSeg('#hafsfont-seg','hafsFont'); syncSeg('#font-seg','font'); renderSwatches();
+applyHafsFont();
 try{ renderAzkar(); }catch(e){} renderChips(); paintTasbih();
 renderStreak(); try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
 try{ renderWirdKpi(); $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m===wirdMode())); }catch(e){}
