@@ -339,6 +339,24 @@
   .mushaf-jump.show{opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0);}
   .mushaf-jump .chev{font-size:12px; color:var(--text-3);}
   .mushaf-jump:active{transform:translateX(-50%) scale(.96);}
+
+  /* قائمة اختيار السورة (ورقة سفلية) */
+  .sura-overlay{position:fixed; inset:0; z-index:90; background:rgba(0,0,0,.45);
+    display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .2s ease;}
+  .sura-overlay.show{opacity:1; pointer-events:auto;}
+  .sura-sheet{background:var(--card); width:100%; max-width:480px; max-height:76vh; border-radius:20px 20px 0 0;
+    display:flex; flex-direction:column; overflow:hidden; box-shadow:var(--shadow-2);
+    transform:translateY(16px); transition:transform .22s ease;}
+  .sura-overlay.show .sura-sheet{transform:translateY(0);}
+  .sura-sheet-head{display:flex; align-items:center; justify-content:space-between; padding:16px 18px;
+    font-weight:800; font-size:16px; border-bottom:1px solid var(--sep); flex:0 0 auto;}
+  .sura-sheet-head button{border:0; background:var(--fill); color:var(--text-2); width:32px; height:32px;
+    border-radius:50%; font-size:14px; line-height:1;}
+  .sura-list{overflow-y:auto; padding:6px 0; -webkit-overflow-scrolling:touch;}
+  .sura-list button{display:block; width:100%; text-align:right; border:0; background:transparent; color:var(--text);
+    font:inherit; font-size:16px; font-weight:600; padding:13px 20px; border-bottom:1px solid var(--sep);}
+  .sura-list button.cur{color:var(--accent); font-weight:800; background:var(--fill-2);}
+  .sura-list button:active{background:var(--fill);}
   .wird-done{display:block; width:calc(100% - 32px); margin:6px 16px 0; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:17px; padding:15px; border-radius:16px;
     box-shadow:var(--shadow-2); transition:transform .13s ease, opacity .2s;}
   .wird-done:active{transform:scale(.98); opacity:.9;}
@@ -408,6 +426,16 @@
 <button class="mushaf-jump" id="mushaf-jump" aria-label="الانتقال إلى سورة">
   <span id="mushaf-jump-name">الفاتحة</span><span class="chev">⌄</span>
 </button>
+
+<div class="sura-overlay" id="sura-overlay">
+  <div class="sura-sheet">
+    <div class="sura-sheet-head">
+      <span>اختر السورة</span>
+      <button id="sura-overlay-close" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="sura-list" id="sura-list"></div>
+  </div>
+</div>
 
 <!-- ===== المسبحة ===== -->
 <section id="s-tasbih" class="screen">
@@ -1107,13 +1135,24 @@ function markBookmarkedAya(){
   const el=document.querySelector('#wird-body .wird-num[data-ai="'+sp.ai+'"]');
   if(el) el.classList.add('bm');
 }
-/* الضغط على رقم الآية: يحفظ موضع القراءة هنا بالضبط */
+/* الضغط على رقم الآية: يحفظ (أو يلغي) موضع القراءة هنا بالضبط — قابل للتبديل */
 document.addEventListener('click', e=>{
   const num=e.target.closest('.wird-num');
   if(!num || wirdMode()!=='mushaf') return;
   const ai=parseInt(num.dataset.ai); if(isNaN(ai)) return;
-  const si=suraOf(ai);
+  const wasOn=num.classList.contains('bm');
   const old=document.querySelector('#wird-body .wird-num.bm'); if(old) old.classList.remove('bm');
+  clearTimeout(__scrollSaveT);
+  __tapSaveUntil=Date.now()+800;
+  if(wasOn){
+    // إلغاء العلامة
+    settings.mushafPos=null;
+    saveSettings();
+    updateResumeBtn();
+    vibrate(8);
+    return;
+  }
+  const si=suraOf(ai);
   num.classList.add('bm');
   const y=Math.max(0, Math.round(num.getBoundingClientRect().top + window.scrollY - 110));
   settings.mushafSura=si;
@@ -1121,17 +1160,21 @@ document.addEventListener('click', e=>{
   saveSettings();
   updateResumeBtn();
   vibrate([10,30,10]);
-  clearTimeout(__scrollSaveT);
-  __tapSaveUntil=Date.now()+800;
 });
 /* remember reading position (surah + scroll) in mushaf mode */
 function updateResumeBtn(){
   const sp=settings.mushafPos, btn=$('#mushaf-resume'); if(!btn) return;
   if(sp && sp.y>240){
+    let label='↩︎ تابِع القراءة من حيث وصلت';
+    if(sp.ai!=null && WIRD){
+      const si=suraOf(sp.ai), no=sp.ai-WIRD.sur[si].i+1;
+      label='↩︎ تابِع القراءة — سورة '+WIRD.sur[si].n+'، آية '+no;
+    }
+    btn.textContent=label;
     btn.style.display=''; btn.onclick=()=>{ window.scrollTo({top:sp.y, behavior:'smooth'}); };
   } else { btn.style.display='none'; btn.onclick=null; }
 }
-/* ---- pastille flottante «السورة الحالية» أثناء التمرير ---- */
+/* ---- pastille السورة الحالية: تظهر عند التمرير للأعلى فقط، وتُخفى أثناء القراءة للأسفل ---- */
 let __suraMarkers=null;
 function collectSuraMarkers(){
   __suraMarkers=Array.from(document.querySelectorAll('#wird-body [id^="msura-"]'));
@@ -1145,11 +1188,11 @@ function currentSuraFromScroll(){
   }
   return cur;
 }
-let __lastJumpSura=-1, __jumpTicking=false;
+let __lastJumpSura=-1, __jumpTicking=false, __lastScrollY=0, __scrollDir='up';
 function updateMushafJump(){
   const jump=$('#mushaf-jump'); if(!jump) return;
   const inMushaf = wirdMode()==='mushaf' && $('#s-wird').classList.contains('active');
-  const show = inMushaf && window.scrollY>260;
+  const show = inMushaf && window.scrollY>260 && __scrollDir==='up';
   jump.classList.toggle('show', show);
   if(!inMushaf || !WIRD) return;
   const si=currentSuraFromScroll();
@@ -1159,15 +1202,46 @@ function updateMushafJump(){
 }
 function onScrollForJump(){
   if(__jumpTicking) return; __jumpTicking=true;
-  requestAnimationFrame(()=>{ updateMushafJump(); __jumpTicking=false; });
+  requestAnimationFrame(()=>{
+    const y=window.scrollY;
+    if(y>__lastScrollY+3) __scrollDir='down';
+    else if(y<__lastScrollY-3) __scrollDir='up';
+    __lastScrollY=y;
+    updateMushafJump(); __jumpTicking=false;
+  });
 }
 window.addEventListener('scroll', onScrollForJump, {passive:true});
-$('#mushaf-jump').addEventListener('click', ()=>{
-  const sel=$('#sura-select'); if(!sel) return;
-  vibrate(6);
-  if(sel.showPicker){ try{ sel.showPicker(); return; }catch(e){} }
-  sel.focus();
-});
+
+/* ---- قائمة اختيار السورة (ورقة سفلية موثوقة بدل showPicker) ---- */
+function buildSuraList(){
+  const list=$('#sura-list'); if(!list || !WIRD) return;
+  const curSi=currentSuraFromScroll();
+  list.innerHTML='';
+  WIRD.sur.forEach((s,idx)=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.textContent=(idx+1)+'. '+s.n;
+    if(idx===curSi) b.classList.add('cur');
+    b.addEventListener('click', ()=>{
+      settings.mushafSura=idx; saveSettings();
+      const sel=$('#sura-select'); if(sel) sel.value=idx;
+      closeSuraOverlay();
+      scrollToSura(idx, true);
+      vibrate(6);
+    });
+    list.appendChild(b);
+  });
+}
+function openSuraOverlay(){
+  buildSuraList();
+  $('#sura-overlay').classList.add('show');
+  const cur=$('#sura-list button.cur');
+  if(cur) cur.scrollIntoView({block:'center'});
+}
+function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); }
+$('#mushaf-jump').addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(); });
+$('#sura-overlay-close').addEventListener('click', closeSuraOverlay);
+$('#sura-overlay').addEventListener('click', e=>{ if(e.target.id==='sura-overlay') closeSuraOverlay(); });
 let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){
   if(__progScroll) return;
