@@ -326,7 +326,19 @@
     font-weight:800; font-size:18px; line-height:1; box-shadow:var(--shadow-1); transition:transform .13s ease;}
   .qzoom button:active{transform:scale(.94);}
   .qzoom .qval{min-width:54px; text-align:center; color:var(--text-2); font-size:13px; font-weight:700;}
-  .wird-num{display:inline-block; color:var(--accent); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;}
+  .wird-num{display:inline-block; color:var(--accent); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;
+    padding:1px 4px; border-radius:8px; cursor:pointer; transition:background-color .2s, color .2s, transform .15s;}
+  .wird-num:active{transform:scale(.88);}
+  .wird-num.bm{background:var(--accent); color:#fff; box-shadow:0 0 0 3px var(--tab-on-bg, rgba(199,21,133,.12));}
+
+  /* pastille flottante: aller à une سورة sans remonter en haut */
+  .mushaf-jump{position:fixed; top:calc(env(safe-area-inset-top) + 10px); left:50%; transform:translateX(-50%) translateY(-8px);
+    z-index:60; display:flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--card); color:var(--accent);
+    box-shadow:var(--shadow-2); border-radius:20px; padding:9px 16px; font:inherit; font-weight:800; font-size:14px;
+    max-width:72vw; opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease;}
+  .mushaf-jump.show{opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0);}
+  .mushaf-jump .chev{font-size:12px; color:var(--text-3);}
+  .mushaf-jump:active{transform:translateX(-50%) scale(.96);}
   .wird-done{display:block; width:calc(100% - 32px); margin:6px 16px 0; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:17px; padding:15px; border-radius:16px;
     box-shadow:var(--shadow-2); transition:transform .13s ease, opacity .2s;}
   .wird-done:active{transform:scale(.98); opacity:.9;}
@@ -392,6 +404,10 @@
   <button class="wird-done" id="wird-done-btn">تمّ — الوِرد التالي</button>
   <div style="height:20px"></div>
 </section>
+
+<button class="mushaf-jump" id="mushaf-jump" aria-label="الانتقال إلى سورة">
+  <span id="mushaf-jump-name">الفاتحة</span><span class="chev">⌄</span>
+</button>
 
 <!-- ===== المسبحة ===== -->
 <section id="s-tasbih" class="screen">
@@ -901,6 +917,7 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   $('#'+t.dataset.s).classList.add('active');
   window.scrollTo(0,0);
   flashSalat();
+  if(t.dataset.s!=='s-wird' && $('#mushaf-jump')) $('#mushaf-jump').classList.remove('show');
   if(t.dataset.s==='s-wird') openWird();
   if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} }
 }));
@@ -1041,7 +1058,8 @@ function renderMushaf(force){
   const body=$('#wird-body');
   // déjà rendu pour cette riwaya -> ne pas reconstruire, juste se positionner
   if(!force && body.dataset.mode==='mushaf' && __mushafRenderedRiwaya===settings.riwaya){
-    updateResumeBtn(settings.mushafSura||0);
+    updateResumeBtn();
+    __lastJumpSura=-1;
     requestAnimationFrame(()=> scrollToSura(settings.mushafSura||0, false));
     return;
   }
@@ -1068,7 +1086,7 @@ function buildMushaf(body){
       const b=basmalaHtml(si); if(b) parts.push(b);
     }
     if(!textOpen){ parts.push('<div class="wird-text">'); textOpen=true; }
-    parts.push(a.t+'<span class="wird-num">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
+    parts.push(a.t+'<span class="wird-num" data-ai="'+i+'">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
   }
   if(textOpen) parts.push('</div>');
   parts.push('</div>');
@@ -1076,19 +1094,84 @@ function buildMushaf(body){
   body.dataset.mode='mushaf';
   __mushafRenderedRiwaya=settings.riwaya;
   $('#wird-sub').textContent='المصحف كامل — '+WIRD.sur.length+' سورة';
-  updateResumeBtn(settings.mushafSura||0);
+  updateResumeBtn();
+  markBookmarkedAya();
+  collectSuraMarkers();
   requestAnimationFrame(()=> scrollToSura(settings.mushafSura||0, false));
 }
+/* وضع علامة مرئية عند الآية المحفوظة (إن وُجدت) */
+function markBookmarkedAya(){
+  const old=document.querySelector('#wird-body .wird-num.bm'); if(old) old.classList.remove('bm');
+  const sp=settings.mushafPos;
+  if(!sp || sp.ai==null) return;
+  const el=document.querySelector('#wird-body .wird-num[data-ai="'+sp.ai+'"]');
+  if(el) el.classList.add('bm');
+}
+/* الضغط على رقم الآية: يحفظ موضع القراءة هنا بالضبط */
+document.addEventListener('click', e=>{
+  const num=e.target.closest('.wird-num');
+  if(!num || wirdMode()!=='mushaf') return;
+  const ai=parseInt(num.dataset.ai); if(isNaN(ai)) return;
+  const si=suraOf(ai);
+  const old=document.querySelector('#wird-body .wird-num.bm'); if(old) old.classList.remove('bm');
+  num.classList.add('bm');
+  const y=Math.max(0, Math.round(num.getBoundingClientRect().top + window.scrollY - 110));
+  settings.mushafSura=si;
+  settings.mushafPos={ sura:si, y:y, ai:ai };
+  saveSettings();
+  updateResumeBtn();
+  vibrate([10,30,10]);
+  clearTimeout(__scrollSaveT);
+  __tapSaveUntil=Date.now()+800;
+});
 /* remember reading position (surah + scroll) in mushaf mode */
-function updateResumeBtn(si){
+function updateResumeBtn(){
   const sp=settings.mushafPos, btn=$('#mushaf-resume'); if(!btn) return;
-  if(sp && sp.sura===si && sp.y>240){
+  if(sp && sp.y>240){
     btn.style.display=''; btn.onclick=()=>{ window.scrollTo({top:sp.y, behavior:'smooth'}); };
   } else { btn.style.display='none'; btn.onclick=null; }
 }
-let __scrollSaveT=null;
+/* ---- pastille flottante «السورة الحالية» أثناء التمرير ---- */
+let __suraMarkers=null;
+function collectSuraMarkers(){
+  __suraMarkers=Array.from(document.querySelectorAll('#wird-body [id^="msura-"]'));
+}
+function currentSuraFromScroll(){
+  if(!__suraMarkers || !__suraMarkers.length) return settings.mushafSura||0;
+  let cur=0;
+  for(const el of __suraMarkers){
+    if(el.getBoundingClientRect().top<=90) cur=parseInt(el.id.slice(6));
+    else break;
+  }
+  return cur;
+}
+let __lastJumpSura=-1, __jumpTicking=false;
+function updateMushafJump(){
+  const jump=$('#mushaf-jump'); if(!jump) return;
+  const inMushaf = wirdMode()==='mushaf' && $('#s-wird').classList.contains('active');
+  const show = inMushaf && window.scrollY>260;
+  jump.classList.toggle('show', show);
+  if(!inMushaf || !WIRD) return;
+  const si=currentSuraFromScroll();
+  if(si===__lastJumpSura) return;
+  __lastJumpSura=si;
+  const nm=$('#mushaf-jump-name'); if(nm && WIRD.sur[si]) nm.textContent=WIRD.sur[si].n;
+}
+function onScrollForJump(){
+  if(__jumpTicking) return; __jumpTicking=true;
+  requestAnimationFrame(()=>{ updateMushafJump(); __jumpTicking=false; });
+}
+window.addEventListener('scroll', onScrollForJump, {passive:true});
+$('#mushaf-jump').addEventListener('click', ()=>{
+  const sel=$('#sura-select'); if(!sel) return;
+  vibrate(6);
+  if(sel.showPicker){ try{ sel.showPicker(); return; }catch(e){} }
+  sel.focus();
+});
+let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){
   if(__progScroll) return;
+  if(Date.now()<__tapSaveUntil) return; // إشارة يدوية حديثة: لا يُكتب فوقها من التمرير التلقائي
   if(wirdMode()!=='mushaf' || !$('#s-wird').classList.contains('active')) return;
   clearTimeout(__scrollSaveT);
   __scrollSaveT=setTimeout(()=>{
@@ -1105,7 +1188,7 @@ function applyWirdMode(){
   $('#mushaf-controls').style.display = daily?'none':'';
   $('#wird-done-btn').style.display = daily?'':'none';
   $('#wird-h1').textContent = daily?'وِرد اليوم':'المصحف الكريم';
-  if(daily){ renderWird(); }
+  if(daily){ renderWird(); if($('#mushaf-jump')) $('#mushaf-jump').classList.remove('show'); }
   else { buildSuraSelect(); renderMushaf(); }
 }
 
