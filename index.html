@@ -304,6 +304,26 @@
     background:var(--accent); color:#fff; font:inherit; font-weight:700; font-size:15px; padding:11px;
     box-shadow:var(--shadow-2); transition:transform .13s ease, opacity .2s;}
   .mushaf-resume:active{transform:scale(.98); opacity:.9;}
+
+  /* استماع بصوت القرّاء */
+  .reciter-box{margin:10px 16px 0;}
+  .reciter-chips{display:flex; gap:8px; overflow-x:auto; padding:2px 2px 2px; scrollbar-width:none;}
+  .reciter-chips::-webkit-scrollbar{display:none;}
+  .reciter-chips button{flex:0 0 auto; border:1px solid var(--line); background:var(--card); color:var(--text);
+    font:inherit; font-weight:600; font-size:13.5px; padding:8px 14px; border-radius:16px; box-shadow:var(--shadow-1);
+    transition:transform .13s ease, background-color .2s, color .2s;}
+  .reciter-chips button.on{background:var(--accent); color:#fff; border-color:transparent;}
+  .reciter-chips button:active{transform:scale(.95);}
+  .reciter-chips button .ext{opacity:.7; font-size:11px; margin-inline-start:2px;}
+  .reciter-player{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line);
+    box-shadow:var(--shadow-1); border-radius:16px; padding:10px 14px; margin-top:8px;}
+  .reciter-play{flex:0 0 auto; width:42px; height:42px; border-radius:50%; border:0; background:var(--accent);
+    color:#fff; font-size:16px; line-height:1; box-shadow:var(--shadow-2); transition:transform .13s ease;}
+  .reciter-play:active{transform:scale(.92);}
+  .reciter-info{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
+  .reciter-info span:first-child{font-weight:800; font-size:14px; color:var(--text);}
+  .reciter-info span:last-child{font-size:12.5px; color:var(--text-2);}
+  .reciter-status{font-size:12px; color:var(--text-3); flex:0 0 auto;}
   .wird-amount{display:flex; gap:8px; overflow-x:auto; padding:10px 16px 4px; scrollbar-width:none;}
   .wird-amount::-webkit-scrollbar{display:none;}
   .wird-amount button{flex:0 0 auto; border:0; background:var(--card); color:var(--text); font:inherit; font-weight:600; font-size:14px; padding:8px 14px; border-radius:18px;}
@@ -412,6 +432,18 @@
       <select id="sura-select" aria-label="اختر السورة"></select>
     </div>
     <button class="mushaf-resume" id="mushaf-resume" style="display:none">↩︎ تابِع القراءة من حيث وصلت</button>
+    <div class="reciter-box" id="reciter-box">
+      <div class="reciter-chips" id="reciter-chips"></div>
+      <div class="reciter-player" id="reciter-player" style="display:none">
+        <button id="reciter-play" class="reciter-play" aria-label="تشغيل">▶</button>
+        <div class="reciter-info">
+          <span id="reciter-name">—</span>
+          <span id="reciter-sura">—</span>
+        </div>
+        <span id="reciter-status" class="reciter-status"></span>
+      </div>
+      <audio id="reciter-audio" preload="none"></audio>
+    </div>
   </div>
   <div class="qzoom" id="q-zoom" title="تكبير خط القرآن">
     <button id="q-minus" aria-label="تصغير الخط">A−</button>
@@ -603,7 +635,7 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'maghribi' };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'maghribi', reciter:'shur' };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
@@ -1242,6 +1274,98 @@ function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); }
 $('#mushaf-jump').addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(); });
 $('#sura-overlay-close').addEventListener('click', closeSuraOverlay);
 $('#sura-overlay').addEventListener('click', e=>{ if(e.target.id==='sura-overlay') closeSuraOverlay(); });
+
+/* ==================== الاستماع بصوت القرّاء ==================== */
+const RECITERS=[
+  {id:'shur',       name:'سعود الشريم',      match:['الشريم','شريم']},
+  {id:'mhmd-lfkyh',  name:'محمد الفقيه اليمني', match:['الفقيه']},
+  {id:'s_gmd',       name:'سعد الغامدي',       match:['الغامدي']},
+  {id:'koshi',       name:'العيون الكوشي',     match:['الكوشي','كوشي']},
+  {id:'maher',       name:'ماهر المعيقلي',     match:['المعيقلي','معيقلي']},
+  {id:'ext-farjani',  name:'مصطفى الفرجاني',   external:'https://ar.islamway.net/collection/18225'},
+];
+let __reciterCatalog=null, __reciterFetching=null;
+async function fetchReciterCatalog(){
+  if(__reciterCatalog) return __reciterCatalog;
+  if(__reciterFetching) return __reciterFetching;
+  __reciterFetching=(async()=>{
+    try{
+      const res=await fetch('https://www.mp3quran.net/api/v3/reciters?language=ar', {mode:'cors'});
+      if(!res.ok) throw new Error('http '+res.status);
+      const data=await res.json();
+      const list=data.reciters||[];
+      const map={};
+      RECITERS.forEach(r=>{
+        if(r.external) return;
+        const found=list.find(x=> r.match.some(m=> (x.name||'').includes(m)));
+        if(found && found.moshaf && found.moshaf.length){
+          const m=found.moshaf.find(mm=> (mm.name||'').includes('مرتل')) || found.moshaf[0];
+          map[r.id]={ server:m.server, name:found.name };
+        }
+      });
+      __reciterCatalog=map;
+      return map;
+    }catch(e){ __reciterCatalog=null; throw e; }
+    finally{ __reciterFetching=null; }
+  })();
+  return __reciterFetching;
+}
+function pad3(n){ return String(n).padStart(3,'0'); }
+function renderReciterChips(){
+  const wrap=$('#reciter-chips'); if(!wrap) return;
+  wrap.innerHTML='';
+  RECITERS.forEach(r=>{
+    const b=document.createElement('button');
+    b.textContent=r.name+(r.external?' ↗':'');
+    b.dataset.id=r.id;
+    b.classList.toggle('on', settings.reciter===r.id);
+    b.addEventListener('click', ()=> onReciterPick(r));
+    wrap.appendChild(b);
+  });
+}
+async function onReciterPick(r){
+  vibrate(6);
+  if(r.external){ window.open(r.external, '_blank', 'noopener'); return; }
+  settings.reciter=r.id; saveSettings();
+  $$('#reciter-chips button').forEach(b=> b.classList.toggle('on', b.dataset.id===r.id));
+  const player=$('#reciter-player'), status=$('#reciter-status');
+  player.style.display='flex';
+  $('#reciter-name').textContent=r.name;
+  status.textContent='…جارٍ التحميل';
+  try{
+    const catalog=await fetchReciterCatalog();
+    const info=catalog && catalog[r.id];
+    if(!info){ status.textContent='غير متوفّر حاليًّا'; return; }
+    status.textContent='';
+    playReciterSurah(info, currentSuraFromScroll());
+  }catch(e){
+    status.textContent='تعذّر الاتصال — تحقّق من الإنترنت';
+  }
+}
+function playReciterSurah(info, si){
+  if(!WIRD || !WIRD.sur[si]) return;
+  const audio=$('#reciter-audio');
+  const surahNum=WIRD.sur[si].s;
+  audio.src=info.server+pad3(surahNum)+'.mp3';
+  $('#reciter-sura').textContent='سورة '+WIRD.sur[si].n;
+  audio.play().then(()=>{ $('#reciter-play').textContent='❚❚'; }).catch(()=>{
+    $('#reciter-status').textContent='اضغط تشغيل يدويًّا';
+  });
+}
+$('#reciter-play').addEventListener('click', async ()=>{
+  const audio=$('#reciter-audio');
+  if(!audio.src){
+    const r=RECITERS.find(x=>x.id===settings.reciter); if(r) onReciterPick(r);
+    return;
+  }
+  if(audio.paused){
+    try{ await audio.play(); $('#reciter-play').textContent='❚❚'; }
+    catch(e){ $('#reciter-status').textContent='تعذّر التشغيل'; }
+  } else { audio.pause(); $('#reciter-play').textContent='▶'; }
+});
+$('#reciter-audio').addEventListener('ended', ()=>{ $('#reciter-play').textContent='▶'; });
+$('#reciter-audio').addEventListener('pause', ()=>{ $('#reciter-play').textContent='▶'; });
+$('#reciter-audio').addEventListener('playing', ()=>{ $('#reciter-play').textContent='❚❚'; });
 let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){
   if(__progScroll) return;
@@ -1263,7 +1387,7 @@ function applyWirdMode(){
   $('#wird-done-btn').style.display = daily?'':'none';
   $('#wird-h1').textContent = daily?'وِرد اليوم':'المصحف الكريم';
   if(daily){ renderWird(); if($('#mushaf-jump')) $('#mushaf-jump').classList.remove('show'); }
-  else { buildSuraSelect(); renderMushaf(); }
+  else { buildSuraSelect(); renderMushaf(); renderReciterChips(); }
 }
 
 function renderAmountChips(){
