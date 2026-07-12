@@ -323,8 +323,12 @@
     color:#fff; font-size:16px; line-height:1; box-shadow:var(--shadow-2); transition:transform .13s ease;}
   .reciter-play:active{transform:scale(.92);}
   .reciter-info{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
-  .reciter-info span:first-child{font-weight:800; font-size:14px; color:var(--text);}
-  .reciter-info span:last-child{font-size:12.5px; color:var(--text-2);}
+  .reciter-info > span:first-child{font-weight:800; font-size:14px; color:var(--text);}
+  .reciter-sura-btn{align-self:flex-start; border:0; background:var(--fill-2); color:var(--accent);
+    font:inherit; font-weight:700; font-size:12.5px; padding:4px 10px; border-radius:12px; margin-top:2px;
+    display:inline-flex; align-items:center; gap:4px;}
+  .reciter-sura-btn .chev{font-size:11px; color:var(--text-3);}
+  .reciter-sura-btn:active{transform:scale(.96);}
   .reciter-status{font-size:12px; color:var(--text-3); flex:0 0 auto;}
 
   /* تذكير الصلاة على النبي ﷺ (شريط داخل التطبيق) */
@@ -450,7 +454,7 @@
         <button id="reciter-play" class="reciter-play" aria-label="تشغيل">▶</button>
         <div class="reciter-info">
           <span id="reciter-name">—</span>
-          <span id="reciter-sura">—</span>
+          <button id="reciter-sura-btn" class="reciter-sura-btn"><span id="reciter-sura">اختر السورة</span> <span class="chev">⌄</span></button>
         </div>
         <span id="reciter-status" class="reciter-status"></span>
       </div>
@@ -1283,34 +1287,35 @@ function onScrollForJump(){
 }
 window.addEventListener('scroll', onScrollForJump, {passive:true});
 
-/* ---- قائمة اختيار السورة (ورقة سفلية موثوقة بدل showPicker) ---- */
-function buildSuraList(){
+/* ---- قائمة اختيار السورة (ورقة سفلية موثوقة، تُستخدم للتنقّل وللاستماع) ---- */
+function buildSuraList(curIdx, onPick){
   const list=$('#sura-list'); if(!list || !WIRD) return;
-  const curSi=currentSuraFromScroll();
   list.innerHTML='';
   WIRD.sur.forEach((s,idx)=>{
     const b=document.createElement('button');
     b.type='button';
     b.textContent=(idx+1)+'. '+s.n;
-    if(idx===curSi) b.classList.add('cur');
-    b.addEventListener('click', ()=>{
-      settings.mushafSura=idx; saveSettings();
-      const sel=$('#sura-select'); if(sel) sel.value=idx;
-      closeSuraOverlay();
-      scrollToSura(idx, true);
-      vibrate(6);
-    });
+    if(idx===curIdx) b.classList.add('cur');
+    b.addEventListener('click', ()=> onPick(idx));
     list.appendChild(b);
   });
 }
-function openSuraOverlay(){
-  buildSuraList();
+function openSuraOverlay(curIdx, onPick, title){
+  $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = title || 'اختر السورة';
+  buildSuraList(curIdx, onPick);
   $('#sura-overlay').classList.add('show');
   const cur=$('#sura-list button.cur');
   if(cur) cur.scrollIntoView({block:'center'});
 }
 function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); }
-$('#mushaf-jump').addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(); });
+$('#mushaf-jump').addEventListener('click', ()=>{
+  vibrate(6);
+  openSuraOverlay(currentSuraFromScroll(), idx=>{
+    settings.mushafSura=idx; saveSettings();
+    const sel=$('#sura-select'); if(sel) sel.value=idx;
+    closeSuraOverlay(); scrollToSura(idx, true); vibrate(6);
+  });
+});
 $('#sura-overlay-close').addEventListener('click', closeSuraOverlay);
 $('#sura-overlay').addEventListener('click', e=>{ if(e.target.id==='sura-overlay') closeSuraOverlay(); });
 
@@ -1376,6 +1381,7 @@ function renderReciterChips(){
     wrap.appendChild(b);
   });
 }
+let __audioSura=null; // فهرس السورة المختارة للاستماع
 async function onReciterPick(r){
   vibrate(6);
   if(r.external){ window.open(r.external, '_blank', 'noopener'); return; }
@@ -1390,13 +1396,18 @@ async function onReciterPick(r){
     const info=catalog && catalog[r.id];
     if(!info){ status.textContent='غير متوفّر حاليًّا'; return; }
     status.textContent='';
-    playReciterSurah(info, currentSuraFromScroll());
+    if(__audioSura==null) __audioSura=currentSuraFromScroll();
+    playReciterSurah(info, __audioSura);
   }catch(e){
     status.textContent='تعذّر الاتصال — تحقّق من الإنترنت';
   }
 }
+function currentReciterInfo(){
+  return __reciterCatalog && __reciterCatalog[settings.reciter];
+}
 function playReciterSurah(info, si){
   if(!WIRD || !WIRD.sur[si]) return;
+  __audioSura=si;
   const audio=$('#reciter-audio');
   const surahNum=WIRD.sur[si].s;
   audio.src=info.server+pad3(surahNum)+'.mp3';
@@ -1405,6 +1416,22 @@ function playReciterSurah(info, si){
     $('#reciter-status').textContent='اضغط تشغيل يدويًّا';
   });
 }
+/* زرّ اسم السورة داخل المشغّل: يفتح قائمة كل السور للاستماع */
+$('#reciter-sura-btn').addEventListener('click', async ()=>{
+  vibrate(6);
+  let info=currentReciterInfo();
+  if(!info){
+    // القارئ لم يُحمّل بعد — نحمّله أولًا
+    try{ const cat=await fetchReciterCatalog(); info=cat && cat[settings.reciter]; }catch(e){}
+  }
+  const cur = __audioSura!=null ? __audioSura : currentSuraFromScroll();
+  openSuraOverlay(cur, si=>{
+    closeSuraOverlay();
+    const inf=currentReciterInfo();
+    if(inf){ playReciterSurah(inf, si); }
+    else { __audioSura=si; $('#reciter-status').textContent='تعذّر الاتصال — تحقّق من الإنترنت'; }
+  }, 'اختر سورة للاستماع');
+});
 $('#reciter-play').addEventListener('click', async ()=>{
   const audio=$('#reciter-audio');
   if(!audio.src){
@@ -1416,7 +1443,14 @@ $('#reciter-play').addEventListener('click', async ()=>{
     catch(e){ $('#reciter-status').textContent='تعذّر التشغيل'; }
   } else { audio.pause(); $('#reciter-play').textContent='▶'; }
 });
-$('#reciter-audio').addEventListener('ended', ()=>{ $('#reciter-play').textContent='▶'; });
+/* عند انتهاء السورة: الانتقال تلقائيًّا للسورة التالية */
+$('#reciter-audio').addEventListener('ended', ()=>{
+  $('#reciter-play').textContent='▶';
+  const info=currentReciterInfo();
+  if(info && __audioSura!=null && __audioSura+1 < WIRD.sur.length){
+    playReciterSurah(info, __audioSura+1);
+  }
+});
 $('#reciter-audio').addEventListener('pause', ()=>{ $('#reciter-play').textContent='▶'; });
 $('#reciter-audio').addEventListener('playing', ()=>{ $('#reciter-play').textContent='❚❚'; });
 let __scrollSaveT=null, __tapSaveUntil=0;
