@@ -670,10 +670,12 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'maghribi', reciter:'shur', quranColor:'normal' };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:false, salat:false, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'maghribi', reciter:'shur', quranColor:'navy' };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
+// ترقية: اللون الأزرق الغامق افتراضيًّا لخطّ القرآن
+if(!settings.__d3){ settings.__d3=1; settings.quranColor='navy'; store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
@@ -1019,14 +1021,44 @@ function scheduleChecks(){
   check();
   window.__azTimer = setInterval(check, 60*1000);
 }
-let __salatToastT=null;
-function showSalatToast(){
+let __toastT=null;
+function showToast(msg, ms){
   const el=$('#salat-toast'); if(!el) return;
+  el.textContent=msg;
   el.classList.add('show'); vibrate([20,50,20]);
-  clearTimeout(__salatToastT);
-  __salatToastT=setTimeout(()=> el.classList.remove('show'), 6000);
+  clearTimeout(__toastT);
+  __toastT=setTimeout(()=> el.classList.remove('show'), ms||6000);
 }
+function showSalatToast(){ showToast('اللهم صلِّ وسلّم على سيّدنا محمد ﷺ', 6000); }
 $('#salat-toast') && $('#salat-toast').addEventListener('click', ()=> $('#salat-toast').classList.remove('show'));
+
+/* ===== زرّ الرجوع: منع الخروج المفاجئ من التطبيق ===== */
+(function backGuard(){
+  let exitArmedUntil=0;
+  try{ history.pushState({az:1}, ''); }catch(e){ return; }
+  window.addEventListener('popstate', ()=>{
+    // 1) قائمة اختيار السورة مفتوحة → أغلقها
+    const ov=$('#sura-overlay');
+    if(ov && ov.classList.contains('show')){
+      closeSuraOverlay(); history.pushState({az:1},''); return;
+    }
+    // 2) فتح الفضل داخل بطاقة ذكر → أغلقه
+    const openFadl=document.querySelector('.fadl.open');
+    if(openFadl){ openFadl.classList.remove('open'); history.pushState({az:1},''); return; }
+    // 3) لست في تبويب الأذكار → ارجع إليه
+    const active=document.querySelector('.tab.on');
+    if(active && active.dataset.s!=='s-azkar'){
+      const azkarTab=document.querySelector('.tab[data-s="s-azkar"]');
+      if(azkarTab) azkarTab.click();
+      history.pushState({az:1},''); return;
+    }
+    // 4) في الصفحة الرئيسية → اضغط رجوع مرّتين للخروج
+    if(Date.now()<exitArmedUntil){ history.back(); return; }
+    exitArmedUntil=Date.now()+2500;
+    showToast('اضغط «رجوع» مرّة أخرى للخروج من التطبيق', 2500);
+    history.pushState({az:1},'');
+  });
+})();
 
 /* ---------- tab switching ---------- */
 $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
