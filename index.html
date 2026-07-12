@@ -331,6 +331,22 @@
   .reciter-sura-btn:active{transform:scale(.96);}
   .reciter-status{font-size:12px; color:var(--text-3); flex:0 0 auto;}
 
+  /* قائمة السور في صفحة الاستماع */
+  #s-listen .reciter-box{position:sticky; top:0; z-index:5; background:var(--bg); padding-bottom:8px;}
+  .listen-list{display:flex; flex-direction:column; gap:8px; margin:12px 16px 0;}
+  .listen-sura{display:flex; align-items:center; gap:12px; width:100%; text-align:start;
+    border:1px solid var(--line); background:var(--card); color:var(--text); box-shadow:var(--shadow-1);
+    border-radius:14px; padding:12px 14px; font:inherit; transition:transform .13s ease, border-color .2s;}
+  .listen-sura:active{transform:scale(.98);}
+  .listen-sura .ls-num{flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:var(--fill-2);
+    color:var(--accent); font-weight:800; font-size:12.5px; display:flex; align-items:center; justify-content:center;}
+  .listen-sura .ls-name{flex:1; min-width:0; font-weight:700; font-size:15px;}
+  .listen-sura .ls-ic{flex:0 0 auto; color:var(--accent); font-size:14px; opacity:.85;}
+  .listen-sura.playing{border-color:var(--accent);}
+  .listen-sura.playing .ls-num{background:var(--accent); color:#fff;}
+  .listen-sura.playing .ls-ic{font-size:0;}
+  .listen-sura.playing .ls-ic::before{content:'❚❚'; font-size:12px;}
+
   /* تذكير الصلاة على النبي ﷺ (شريط داخل التطبيق) */
   .salat-toast{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
     z-index:80; background:var(--accent); color:#fff; text-align:center; font-weight:700; font-size:15px;
@@ -457,18 +473,6 @@
       <select id="sura-select" aria-label="اختر السورة"></select>
     </div>
     <button class="mushaf-resume" id="mushaf-resume" style="display:none">↩︎ تابِع القراءة من حيث وصلت</button>
-    <div class="reciter-box" id="reciter-box">
-      <div class="reciter-chips" id="reciter-chips"></div>
-      <div class="reciter-player" id="reciter-player" style="display:none">
-        <button id="reciter-play" class="reciter-play" aria-label="تشغيل">▶</button>
-        <div class="reciter-info">
-          <span id="reciter-name">—</span>
-          <button id="reciter-sura-btn" class="reciter-sura-btn"><span id="reciter-sura">اختر السورة</span> <span class="chev">⌄</span></button>
-        </div>
-        <span id="reciter-status" class="reciter-status"></span>
-      </div>
-      <audio id="reciter-audio" preload="none"></audio>
-    </div>
   </div>
   <div class="qzoom" id="q-zoom" title="تكبير خط القرآن">
     <button id="q-minus" aria-label="تصغير الخط">A−</button>
@@ -477,6 +481,28 @@
   </div>
   <div id="wird-body"></div>
   <button class="wird-done" id="wird-done-btn">تمّ — الوِرد التالي</button>
+  <div style="height:20px"></div>
+</section>
+
+<!-- ===== الاستماع ===== -->
+<section id="s-listen" class="screen">
+  <div class="head">
+    <h1>الاستماع</h1>
+    <div class="sub">اختر القارئ ثمّ السورة للاستماع إليها</div>
+  </div>
+  <div class="reciter-box" id="reciter-box">
+    <div class="reciter-chips" id="reciter-chips"></div>
+    <div class="reciter-player" id="reciter-player" style="display:none">
+      <button id="reciter-play" class="reciter-play" aria-label="تشغيل">▶</button>
+      <div class="reciter-info">
+        <span id="reciter-name">—</span>
+        <button id="reciter-sura-btn" class="reciter-sura-btn"><span id="reciter-sura">اختر السورة</span> <span class="chev">⌄</span></button>
+      </div>
+      <span id="reciter-status" class="reciter-status"></span>
+    </div>
+    <audio id="reciter-audio" preload="none"></audio>
+  </div>
+  <div class="listen-list" id="listen-list"></div>
   <div style="height:20px"></div>
 </section>
 
@@ -643,6 +669,10 @@
   <button class="tab" data-s="s-wird">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><line x1="9" y1="7" x2="15" y2="7"/></svg>
     <span>الوِرد</span>
+  </button>
+  <button class="tab" data-s="s-listen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2z"/><path d="M20 14a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2z"/></svg>
+    <span>الاستماع</span>
   </button>
   <button class="tab" data-s="s-tasbih">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4" fill="currentColor" stroke="none"/></svg>
@@ -1069,6 +1099,7 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   flashSalat();
   if(t.dataset.s!=='s-wird' && $('#mushaf-jump')) $('#mushaf-jump').classList.remove('show');
   if(t.dataset.s==='s-wird') openWird();
+  if(t.dataset.s==='s-listen') openListen();
   if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} }
 }));
 
@@ -1459,9 +1490,51 @@ function playReciterSurah(info, si){
   const surahNum=WIRD.sur[si].s;
   audio.src=info.server+pad3(surahNum)+'.mp3';
   $('#reciter-sura').textContent='سورة '+WIRD.sur[si].n;
+  markListenActive();
   audio.play().then(()=>{ $('#reciter-play').textContent='❚❚'; }).catch(()=>{
     $('#reciter-status').textContent='اضغط تشغيل يدويًّا';
   });
+}
+/* ---- صفحة الاستماع المستقلّة ---- */
+async function openListen(){
+  if(!WIRD || WIRD.__riwaya!==settings.riwaya){
+    try{ if(!wirdGlobal()) await loadScript(wirdFile()); WIRD=wirdGlobal(); if(WIRD) WIRD.__riwaya=settings.riwaya; }catch(e){}
+  }
+  renderReciterChips();
+  renderListenList();
+}
+function renderListenList(){
+  const wrap=$('#listen-list'); if(!wrap) return;
+  if(!WIRD || !WIRD.sur){ wrap.innerHTML='<div class="khatma-done">تعذّر تحميل قائمة السور — تحقّق من الاتصال ثمّ أعِد المحاولة</div>'; wrap.onclick=()=>{ wrap.onclick=null; openListen(); }; return; }
+  wrap.innerHTML='';
+  WIRD.sur.forEach((s,idx)=>{
+    const b=document.createElement('button');
+    b.type='button'; b.className='listen-sura';
+    b.innerHTML='<span class="ls-num">'+(idx+1)+'</span><span class="ls-name">'+s.n+'</span><span class="ls-ic">▶</span>';
+    b.addEventListener('click', ()=> playListenSura(idx));
+    wrap.appendChild(b);
+  });
+  markListenActive();
+}
+function markListenActive(){
+  const wrap=$('#listen-list'); if(!wrap) return;
+  [...wrap.children].forEach((b,i)=> b.classList.toggle('playing', i===__audioSura));
+}
+async function playListenSura(idx){
+  vibrate(6);
+  const r=RECITERS.find(x=>x.id===settings.reciter)||RECITERS[0];
+  settings.reciter=r.id;
+  $('#reciter-player').style.display='flex';
+  $('#reciter-name').textContent=r.name;
+  renderReciterChips();
+  let info=currentReciterInfo();
+  if(!info){
+    $('#reciter-status').textContent='…جارٍ التحميل';
+    try{ const cat=await fetchReciterCatalog(); info=cat && cat[r.id]; }catch(e){}
+    if(!info){ $('#reciter-status').textContent='تعذّر الاتصال — تحقّق من الإنترنت'; return; }
+  }
+  $('#reciter-status').textContent='';
+  playReciterSurah(info, idx);
 }
 /* زرّ اسم السورة داخل المشغّل: يفتح قائمة كل السور للاستماع */
 $('#reciter-sura-btn').addEventListener('click', async ()=>{
@@ -1521,7 +1594,7 @@ function applyWirdMode(){
   $('#wird-done-btn').style.display = daily?'':'none';
   $('#wird-h1').textContent = daily?'وِرد اليوم':'المصحف الكريم';
   if(daily){ renderWird(); if($('#mushaf-jump')) $('#mushaf-jump').classList.remove('show'); }
-  else { buildSuraSelect(); renderMushaf(); renderReciterChips(); }
+  else { buildSuraSelect(); renderMushaf(); }
 }
 
 function renderAmountChips(){
