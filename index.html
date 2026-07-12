@@ -1401,25 +1401,37 @@ $('#sura-overlay').addEventListener('click', e=>{ if(e.target.id==='sura-overlay
 const RECITERS=[
   {id:'shur',       name:'سعود الشريم',      exact:'سعود الشريم',   match:['الشريم']},
   {id:'minshawi',    name:'محمد المنشاوي',     exact:'محمد صديق المنشاوي', match:['المنشاوي']},
-  {id:'abdulbasit',  name:'عبد الباسط عبد الصمد', exact:'عبد الباسط عبد الصمد', match:['عبد الباسط']},
+  {id:'minshawi-mjwd', name:'المنشاوي (مجوّد)', exact:'محمد صديق المنشاوي', match:['المنشاوي'],
+    prefer:/مجود/, fallback:'https://server10.mp3quran.net/minsh_mjwd/'},
+  {id:'abdulbasit',  name:'عبد الباسط عبد الصمد', exact:'عبد الباسط عبد الصمد', match:['الباسط'],
+    prefer:/حفص.*مرتل/, fallback:'https://server7.mp3quran.net/basit/'},
   {id:'mhmd-lfkyh',  name:'محمد الفقيه اليمني', match:['الفقيه']},
   {id:'koshi',       name:'العيون الكوشي',     exact:'العيون الكوشي', match:['الكوشي']},
   {id:'maher',       name:'ماهر المعيقلي',     exact:'ماهر المعيقلي', match:['المعيقلي']},
   {id:'hzza',        name:'هزاع البلوشي',      exact:'هزاع البلوشي',  match:['البلوشي','هزاع']},
 ];
-/* اختيار القارئ الفرد (أقصر اسم = تجنّب التسجيلات المشتركة مثل «الشريم والسديس») */
+const normName = s => (s||'').replace(/\s+/g,'');
+/* اختيار القارئ الفرد (أقصر اسم = تجنّب التسجيلات المشتركة مثل «الشريم والسديس»)
+   المقارنة بلا مسافات لأنّ API يكتب بعض الأسماء «عبدالباسط» بلا فواصل */
 function findReciter(list, r){
-  if(r.exact){ const ex=list.find(x=> (x.name||'').trim()===r.exact); if(ex) return ex; }
-  const matches=list.filter(x=> r.match.some(m=> (x.name||'').includes(m)));
+  if(r.exact){ const ex=list.find(x=> normName(x.name)===normName(r.exact)); if(ex) return ex; }
+  const matches=list.filter(x=> r.match.some(m=> normName(x.name).includes(normName(m))));
   if(!matches.length) return null;
   matches.sort((a,b)=> (a.name||'').length-(b.name||'').length);
   return matches[0];
 }
-/* اختيار المصحف المرتّل الكامل (تجنّب المعلّم/المكرّر/المجوّد/الأجزاء) */
-function pickMoshaf(moshafs){
+/* اختيار المصحف: prefer يحدّد مصحفًا بعينه (مثل المجوّد)، وإلا المرتّل الكامل
+   (تجنّب المعلّم/المكرّر/المجوّد/الأجزاء) */
+function pickMoshaf(moshafs, prefer){
   if(!moshafs || !moshafs.length) return null;
-  const bad=/معلم|مكرر|تعليم|للأطفال|مجود|جزء|قصار/;
-  let cands=moshafs.filter(m=> !bad.test(m.name||''));
+  let cands;
+  if(prefer){
+    cands=moshafs.filter(m=> prefer.test(m.name||''));
+    if(!cands.length) return null; // المطلوب غير موجود — يُستعمل الرابط الاحتياطي
+  }else{
+    const bad=/معلم|مكرر|تعليم|للأطفال|مجود|جزء|قصار/;
+    cands=moshafs.filter(m=> !bad.test(m.name||''));
+  }
   if(!cands.length) cands=moshafs.slice();
   cands.sort((a,b)=> (parseInt(b.surah_total)||0)-(parseInt(a.surah_total)||0));
   return cands[0];
@@ -1438,8 +1450,9 @@ async function fetchReciterCatalog(){
       RECITERS.forEach(r=>{
         if(r.external) return;
         const found=findReciter(list, r);
-        const m=found && pickMoshaf(found.moshaf);
-        if(m && m.server){ map[r.id]={ server:m.server, name:found.name, moshaf:m.name }; }
+        const m=found && pickMoshaf(found.moshaf, r.prefer);
+        if(m && m.server){ map[r.id]={ server:m.server, name:r.name, moshaf:m.name }; }
+        else if(r.fallback){ map[r.id]={ server:r.fallback, name:r.name, moshaf:'' }; }
       });
       __reciterCatalog=map;
       return map;
