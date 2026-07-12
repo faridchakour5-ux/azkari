@@ -35,7 +35,7 @@
     --shadow-1:0 1px 2px rgba(58,53,46,.05), 0 4px 14px rgba(58,53,46,.05);
     --shadow-2:0 4px 14px rgba(47,158,68,.25);
     --tab-idle:#2F9E44; --tab-on:#C71585; --tab-on-bg:rgba(199,21,133,.10);
-    --qblue:#1D5FBF;
+    --qc-blue:#2166D6; --qc-blue2:#16509E; --qc-navy:#0B2C66;
   }
   :root[data-bg="beige"]{
     --bg:#F1E8D6; --group:#F1E8D6; --card:#F7EFDF; --card-2:#F7EFDF;
@@ -76,7 +76,7 @@
     --shadow-1:0 1px 3px rgba(0,0,0,.45), 0 5px 16px rgba(0,0,0,.35);
     --shadow-2:0 4px 14px rgba(0,0,0,.5);
     --tab-idle:#34C77B; --tab-on:#F06CB1; --tab-on-bg:rgba(240,108,177,.14);
-    --qblue:#6AA8FF;
+    --qc-blue:#78B0FF; --qc-blue2:#5E97F2; --qc-navy:#4C86E6;
     color-scheme:dark;
   }
 
@@ -355,8 +355,17 @@
   .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.3; text-align:justify;}
   body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
   body.qmaghribi .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
-  /* لون خطّ القرآن الأزرق (اختياري لورش وحفص) */
-  body.qblue .wird-text, body.qblue .wird-basmala, body.qblue .card.quran .txt{ color:var(--qblue); }
+  /* لون خطّ القرآن (اختياري لورش وحفص) — أربع درجات */
+  body.qc-blue  .wird-text, body.qc-blue  .wird-basmala, body.qc-blue  .card.quran .txt{ color:var(--qc-blue); }
+  body.qc-blue2 .wird-text, body.qc-blue2 .wird-basmala, body.qc-blue2 .card.quran .txt{ color:var(--qc-blue2); }
+  body.qc-navy  .wird-text, body.qc-navy  .wird-basmala, body.qc-navy  .card.quran .txt{ color:var(--qc-navy); }
+  /* منتقي ألوان خطّ القرآن */
+  .qcolor-swatches{display:flex; gap:10px; align-items:center;}
+  .qcolor-swatches button{border:0; background:transparent; padding:0; cursor:pointer; line-height:0;}
+  .qcolor-swatches button i{display:block; width:26px; height:26px; border-radius:50%;
+    border:2px solid var(--sep); box-shadow:0 1px 3px rgba(0,0,0,.15); transition:transform .13s ease;}
+  .qcolor-swatches button.on i{border-color:var(--accent); border-width:3px; transform:scale(1.12);}
+  .qcolor-swatches button:active i{transform:scale(.92);}
   .qzoom{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 16px 0;}
   .qzoom button{width:42px; height:42px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--accent);
     font-weight:800; font-size:18px; line-height:1; box-shadow:var(--shadow-1); transition:transform .13s ease;}
@@ -535,9 +544,11 @@
       </div>
     </div>
     <div class="row"><span class="k">لون خطّ القرآن</span>
-      <div class="miniseg" id="qcolor-seg">
-        <button data-r="normal" class="on">عادي</button>
-        <button data-r="blue">أزرق</button>
+      <div class="qcolor-swatches" id="qcolor-seg">
+        <button data-r="normal" class="on" title="عادي"><i style="background:var(--text)"></i></button>
+        <button data-r="blue"  title="أزرق"><i style="background:var(--qc-blue)"></i></button>
+        <button data-r="blue2" title="أزرق أقل غموقاً"><i style="background:var(--qc-blue2)"></i></button>
+        <button data-r="navy"  title="أزرق غامق"><i style="background:var(--qc-navy)"></i></button>
       </div>
     </div>
   </div>
@@ -692,7 +703,11 @@ function applyHafsFont(){
     : 'رواية حفص عن عاصم بخط النسخ — المعتمدة في أغلب العالم الإسلامي.';
 }
 function applyQuranColor(){
-  document.body.classList.toggle('qblue', (settings.quranColor||'normal')==='blue');
+  const c = settings.quranColor||'normal';
+  document.body.classList.remove('qc-blue','qc-blue2','qc-navy');
+  if(c==='blue')  document.body.classList.add('qc-blue');
+  else if(c==='blue2') document.body.classList.add('qc-blue2');
+  else if(c==='navy')  document.body.classList.add('qc-navy');
 }
 const Q_MIN=0.8, Q_MAX=2.2;
 function applyQuranScale(){
