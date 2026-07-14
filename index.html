@@ -123,6 +123,8 @@
     font:inherit; font-weight:700; font-size:14px; padding:9px 10px; box-shadow:var(--shadow-1);}
   .az-scope button.on{border-color:transparent;}
   .az-scope button.on{background:var(--accent); color:#fff;}
+  .az-scope .scope-l1{font-size:16px; font-weight:800; line-height:1.5;}
+  .az-scope .scope-l2{font-size:12.5px; font-weight:600; opacity:.92; line-height:1.5;}
 
   /* Segmented control */
   .seg{display:flex; background:var(--fill-2); border-radius:11px; padding:2px; margin:14px 20px 6px; position:relative;
@@ -444,7 +446,7 @@
   <div id="streak-row" class="streakrow"></div>
   <div class="seg" id="time-seg"></div>
   <div class="az-scope" id="az-scope" style="display:none">
-    <button data-scope="sahih" class="on">القرآن<br>والبخاري ومسلم</button>
+    <button data-scope="sahih" class="on"><span class="scope-l1">القرآن</span><br><span class="scope-l2">والبخاري ومسلم</span></button>
     <button data-scope="all">جميع الأذكار</button>
   </div>
   <div class="progressbar"><i id="pg-fill"></i></div>
