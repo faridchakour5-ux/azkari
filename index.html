@@ -279,13 +279,6 @@
   .prayerbar .t.cur .vl,.prayerbar .t.cur .nm{color:var(--accent);}
   .locbtn{display:block; margin:6px 16px 0; border:0; background:var(--card); color:var(--accent); font:inherit; font-weight:600; font-size:14px; padding:11px; border-radius:14px; width:calc(100% - 32px);}
 
-  /* streak */
-  .streakrow{margin:10px 16px 0; background:var(--card); border-radius:16px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
-    border:1px solid var(--line); box-shadow:var(--shadow-1);}
-  .streakrow .sk{display:flex; align-items:center; gap:8px;}
-  .streakrow .sk .fire{font-size:20px;}
-  .streakrow .sk b{font-size:18px; font-weight:800;}
-  .streakrow .sk span{font-size:13px; color:var(--text-2);}
   .week{display:flex; gap:6px;}
   .week .d{width:24px; height:24px; border-radius:50%; background:var(--fill); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--text-2);}
   .week .d.done{background:var(--accent); color:#fff;}
@@ -442,7 +435,6 @@
   </div>
   <button class="locbtn" id="loc-btn">📍 تفعيل مواقيت الصلاة حسب موقعك</button>
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
-  <div id="streak-row" class="streakrow"></div>
   <div class="seg" id="time-seg"></div>
   <div class="az-scope" id="az-scope" style="display:none">
     <button data-scope="sahih" class="on"><span class="scope-l1">القرآن</span><br><span class="scope-l2">والبخاري ومسلم</span></button>
@@ -1719,13 +1711,9 @@ function markDoneToday(){
   s.last=t; s.days[t]=1;
   // prune to last 14 days
   const keep={}; for(let k in s.days){ if(dayDiff(k,t)<14) keep[k]=1; } s.days=keep;
-  store.set('az_streak',s); renderStreak();
+  store.set('az_streak',s);
 }
 function markWirdDoneToday(){ markDoneToday(); }
-function renderStreak(){
-  const s=streakData(); const row=$('#streak-row');
-  row.innerHTML='<div class="sk"><span class="fire">🔥</span><div><b>'+(s.count||0)+'</b> <span>'+(s.count===1?'يوم':'يوماً متتابعاً')+'</span></div></div>';
-}
 
 /* ================= PRAYER TIMES (offline via adhan) ================= */
 const PRAYERS=[['fajr','الفجر'],['sunrise','الشروق'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
@@ -1785,7 +1773,7 @@ applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
 syncSeg('#riwaya-seg','riwaya'); syncSeg('#hafsfont-seg','hafsFont'); syncSeg('#qcolor-seg','quranColor'); syncSeg('#font-seg','font'); renderSwatches();
 applyHafsFont(); applyQuranColor();
 try{ renderAzkar(); }catch(e){} renderChips(); paintTasbih();
-renderStreak(); try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
+try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
 try{ renderWirdKpi(); $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m===wirdMode())); }catch(e){}
 
 /* ================= BACKUP / RESTORE ================= */
