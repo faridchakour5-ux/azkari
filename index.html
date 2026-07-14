@@ -438,7 +438,6 @@
 <section id="s-azkar" class="screen active">
   <div class="head">
     <h1 id="az-title">أذكار الصباح</h1>
-    <div class="sub" id="az-sub">حصِّن نفسك بذكر الله</div>
     <div class="az-source" id="az-source"></div>
   </div>
   <button class="locbtn" id="loc-btn">📍 تفعيل مواقيت الصلاة حسب موقعك</button>
@@ -777,13 +776,13 @@ function saveSettings(){ store.set('az_settings', settings); }
 
 /* ---------- AZKAR screen ---------- */
 const CATS = [
-  {id:'morning',  name:'الصباح',    title:'أذكار الصباح',    sub:'من بعد الفجر إلى الضحى'},
-  {id:'evening',  name:'المساء',    title:'أذكار المساء',    sub:'من بعد العصر إلى المغرب'},
-  {id:'sleep',    name:'النوم',     title:'أذكار النوم',     sub:'تُقال عند الأخذ بالمضجع'},
-  {id:'wakeup',   name:'الاستيقاظ', title:'أذكار الاستيقاظ', sub:'تُقال عند اليقظة من النوم'},
-  {id:'istiqama', name:'الاستقامة', title:'أدعية الاستقامة', sub:'لتثبيت القلب على الدين'},
-  {id:'travel',   name:'السفر',     title:'أذكار السفر',     sub:'تُقال في السفر وعند الرجوع'},
-  {id:'riding',   name:'الركوب',    title:'أذكار الركوب',    sub:'تُقال عند ركوب الدابّة أو المركبة'},
+  {id:'morning',  name:'الصباح',    title:'أذكار الصباح'},
+  {id:'evening',  name:'المساء',    title:'أذكار المساء'},
+  {id:'sleep',    name:'النوم',     title:'أذكار النوم'},
+  {id:'wakeup',   name:'الاستيقاظ', title:'أذكار الاستيقاظ'},
+  {id:'istiqama', name:'الاستقامة', title:'أدعية الاستقامة'},
+  {id:'travel',   name:'السفر',     title:'أذكار السفر'},
+  {id:'riding',   name:'الركوب',    title:'أذكار الركوب'},
 ];
 const catMeta = id => CATS.find(c=>c.id===id) || CATS[0];
 let currentTab = (new Date().getHours()>=4 && new Date().getHours()<16) ? 'morning':'evening';
@@ -833,7 +832,6 @@ function renderAzkar(){
   const wrap = $('#az-list'); wrap.innerHTML='';
   const meta = catMeta(currentTab);
   $('#az-title').textContent = meta.title;
-  $('#az-sub').textContent = meta.sub;
   const isME = (currentTab==='morning'||currentTab==='evening');
   const scope = settings.azkarScope||'sahih';
   $('#az-scope').style.display = isME ? '' : 'none';
@@ -1726,15 +1724,7 @@ function markDoneToday(){
 function markWirdDoneToday(){ markDoneToday(); }
 function renderStreak(){
   const s=streakData(); const row=$('#streak-row');
-  const names=['أحد','إثن','ثلا','أرب','خمي','جمع','سبت'];
-  let week='';
-  const now=new Date();
-  for(let off=6;off>=0;off--){
-    const d=new Date(now); d.setDate(now.getDate()-off);
-    const key=d.toISOString().slice(0,10); const done=s.days&&s.days[key];
-    week+='<div class="d'+(done?' done':'')+'">'+names[d.getDay()]+'</div>';
-  }
-  row.innerHTML='<div class="sk"><span class="fire">🔥</span><div><b>'+(s.count||0)+'</b> <span>'+(s.count===1?'يوم':'يوماً متتابعاً')+'</span></div></div><div class="week">'+week+'</div>';
+  row.innerHTML='<div class="sk"><span class="fire">🔥</span><div><b>'+(s.count||0)+'</b> <span>'+(s.count===1?'يوم':'يوماً متتابعاً')+'</span></div></div>';
 }
 
 /* ================= PRAYER TIMES (offline via adhan) ================= */
