@@ -564,9 +564,9 @@
     </div>
     <div class="row"><span class="k">لون خطّ القرآن</span>
       <div class="qcolor-swatches" id="qcolor-seg">
-        <button data-r="normal" class="on" title="عادي"><i style="background:var(--text)"></i></button>
+        <button data-r="normal" title="عادي"><i style="background:var(--text)"></i></button>
         <button data-r="blue"  title="أزرق"><i style="background:var(--qc-blue)"></i></button>
-        <button data-r="blue2" title="أزرق أقل غموقاً"><i style="background:var(--qc-blue2)"></i></button>
+        <button data-r="blue2" class="on" title="أزرق أقل غموقاً"><i style="background:var(--qc-blue2)"></i></button>
         <button data-r="navy"  title="أزرق غامق"><i style="background:var(--qc-navy)"></i></button>
       </div>
     </div>
@@ -693,7 +693,7 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'navy' };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2' };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
@@ -703,6 +703,8 @@ if(!settings.__d3){ settings.__d3=1; settings.quranColor='navy'; store.set('az_s
 if(!settings.__d4){ settings.__d4=1; settings.hafsFont='naskh'; store.set('az_settings', settings); }
 // ترقية: تفعيل تذكير الأذكار والصلاة على النبي ﷺ افتراضيًّا
 if(!settings.__d5){ settings.__d5=1; settings.notif=true; settings.salat=true; store.set('az_settings', settings); }
+// ترقية: الأزرق المتوسّط (بين الفاتح والغامق) افتراضيًّا لخطّ القرآن
+if(!settings.__d6){ settings.__d6=1; settings.quranColor='blue2'; store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
