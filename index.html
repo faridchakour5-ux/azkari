@@ -629,7 +629,7 @@
     </div>
     <div class="btn-row" id="notif-test">تجربة الإشعار الآن</div>
   </div>
-  <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا (7 · 10 · 13 · 16 · 19 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
+  <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك. تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا (7 · 10 · 13 · 16 · 19 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
 
   <div class="gtitle">النسخ الاحتياطي</div>
   <div class="group">
@@ -1030,6 +1030,11 @@ const AZKAR_SLOTS=[
   {h:22, title:'حان وقت أذكار النوم 🌙',  body:['قبل أن تنام، اختم يومك بأذكار النوم']},
 ];
 const SALAT_HOURS=[7,10,13,16,19,22]; // 6 مرّات متفرّقة في اليوم
+/* تذكير بقراءة القرآن مرّتين يوميًّا — يتوقّف تلقائيًّا إن كان قد قرأ اليوم */
+const QURAN_READ_SLOTS=[
+  {h:12, title:'📖 لا تنسَ وِردك من القرآن', body:['ولو ٨ أسطر فقط تكفي — اقرأ وِردك اليوم']},
+  {h:20, title:'📖 تذكير بقراءة القرآن',     body:['خصّص دقائق لثمانية أسطر من القرآن قبل أن ينتهي يومك']},
+];
 function scheduleChecks(){
   if(!window.__salatToastTimer){
     window.__salatToastTimer = setInterval(()=>{
@@ -1052,6 +1057,14 @@ function scheduleChecks(){
       if(!sf[h]){ sf[h]=1; store.set('az_salatfired_'+todayKey(), sf);
         fireNotification('صَلِّ على الحبيب ﷺ', ['اللهم صلِّ وسلّم على سيّدنا محمد ﷺ']);
         showSalatToast(); }
+    }
+    if(settings.notif && m<10 && !qreadToday()){
+      const qslot = QURAN_READ_SLOTS.find(s=>s.h===h);
+      if(qslot){
+        const fired = store.get('az_qreadfired_'+todayKey(), {});
+        if(!fired[h]){ fired[h]=1; store.set('az_qreadfired_'+todayKey(),fired);
+          fireNotification(qslot.title, qslot.body); }
+      }
     }
   };
   check();
