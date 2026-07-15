@@ -629,7 +629,7 @@
     </div>
     <div class="btn-row" id="notif-test">تجربة الإشعار الآن</div>
   </div>
-  <div class="gnote">3 أسطر للذكر كل 4 ساعات، من العاشرة صباحاً حتى العاشرة ليلاً (10 · 14 · 18 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
+  <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا (7 · 10 · 13 · 16 · 19 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
 
   <div class="gtitle">النسخ الاحتياطي</div>
   <div class="group">
@@ -970,7 +970,7 @@ notifToggle.addEventListener('change', async ()=>{
     if(p!=='granted'){ notifToggle.checked=false; settings.notif=false; saveSettings();
       alert('لتفعيل التذكير، اسمح بالإشعارات من إعدادات المتصفح.'); return; }
     settings.notif=true; saveSettings(); scheduleChecks();
-    fireNotification('تم تفعيل التذكير ✓', ['ستصلك 3 أسطر للذكر كل 4 ساعات','من العاشرة صباحاً حتى العاشرة ليلاً']);
+    fireNotification('تم تفعيل التذكير ✓', ['ستصلك تذكيرات بأذكار الصباح والمساء والنوم','في مواعيدها كل يوم']);
   } else { settings.notif=false; saveSettings(); }
 });
 $('#notif-test').addEventListener('click', async ()=>{
@@ -1016,9 +1016,14 @@ function fireNotification(title, lines){
   }
 }
 
-/* client-side scheduler: fire at 10/14/18/22 once per slot per day (best effort while open) */
-const SLOTS=[10,14,18,22];
-const SALAT_START=7, SALAT_END=23;
+/* client-side scheduler: تذكير بأذكار الصباح/المساء/النوم + 6 تذكيرات متفرّقة بالصلاة على النبي ﷺ
+   (أفضل جهد أثناء فتح التطبيق أو تشغيله في الخلفية) */
+const AZKAR_SLOTS=[
+  {h:7,  title:'حان وقت أذكار الصباح 🌅', body:['ابدأ يومك بأذكار الصباح، تحصينًا وبركة']},
+  {h:17, title:'حان وقت أذكار المساء 🌇', body:['من بعد العصر إلى المغرب — لا تنسَ أذكار المساء']},
+  {h:22, title:'حان وقت أذكار النوم 🌙',  body:['قبل أن تنام، اختم يومك بأذكار النوم']},
+];
+const SALAT_HOURS=[7,10,13,16,19,22]; // 6 مرّات متفرّقة في اليوم
 function scheduleChecks(){
   if(!window.__salatToastTimer){
     window.__salatToastTimer = setInterval(()=>{
@@ -1028,12 +1033,15 @@ function scheduleChecks(){
   if(window.__azTimer) return;
   const check=()=>{
     const now=new Date(), h=now.getHours(), m=now.getMinutes();
-    if(settings.notif && SLOTS.includes(h) && m<10){
-      const fired = store.get('az_fired_'+todayKey(), {});
-      if(!fired[h]){ fired[h]=1; store.set('az_fired_'+todayKey(),fired);
-        fireNotification('وقت الذكر 🤍', pickThree()); }
+    if(settings.notif && m<10){
+      const slot = AZKAR_SLOTS.find(s=>s.h===h);
+      if(slot){
+        const fired = store.get('az_fired_'+todayKey(), {});
+        if(!fired[h]){ fired[h]=1; store.set('az_fired_'+todayKey(),fired);
+          fireNotification(slot.title, slot.body); }
+      }
     }
-    if(settings.salat && h>=SALAT_START && h<=SALAT_END && m<5){
+    if(settings.salat && SALAT_HOURS.includes(h) && m<5){
       const sf = store.get('az_salatfired_'+todayKey(), {});
       if(!sf[h]){ sf[h]=1; store.set('az_salatfired_'+todayKey(), sf);
         fireNotification('صَلِّ على الحبيب ﷺ', ['اللهم صلِّ وسلّم على سيّدنا محمد ﷺ']);
