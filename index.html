@@ -1500,8 +1500,38 @@ function playReciterSurah(info, si){
   audio.src=info.server+pad3(surahNum)+'.mp3';
   $('#reciter-sura').textContent='سورة '+WIRD.sur[si].n;
   markListenActive();
+  updateMediaSession(info.name, WIRD.sur[si].n);
   audio.play().then(()=>{ $('#reciter-play').textContent='❚❚'; }).catch(()=>{
     $('#reciter-status').textContent='اضغط تشغيل يدويًّا';
+  });
+}
+/* ---- Media Session: يبقي الصوت شغّالًا وقفل الشاشة مضاء بأزرار تحكّم في شريط الإشعارات ---- */
+function setupMediaSession(){
+  if(!('mediaSession' in navigator)) return;
+  const audio=$('#reciter-audio');
+  const set=(action,fn)=>{ try{ navigator.mediaSession.setActionHandler(action, fn); }catch(e){} };
+  set('play', ()=> audio.play().catch(()=>{}));
+  set('pause', ()=> audio.pause());
+  set('stop', ()=> audio.pause());
+  set('previoustrack', ()=>{
+    const info=currentReciterInfo();
+    if(info && __audioSura!=null && __audioSura>0) playReciterSurah(info, __audioSura-1);
+  });
+  set('nexttrack', ()=>{
+    const info=currentReciterInfo();
+    if(info && __audioSura!=null && WIRD && __audioSura+1<WIRD.sur.length) playReciterSurah(info, __audioSura+1);
+  });
+}
+function updateMediaSession(reciterName, surahName){
+  if(!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: 'سورة '+surahName,
+    artist: reciterName,
+    album: 'القرآن الكريم — صلاتي',
+    artwork: [
+      {src:'icons/icon-192.png', sizes:'192x192', type:'image/png'},
+      {src:'icons/icon-512.png', sizes:'512x512', type:'image/png'},
+    ]
   });
 }
 /* ---- صفحة الاستماع المستقلّة ---- */
@@ -1580,8 +1610,9 @@ $('#reciter-audio').addEventListener('ended', ()=>{
     playReciterSurah(info, __audioSura+1);
   }
 });
-$('#reciter-audio').addEventListener('pause', ()=>{ $('#reciter-play').textContent='▶'; });
-$('#reciter-audio').addEventListener('playing', ()=>{ $('#reciter-play').textContent='❚❚'; });
+$('#reciter-audio').addEventListener('pause', ()=>{ $('#reciter-play').textContent='▶'; if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; });
+$('#reciter-audio').addEventListener('playing', ()=>{ $('#reciter-play').textContent='❚❚'; if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; });
+setupMediaSession();
 let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){
   if(__progScroll) return;
