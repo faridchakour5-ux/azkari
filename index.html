@@ -1410,20 +1410,29 @@ const RECITERS=[
   {id:'mhmd-lfkyh',  name:'محمد الفقيه اليمني', match:['الفقيه']},
   {id:'koshi',       name:'العيون الكوشي',     exact:'العيون الكوشي', match:['الكوشي']},
   {id:'maher',       name:'ماهر المعيقلي',     exact:'ماهر المعيقلي', match:['المعيقلي']},
+  {id:'jaleel',      name:'خالد الجليل',       exact:'خالد الجليل',   match:['الجليل']},
   {id:'hzza',        name:'هزاع البلوشي',      exact:'هزاع البلوشي',  match:['البلوشي','هزاع']},
 ];
 const normName = s => (s||'').replace(/\s+/g,'');
+/* هل يملك القارئ مصحفًا كاملًا (114 سورة)؟ لتفادي التسجيلات الجزئية (جزء عمّ...) */
+function moshafFull(m){ return (parseInt(m && m.surah_total)||0) >= 114; }
+function reciterHasFull(x){ return (x && x.moshaf || []).some(moshafFull); }
 /* اختيار القارئ الفرد (أقصر اسم = تجنّب التسجيلات المشتركة مثل «الشريم والسديس»)
    المقارنة بلا مسافات لأنّ API يكتب بعض الأسماء «عبدالباسط» بلا فواصل */
 function findReciter(list, r){
   if(r.exact){ const ex=list.find(x=> normName(x.name)===normName(r.exact)); if(ex) return ex; }
   const matches=list.filter(x=> r.match.some(m=> normName(x.name).includes(normName(m))));
   if(!matches.length) return null;
-  matches.sort((a,b)=> (a.name||'').length-(b.name||'').length);
+  // فضّل من يملك مصحفًا كاملًا، ثم الأقصر اسمًا
+  matches.sort((a,b)=>{
+    const fa=reciterHasFull(a)?0:1, fb=reciterHasFull(b)?0:1;
+    if(fa!==fb) return fa-fb;
+    return (a.name||'').length-(b.name||'').length;
+  });
   return matches[0];
 }
 /* اختيار المصحف: prefer يحدّد مصحفًا بعينه (مثل المجوّد)، وإلا المرتّل الكامل
-   (تجنّب المعلّم/المكرّر/المجوّد/الأجزاء) */
+   (تجنّب المعلّم/المكرّر/المجوّد/الأجزاء — ونُلزم أن يكون كاملًا 114 سورة) */
 function pickMoshaf(moshafs, prefer){
   if(!moshafs || !moshafs.length) return null;
   let cands;
@@ -1433,6 +1442,9 @@ function pickMoshaf(moshafs, prefer){
   }else{
     const bad=/معلم|مكرر|تعليم|للأطفال|مجود|جزء|قصار/;
     cands=moshafs.filter(m=> !bad.test(m.name||''));
+    // ألزِم المصحف الكامل إن وُجد، حتى لا تُختار الأجزاء التي لا تشغّل السور الكبيرة
+    const full=cands.filter(moshafFull);
+    if(full.length) cands=full;
   }
   if(!cands.length) cands=moshafs.slice();
   cands.sort((a,b)=> (parseInt(b.surah_total)||0)-(parseInt(a.surah_total)||0));
