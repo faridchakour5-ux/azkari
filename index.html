@@ -247,7 +247,9 @@
   .sw input:checked + .track{background:var(--accent);}
   .sw input:checked + .track + .knob{transform:translateX(-20px);}
   html[dir="rtl"] .sw input:checked + .track + .knob{transform:translateX(-20px);}
-  .btn-row{padding:13px 16px; color:var(--accent); font-size:16px; font-weight:600;}
+  .btn-row{padding:13px 16px; color:var(--accent); font-size:16px; font-weight:600; cursor:pointer;
+    -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; transition:background-color .15s ease;}
+  .btn-row:active{background:var(--fill-2); border-radius:12px;}
 
   /* Tab bar */
   .tabbar{position:fixed; bottom:0; left:0; right:0; display:flex;
@@ -1044,9 +1046,12 @@ notifToggle.addEventListener('change', async ()=>{
   } else { settings.notif=false; saveSettings(); }
 });
 $('#notif-test').addEventListener('click', async ()=>{
-  const p = await Notification.requestPermission();
-  if(p!=='granted'){ alert('اسمح بالإشعارات أولاً.'); return; }
+  vibrate(6);
+  let perm = ('Notification' in window) ? Notification.permission : 'denied';
+  if(perm==='default'){ try{ perm = await Notification.requestPermission(); }catch(e){} }
+  if(perm!=='granted'){ showToast('الإشعارات غير مسموح بها — فعّلها من إعدادات الهاتف للتطبيق', 3800); return; }
   fireNotification('وقت الذكر 🤍', pickThree());
+  showToast('تمّ إرسال إشعار تجريبي ✓ — قد لا يظهر ما دام التطبيق مفتوحًا؛ صغّره لتراه', 4000);
 });
 
 const salatToggle = $('#salat-toggle');
