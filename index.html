@@ -355,6 +355,18 @@
     opacity:0; transform:translateY(16px); pointer-events:none; transition:opacity .3s ease, transform .3s ease;
     font-family:'AmiriQuran',serif;}
   .salat-toast.show{opacity:1; transform:translateY(0);}
+  /* شريط الأذان الجاري */
+  .adhan-banner{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
+    z-index:85; background:var(--accent); color:#fff; display:none; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 16px; border-radius:16px; box-shadow:var(--shadow-2); max-width:480px; margin:0 auto;}
+  .adhan-banner.show{display:flex; animation:abIn .3s ease;}
+  @keyframes abIn{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
+  .adhan-banner .ab-txt{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .adhan-banner .ab-txt b{font-size:16px; font-weight:800;}
+  .adhan-banner .ab-txt span{font-size:12.5px; opacity:.9;}
+  .adhan-stop{flex:0 0 auto; border:0; background:rgba(255,255,255,.22); color:#fff; font:inherit; font-weight:700;
+    font-size:13px; padding:8px 14px; border-radius:12px;}
+  .adhan-stop:active{transform:scale(.95);}
   .wird-amount{display:flex; gap:8px; overflow-x:auto; padding:10px 16px 4px; scrollbar-width:none;}
   .wird-amount::-webkit-scrollbar{display:none;}
   .wird-amount button{flex:0 0 auto; border:0; background:var(--card); color:var(--text); font:inherit; font-weight:600; font-size:14px; padding:8px 14px; border-radius:18px;}
@@ -542,6 +554,12 @@
 
 <div class="salat-toast" id="salat-toast">اللهم صلِّ وسلّم على سيّدنا محمد ﷺ</div>
 
+<audio id="adhan-audio" preload="none"></audio>
+<div class="adhan-banner" id="adhan-banner">
+  <div class="ab-txt"><b id="adhan-banner-title">🕌 الأذان</b><span id="adhan-banner-sub"></span></div>
+  <button id="adhan-stop" class="adhan-stop">إيقاف ✕</button>
+</div>
+
 <!-- ===== المسبحة ===== -->
 <section id="s-tasbih" class="screen">
   <div class="head"><h1>المسبحة</h1><div class="sub">اضغط في أي مكان للعدّ</div></div>
@@ -654,9 +672,18 @@
     <div class="row"><span class="k">تذكير بالصلاة على النبي ﷺ</span>
       <label class="sw"><input type="checkbox" id="salat-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
+    <div class="row"><span class="k">🕌 رفع الأذان عند وقت الصلاة</span>
+      <label class="sw"><input type="checkbox" id="adhan-toggle"><span class="track"></span><span class="knob"></span></label>
+    </div>
+    <div class="row"><span class="k">صوت المؤذّن</span>
+      <div class="miniseg" id="muezzin-seg">
+        <button data-r="wadee" class="on">وديع اليمني</button>
+      </div>
+    </div>
+    <div class="btn-row" id="adhan-test">🔊 تجربة الأذان الآن</div>
     <div class="btn-row" id="notif-test">تجربة الإشعار الآن</div>
   </div>
-  <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك، وتذكير قبل كل أذان بـ10 دقائق (يحتاج تفعيل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا (7 · 10 · 13 · 16 · 19 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
+  <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك، وتذكير قبل كل أذان بـ10 دقائق. رفع الأذان بصوت المؤذّن عند دخول وقت كل صلاة (يحتاج تفعيل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار، ويعمل بلا إنترنت). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا (7 · 10 · 13 · 16 · 19 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
 
   <div class="gtitle">النسخ الاحتياطي</div>
   <div class="group">
@@ -720,7 +747,7 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'mhmd-lfkyh', quranColor:'blue2' };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', adhan:true, muezzin:'wadee' };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
@@ -732,8 +759,8 @@ if(!settings.__d4){ settings.__d4=1; settings.hafsFont='naskh'; store.set('az_se
 if(!settings.__d5){ settings.__d5=1; settings.notif=true; settings.salat=true; store.set('az_settings', settings); }
 // ترقية: الأزرق المتوسّط (بين الفاتح والغامق) افتراضيًّا لخطّ القرآن
 if(!settings.__d6){ settings.__d6=1; settings.quranColor='blue2'; store.set('az_settings', settings); }
-// ترقية: القارئ اليمني افتراضيًّا ضمن قائمة أفضل 5 قرّاء
-if(!settings.__d7){ settings.__d7=1; settings.reciter='mhmd-lfkyh'; store.set('az_settings', settings); }
+// ترقية: تفعيل الأذان افتراضيًّا بصوت وديع اليمني
+if(!settings.__d8){ settings.__d8=1; settings.adhan=true; settings.muezzin='wadee'; store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
@@ -1029,6 +1056,31 @@ salatToggle.addEventListener('change', async ()=>{
   } else { settings.salat=false; saveSettings(); }
 });
 
+/* الأذان: تبديل التفعيل + اختيار المؤذّن + تجربة */
+const adhanToggle = $('#adhan-toggle');
+if(adhanToggle){
+  adhanToggle.checked = settings.adhan;
+  adhanToggle.addEventListener('change', async ()=>{
+    settings.adhan = adhanToggle.checked; saveSettings();
+    if(adhanToggle.checked){
+      scheduleChecks();
+      try{ await Notification.requestPermission(); }catch(e){}
+      if(!geoStore()) showToast('فعّل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار ليعمل الأذان', 4000);
+    }
+  });
+}
+$('#muezzin-seg') && $$('#muezzin-seg button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    $$('#muezzin-seg button').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on'); settings.muezzin=btn.dataset.r; saveSettings(); vibrate(6);
+  });
+});
+$('#adhan-test') && $('#adhan-test').addEventListener('click', ()=>{
+  const audio=$('#adhan-audio');
+  if(audio && !audio.paused){ stopAdhan(); return; }
+  playAdhan('(تجربة)');
+});
+
 /* notification content pool (short, both riwayat-safe) */
 const POOL = [
   'سبحان الله وبحمده، سبحان الله العظيم','لا إله إلا الله وحده لا شريك له',
@@ -1043,12 +1095,13 @@ function pickThree(){
 }
 function fireNotification(title, lines, data){
   const body = lines.join('\n');
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
   if(navigator.serviceWorker && navigator.serviceWorker.controller){
     navigator.serviceWorker.ready.then(reg=> reg.showNotification(title,{
       body, dir:'rtl', lang:'ar', icon:'icons/icon-192.png', badge:'icons/icon-192.png',
       tag:'azkar-reminder', renotify:true, vibrate:[40,60,40], data:data||null
-    }));
-  } else if('Notification' in window && Notification.permission==='granted'){
+    })).catch(()=>{});
+  } else {
     const n=new Notification(title,{ body, dir:'rtl', lang:'ar', icon:'icons/icon-192.png' });
     if(data) n.onclick=()=>{ window.focus(); applyNotifNavigation(data); n.close(); };
   }
@@ -1132,6 +1185,7 @@ function scheduleChecks(){
       }
     }
     if(settings.notif) checkPrayerReminder(now);
+    if(settings.adhan) checkAdhan(now);
   };
   check();
   window.__azTimer = setInterval(check, 60*1000);
@@ -1153,6 +1207,47 @@ function checkPrayerReminder(now){
     }
   });
   if(changed) store.set('az_prayerfired_'+todayKey(), fired);
+}
+/* ==================== الأذان عند وقت الصلاة ==================== */
+const MUEZZINS = {
+  wadee: { name:'الشيخ وديع اليمني', src:'audio/adhan-wadee.mp3' }
+};
+function muezzinSrc(){ const m=MUEZZINS[settings.muezzin]||MUEZZINS.wadee; return m.src; }
+function playAdhan(prayerName){
+  const audio=$('#adhan-audio'); if(!audio) return;
+  audio.src=muezzinSrc();
+  const banner=$('#adhan-banner');
+  if(banner){
+    $('#adhan-banner-title').textContent='🕌 أذان '+(prayerName||'الصلاة');
+    $('#adhan-banner-sub').textContent=(MUEZZINS[settings.muezzin]||MUEZZINS.wadee).name;
+    banner.classList.add('show');
+  }
+  vibrate([80,60,80]);
+  audio.play().catch(()=>{ /* في حال منع التشغيل التلقائي، يُظهر الشريط مع إشعار */ });
+  fireNotification('🕌 حان وقت صلاة '+(prayerName||''), ['الله أكبر، الله أكبر']);
+}
+function stopAdhan(){
+  const audio=$('#adhan-audio'); if(audio){ audio.pause(); audio.currentTime=0; }
+  const banner=$('#adhan-banner'); if(banner) banner.classList.remove('show');
+}
+$('#adhan-stop') && $('#adhan-stop').addEventListener('click', stopAdhan);
+$('#adhan-audio') && $('#adhan-audio').addEventListener('ended', ()=>{ const b=$('#adhan-banner'); if(b) b.classList.remove('show'); });
+function checkAdhan(now){
+  const g=geoStore(); if(!g) return;
+  const pt=computePrayers(g.lat,g.lng); if(!pt) return;
+  const list=[['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
+  const fired=store.get('az_adhanfired_'+todayKey(), {});
+  let changed=false;
+  list.forEach(([k,nm])=>{
+    const t=pt[k]; if(!t) return;
+    const diffMin=(t-now)/60000;
+    // يُرفع الأذان في الدقيقة التي يدخل فيها الوقت تمامًا
+    if(diffMin<=0 && diffMin>-1 && !fired[k]){
+      fired[k]=1; changed=true;
+      playAdhan(nm);
+    }
+  });
+  if(changed) store.set('az_adhanfired_'+todayKey(), fired);
 }
 let __toastT=null;
 function showToast(msg, ms){
