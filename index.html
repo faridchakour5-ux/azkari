@@ -396,6 +396,17 @@
   .mushaf-jump .chev{font-size:12px; color:var(--text-3);}
   .mushaf-jump:active{transform:translateX(-50%) scale(.96);}
 
+  /* تكبير/تصغير خطّ القرآن العائم — يظهر أثناء القراءة عند الرجوع للأعلى، كزرّ السورة */
+  .qzoom-float{position:fixed; top:calc(env(safe-area-inset-top) + 10px); right:16px;
+    z-index:60; display:flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--card);
+    box-shadow:var(--shadow-2); border-radius:20px; padding:6px 10px; opacity:0; pointer-events:none;
+    transform:translateY(-8px); transition:opacity .2s ease, transform .2s ease;}
+  .qzoom-float.show{opacity:1; pointer-events:auto; transform:translateY(0);}
+  .qzoom-float button{width:30px; height:30px; border:1px solid var(--line); border-radius:9px; background:var(--fill-2);
+    color:var(--accent); font-weight:800; font-size:14px; line-height:1;}
+  .qzoom-float button:active{transform:scale(.92);}
+  .qzoom-float .qval{min-width:34px; text-align:center; color:var(--text-2); font-size:11.5px; font-weight:700;}
+
   /* قائمة اختيار السورة (ورقة سفلية) */
   .sura-overlay{position:fixed; inset:0; z-index:90; background:rgba(0,0,0,.45);
     display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .2s ease;}
@@ -502,6 +513,12 @@
 <button class="mushaf-jump" id="mushaf-jump" aria-label="الانتقال إلى سورة">
   <span id="mushaf-jump-name">الفاتحة</span><span class="chev">⌄</span>
 </button>
+
+<div class="qzoom-float" id="q-zoom-float" title="تكبير خط القرآن">
+  <button id="q-minus-float" aria-label="تصغير الخط">A−</button>
+  <span class="qval" id="q-zoom-val-float">100%</span>
+  <button id="q-plus-float" aria-label="تكبير الخط">A+</button>
+</div>
 
 <div class="sura-overlay" id="sura-overlay">
   <div class="sura-sheet">
@@ -744,7 +761,9 @@ const Q_MIN=0.8, Q_MAX=2.2;
 function applyQuranScale(){
   let q=parseFloat(settings.quranScale)||1; q=Math.min(Q_MAX,Math.max(Q_MIN,q));
   document.documentElement.style.setProperty('--qscale', q);
-  const v=$('#q-zoom-val'); if(v) v.textContent=Math.round(q*100)+'%';
+  const pct=Math.round(q*100)+'%';
+  const v=$('#q-zoom-val'); if(v) v.textContent=pct;
+  const vf=$('#q-zoom-val-float'); if(vf) vf.textContent=pct;
 }
 function bumpQuranScale(delta){
   let q=parseFloat(settings.quranScale)||1;
@@ -1366,6 +1385,7 @@ function updateMushafJump(){
   const inMushaf = wirdMode()==='mushaf' && $('#s-wird').classList.contains('active');
   const show = inMushaf && window.scrollY>260 && __scrollDir==='up';
   jump.classList.toggle('show', show);
+  const zf=$('#q-zoom-float'); if(zf) zf.classList.toggle('show', show);
   if(!inMushaf || !WIRD) return;
   const si=currentSuraFromScroll();
   if(si===__lastJumpSura) return;
@@ -1890,6 +1910,8 @@ try{ renderBackupStatus(); }catch(e){}
 applyQuranScale();
 $('#q-plus')  && $('#q-plus').addEventListener('click', ()=> bumpQuranScale(0.1));
 $('#q-minus') && $('#q-minus').addEventListener('click', ()=> bumpQuranScale(-0.1));
+$('#q-plus-float')  && $('#q-plus-float').addEventListener('click', ()=> bumpQuranScale(0.1));
+$('#q-minus-float') && $('#q-minus-float').addEventListener('click', ()=> bumpQuranScale(-0.1));
 
 try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
 /* التذكيرات مفعّلة افتراضيًّا: نطلب إذن الإشعارات عند أوّل لمسة (المتصفّح يمنع الطلب بلا تفاعل) */
