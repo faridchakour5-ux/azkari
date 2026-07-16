@@ -325,6 +325,12 @@
   .reciter-sura-btn .chev{font-size:11px; color:var(--text-3);}
   .reciter-sura-btn:active{transform:scale(.96);}
   .reciter-status{font-size:12px; color:var(--text-3); flex:0 0 auto;}
+  .reciter-actions{display:flex; gap:8px; margin-top:8px;}
+  .reciter-action-btn{flex:1; border:1px solid var(--line); background:var(--card); color:var(--text-2);
+    font:inherit; font-weight:700; font-size:12.5px; padding:8px 10px; border-radius:12px; box-shadow:var(--shadow-1);
+    transition:transform .13s ease, background-color .2s, color .2s;}
+  .reciter-action-btn:active{transform:scale(.96);}
+  .reciter-action-btn.on{background:var(--accent); color:#fff; border-color:transparent;}
 
   /* قائمة السور في صفحة الاستماع */
   #s-listen .reciter-box{position:sticky; top:0; z-index:5; background:var(--bg); padding-bottom:8px;}
@@ -504,6 +510,10 @@
       </div>
       <span id="reciter-status" class="reciter-status"></span>
     </div>
+    <div class="reciter-actions" id="reciter-actions" style="display:none">
+      <button id="reciter-repeat" class="reciter-action-btn" aria-label="تكرار السورة">🔁 <span id="reciter-repeat-label">بلا تكرار</span></button>
+      <button id="reciter-read" class="reciter-action-btn" aria-label="اقرأ نفس السورة">📖 اقرأ نفس السورة</button>
+    </div>
     <audio id="reciter-audio" preload="none"></audio>
   </div>
   <div class="listen-list" id="listen-list"></div>
@@ -646,7 +656,7 @@
     </div>
     <div class="btn-row" id="notif-test">تجربة الإشعار الآن</div>
   </div>
-  <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك. تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا (7 · 10 · 13 · 16 · 19 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
+  <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك، وتذكير قبل كل أذان بـ10 دقائق (يحتاج تفعيل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا (7 · 10 · 13 · 16 · 19 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
 
   <div class="gtitle">النسخ الاحتياطي</div>
   <div class="group">
@@ -1085,9 +1095,28 @@ function scheduleChecks(){
           fireNotification(qslot.title, qslot.body); }
       }
     }
+    if(settings.notif) checkPrayerReminder(now);
   };
   check();
   window.__azTimer = setInterval(check, 60*1000);
+}
+/* تذكير قبل الأذان بـ10 دقائق (يحتاج تفعيل الموقع من صفحة الأذكار) */
+const PRAYER_REMIND_MIN=10;
+function checkPrayerReminder(now){
+  const g=geoStore(); if(!g) return;
+  const pt=computePrayers(g.lat,g.lng); if(!pt) return;
+  const list=[['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
+  const fired=store.get('az_prayerfired_'+todayKey(), {});
+  let changed=false;
+  list.forEach(([k,nm])=>{
+    const t=pt[k]; if(!t) return;
+    const diffMin=(t-now)/60000;
+    if(diffMin<=PRAYER_REMIND_MIN && diffMin>PRAYER_REMIND_MIN-1 && !fired[k]){
+      fired[k]=1; changed=true;
+      fireNotification('🕌 اقترب وقت صلاة '+nm, ['تبقّى 10 دقائق على أذان '+nm]);
+    }
+  });
+  if(changed) store.set('az_prayerfired_'+todayKey(), fired);
 }
 let __toastT=null;
 function showToast(msg, ms){
@@ -1554,16 +1583,58 @@ function currentReciterInfo(){
 function playReciterSurah(info, si){
   if(!WIRD || !WIRD.sur[si]) return;
   __audioSura=si;
+  __repeatPlayed=1;
   const audio=$('#reciter-audio');
   const surahNum=WIRD.sur[si].s;
   audio.src=info.server+pad3(surahNum)+'.mp3';
   $('#reciter-sura').textContent='سورة '+WIRD.sur[si].n;
   markListenActive();
   updateMediaSession(info.name, WIRD.sur[si].n);
+  const actions=$('#reciter-actions'); if(actions) actions.style.display='flex';
   audio.play().then(()=>{ $('#reciter-play').textContent='❚❚'; }).catch(()=>{
     $('#reciter-status').textContent='اضغط تشغيل يدويًّا';
   });
 }
+/* ---- تكرار السورة نفسها عدد مرّات مختار ---- */
+const REPEAT_OPTIONS=[
+  {id:'1',   label:'بلا تكرار'},
+  {id:'2',   label:'مرّتان'},
+  {id:'3',   label:'3 مرّات'},
+  {id:'5',   label:'5 مرّات'},
+  {id:'10',  label:'10 مرّات'},
+  {id:'inf', label:'تكرار مستمرّ ∞'},
+];
+let __repeatMode='1', __repeatPlayed=1;
+function repeatLabel(){ const o=REPEAT_OPTIONS.find(x=>x.id===__repeatMode); return o?o.label:'بلا تكرار'; }
+function updateRepeatBadge(){
+  const b=$('#reciter-repeat'), lbl=$('#reciter-repeat-label'); if(!b) return;
+  b.classList.toggle('on', __repeatMode!=='1');
+  if(lbl) lbl.textContent=repeatLabel();
+}
+$('#reciter-repeat') && $('#reciter-repeat').addEventListener('click', ()=>{
+  const idx=REPEAT_OPTIONS.findIndex(o=>o.id===__repeatMode);
+  __repeatMode=REPEAT_OPTIONS[(idx+1)%REPEAT_OPTIONS.length].id;
+  __repeatPlayed=1;
+  updateRepeatBadge(); vibrate(6);
+  showToast('التكرار: '+repeatLabel(), 1600);
+});
+/* ---- قراءة نفس السورة المُتلاة أثناء الاستماع ---- */
+async function readAlongCurrentSurah(){
+  if(__audioSura==null) return;
+  vibrate(6);
+  const idx=__audioSura;
+  if(!WIRD || WIRD.__riwaya!==settings.riwaya){
+    try{ if(!wirdGlobal()) await loadScript(wirdFile()); WIRD=wirdGlobal(); if(WIRD) WIRD.__riwaya=settings.riwaya; }catch(e){ return; }
+  }
+  settings.wirdMode='mushaf'; settings.mushafSura=idx; saveSettings();
+  $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m==='mushaf'));
+  const wirdTab=document.querySelector('.tab[data-s="s-wird"]'); if(wirdTab) wirdTab.click();
+  setTimeout(()=>{
+    const sel=$('#sura-select'); if(sel) sel.value=idx;
+    scrollToSura(idx, true);
+  }, 700);
+}
+$('#reciter-read') && $('#reciter-read').addEventListener('click', readAlongCurrentSurah);
 /* ---- Media Session: يبقي الصوت شغّالًا وقفل الشاشة مضاء بأزرار تحكّم في شريط الإشعارات ---- */
 function setupMediaSession(){
   if(!('mediaSession' in navigator)) return;
@@ -1664,6 +1735,13 @@ $('#reciter-play').addEventListener('click', async ()=>{
 /* عند انتهاء السورة: الانتقال تلقائيًّا للسورة التالية */
 $('#reciter-audio').addEventListener('ended', ()=>{
   $('#reciter-play').textContent='▶';
+  const total = __repeatMode==='inf' ? Infinity : (parseInt(__repeatMode,10)||1);
+  if(__repeatPlayed < total){
+    __repeatPlayed++;
+    const audio=$('#reciter-audio'); audio.currentTime=0; audio.play().catch(()=>{});
+    return;
+  }
+  __repeatPlayed=1;
   const info=currentReciterInfo();
   if(info && __audioSura!=null && __audioSura+1 < WIRD.sur.length){
     playReciterSurah(info, __audioSura+1);
