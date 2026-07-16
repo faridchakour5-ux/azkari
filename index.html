@@ -368,6 +368,8 @@
     z-index:85; background:var(--accent); color:#fff; display:none; align-items:center; justify-content:space-between; gap:12px;
     padding:12px 16px; border-radius:16px; box-shadow:var(--shadow-2); max-width:480px; margin:0 auto;}
   .adhan-banner.show{display:flex; animation:abIn .3s ease;}
+  .adhan-banner{cursor:pointer;}
+  .adhan-banner:active{transform:scale(.99);}
   @keyframes abIn{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
   .adhan-banner .ab-txt{display:flex; flex-direction:column; gap:2px; min-width:0;}
   .adhan-banner .ab-txt b{font-size:16px; font-weight:800;}
@@ -1224,25 +1226,58 @@ const MUEZZINS = {
   wadee: { name:'الشيخ وديع اليمني', src:'audio/adhan-wadee.mp3' }
 };
 function muezzinSrc(){ const m=MUEZZINS[settings.muezzin]||MUEZZINS.wadee; return m.src; }
+const ADHAN_MOSQUE_SVG='<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3s4 3 4 6H8c0-3 4-6 4-6z"/><path d="M4 21v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7"/><path d="M4 21h16"/><path d="M9 21v-3a3 3 0 0 1 6 0v3"/></svg>';
+function showAdhanBanner(prayerName, needTap){
+  const banner=$('#adhan-banner'); if(!banner) return;
+  $('#adhan-banner-title').innerHTML=ADHAN_MOSQUE_SVG+'أذان '+(prayerName||'الصلاة');
+  $('#adhan-banner-sub').textContent = needTap ? 'اضغط هنا لسماع الأذان ▶' : (MUEZZINS[settings.muezzin]||MUEZZINS.wadee).name;
+  banner.classList.add('show');
+}
 function playAdhan(prayerName){
   const audio=$('#adhan-audio'); if(!audio) return;
+  __lastAdhanPrayer = prayerName||'الصلاة';
   audio.src=muezzinSrc();
-  const banner=$('#adhan-banner');
-  if(banner){
-    $('#adhan-banner-title').innerHTML='<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3s4 3 4 6H8c0-3 4-6 4-6z"/><path d="M4 21v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7"/><path d="M4 21h16"/><path d="M9 21v-3a3 3 0 0 1 6 0v3"/></svg>أذان '+(prayerName||'الصلاة');
-    $('#adhan-banner-sub').textContent=(MUEZZINS[settings.muezzin]||MUEZZINS.wadee).name;
-    banner.classList.add('show');
-  }
+  showAdhanBanner(prayerName, false);
   vibrate([80,60,80]);
-  audio.play().catch(()=>{ /* في حال منع التشغيل التلقائي، يُظهر الشريط مع إشعار */ });
-  fireNotification('🕌 حان وقت صلاة '+(prayerName||''), ['الله أكبر، الله أكبر']);
+  audio.play().catch(()=>{
+    // مُنع التشغيل التلقائي (المتصفّح يتطلّب لمسة) — نجعل الشريط قابلًا للنقر لتشغيل الأذان
+    showAdhanBanner(prayerName, true);
+  });
+  fireNotification('حان وقت صلاة '+(prayerName||''), ['الله أكبر، الله أكبر — اضغط شريط الأذان لسماعه']);
 }
+let __lastAdhanPrayer='الصلاة';
 function stopAdhan(){
   const audio=$('#adhan-audio'); if(audio){ audio.pause(); audio.currentTime=0; }
   const banner=$('#adhan-banner'); if(banner) banner.classList.remove('show');
 }
-$('#adhan-stop') && $('#adhan-stop').addEventListener('click', stopAdhan);
+$('#adhan-stop') && $('#adhan-stop').addEventListener('click', e=>{ e.stopPropagation(); stopAdhan(); });
+// نقر الشريط نفسه = تشغيل الأذان يدويًّا (في حال مُنع التشغيل التلقائي)
+$('#adhan-banner') && $('#adhan-banner').addEventListener('click', ()=>{
+  const audio=$('#adhan-audio');
+  if(audio && audio.paused){
+    if(!audio.src) audio.src=muezzinSrc();
+    audio.play().then(()=> showAdhanBanner(__lastAdhanPrayer, false)).catch(()=>{});
+  }
+});
 $('#adhan-audio') && $('#adhan-audio').addEventListener('ended', ()=>{ const b=$('#adhan-banner'); if(b) b.classList.remove('show'); });
+/* فكّ قفل التشغيل التلقائي للأذان عند أوّل لمسة (المتصفّح يمنع الصوت التلقائي قبل تفاعل المستخدم) */
+(function unlockAdhanAudio(){
+  let done=false;
+  const unlock=()=>{
+    if(done) return; done=true;
+    document.removeEventListener('pointerdown', unlock);
+    const a=$('#adhan-audio'); if(!a) return;
+    try{
+      a.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+      a.muted=true;
+      const p=a.play();
+      const done2=()=>{ try{ a.pause(); a.currentTime=0; a.muted=false; a.removeAttribute('src'); }catch(e){} };
+      if(p&&p.then) p.then(done2).catch(()=>{ a.muted=false; });
+      else done2();
+    }catch(e){ try{ a.muted=false; }catch(_){} }
+  };
+  document.addEventListener('pointerdown', unlock);
+})();
 function checkAdhan(now){
   const g=geoStore(); if(!g) return;
   const pt=computePrayers(g.lat,g.lng); if(!pt) return;
@@ -1252,8 +1287,8 @@ function checkAdhan(now){
   list.forEach(([k,nm])=>{
     const t=pt[k]; if(!t) return;
     const diffMin=(t-now)/60000;
-    // يُرفع الأذان في الدقيقة التي يدخل فيها الوقت تمامًا
-    if(diffMin<=0 && diffMin>-1 && !fired[k]){
+    // يُرفع الأذان عند دخول الوقت (ونافذة حتى 3 دقائق تحسّبًا لتأخّر المؤقّت أو فتح التطبيق بعد الوقت بقليل)
+    if(diffMin<=0 && diffMin>-3 && !fired[k]){
       fired[k]=1; changed=true;
       playAdhan(nm);
     }
@@ -2158,7 +2193,10 @@ try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
   }catch(e){}
 })();
 /* refresh on day change / resume */
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ try{ renderAzkar(); }catch(e){} } });
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
+  try{ renderAzkar(); }catch(e){}
+  try{ const now=new Date(); if(settings.adhan) checkAdhan(now); if(settings.notif) checkPrayerReminder(now); }catch(e){}
+} });
 
 /* ================= INSTALL (Add to Home Screen) ================= */
 let deferredInstall=null;
