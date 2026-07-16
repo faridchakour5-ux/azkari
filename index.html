@@ -287,7 +287,7 @@
   .wird-kpi{margin:10px 16px 0; background:var(--card); border-radius:16px; padding:12px 16px;
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     border:1px solid var(--line); box-shadow:var(--shadow-1);}
-  .wird-kpi .ic{font-size:24px; line-height:1;}
+  .wird-kpi .ic{font-size:24px; line-height:1; color:var(--accent); display:inline-flex;}
   .wird-kpi .lbl b{display:block; font-size:16px; font-weight:800;}
   .wird-kpi .lbl span{font-size:13px; color:var(--text-2);}
   .wird-kpi.read{border:1.5px solid var(--accent);}
@@ -315,7 +315,9 @@
   .reciter-player{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line);
     box-shadow:var(--shadow-1); border-radius:16px; padding:10px 14px; margin-top:8px;}
   .reciter-play{flex:0 0 auto; width:42px; height:42px; border-radius:50%; border:0; background:var(--accent);
-    color:#fff; font-size:16px; line-height:1; box-shadow:var(--shadow-2); transition:transform .13s ease;}
+    color:#fff; font-size:16px; line-height:1; box-shadow:var(--shadow-2); transition:transform .13s ease;
+    display:flex; align-items:center; justify-content:center;}
+  .reciter-play .gh-ic{width:18px; height:18px;}
   .reciter-play:active{transform:scale(.92);}
   .reciter-info{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
   .reciter-info > span:first-child{font-weight:800; font-size:14px; color:var(--text);}
@@ -328,6 +330,7 @@
   .reciter-actions{display:flex; gap:8px; margin-top:8px;}
   .reciter-action-btn{flex:1; border:1px solid var(--line); background:var(--card); color:var(--text-2);
     font:inherit; font-weight:700; font-size:12.5px; padding:8px 10px; border-radius:12px; box-shadow:var(--shadow-1);
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
     transition:transform .13s ease, background-color .2s, color .2s;}
   .reciter-action-btn:active{transform:scale(.96);}
   .reciter-action-btn.on{background:var(--accent); color:#fff; border-color:transparent;}
@@ -342,11 +345,9 @@
   .listen-sura .ls-num{flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:var(--fill-2);
     color:var(--accent); font-weight:800; font-size:12.5px; display:flex; align-items:center; justify-content:center;}
   .listen-sura .ls-name{flex:1; min-width:0; font-weight:700; font-size:15px;}
-  .listen-sura .ls-ic{flex:0 0 auto; color:var(--accent); font-size:14px; opacity:.85;}
+  .listen-sura .ls-ic{flex:0 0 auto; color:var(--accent); font-size:14px; opacity:.85; display:inline-flex;}
   .listen-sura.playing{border-color:var(--accent);}
   .listen-sura.playing .ls-num{background:var(--accent); color:#fff;}
-  .listen-sura.playing .ls-ic{font-size:0;}
-  .listen-sura.playing .ls-ic::before{content:'❚❚'; font-size:12px;}
 
   /* تذكير الصلاة على النبي ﷺ (شريط داخل التطبيق) */
   .salat-toast{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
@@ -355,6 +356,11 @@
     opacity:0; transform:translateY(16px); pointer-events:none; transition:opacity .3s ease, transform .3s ease;
     font-family:'AmiriQuran',serif;}
   .salat-toast.show{opacity:1; transform:translateY(0);}
+  /* أيقونات موحّدة بأسلوب GitHub (خطّية أحادية اللون) */
+  .gh-ic{width:1.15em; height:1.15em; flex:0 0 auto; vertical-align:-.18em; stroke:currentColor; fill:none;
+    stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+  .btn-row .gh-ic,.locbtn .gh-ic,.row .k .gh-ic{margin-inline-end:8px;}
+  .adhan-banner .ab-txt b .gh-ic{margin-inline-end:6px;}
   /* شريط الأذان الجاري */
   .adhan-banner{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
     z-index:85; background:var(--accent); color:#fff; display:none; align-items:center; justify-content:space-between; gap:12px;
@@ -462,7 +468,7 @@
     <h1 id="az-title">أذكار الصباح</h1>
     <div class="az-source" id="az-source"></div>
   </div>
-  <button class="locbtn" id="loc-btn">📍 تفعيل مواقيت الصلاة حسب موقعك</button>
+  <button class="locbtn" id="loc-btn"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>تفعيل مواقيت الصلاة حسب موقعك</button>
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
   <div class="seg" id="time-seg"></div>
   <div class="az-scope" id="az-scope" style="display:none">
@@ -515,7 +521,7 @@
   <div class="reciter-box" id="reciter-box">
     <div class="reciter-chips" id="reciter-chips"></div>
     <div class="reciter-player" id="reciter-player" style="display:none">
-      <button id="reciter-play" class="reciter-play" aria-label="تشغيل">▶</button>
+      <button id="reciter-play" class="reciter-play" aria-label="تشغيل"><svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M7 4v16l13-8z"/></svg></button>
       <div class="reciter-info">
         <span id="reciter-name">—</span>
         <button id="reciter-sura-btn" class="reciter-sura-btn"><span id="reciter-sura">اختر السورة</span> <span class="chev">⌄</span></button>
@@ -523,8 +529,8 @@
       <span id="reciter-status" class="reciter-status"></span>
     </div>
     <div class="reciter-actions" id="reciter-actions" style="display:none">
-      <button id="reciter-repeat" class="reciter-action-btn" aria-label="تكرار السورة">🔁 <span id="reciter-repeat-label">بلا تكرار</span></button>
-      <button id="reciter-read" class="reciter-action-btn" aria-label="اقرأ نفس السورة">📖 اقرأ نفس السورة</button>
+      <button id="reciter-repeat" class="reciter-action-btn" aria-label="تكرار السورة"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span id="reciter-repeat-label">بلا تكرار</span></button>
+      <button id="reciter-read" class="reciter-action-btn" aria-label="اقرأ نفس السورة"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>اقرأ نفس السورة</button>
     </div>
     <audio id="reciter-audio" preload="none"></audio>
   </div>
@@ -556,7 +562,7 @@
 
 <audio id="adhan-audio" preload="none"></audio>
 <div class="adhan-banner" id="adhan-banner">
-  <div class="ab-txt"><b id="adhan-banner-title">🕌 الأذان</b><span id="adhan-banner-sub"></span></div>
+  <div class="ab-txt"><b id="adhan-banner-title">الأذان</b><span id="adhan-banner-sub"></span></div>
   <button id="adhan-stop" class="adhan-stop">إيقاف ✕</button>
 </div>
 
@@ -660,7 +666,7 @@
 
   <div class="gtitle">التطبيق</div>
   <div class="group">
-    <div class="btn-row" id="install-btn">📲 أضِف إلى الشاشة الرئيسية</div>
+    <div class="btn-row" id="install-btn"><svg class="gh-ic" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><line x1="10" y1="18" x2="14" y2="18"/></svg>أضِف إلى الشاشة الرئيسية</div>
   </div>
   <div class="gnote" id="install-note">ثبِّت التطبيق ليعمل كتطبيق مستقلّ بدون متصفّح ويشتغل دون إنترنت.</div>
 
@@ -672,7 +678,7 @@
     <div class="row"><span class="k">تذكير بالصلاة على النبي ﷺ</span>
       <label class="sw"><input type="checkbox" id="salat-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
-    <div class="row"><span class="k">🕌 رفع الأذان عند وقت الصلاة</span>
+    <div class="row"><span class="k"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3s4 3 4 6H8c0-3 4-6 4-6z"/><path d="M4 21v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7"/><path d="M4 21h16"/><path d="M9 21v-3a3 3 0 0 1 6 0v3"/></svg>رفع الأذان عند وقت الصلاة</span>
       <label class="sw"><input type="checkbox" id="adhan-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
     <div class="row"><span class="k">صوت المؤذّن</span>
@@ -680,7 +686,7 @@
         <button data-r="wadee" class="on">وديع اليمني</button>
       </div>
     </div>
-    <div class="btn-row" id="adhan-test">🔊 تجربة الأذان الآن</div>
+    <div class="btn-row" id="adhan-test"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8a4 4 0 0 1 0 8"/><path d="M19 5a8 8 0 0 1 0 14"/></svg>تجربة الأذان الآن</div>
     <div class="btn-row" id="notif-test">تجربة الإشعار الآن</div>
   </div>
   <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك، وتذكير قبل كل أذان بـ10 دقائق. رفع الأذان بصوت المؤذّن عند دخول وقت كل صلاة (يحتاج تفعيل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار، ويعمل بلا إنترنت). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا (7 · 10 · 13 · 16 · 19 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
@@ -690,8 +696,8 @@
     <div class="row" style="display:block; padding:14px 16px;">
       <div id="backup-status" style="color:var(--text-2); font-size:14px; line-height:1.9;"></div>
     </div>
-    <div class="btn-row" id="backup-save">💾 حفظ تقدّمي في ملف</div>
-    <div class="btn-row" id="backup-restore">♻️ استعادة من ملف</div>
+    <div class="btn-row" id="backup-save"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>حفظ تقدّمي في ملف</div>
+    <div class="btn-row" id="backup-restore"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="M7 13l5-5 5 5"/><path d="M4 4h16"/></svg>استعادة من ملف</div>
     <input type="file" id="backup-file" accept="application/json,.json" style="display:none">
   </div>
   <div class="gnote">تقدّمك (موضعك في الوِرد، الأذكار المُنجَزة، السلسلة، وأيام القراءة) يُحفَظ تلقائياً في هذا المتصفّح. احفظ نسخة في ملف لنقلها إلى جهاز آخر أو لاستعادتها إذا مُسحت بيانات المتصفّح.</div>
@@ -1218,7 +1224,7 @@ function playAdhan(prayerName){
   audio.src=muezzinSrc();
   const banner=$('#adhan-banner');
   if(banner){
-    $('#adhan-banner-title').textContent='🕌 أذان '+(prayerName||'الصلاة');
+    $('#adhan-banner-title').innerHTML='<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3s4 3 4 6H8c0-3 4-6 4-6z"/><path d="M4 21v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7"/><path d="M4 21h16"/><path d="M9 21v-3a3 3 0 0 1 6 0v3"/></svg>أذان '+(prayerName||'الصلاة');
     $('#adhan-banner-sub').textContent=(MUEZZINS[settings.muezzin]||MUEZZINS.wadee).name;
     banner.classList.add('show');
   }
@@ -1392,7 +1398,9 @@ function renderWirdKpi(){
   el.className='wird-kpi'+(read?' read':'');
   el.innerHTML=
     '<div style="display:flex; align-items:center; gap:10px">'+
-      '<span class="ic">'+(read?'✅':'📖')+'</span>'+
+      '<span class="ic">'+(read
+        ? '<svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>'
+        : '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>')+'</span>'+
       '<div class="lbl"><b>'+(read?'قرأتَ اليوم':'لم تقرأ بعد')+'</b>'+
       '<span>'+(read?'تقبّل الله، واصِل وردك':'اقرأ وردك ثم اضغط «تمّ»')+'</span></div>'+
     '</div>'+
@@ -1675,6 +1683,10 @@ async function fetchReciterCatalog(){
   return __reciterFetching;
 }
 function pad3(n){ return String(n).padStart(3,'0'); }
+/* أيقونات SVG بأسلوب GitHub تُدرَج ديناميكيًّا */
+const ICON_PLAY  = '<svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M7 4v16l13-8z"/></svg>';
+const ICON_PAUSE = '<svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+function setPlayBtn(playing){ const b=$('#reciter-play'); if(b) b.innerHTML = playing ? ICON_PAUSE : ICON_PLAY; }
 function renderReciterChips(){
   const wrap=$('#reciter-chips'); if(!wrap) return;
   wrap.innerHTML='';
@@ -1722,7 +1734,7 @@ function playReciterSurah(info, si){
   markListenActive();
   updateMediaSession(info.name, WIRD.sur[si].n);
   const actions=$('#reciter-actions'); if(actions) actions.style.display='flex';
-  audio.play().then(()=>{ $('#reciter-play').textContent='❚❚'; }).catch(()=>{
+  audio.play().then(()=>{ setPlayBtn(true); }).catch(()=>{
     $('#reciter-status').textContent='اضغط تشغيل يدويًّا';
   });
 }
@@ -1810,7 +1822,7 @@ function renderListenList(){
   WIRD.sur.forEach((s,idx)=>{
     const b=document.createElement('button');
     b.type='button'; b.className='listen-sura';
-    b.innerHTML='<span class="ls-num">'+(idx+1)+'</span><span class="ls-name">'+s.n+'</span><span class="ls-ic">▶</span>';
+    b.innerHTML='<span class="ls-num">'+(idx+1)+'</span><span class="ls-name">'+s.n+'</span><span class="ls-ic">'+ICON_PLAY+'</span>';
     b.addEventListener('click', ()=> playListenSura(idx));
     wrap.appendChild(b);
   });
@@ -1818,7 +1830,11 @@ function renderListenList(){
 }
 function markListenActive(){
   const wrap=$('#listen-list'); if(!wrap) return;
-  [...wrap.children].forEach((b,i)=> b.classList.toggle('playing', i===__audioSura));
+  [...wrap.children].forEach((b,i)=>{
+    const on = i===__audioSura;
+    b.classList.toggle('playing', on);
+    const ic=b.querySelector('.ls-ic'); if(ic) ic.innerHTML = on ? ICON_PAUSE : ICON_PLAY;
+  });
 }
 async function playListenSura(idx){
   vibrate(6);
@@ -1859,13 +1875,13 @@ $('#reciter-play').addEventListener('click', async ()=>{
     return;
   }
   if(audio.paused){
-    try{ await audio.play(); $('#reciter-play').textContent='❚❚'; }
+    try{ await audio.play(); setPlayBtn(true); }
     catch(e){ $('#reciter-status').textContent='تعذّر التشغيل'; }
-  } else { audio.pause(); $('#reciter-play').textContent='▶'; }
+  } else { audio.pause(); setPlayBtn(false); }
 });
 /* عند انتهاء السورة: الانتقال تلقائيًّا للسورة التالية */
 $('#reciter-audio').addEventListener('ended', ()=>{
-  $('#reciter-play').textContent='▶';
+  setPlayBtn(false);
   const total = __repeatMode==='inf' ? Infinity : (parseInt(__repeatMode,10)||1);
   if(__repeatPlayed < total){
     __repeatPlayed++;
@@ -1878,8 +1894,8 @@ $('#reciter-audio').addEventListener('ended', ()=>{
     playReciterSurah(info, __audioSura+1);
   }
 });
-$('#reciter-audio').addEventListener('pause', ()=>{ $('#reciter-play').textContent='▶'; if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; });
-$('#reciter-audio').addEventListener('playing', ()=>{ $('#reciter-play').textContent='❚❚'; if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; });
+$('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; });
+$('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; });
 setupMediaSession();
 let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){
