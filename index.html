@@ -1080,6 +1080,7 @@ if(adhanToggle){
       try{ await Notification.requestPermission(); }catch(e){}
       if(!geoStore()) showToast('فعّل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار ليعمل الأذان', 4000);
     }
+    scheduleNativeAdhan();
   });
 }
 $('#muezzin-seg') && $$('#muezzin-seg button').forEach(btn=>{
@@ -2076,16 +2077,59 @@ let prayerToday=null;
 function geoStore(){ return store.get('az_geo', null); }
 function fmtTime(d){ return d.toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit',hour12:true}); }
 
-function computePrayers(lat,lng){
+function computePrayers(lat,lng,date){
   try{
     const A=window.adhan; if(!A) return null;
     const coords=new A.Coordinates(lat,lng);
     // Morocco (Ministry of Habous): Fajr 19°, Isha 17°, Asr = Shafi
     const params=new A.CalculationParameters('Other',19,17);
     params.madhab=A.Madhab.Shafi;
-    const pt=new A.PrayerTimes(coords, new Date(), params);
+    const pt=new A.PrayerTimes(coords, date||new Date(), params);
     return pt;
   }catch(e){ return null; }
+}
+/* ===== جدولة الأذان على مستوى النظام (تطبيق Capacitor الأصلي) =====
+   تعمل حتى والتطبيق مغلق تمامًا وبلا إنترنت، عبر إشعارات مجدوَلة محليًّا */
+function isNative(){ return !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()); }
+async function scheduleNativeAdhan(){
+  if(!isNative()) return;
+  const LN = Capacitor.Plugins && Capacitor.Plugins.LocalNotifications;
+  if(!LN) return;
+  try{
+    await LN.requestPermissions();
+    // قناة الأذان: صوت المؤذّن كنغمة، وقناة عادية للتذكيرات
+    await LN.createChannel({ id:'adhan', name:'الأذان', description:'أذان الصلوات الخمس', importance:5, sound:'adhan_wadee', visibility:1, vibration:true });
+    await LN.createChannel({ id:'reminders', name:'التذكيرات', description:'تذكير الأذكار والصلاة على النبي', importance:4, visibility:1 });
+    // إلغاء المجدوَل سابقًا لتفادي التكرار
+    const pending = await LN.getPending();
+    if(pending && pending.notifications && pending.notifications.length){
+      await LN.cancel({ notifications: pending.notifications.map(n=>({ id:n.id })) });
+    }
+    const g = geoStore(); if(!g) return;
+    const prayers=[['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
+    const notifs=[]; let id=1000; const nowMs=Date.now();
+    for(let day=0; day<7; day++){
+      const d=new Date(); d.setDate(d.getDate()+day);
+      const pt=computePrayers(g.lat,g.lng,d); if(!pt) continue;
+      prayers.forEach(([k,nm])=>{
+        const t=pt[k]; if(!t) return; const at=new Date(t);
+        if(at.getTime() < nowMs+60000) return; // تخطّي ما مضى
+        if(settings.adhan){
+          notifs.push({ id:id++, channelId:'adhan', title:'حان وقت صلاة '+nm, body:'الله أكبر، الله أكبر',
+            schedule:{ at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+        }
+        // تذكير قبل الأذان بـ10 دقائق
+        if(settings.notif){
+          const rem=new Date(at.getTime()-10*60000);
+          if(rem.getTime() > nowMs+60000){
+            notifs.push({ id:id++, channelId:'reminders', title:'اقترب وقت صلاة '+nm, body:'تبقّى 10 دقائق على '+nm,
+              schedule:{ at:rem, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+          }
+        }
+      });
+    }
+    if(notifs.length) await LN.schedule({ notifications: notifs });
+  }catch(e){}
 }
 function renderPrayers(){
   const g=geoStore(); const bar=$('#prayer-bar'); const btn=$('#loc-btn');
@@ -2111,14 +2155,15 @@ function autoTimeByPrayer(pt){
     if(currentTab!==want && !window.__userPickedTime){ currentTab=want; $$('#time-seg button').forEach(b=>b.classList.toggle('on',b.dataset.t===want)); renderAzkar(); }
   }catch(e){}
 }
+const LOC_PIN_SVG='<svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>';
 $('#loc-btn').addEventListener('click', ()=>{
   if(!navigator.geolocation){ alert('الموقع غير مدعوم على هذا المتصفح.'); return; }
   $('#loc-btn').textContent='…جارٍ تحديد الموقع';
   navigator.geolocation.getCurrentPosition(p=>{
     store.set('az_geo',{lat:p.coords.latitude,lng:p.coords.longitude});
-    renderPrayers(); vibrate(15);
+    renderPrayers(); vibrate(15); scheduleNativeAdhan();
   }, err=>{
-    $('#loc-btn').textContent='📍 تفعيل مواقيت الصلاة حسب موقعك';
+    $('#loc-btn').innerHTML=LOC_PIN_SVG+'تفعيل مواقيت الصلاة حسب موقعك';
     alert('تعذّر تحديد الموقع. تأكّد من السماح بالوصول للموقع.');
   }, {enableHighAccuracy:false, timeout:10000});
 });
@@ -2179,6 +2224,9 @@ $('#q-plus-float')  && $('#q-plus-float').addEventListener('click', ()=> bumpQur
 $('#q-minus-float') && $('#q-minus-float').addEventListener('click', ()=> bumpQuranScale(-0.1));
 
 try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
+/* التطبيق الأصلي (Capacitor): جدولة أذان الصلوات على مستوى النظام عند الإقلاع وعند كل فتح */
+try{ scheduleNativeAdhan(); }catch(e){}
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ try{ scheduleNativeAdhan(); }catch(e){} } });
 /* التذكيرات مفعّلة افتراضيًّا: نطلب إذن الإشعارات عند أوّل لمسة (المتصفّح يمنع الطلب بلا تفاعل) */
 (function requestNotifOnFirstGesture(){
   try{
