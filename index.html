@@ -720,7 +720,7 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2' };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'mhmd-lfkyh', quranColor:'blue2' };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
@@ -732,6 +732,8 @@ if(!settings.__d4){ settings.__d4=1; settings.hafsFont='naskh'; store.set('az_se
 if(!settings.__d5){ settings.__d5=1; settings.notif=true; settings.salat=true; store.set('az_settings', settings); }
 // ترقية: الأزرق المتوسّط (بين الفاتح والغامق) افتراضيًّا لخطّ القرآن
 if(!settings.__d6){ settings.__d6=1; settings.quranColor='blue2'; store.set('az_settings', settings); }
+// ترقية: القارئ اليمني افتراضيًّا ضمن قائمة أفضل 5 قرّاء
+if(!settings.__d7){ settings.__d7=1; settings.reciter='mhmd-lfkyh'; store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
@@ -1039,30 +1041,64 @@ function pickThree(){
   for(let i=0;i<3 && a.length;i++){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); }
   return out;
 }
-function fireNotification(title, lines){
+function fireNotification(title, lines, data){
   const body = lines.join('\n');
   if(navigator.serviceWorker && navigator.serviceWorker.controller){
     navigator.serviceWorker.ready.then(reg=> reg.showNotification(title,{
       body, dir:'rtl', lang:'ar', icon:'icons/icon-192.png', badge:'icons/icon-192.png',
-      tag:'azkar-reminder', renotify:true, vibrate:[40,60,40]
+      tag:'azkar-reminder', renotify:true, vibrate:[40,60,40], data:data||null
     }));
   } else if('Notification' in window && Notification.permission==='granted'){
-    new Notification(title,{ body, dir:'rtl', lang:'ar', icon:'icons/icon-192.png' });
+    const n=new Notification(title,{ body, dir:'rtl', lang:'ar', icon:'icons/icon-192.png' });
+    if(data) n.onclick=()=>{ window.focus(); applyNotifNavigation(data); n.close(); };
   }
 }
+/* التنقّل المباشر عند الضغط على الإشعار — نفس الصفحة المقصودة لا الشاشة الرئيسية فقط */
+function applyNotifNavigation(data){
+  if(!data || !data.action) return;
+  try{
+    if(data.action==='azkar'){
+      const t=document.querySelector('.tab[data-s="s-azkar"]'); if(t) t.click();
+      if(data.tab && CATS.find(c=>c.id===data.tab)){
+        currentTab=data.tab; window.__userPickedTime=true;
+        $$('#time-seg button').forEach(b=>b.classList.toggle('on', b.dataset.t===data.tab));
+        renderAzkar();
+      }
+    } else if(data.action==='wird'){
+      const t=document.querySelector('.tab[data-s="s-wird"]'); if(t) t.click();
+    } else if(data.action==='listen'){
+      const t=document.querySelector('.tab[data-s="s-listen"]'); if(t) t.click();
+    }
+  }catch(e){}
+}
+navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', e=>{
+  if(e.data && e.data.type==='navigate') applyNotifNavigation(e.data.data);
+});
+(function handleNotifOpenParam(){
+  try{
+    const u=new URL(location.href);
+    const open=u.searchParams.get('open');
+    if(open){
+      const data=JSON.parse(open);
+      u.searchParams.delete('open');
+      history.replaceState({}, '', u.pathname+u.search);
+      setTimeout(()=> applyNotifNavigation(data), 300);
+    }
+  }catch(e){}
+})();
 
 /* client-side scheduler: تذكير بأذكار الصباح/المساء/النوم + 6 تذكيرات متفرّقة بالصلاة على النبي ﷺ
    (أفضل جهد أثناء فتح التطبيق أو تشغيله في الخلفية) */
 const AZKAR_SLOTS=[
-  {h:7,  title:'حان وقت أذكار الصباح 🌅', body:['ابدأ يومك بأذكار الصباح، تحصينًا وبركة']},
-  {h:17, title:'حان وقت أذكار المساء 🌇', body:['من بعد العصر إلى المغرب — لا تنسَ أذكار المساء']},
-  {h:22, title:'حان وقت أذكار النوم 🌙',  body:['قبل أن تنام، اختم يومك بأذكار النوم']},
+  {h:7,  title:'حان وقت أذكار الصباح 🌅', body:['ابدأ يومك بأذكار الصباح، تحصينًا وبركة'], data:{action:'azkar', tab:'morning'}},
+  {h:17, title:'حان وقت أذكار المساء 🌇', body:['من بعد العصر إلى المغرب — لا تنسَ أذكار المساء'], data:{action:'azkar', tab:'evening'}},
+  {h:22, title:'حان وقت أذكار النوم 🌙',  body:['قبل أن تنام، اختم يومك بأذكار النوم'], data:{action:'azkar', tab:'sleep'}},
 ];
 const SALAT_HOURS=[7,10,13,16,19,22]; // 6 مرّات متفرّقة في اليوم
 /* تذكير بقراءة القرآن مرّتين يوميًّا — يتوقّف تلقائيًّا إن كان قد قرأ اليوم */
 const QURAN_READ_SLOTS=[
-  {h:12, title:'📖 لا تنسَ وِردك من القرآن', body:['ولو ٨ أسطر فقط تكفي — اقرأ وِردك اليوم']},
-  {h:20, title:'📖 تذكير بقراءة القرآن',     body:['خصّص دقائق لثمانية أسطر من القرآن قبل أن ينتهي يومك']},
+  {h:12, title:'📖 لا تنسَ وِردك من القرآن', body:['ولو ٨ أسطر فقط تكفي — اقرأ وِردك اليوم'], data:{action:'wird'}},
+  {h:20, title:'📖 تذكير بقراءة القرآن',     body:['خصّص دقائق لثمانية أسطر من القرآن قبل أن ينتهي يومك'], data:{action:'wird'}},
 ];
 function scheduleChecks(){
   if(!window.__salatToastTimer){
@@ -1078,7 +1114,7 @@ function scheduleChecks(){
       if(slot){
         const fired = store.get('az_fired_'+todayKey(), {});
         if(!fired[h]){ fired[h]=1; store.set('az_fired_'+todayKey(),fired);
-          fireNotification(slot.title, slot.body); }
+          fireNotification(slot.title, slot.body, slot.data); }
       }
     }
     if(settings.salat && SALAT_HOURS.includes(h) && m<5){
@@ -1092,7 +1128,7 @@ function scheduleChecks(){
       if(qslot){
         const fired = store.get('az_qreadfired_'+todayKey(), {});
         if(!fired[h]){ fired[h]=1; store.set('az_qreadfired_'+todayKey(),fired);
-          fireNotification(qslot.title, qslot.body); }
+          fireNotification(qslot.title, qslot.body, qslot.data); }
       }
     }
     if(settings.notif) checkPrayerReminder(now);
@@ -1466,20 +1502,14 @@ $('#sura-overlay-close').addEventListener('click', closeSuraOverlay);
 $('#sura-overlay').addEventListener('click', e=>{ if(e.target.id==='sura-overlay') closeSuraOverlay(); });
 
 /* ==================== الاستماع بصوت القرّاء ==================== */
+/* أفضل 5 قرّاء — الفقيه اليمني هو الافتراضي */
 const RECITERS=[
-  {id:'shur',       name:'سعود الشريم',      exact:'سعود الشريم',   match:['الشريم']},
-  {id:'minshawi',    name:'محمد المنشاوي',     exact:'محمد صديق المنشاوي', match:['المنشاوي']},
-  {id:'minshawi-mjwd', name:'المنشاوي (مجوّد)', exact:'محمد صديق المنشاوي', match:['المنشاوي'],
-    prefer:/مجود/, fallback:'https://server10.mp3quran.net/minsh_mjwd/'},
+  {id:'mhmd-lfkyh',  name:'محمد الفقيه اليمني', match:['الفقيه']},
   {id:'abdulbasit',  name:'عبد الباسط عبد الصمد', exact:'عبد الباسط عبد الصمد', match:['الباسط'],
     prefer:/حفص.*مرتل/, fallback:'https://server7.mp3quran.net/basit/'},
-  {id:'qzabri',      name:'عمر القزابري',      exact:'عمر القزابري',  match:['القزابري'],
-    fallback:'https://server11.mp3quran.net/qzabri/'},
-  {id:'mhmd-lfkyh',  name:'محمد الفقيه اليمني', match:['الفقيه']},
-  {id:'koshi',       name:'العيون الكوشي',     exact:'العيون الكوشي', match:['الكوشي']},
+  {id:'minshawi',    name:'محمد المنشاوي',     exact:'محمد صديق المنشاوي', match:['المنشاوي']},
+  {id:'shur',       name:'سعود الشريم',      exact:'سعود الشريم',   match:['الشريم']},
   {id:'maher',       name:'ماهر المعيقلي',     exact:'ماهر المعيقلي', match:['المعيقلي']},
-  {id:'jaleel',      name:'خالد الجليل',       exact:'خالد الجليل',   match:['الجليل']},
-  {id:'hzza',        name:'هزاع البلوشي',      exact:'هزاع البلوشي',  match:['البلوشي','هزاع']},
 ];
 const normName = s => (s||'').replace(/\s+/g,'');
 /* هل يملك القارئ مصحفًا كاملًا (114 سورة)؟ لتفادي التسجيلات الجزئية (جزء عمّ...) */

@@ -1,5 +1,5 @@
-/* صلاتي — service worker v57 */
-const CACHE = 'azkari-v57';
+/* صلاتي — service worker v58 */
+const CACHE = 'azkari-v58';
 const ASSETS = [
   './',
   './index.html',
@@ -80,10 +80,19 @@ self.addEventListener('fetch', e => {
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
+  const data = e.notification.data || null;
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      for (const c of list) { if ('focus' in c) return c.focus(); }
-      if (clients.openWindow) return clients.openWindow('./index.html');
+      for (const c of list) {
+        if ('focus' in c) {
+          if (data) c.postMessage({ type: 'navigate', data });
+          return c.focus();
+        }
+      }
+      if (clients.openWindow) {
+        const qs = data ? ('?open=' + encodeURIComponent(JSON.stringify(data))) : '';
+        return clients.openWindow('./index.html' + qs);
+      }
     })
   );
 });
