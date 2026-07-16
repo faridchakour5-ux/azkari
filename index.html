@@ -1502,14 +1502,20 @@ $('#sura-overlay-close').addEventListener('click', closeSuraOverlay);
 $('#sura-overlay').addEventListener('click', e=>{ if(e.target.id==='sura-overlay') closeSuraOverlay(); });
 
 /* ==================== الاستماع بصوت القرّاء ==================== */
-/* أفضل 5 قرّاء — الفقيه اليمني هو الافتراضي */
 const RECITERS=[
-  {id:'mhmd-lfkyh',  name:'محمد الفقيه اليمني', match:['الفقيه']},
+  {id:'shur',       name:'سعود الشريم',      exact:'سعود الشريم',   match:['الشريم']},
+  {id:'minshawi',    name:'محمد المنشاوي',     exact:'محمد صديق المنشاوي', match:['المنشاوي']},
+  {id:'minshawi-mjwd', name:'المنشاوي (مجوّد)', exact:'محمد صديق المنشاوي', match:['المنشاوي'],
+    prefer:/مجود/, fallback:'https://server10.mp3quran.net/minsh_mjwd/'},
   {id:'abdulbasit',  name:'عبد الباسط عبد الصمد', exact:'عبد الباسط عبد الصمد', match:['الباسط'],
     prefer:/حفص.*مرتل/, fallback:'https://server7.mp3quran.net/basit/'},
-  {id:'minshawi',    name:'محمد المنشاوي',     exact:'محمد صديق المنشاوي', match:['المنشاوي']},
-  {id:'shur',       name:'سعود الشريم',      exact:'سعود الشريم',   match:['الشريم']},
+  {id:'qzabri',      name:'عمر القزابري',      exact:'عمر القزابري',  match:['القزابري'],
+    fallback:'https://server11.mp3quran.net/qzabri/'},
+  {id:'mhmd-lfkyh',  name:'محمد الفقيه اليمني', match:['الفقيه']},
+  {id:'koshi',       name:'العيون الكوشي',     exact:'العيون الكوشي', match:['الكوشي']},
   {id:'maher',       name:'ماهر المعيقلي',     exact:'ماهر المعيقلي', match:['المعيقلي']},
+  {id:'jaleel',      name:'خالد الجليل',       exact:'خالد الجليل',   match:['الجليل']},
+  {id:'hzza',        name:'هزاع البلوشي',      exact:'هزاع البلوشي',  match:['البلوشي','هزاع']},
 ];
 const normName = s => (s||'').replace(/\s+/g,'');
 /* هل يملك القارئ مصحفًا كاملًا (114 سورة)؟ لتفادي التسجيلات الجزئية (جزء عمّ...) */
