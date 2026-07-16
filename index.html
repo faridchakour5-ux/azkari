@@ -2065,9 +2065,22 @@ $('#install-btn') && $('#install-btn').addEventListener('click', async ()=>{
 });
 
 
-/* service worker */
+/* service worker: تحديث تلقائي كامل — لا حاجة لأيّ تحديث يدوي من المستخدم */
 if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{}));
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      // تحقّق فوري من وجود نسخة أحدث، ثمّ كل 30 دقيقة، وكلّما عاد المستخدم للتطبيق
+      reg.update().catch(()=>{});
+      setInterval(()=> reg.update().catch(()=>{}), 30*60*1000);
+      document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) reg.update().catch(()=>{}); });
+    }).catch(()=>{});
+    // بمجرّد أن تتولّى النسخة الجديدة التحكّم (بعد التنزيل في الخلفية)، أعِد تحميل الصفحة تلقائيًّا مرّة واحدة
+    let swRefreshed=false;
+    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+      if(swRefreshed) return; swRefreshed=true;
+      window.location.reload();
+    });
+  });
 }
 </script>
 </body>
