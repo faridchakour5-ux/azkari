@@ -693,7 +693,7 @@
     <div class="btn-row" id="adhan-test"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8a4 4 0 0 1 0 8"/><path d="M19 5a8 8 0 0 1 0 14"/></svg>تجربة الأذان الآن</div>
     <div class="btn-row" id="notif-test">تجربة الإشعار الآن</div>
   </div>
-  <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك، وتذكير قبل كل أذان بـ10 دقائق. رفع الأذان بصوت المؤذّن عند دخول وقت كل صلاة (يحتاج تفعيل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار، ويعمل بلا إنترنت). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا (7 · 10 · 13 · 16 · 19 · 22). دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
+  <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك، وتذكير قبل كل أذان بـ10 دقائق. رفع الأذان بصوت المؤذّن عند دخول وقت كل صلاة (يحتاج تفعيل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار، ويعمل بلا إنترنت). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا، و10 مرّات يوم الجمعة، مع تذكير بقراءة سورة الكهف صباح الجمعة. دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
 
   <div class="gtitle">النسخ الاحتياطي</div>
   <div class="group">
@@ -1133,6 +1133,19 @@ function applyNotifNavigation(data){
       }
     } else if(data.action==='wird'){
       const t=document.querySelector('.tab[data-s="s-wird"]'); if(t) t.click();
+    } else if(data.action==='kahf'){
+      const t=document.querySelector('.tab[data-s="s-wird"]'); if(t) t.click();
+      settings.wirdMode='mushaf'; saveSettings();
+      $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m==='mushaf'));
+      setTimeout(()=>{
+        try{
+          if(WIRD && WIRD.sur){
+            const idx=WIRD.sur.findIndex(s=>s.s===KAHF_SURA_NUM);
+            if(idx>=0){ settings.mushafSura=idx; saveSettings();
+              const sel=$('#sura-select'); if(sel) sel.value=idx; scrollToSura(idx, true); }
+          }
+        }catch(e){}
+      }, 900);
     } else if(data.action==='listen'){
       const t=document.querySelector('.tab[data-s="s-listen"]'); if(t) t.click();
     }
@@ -1161,7 +1174,13 @@ const AZKAR_SLOTS=[
   {h:17, title:'حان وقت أذكار المساء 🌇', body:['من بعد العصر إلى المغرب — لا تنسَ أذكار المساء'], data:{action:'azkar', tab:'evening'}},
   {h:22, title:'حان وقت أذكار النوم 🌙',  body:['قبل أن تنام، اختم يومك بأذكار النوم'], data:{action:'azkar', tab:'sleep'}},
 ];
-const SALAT_HOURS=[7,10,13,16,19,22]; // 6 مرّات متفرّقة في اليوم
+const SALAT_HOURS=[7,10,13,16,19,22]; // 6 مرّات متفرّقة في الأيام العادية
+const SALAT_HOURS_FRIDAY=[6,8,10,11,12,14,16,18,20,22]; // 10 مرّات يوم الجمعة (الإكثار من الصلاة على النبي ﷺ)
+function isFridayNow(){ return new Date().getDay()===5; }
+function salatHoursToday(){ return isFridayNow() ? SALAT_HOURS_FRIDAY : SALAT_HOURS; }
+// تذكير قراءة سورة الكهف يوم الجمعة
+const KAHF_HOUR=9;
+const KAHF_SURA_NUM=18;
 /* تذكير بقراءة القرآن مرّتين يوميًّا — يتوقّف تلقائيًّا إن كان قد قرأ اليوم */
 const QURAN_READ_SLOTS=[
   {h:12, title:'📖 لا تنسَ وِردك من القرآن', body:['ولو ٨ أسطر فقط تكفي — اقرأ وِردك اليوم'], data:{action:'wird'}},
@@ -1184,11 +1203,20 @@ function scheduleChecks(){
           fireNotification(slot.title, slot.body, slot.data); }
       }
     }
-    if(settings.salat && SALAT_HOURS.includes(h) && m<5){
+    if(settings.salat && salatHoursToday().includes(h) && m<5){
       const sf = store.get('az_salatfired_'+todayKey(), {});
       if(!sf[h]){ sf[h]=1; store.set('az_salatfired_'+todayKey(), sf);
-        fireNotification('صَلِّ على الحبيب ﷺ', ['اللهم صلِّ وسلّم على سيّدنا محمد ﷺ']);
+        const fri = now.getDay()===5;
+        fireNotification(fri?'يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ':'صَلِّ على الحبيب ﷺ',
+          ['اللهم صلِّ وسلّم على سيّدنا محمد ﷺ']);
         showSalatToast(); }
+    }
+    // تذكير سورة الكهف يوم الجمعة
+    if(settings.notif && now.getDay()===5 && h===KAHF_HOUR && m<10){
+      const kf = store.get('az_kahffired_'+todayKey(), {});
+      if(!kf.done){ kf.done=1; store.set('az_kahffired_'+todayKey(), kf);
+        fireNotification('اليوم الجمعة — سورة الكهف 📖',
+          ['من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين'], {action:'kahf'}); }
     }
     if(settings.notif && m<10 && !qreadToday()){
       const qslot = QURAN_READ_SLOTS.find(s=>s.h===h);
@@ -2108,7 +2136,7 @@ async function scheduleNativeAdhan(){
     const g = geoStore(); if(!g) return;
     const prayers=[['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
     const notifs=[]; let id=1000; const nowMs=Date.now();
-    for(let day=0; day<7; day++){
+    for(let day=0; day<8; day++){ // 8 أيام لضمان تغطية جمعة قادمة كاملة دائمًا
       const d=new Date(); d.setDate(d.getDate()+day);
       const pt=computePrayers(g.lat,g.lng,d); if(!pt) continue;
       prayers.forEach(([k,nm])=>{
@@ -2127,6 +2155,27 @@ async function scheduleNativeAdhan(){
           }
         }
       });
+      // خاصّ بيوم الجمعة: الإكثار من الصلاة على النبي ﷺ (10 مرّات) + تذكير سورة الكهف
+      const isFri = d.getDay()===5;
+      if(settings.salat){
+        (isFri ? SALAT_HOURS_FRIDAY : SALAT_HOURS).forEach(hh=>{
+          const at=new Date(d); at.setHours(hh,0,0,0);
+          if(at.getTime() > nowMs+60000){
+            notifs.push({ id:id++, channelId:'reminders',
+              title:isFri?'يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ':'صَلِّ على الحبيب ﷺ',
+              body:'اللهم صلِّ وسلّم على سيّدنا محمد ﷺ',
+              schedule:{ at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+          }
+        });
+      }
+      if(settings.notif && isFri){
+        const at=new Date(d); at.setHours(KAHF_HOUR,0,0,0);
+        if(at.getTime() > nowMs+60000){
+          notifs.push({ id:id++, channelId:'reminders', title:'اليوم الجمعة — سورة الكهف 📖',
+            body:'من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين',
+            schedule:{ at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+        }
+      }
     }
     if(notifs.length) await LN.schedule({ notifications: notifs });
   }catch(e){}
