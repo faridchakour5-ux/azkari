@@ -424,6 +424,17 @@
   .mushaf-jump .chev{font-size:12px; color:var(--text-3);}
   .mushaf-jump:active{transform:translateX(-50%) scale(.96);}
 
+  /* زرّ تتبّع التلاوة العائم (تمرير المصحف تلقائيًّا مع الصوت) */
+  .follow-pill{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(12px); z-index:70; display:none; align-items:center; gap:8px;
+    border:1px solid var(--line); background:var(--card); color:var(--text-2); box-shadow:var(--shadow-2);
+    border-radius:22px; padding:10px 18px; font:inherit; font-weight:800; font-size:14px;
+    opacity:0; transition:opacity .2s ease, transform .2s ease, background-color .2s, color .2s;}
+  .follow-pill.show{display:flex; opacity:1; transform:translateX(-50%) translateY(0);}
+  .follow-pill.on{background:var(--accent); color:#fff; border-color:transparent;}
+  .follow-pill:active{transform:translateX(-50%) scale(.96);}
+  .follow-pill .fp-ic{width:16px; height:16px; display:inline-flex;}
+
   /* تكبير/تصغير خطّ القرآن العائم — يظهر أثناء القراءة عند الرجوع للأعلى، كزرّ السورة */
   .qzoom-float{position:fixed; top:calc(env(safe-area-inset-top) + 10px); right:16px;
     z-index:60; display:flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--card);
@@ -551,6 +562,10 @@
   <span class="qval" id="q-zoom-val-float">100%</span>
   <button id="q-plus-float" aria-label="تكبير الخط">A+</button>
 </div>
+
+<button class="follow-pill" id="follow-pill" aria-label="تتبّع التلاوة">
+  <span class="fp-ic" id="follow-pill-ic"></span><span id="follow-pill-label">تتبّع التلاوة</span>
+</button>
 
 <div class="sura-overlay" id="sura-overlay">
   <div class="sura-sheet">
@@ -1374,6 +1389,7 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   if(t.dataset.s==='s-wird') openWird();
   if(t.dataset.s==='s-listen') openListen();
   if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} }
+  try{ renderFollowPill(); }catch(e){}
 }));
 
 let __splashTimer=null;
@@ -1844,9 +1860,75 @@ async function readAlongCurrentSurah(){
   setTimeout(()=>{
     const sel=$('#sura-select'); if(sel) sel.value=idx;
     scrollToSura(idx, true);
+    setTimeout(()=> startFollow(), 900); // بدء التتبّع التلقائي بعد الوصول للسورة
   }, 700);
 }
 $('#reciter-read') && $('#reciter-read').addEventListener('click', readAlongCurrentSurah);
+
+/* ==================== تتبّع التلاوة: تمرير المصحف تلقائيًّا مع الصوت (بلا لمس) ==================== */
+const FOLLOW_ICON_ON  = '<svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+const FOLLOW_ICON_OFF = '<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 5v14"/><path d="M5 12l7 7 7-7"/></svg>';
+let __follow=false, __followRAF=null, __followPausedUntil=0, __autoScrolling=false;
+function mushafFollowActive(){ return typeof wirdMode==='function' && wirdMode()==='mushaf' && $('#s-wird') && $('#s-wird').classList.contains('active'); }
+function audioPlaying(){ const a=$('#reciter-audio'); return a && !a.paused && !a.ended && a.currentTime>0; }
+function suraRegion(si){
+  const start=document.getElementById('msura-'+si); if(!start) return null;
+  const next=document.getElementById('msura-'+(si+1));
+  const body=$('#wird-body');
+  const top=start.getBoundingClientRect().top + window.scrollY;
+  let bottom;
+  if(next) bottom=next.getBoundingClientRect().top + window.scrollY;
+  else if(body) bottom=body.getBoundingClientRect().bottom + window.scrollY;
+  else bottom=top+2000;
+  return { top, bottom:Math.max(bottom, top+200) };
+}
+function followTick(){
+  __followRAF=null;
+  if(!__follow){ return; }
+  const audio=$('#reciter-audio');
+  if(!audio || audio.paused || __audioSura==null || !mushafFollowActive()){ __followRAF=requestAnimationFrame(followTick); return; }
+  if(Date.now() < __followPausedUntil){ __followRAF=requestAnimationFrame(followTick); return; }
+  const dur=audio.duration, cur=audio.currentTime;
+  if(dur && isFinite(dur) && dur>0){
+    const reg=suraRegion(__audioSura);
+    if(reg){
+      const progress=Math.min(1, Math.max(0, cur/dur));
+      const readingLine=window.innerHeight*0.36;
+      const target=Math.max(0, reg.top + progress*(reg.bottom-reg.top) - readingLine);
+      const currentY=window.scrollY;
+      const diff=target-currentY;
+      if(Math.abs(diff)>1.2){
+        __autoScrolling=true;
+        window.scrollTo(0, currentY + diff*0.07); // تمرير سلس متدرّج
+        __autoScrolling=false;
+      }
+    }
+  }
+  __followRAF=requestAnimationFrame(followTick);
+}
+function renderFollowPill(){
+  const pill=$('#follow-pill'); if(!pill) return;
+  const visible = mushafFollowActive() && audioPlaying() && __audioSura!=null;
+  pill.classList.toggle('show', visible);
+  pill.classList.toggle('on', __follow);
+  const ic=$('#follow-pill-ic'), lbl=$('#follow-pill-label');
+  if(ic) ic.innerHTML = __follow ? FOLLOW_ICON_ON : FOLLOW_ICON_OFF;
+  if(lbl) lbl.textContent = __follow ? 'إيقاف التتبّع' : 'تتبّع التلاوة';
+}
+function startFollow(){
+  if(!mushafFollowActive() || !audioPlaying()) { renderFollowPill(); return; }
+  __follow=true; __followPausedUntil=0;
+  renderFollowPill();
+  if(!__followRAF) __followRAF=requestAnimationFrame(followTick);
+}
+function stopFollow(){
+  __follow=false;
+  if(__followRAF){ cancelAnimationFrame(__followRAF); __followRAF=null; }
+  renderFollowPill();
+}
+$('#follow-pill') && $('#follow-pill').addEventListener('click', ()=>{ vibrate(6); __follow ? stopFollow() : startFollow(); });
+// إيقاف مؤقّت للتتبّع عند تمرير المستخدم يدويًّا (يستأنف بعد 5 ثوانٍ)
+['touchstart','wheel'].forEach(ev=> window.addEventListener(ev, ()=>{ if(__follow && !__autoScrolling) __followPausedUntil=Date.now()+5000; }, {passive:true}));
 /* ---- Media Session: يبقي الصوت شغّالًا وقفل الشاشة مضاء بأزرار تحكّم في شريط الإشعارات ---- */
 function setupMediaSession(){
   if(!('mediaSession' in navigator)) return;
@@ -1963,8 +2045,9 @@ $('#reciter-audio').addEventListener('ended', ()=>{
     playReciterSurah(info, __audioSura+1);
   }
 });
-$('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; });
-$('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; });
+$('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; try{ renderFollowPill(); }catch(e){} });
+$('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; try{ renderFollowPill(); }catch(e){} });
+$('#reciter-audio').addEventListener('ended', ()=>{ try{ renderFollowPill(); }catch(e){} });
 setupMediaSession();
 let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){
@@ -2082,6 +2165,7 @@ $$('#wird-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{
   const m=b.dataset.m; if(wirdMode()===m) return;
   settings.wirdMode=m; saveSettings();
   if(WIRD) applyWirdMode();
+  if(m!=='mushaf') stopFollow(); else { try{ renderFollowPill(); }catch(e){} }
   vibrate(6);
 }));
 
