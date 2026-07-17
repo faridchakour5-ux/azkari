@@ -36,6 +36,9 @@
     --shadow-2:0 4px 14px rgba(47,158,68,.25);
     --tab-idle:#2F9E44; --tab-on:#C71585; --tab-on-bg:rgba(199,21,133,.10);
     --qc-blue:#2166D6; --qc-blue2:#16509E; --qc-navy:#0B2C66;
+    /* ألوان زرّي «اقرأ» (أزرق) و«تكرار» (كهرماني) في صفحة الاستماع */
+    --c-read:#1553CC; --c-read-bg:rgba(28,95,191,.16);
+    --c-repeat:#9E6410; --c-repeat-bg:rgba(169,113,26,.17);
   }
   :root[data-bg="beige"]{
     --bg:#F1E8D6; --group:#F1E8D6; --card:#F7EFDF; --card-2:#F7EFDF;
@@ -77,6 +80,8 @@
     --shadow-2:0 4px 14px rgba(0,0,0,.5);
     --tab-idle:#34C77B; --tab-on:#F06CB1; --tab-on-bg:rgba(240,108,177,.14);
     --qc-blue:#78B0FF; --qc-blue2:#5E97F2; --qc-navy:#4C86E6;
+    --c-read:#7FB2FF; --c-read-bg:rgba(127,178,255,.16);
+    --c-repeat:#E3B25A; --c-repeat-bg:rgba(227,178,90,.16);
     color-scheme:dark;
   }
 
@@ -335,7 +340,10 @@
     display:inline-flex; align-items:center; justify-content:center; gap:6px;
     transition:transform .13s ease, background-color .2s, color .2s;}
   .reciter-action-btn:active{transform:scale(.96);}
-  .reciter-action-btn.on{background:var(--accent); color:#fff; border-color:transparent;}
+  /* لون مميّز لكل زرّ: أزرق للقراءة، كهرماني للتكرار */
+  #reciter-read{background:var(--c-read-bg); color:var(--c-read); border-color:transparent;}
+  #reciter-repeat{background:var(--c-repeat-bg); color:var(--c-repeat); border-color:transparent;}
+  #reciter-repeat.on{background:var(--c-repeat); color:#fff;}
 
   /* قائمة السور في صفحة الاستماع */
   #s-listen .reciter-box{position:sticky; top:0; z-index:5; background:var(--bg); padding-bottom:8px;}
