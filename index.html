@@ -344,6 +344,11 @@
   #reciter-read{background:var(--c-read-bg); color:var(--c-read); border-color:transparent;}
   #reciter-repeat{background:var(--c-repeat-bg); color:var(--c-repeat); border-color:transparent;}
   #reciter-repeat.on{background:var(--c-repeat); color:#fff;}
+  /* توزيع لبق للّونين على أزرار مختارة عبر الصفحات */
+  .btn-row.b-blue{color:var(--c-read);}
+  .btn-row.b-amber{color:var(--c-repeat);}
+  .locbtn.b-blue{color:var(--c-read); background:var(--c-read-bg);}
+  .mushaf-resume.b-amber{color:var(--c-repeat) !important; background:var(--c-repeat-bg) !important;}
 
   /* قائمة السور في صفحة الاستماع */
   #s-listen .reciter-box{position:sticky; top:0; z-index:5; background:var(--bg); padding-bottom:8px;}
@@ -443,6 +448,20 @@
   .follow-pill:active{transform:translateX(-50%) scale(.96);}
   .follow-pill .fp-ic{width:16px; height:16px; display:inline-flex;}
 
+  /* تمرير تلقائي للقراءة بسرعة قابلة للتحكّم */
+  .autoread-pill{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(12px); z-index:70; display:none; align-items:center; gap:6px;
+    border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow-2); border-radius:22px;
+    padding:6px 8px; opacity:0; transition:opacity .2s ease, transform .2s ease;}
+  .autoread-pill.show{display:flex; opacity:1; transform:translateX(-50%) translateY(0);}
+  .autoread-pill .ar-spd{width:34px; height:34px; border:1px solid var(--line); border-radius:11px;
+    background:var(--fill-2); color:var(--c-read); font-weight:800; font-size:19px; line-height:1;}
+  .autoread-pill .ar-spd:active{transform:scale(.9);}
+  .autoread-pill .ar-main{display:inline-flex; align-items:center; gap:7px; border:0; background:transparent;
+    color:var(--text-2); font:inherit; font-weight:800; font-size:13.5px; padding:0 6px; min-width:104px; justify-content:center;}
+  .autoread-pill .ar-main.on{color:var(--c-read);}
+  .autoread-pill .ar-ic{width:16px; height:16px; display:inline-flex;}
+
   /* تكبير/تصغير خطّ القرآن العائم — يظهر أثناء القراءة عند الرجوع للأعلى، كزرّ السورة */
   .qzoom-float{position:fixed; top:calc(env(safe-area-inset-top) + 10px); right:16px;
     z-index:60; display:flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--card);
@@ -491,7 +510,7 @@
     <h1 id="az-title">أذكار الصباح</h1>
     <div class="az-source" id="az-source"></div>
   </div>
-  <button class="locbtn" id="loc-btn"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>تفعيل مواقيت الصلاة حسب موقعك</button>
+  <button class="locbtn b-blue" id="loc-btn"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>تفعيل مواقيت الصلاة حسب موقعك</button>
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
   <div class="seg" id="time-seg"></div>
   <div class="az-scope" id="az-scope" style="display:none">
@@ -523,7 +542,7 @@
     <div class="selectwrap mushaf-pick">
       <select id="sura-select" aria-label="اختر السورة"></select>
     </div>
-    <button class="mushaf-resume" id="mushaf-resume" style="display:none">↩︎ تابِع القراءة من حيث وصلت</button>
+    <button class="mushaf-resume b-amber" id="mushaf-resume" style="display:none">↩︎ تابِع القراءة من حيث وصلت</button>
   </div>
   <div class="qzoom" id="q-zoom" title="تكبير خط القرآن">
     <button id="q-minus" aria-label="تصغير الخط">A−</button>
@@ -574,6 +593,12 @@
 <button class="follow-pill" id="follow-pill" aria-label="تتبّع التلاوة">
   <span class="fp-ic" id="follow-pill-ic"></span><span id="follow-pill-label">تتبّع التلاوة</span>
 </button>
+
+<div class="autoread-pill" id="autoread-pill">
+  <button class="ar-spd" id="autoread-slower" aria-label="أبطأ">−</button>
+  <button class="ar-main" id="autoread-toggle"><span class="ar-ic" id="autoread-ic"></span><span id="autoread-label">تمرير للقراءة</span></button>
+  <button class="ar-spd" id="autoread-faster" aria-label="أسرع">+</button>
+</div>
 
 <div class="sura-overlay" id="sura-overlay">
   <div class="sura-sheet">
@@ -713,8 +738,8 @@
         <button data-r="wadee" class="on">وديع اليمني</button>
       </div>
     </div>
-    <div class="btn-row" id="adhan-test"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8a4 4 0 0 1 0 8"/><path d="M19 5a8 8 0 0 1 0 14"/></svg>تجربة الأذان الآن</div>
-    <div class="btn-row" id="notif-test">تجربة الإشعار الآن</div>
+    <div class="btn-row b-amber" id="adhan-test"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8a4 4 0 0 1 0 8"/><path d="M19 5a8 8 0 0 1 0 14"/></svg>تجربة الأذان الآن</div>
+    <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
   </div>
   <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك، وتذكير قبل كل أذان بـ10 دقائق. رفع الأذان بصوت المؤذّن عند دخول وقت كل صلاة (يحتاج تفعيل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار، ويعمل بلا إنترنت). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا، و10 مرّات يوم الجمعة، مع تذكير بقراءة سورة الكهف صباح الجمعة. دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
 
@@ -723,8 +748,8 @@
     <div class="row" style="display:block; padding:14px 16px;">
       <div id="backup-status" style="color:var(--text-2); font-size:14px; line-height:1.9;"></div>
     </div>
-    <div class="btn-row" id="backup-save"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>حفظ تقدّمي في ملف</div>
-    <div class="btn-row" id="backup-restore"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="M7 13l5-5 5 5"/><path d="M4 4h16"/></svg>استعادة من ملف</div>
+    <div class="btn-row b-blue" id="backup-save"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>حفظ تقدّمي في ملف</div>
+    <div class="btn-row b-amber" id="backup-restore"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="M7 13l5-5 5 5"/><path d="M4 4h16"/></svg>استعادة من ملف</div>
     <input type="file" id="backup-file" accept="application/json,.json" style="display:none">
   </div>
   <div class="gnote">تقدّمك (موضعك في الوِرد، الأذكار المُنجَزة، السلسلة، وأيام القراءة) يُحفَظ تلقائياً في هذا المتصفّح. احفظ نسخة في ملف لنقلها إلى جهاز آخر أو لاستعادتها إذا مُسحت بيانات المتصفّح.</div>
@@ -1397,7 +1422,8 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   if(t.dataset.s==='s-wird') openWird();
   if(t.dataset.s==='s-listen') openListen();
   if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} }
-  try{ renderFollowPill(); }catch(e){}
+  if(t.dataset.s!=='s-wird'){ try{ stopAutoRead(); }catch(e){} }
+  try{ renderFollowPill(); renderAutoReadPill(); }catch(e){}
 }));
 
 let __splashTimer=null;
@@ -1660,7 +1686,7 @@ function onScrollForJump(){
     if(y>__lastScrollY+3) __scrollDir='down';
     else if(y<__lastScrollY-3) __scrollDir='up';
     __lastScrollY=y;
-    updateMushafJump(); __jumpTicking=false;
+    updateMushafJump(); try{ renderAutoReadPill(); }catch(e){} __jumpTicking=false;
   });
 }
 window.addEventListener('scroll', onScrollForJump, {passive:true});
@@ -1925,6 +1951,7 @@ function renderFollowPill(){
 }
 function startFollow(){
   if(!mushafFollowActive() || !audioPlaying()) { renderFollowPill(); return; }
+  try{ stopAutoRead(); }catch(e){}
   __follow=true; __followPausedUntil=0;
   renderFollowPill();
   if(!__followRAF) __followRAF=requestAnimationFrame(followTick);
@@ -1936,7 +1963,56 @@ function stopFollow(){
 }
 $('#follow-pill') && $('#follow-pill').addEventListener('click', ()=>{ vibrate(6); __follow ? stopFollow() : startFollow(); });
 // إيقاف مؤقّت للتتبّع عند تمرير المستخدم يدويًّا (يستأنف بعد 5 ثوانٍ)
-['touchstart','wheel'].forEach(ev=> window.addEventListener(ev, ()=>{ if(__follow && !__autoScrolling) __followPausedUntil=Date.now()+5000; }, {passive:true}));
+['touchstart','wheel'].forEach(ev=> window.addEventListener(ev, ()=>{
+  if(__autoScrolling) return;
+  if(__follow) __followPausedUntil=Date.now()+5000;
+  if(__autoRead) __autoReadPausedUntil=Date.now()+3000;
+}, {passive:true}));
+
+/* ==================== تمرير تلقائي لتلاوة الورد (بلا صوت) بسرعة قابلة للتحكّم ==================== */
+let __autoRead=false, __autoReadRAF=null, __autoReadLast=0, __autoReadPausedUntil=0, __autoReadY=0;
+function autoReadSpeed(){ return Math.min(140, Math.max(12, settings.autoReadSpeed||42)); }
+function wirdScreenActive(){ return $('#s-wird') && $('#s-wird').classList.contains('active'); }
+function pageScrollable(){ return (document.documentElement.scrollHeight - window.innerHeight) > 120; }
+function autoReadShouldShow(){ return wirdScreenActive() && pageScrollable() && !audioPlaying(); }
+function renderAutoReadPill(){
+  const pill=$('#autoread-pill'); if(!pill) return;
+  pill.classList.toggle('show', autoReadShouldShow());
+  const main=$('#autoread-toggle'); if(main) main.classList.toggle('on', __autoRead);
+  const ic=$('#autoread-ic'); if(ic) ic.innerHTML = __autoRead ? FOLLOW_ICON_ON : FOLLOW_ICON_OFF;
+  const lbl=$('#autoread-label'); if(lbl) lbl.textContent = __autoRead ? 'إيقاف التمرير' : 'تمرير للقراءة';
+}
+function autoReadTick(ts){
+  __autoReadRAF=null;
+  if(!__autoRead) return;
+  if(!wirdScreenActive()){ __autoReadRAF=requestAnimationFrame(autoReadTick); return; }
+  // أثناء تمرير المستخدم اليدوي: نتوقّف ونزامن الموضع معه
+  if(Date.now() < __autoReadPausedUntil){ __autoReadLast=ts; __autoReadY=window.scrollY; __autoReadRAF=requestAnimationFrame(autoReadTick); return; }
+  if(!__autoReadLast){ __autoReadLast=ts; __autoReadY=window.scrollY; }
+  const dt=Math.min(0.1, (ts-__autoReadLast)/1000); __autoReadLast=ts;
+  const maxY=document.documentElement.scrollHeight - window.innerHeight;
+  __autoReadY += autoReadSpeed()*dt; // مُراكِم كسريّ لتفادي فقدان الأجزاء دون البكسل
+  if(__autoReadY >= maxY-1){ __autoScrolling=true; window.scrollTo(0, maxY); __autoScrolling=false; stopAutoRead(); return; }
+  __autoScrolling=true;
+  window.scrollTo(0, __autoReadY);
+  __autoScrolling=false;
+  __autoReadRAF=requestAnimationFrame(autoReadTick);
+}
+function startAutoRead(){
+  if(!wirdScreenActive()) return;
+  try{ stopFollow(); }catch(e){}
+  __autoRead=true; __autoReadLast=0; __autoReadY=window.scrollY; __autoReadPausedUntil=0;
+  renderAutoReadPill();
+  if(!__autoReadRAF) __autoReadRAF=requestAnimationFrame(autoReadTick);
+}
+function stopAutoRead(){
+  __autoRead=false;
+  if(__autoReadRAF){ cancelAnimationFrame(__autoReadRAF); __autoReadRAF=null; }
+  renderAutoReadPill();
+}
+$('#autoread-toggle') && $('#autoread-toggle').addEventListener('click', ()=>{ vibrate(6); __autoRead ? stopAutoRead() : startAutoRead(); });
+$('#autoread-slower') && $('#autoread-slower').addEventListener('click', ()=>{ settings.autoReadSpeed=Math.max(12, autoReadSpeed()-12); saveSettings(); vibrate(4); showToast('سرعة التمرير: '+Math.round(autoReadSpeed()/12), 1200); });
+$('#autoread-faster') && $('#autoread-faster').addEventListener('click', ()=>{ settings.autoReadSpeed=Math.min(140, autoReadSpeed()+12); saveSettings(); vibrate(4); showToast('سرعة التمرير: '+Math.round(autoReadSpeed()/12), 1200); });
 /* ---- Media Session: يبقي الصوت شغّالًا وقفل الشاشة مضاء بأزرار تحكّم في شريط الإشعارات ---- */
 function setupMediaSession(){
   if(!('mediaSession' in navigator)) return;
@@ -2053,9 +2129,9 @@ $('#reciter-audio').addEventListener('ended', ()=>{
     playReciterSurah(info, __audioSura+1);
   }
 });
-$('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; try{ renderFollowPill(); }catch(e){} });
-$('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; try{ renderFollowPill(); }catch(e){} });
-$('#reciter-audio').addEventListener('ended', ()=>{ try{ renderFollowPill(); }catch(e){} });
+$('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
+$('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
+$('#reciter-audio').addEventListener('ended', ()=>{ try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 setupMediaSession();
 let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){
@@ -2079,6 +2155,7 @@ function applyWirdMode(){
   $('#wird-h1').textContent = daily?'وِرد اليوم':'المصحف الكريم';
   if(daily){ renderWird(); if($('#mushaf-jump')) $('#mushaf-jump').classList.remove('show'); }
   else { buildSuraSelect(); renderMushaf(); }
+  setTimeout(()=>{ try{ renderAutoReadPill(); }catch(e){} }, 400);
 }
 
 function renderAmountChips(){
@@ -2174,6 +2251,7 @@ $$('#wird-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{
   settings.wirdMode=m; saveSettings();
   if(WIRD) applyWirdMode();
   if(m!=='mushaf') stopFollow(); else { try{ renderFollowPill(); }catch(e){} }
+  try{ renderAutoReadPill(); }catch(e){}
   vibrate(6);
 }));
 
