@@ -805,7 +805,7 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', adhan:true, muezzin:'wadee' };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', adhan:true, muezzin:'wadee', autoReadLevel:2.5 };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
@@ -1971,7 +1971,10 @@ $('#follow-pill') && $('#follow-pill').addEventListener('click', ()=>{ vibrate(6
 
 /* ==================== تمرير تلقائي لتلاوة الورد (بلا صوت) بسرعة قابلة للتحكّم ==================== */
 let __autoRead=false, __autoReadRAF=null, __autoReadLast=0, __autoReadPausedUntil=0, __autoReadY=0;
-function autoReadSpeed(){ return Math.min(140, Math.max(12, settings.autoReadSpeed||42)); }
+const AR_LEVELS=[1,1.5,2,2.5,3,3.5,4,4.5,5]; // مستويات السرعة، الافتراضي 2.5
+function autoReadLevel(){ const l=settings.autoReadLevel; return AR_LEVELS.includes(l) ? l : 2.5; }
+function fmtLevel(l){ return String(l).replace('.', '٫'); } // فاصلة عربية للعرض
+function autoReadSpeed(){ return autoReadLevel()*18; } // بكسل/ثانية
 function wirdScreenActive(){ return $('#s-wird') && $('#s-wird').classList.contains('active'); }
 function pageScrollable(){ return (document.documentElement.scrollHeight - window.innerHeight) > 120; }
 function autoReadShouldShow(){ return wirdScreenActive() && pageScrollable() && !audioPlaying(); }
@@ -1980,7 +1983,7 @@ function renderAutoReadPill(){
   pill.classList.toggle('show', autoReadShouldShow());
   const main=$('#autoread-toggle'); if(main) main.classList.toggle('on', __autoRead);
   const ic=$('#autoread-ic'); if(ic) ic.innerHTML = __autoRead ? FOLLOW_ICON_ON : FOLLOW_ICON_OFF;
-  const lbl=$('#autoread-label'); if(lbl) lbl.textContent = __autoRead ? 'إيقاف التمرير' : 'تمرير للقراءة';
+  const lbl=$('#autoread-label'); if(lbl) lbl.textContent = __autoRead ? ('سرعة '+fmtLevel(autoReadLevel())) : 'تمرير للقراءة';
 }
 function autoReadTick(ts){
   __autoReadRAF=null;
@@ -2011,8 +2014,15 @@ function stopAutoRead(){
   renderAutoReadPill();
 }
 $('#autoread-toggle') && $('#autoread-toggle').addEventListener('click', ()=>{ vibrate(6); __autoRead ? stopAutoRead() : startAutoRead(); });
-$('#autoread-slower') && $('#autoread-slower').addEventListener('click', ()=>{ settings.autoReadSpeed=Math.max(12, autoReadSpeed()-12); saveSettings(); vibrate(4); showToast('سرعة التمرير: '+Math.round(autoReadSpeed()/12), 1200); });
-$('#autoread-faster') && $('#autoread-faster').addEventListener('click', ()=>{ settings.autoReadSpeed=Math.min(140, autoReadSpeed()+12); saveSettings(); vibrate(4); showToast('سرعة التمرير: '+Math.round(autoReadSpeed()/12), 1200); });
+function stepAutoRead(dir){
+  const i=AR_LEVELS.indexOf(autoReadLevel());
+  const ni=Math.min(AR_LEVELS.length-1, Math.max(0, i+dir));
+  settings.autoReadLevel=AR_LEVELS[ni]; saveSettings(); vibrate(4);
+  renderAutoReadPill();
+  showToast('سرعة التمرير: '+fmtLevel(AR_LEVELS[ni]), 1200);
+}
+$('#autoread-slower') && $('#autoread-slower').addEventListener('click', ()=> stepAutoRead(-1));
+$('#autoread-faster') && $('#autoread-faster').addEventListener('click', ()=> stepAutoRead(+1));
 /* ---- Media Session: يبقي الصوت شغّالًا وقفل الشاشة مضاء بأزرار تحكّم في شريط الإشعارات ---- */
 function setupMediaSession(){
   if(!('mediaSession' in navigator)) return;
