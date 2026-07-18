@@ -2384,9 +2384,20 @@ function renderPrayers(){
   btn.style.display='none'; bar.style.display='flex'; prayerToday=pt;
   const A=window.adhan;
   let nextName='—', nextTime='', nextKey=null;
-  try{ const np=pt.nextPrayer(); nextKey=np; const nt=pt.timeForPrayer(np);
+  try{
+    const np=pt.nextPrayer();
     const map={fajr:'الفجر',sunrise:'الشروق',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء',none:'الفجر'};
-    nextName=map[np]||'—'; if(nt) nextTime=fmtTime(nt);
+    nextName=map[np]||'—';
+    if(np==='none'){
+      // بعد العشاء: القادمة فجر الغد
+      nextKey='fajr';
+      const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+      const ptTomorrow=computePrayers(g.lat,g.lng,tomorrow);
+      if(ptTomorrow && ptTomorrow.fajr) nextTime=fmtTime(ptTomorrow.fajr);
+    } else {
+      nextKey=np;
+      const nt=pt.timeForPrayer(np); if(nt) nextTime=fmtTime(nt);
+    }
   }catch(e){}
   const cur = (()=>{ try{ return pt.currentPrayer(); }catch(e){ return null; } })();
   let times='';
