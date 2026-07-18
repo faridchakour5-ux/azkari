@@ -1741,6 +1741,8 @@ $('#sura-overlay').addEventListener('click', e=>{ if(e.target.id==='sura-overlay
 /* ==================== الاستماع بصوت القرّاء ==================== */
 const RECITERS=[
   {id:'shur',       name:'سعود الشريم',      exact:'سعود الشريم',   match:['الشريم']},
+  {id:'ghamdi',      name:'سعد الغامدي',      exact:'سعد الغامدي',   match:['الغامدي'],
+    fallback:'https://server9.mp3quran.net/s_gmd/'},
   {id:'minshawi',    name:'محمد المنشاوي',     exact:'محمد صديق المنشاوي', match:['المنشاوي']},
   {id:'minshawi-mjwd', name:'المنشاوي (مجوّد)', exact:'محمد صديق المنشاوي', match:['المنشاوي'],
     prefer:/مجود/, fallback:'https://server10.mp3quran.net/minsh_mjwd/'},
