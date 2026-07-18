@@ -1201,6 +1201,17 @@ function applyNotifNavigation(data){
       }, 900);
     } else if(data.action==='listen'){
       const t=document.querySelector('.tab[data-s="s-listen"]'); if(t) t.click();
+    } else if(data.action==='adhan'){
+      // الضغط على إشعار الأذان يشغّله (نقر الإشعار تفاعلٌ يفكّ حظر الصوت غالبًا)
+      const nm=data.prayer||__lastAdhanPrayer||'الصلاة';
+      __lastAdhanPrayer=nm;
+      const audio=$('#adhan-audio');
+      showAdhanBanner(nm, false);
+      if(audio){
+        if(!audio.src || /data:audio/.test(audio.src)) audio.src=muezzinSrc();
+        audio.currentTime=0;
+        audio.play().then(()=> showAdhanBanner(nm, false)).catch(()=> showAdhanBanner(nm, true));
+      }
     }
   }catch(e){}
 }
@@ -1325,7 +1336,8 @@ function playAdhan(prayerName){
     // مُنع التشغيل التلقائي (المتصفّح يتطلّب لمسة) — نجعل الشريط قابلًا للنقر لتشغيل الأذان
     showAdhanBanner(prayerName, true);
   });
-  fireNotification('حان وقت صلاة '+(prayerName||''), ['الله أكبر، الله أكبر — اضغط شريط الأذان لسماعه']);
+  // الإشعار يحمل إجراء «adhan»: الضغط عليه يشغّل الأذان (لمسة المستخدم تفكّ حظر التشغيل)
+  fireNotification('🕌 حان وقت صلاة '+(prayerName||''), ['اضغط هنا لسماع الأذان — الله أكبر الله أكبر'], {action:'adhan', prayer:prayerName});
 }
 let __lastAdhanPrayer='الصلاة';
 function stopAdhan(){
@@ -1342,24 +1354,22 @@ $('#adhan-banner') && $('#adhan-banner').addEventListener('click', ()=>{
   }
 });
 $('#adhan-audio') && $('#adhan-audio').addEventListener('ended', ()=>{ const b=$('#adhan-banner'); if(b) b.classList.remove('show'); });
-/* فكّ قفل التشغيل التلقائي للأذان عند أوّل لمسة (المتصفّح يمنع الصوت التلقائي قبل تفاعل المستخدم) */
-(function unlockAdhanAudio(){
-  let done=false;
-  const unlock=()=>{
-    if(done) return; done=true;
-    document.removeEventListener('pointerdown', unlock);
-    const a=$('#adhan-audio'); if(!a) return;
-    try{
-      a.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-      a.muted=true;
-      const p=a.play();
-      const done2=()=>{ try{ a.pause(); a.currentTime=0; a.muted=false; a.removeAttribute('src'); }catch(e){} };
-      if(p&&p.then) p.then(done2).catch(()=>{ a.muted=false; });
-      else done2();
-    }catch(e){ try{ a.muted=false; }catch(_){} }
-  };
-  document.addEventListener('pointerdown', unlock);
-})();
+/* فكّ قفل التشغيل التلقائي للأذان: يُعاد عند كل لمسة (بعض المتصفّحات تُلغي الإذن) */
+function primeAdhanUnlock(){
+  const a=$('#adhan-audio'); if(!a) return;
+  // لا نُقاطع أذانًا جاريًا
+  if(a.src && !/data:audio/.test(a.src) && !a.paused) return;
+  try{
+    a.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+    a.muted=true;
+    const p=a.play();
+    const done=()=>{ try{ a.pause(); a.currentTime=0; a.muted=false; a.removeAttribute('src'); }catch(e){} };
+    if(p&&p.then) p.then(done).catch(()=>{ a.muted=false; });
+    else done();
+  }catch(e){ try{ a.muted=false; }catch(_){} }
+}
+document.addEventListener('pointerdown', primeAdhanUnlock, {passive:true});
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) primeAdhanUnlock(); });
 function checkAdhan(now){
   const g=geoStore(); if(!g) return;
   const pt=computePrayers(g.lat,g.lng); if(!pt) return;
