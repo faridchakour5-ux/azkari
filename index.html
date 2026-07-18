@@ -284,8 +284,10 @@
   .prayerbar .times{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
   .prayerbar .t{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:42px;}
   .prayerbar .t .nm{font-size:11px; color:var(--text-2);}
-  .prayerbar .t .vl{font-size:13px; font-weight:700; color:var(--c-repeat);}
+  .prayerbar .t .vl{font-size:13px; font-weight:700;}
   .prayerbar .t.cur .nm{color:var(--accent); font-weight:800;}
+  .prayerbar .t.next-p .nm{color:var(--c-read); font-weight:800;}
+  .prayerbar .t.next-p .vl{color:var(--c-repeat); font-weight:800;}
   .locbtn{display:block; margin:6px 16px 0; border:0; background:var(--card); color:var(--accent); font:inherit; font-weight:600; font-size:14px; padding:11px; border-radius:14px; width:calc(100% - 32px);}
 
   .week{display:flex; gap:6px;}
@@ -2368,14 +2370,14 @@ function renderPrayers(){
   const pt=computePrayers(g.lat,g.lng); if(!pt){ bar.style.display='none'; return; }
   btn.style.display='none'; bar.style.display='flex'; prayerToday=pt;
   const A=window.adhan;
-  let nextName='—', nextTime='';
-  try{ const np=pt.nextPrayer(); const nt=pt.timeForPrayer(np);
+  let nextName='—', nextTime='', nextKey=null;
+  try{ const np=pt.nextPrayer(); nextKey=np; const nt=pt.timeForPrayer(np);
     const map={fajr:'الفجر',sunrise:'الشروق',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء',none:'الفجر'};
     nextName=map[np]||'—'; if(nt) nextTime=fmtTime(nt);
   }catch(e){}
   const cur = (()=>{ try{ return pt.currentPrayer(); }catch(e){ return null; } })();
   let times='';
-  PRAYERS.forEach(([k,nm])=>{ const tv=pt[k]; if(!tv) return; const isCur=cur===k; times+='<div class="t'+(isCur?' cur':'')+'"><span class="nm">'+nm+'</span><span class="vl">'+fmtTime(tv)+'</span></div>'; });
+  PRAYERS.forEach(([k,nm])=>{ const tv=pt[k]; if(!tv) return; const isCur=cur===k; const isNext=(k===nextKey); times+='<div class="t'+(isCur?' cur':'')+(isNext?' next-p':'')+'"><span class="nm">'+nm+'</span><span class="vl">'+fmtTime(tv)+'</span></div>'; });
   bar.innerHTML='<div class="next"><b>'+nextName+'</b><span><span class="next-lbl">الصلاة القادمة</span> <span class="next-time">'+nextTime+'</span></span></div><div class="times">'+times+'</div>';
   // auto morning/evening by Asr
   autoTimeByPrayer(pt);
