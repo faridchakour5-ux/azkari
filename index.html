@@ -277,13 +277,15 @@
   .prayerbar{margin:6px 16px 0; background:var(--card); border-radius:16px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
     border:1px solid var(--line); box-shadow:var(--shadow-1);}
   .prayerbar .next{display:flex; flex-direction:column; gap:2px;}
-  .prayerbar .next b{font-size:17px; font-weight:800;}
+  .prayerbar .next b{font-size:17px; font-weight:800; color:var(--c-read);}
   .prayerbar .next span{font-size:13px; color:var(--text-2);}
+  .prayerbar .next .next-lbl{color:var(--c-read);}
+  .prayerbar .next .next-time{color:var(--c-repeat); font-weight:800;}
   .prayerbar .times{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
   .prayerbar .t{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:42px;}
   .prayerbar .t .nm{font-size:11px; color:var(--text-2);}
-  .prayerbar .t .vl{font-size:13px; font-weight:700;}
-  .prayerbar .t.cur .vl,.prayerbar .t.cur .nm{color:var(--accent);}
+  .prayerbar .t .vl{font-size:13px; font-weight:700; color:var(--c-repeat);}
+  .prayerbar .t.cur .nm{color:var(--c-read); font-weight:800;}
   .locbtn{display:block; margin:6px 16px 0; border:0; background:var(--card); color:var(--accent); font:inherit; font-weight:600; font-size:14px; padding:11px; border-radius:14px; width:calc(100% - 32px);}
 
   .week{display:flex; gap:6px;}
@@ -2374,7 +2376,7 @@ function renderPrayers(){
   const cur = (()=>{ try{ return pt.currentPrayer(); }catch(e){ return null; } })();
   let times='';
   PRAYERS.forEach(([k,nm])=>{ const tv=pt[k]; if(!tv) return; const isCur=cur===k; times+='<div class="t'+(isCur?' cur':'')+'"><span class="nm">'+nm+'</span><span class="vl">'+fmtTime(tv)+'</span></div>'; });
-  bar.innerHTML='<div class="next"><b>'+nextName+'</b><span>الصلاة القادمة '+nextTime+'</span></div><div class="times">'+times+'</div>';
+  bar.innerHTML='<div class="next"><b>'+nextName+'</b><span><span class="next-lbl">الصلاة القادمة</span> <span class="next-time">'+nextTime+'</span></span></div><div class="times">'+times+'</div>';
   // auto morning/evening by Asr
   autoTimeByPrayer(pt);
 }
