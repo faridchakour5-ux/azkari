@@ -1726,6 +1726,22 @@ function openSuraOverlay(curIdx, onPick, title){
   const cur=$('#sura-list button.cur');
   if(cur) cur.scrollIntoView({block:'center'});
 }
+/* ورقة سفلية عامّة بقائمة تسميات جاهزة (تُستعمل لاختيار عدد مرّات التكرار مثلًا) */
+function openLabelOverlay(items, curId, onPick, title){
+  const list=$('#sura-list'); if(!list) return;
+  list.innerHTML='';
+  items.forEach(it=>{
+    const b=document.createElement('button');
+    b.type='button'; b.textContent=it.label;
+    if(it.id===curId) b.classList.add('cur');
+    b.addEventListener('click', ()=> onPick(it.id));
+    list.appendChild(b);
+  });
+  $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = title || 'اختر';
+  $('#sura-overlay').classList.add('show');
+  const cur=$('#sura-list button.cur');
+  if(cur) cur.scrollIntoView({block:'center'});
+}
 function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); }
 $('#mushaf-jump').addEventListener('click', ()=>{
   vibrate(6);
@@ -1891,11 +1907,13 @@ function updateRepeatBadge(){
   if(lbl) lbl.textContent=repeatLabel();
 }
 $('#reciter-repeat') && $('#reciter-repeat').addEventListener('click', ()=>{
-  const idx=REPEAT_OPTIONS.findIndex(o=>o.id===__repeatMode);
-  __repeatMode=REPEAT_OPTIONS[(idx+1)%REPEAT_OPTIONS.length].id;
-  __repeatPlayed=1;
-  updateRepeatBadge(); vibrate(6);
-  showToast('التكرار: '+repeatLabel(), 1600);
+  vibrate(6);
+  openLabelOverlay(REPEAT_OPTIONS, __repeatMode, id=>{
+    __repeatMode=id; __repeatPlayed=1;
+    updateRepeatBadge(); vibrate(6);
+    closeSuraOverlay();
+    showToast('التكرار: '+repeatLabel(), 1600);
+  }, 'كم مرّة تريد الاستماع لهذه السورة؟');
 });
 /* ---- قراءة نفس السورة المُتلاة أثناء الاستماع ---- */
 async function readAlongCurrentSurah(){
