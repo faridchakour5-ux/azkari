@@ -178,6 +178,24 @@
     color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:800;}
   .info-btn{border:0; background:var(--fill); color:var(--text-2); width:34px; height:34px; border-radius:17px;
     font-size:17px; font-weight:700; line-height:1;}
+  .speak-btn{border:0; background:var(--fill); color:var(--c-read); width:34px; height:34px; border-radius:17px;
+    display:inline-flex; align-items:center; justify-content:center;}
+  .speak-btn:active{transform:scale(.9);}
+  .speak-btn.on{background:var(--c-read); color:#fff;}
+  .speak-btn .gh-ic{width:16px; height:16px;}
+  /* زرّ الاستماع الشامل للأذكار + الشريط العائم */
+  .listen-all-btn{border:1px solid var(--line); background:var(--card); color:var(--c-read); font:inherit;
+    font-weight:700; font-size:13px; padding:8px 14px; border-radius:14px; display:inline-flex; align-items:center; gap:6px;
+    box-shadow:var(--shadow-1); margin:8px 16px 0;}
+  .listen-all-btn:active{transform:scale(.97);}
+  .listen-all-btn .gh-ic{width:15px; height:15px;}
+  .speakall-pill{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(12px); z-index:70; display:none; align-items:center; gap:8px;
+    border:1px solid var(--line); background:var(--c-read); color:#fff; box-shadow:var(--shadow-2);
+    border-radius:22px; padding:10px 18px; font:inherit; font-weight:800; font-size:14px;
+    opacity:0; transition:opacity .2s ease, transform .2s ease;}
+  .speakall-pill.show{display:flex; opacity:1; transform:translateX(-50%) translateY(0);}
+  .card.speaking{border:1.5px solid var(--c-read);}
   .card.done{opacity:.5;}
   .card.done .rem{background:var(--text-3);}
   .card .tick{position:absolute; top:14px; left:14px; color:var(--c-read); font-size:20px; opacity:0; transition:opacity .25s; font-weight:800;}
@@ -522,6 +540,7 @@
   </div>
   <div class="progressbar"><i id="pg-fill"></i></div>
   <div class="progresslabel"><span id="pg-text">0 من 0</span><span id="pg-reset-day"></span></div>
+  <button class="listen-all-btn" id="listen-all-btn"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8a4 4 0 0 1 0 8"/><path d="M19 5a8 8 0 0 1 0 14"/></svg><span id="listen-all-label">استماع لكل الأذكار</span></button>
   <div class="list" id="az-list"></div>
 </section>
 
@@ -602,6 +621,11 @@
   <button class="ar-main" id="autoread-toggle"><span class="ar-ic" id="autoread-ic"></span><span id="autoread-label">تمرير للقراءة</span></button>
   <button class="ar-spd" id="autoread-faster" aria-label="أسرع">+</button>
 </div>
+
+<button class="speakall-pill" id="speakall-pill">
+  <svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+  <span id="speakall-label">إيقاف الاستماع</span>
+</button>
 
 <div class="sura-overlay" id="sura-overlay">
   <div class="sura-sheet">
@@ -914,7 +938,9 @@ function buildCats(){
     b.classList.toggle('on', c.id===currentTab);
     b.addEventListener('click', ()=>{
       $$('#time-seg button').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on'); currentTab=c.id; window.__userPickedTime=true; renderAzkar();
+      b.classList.add('on'); currentTab=c.id; window.__userPickedTime=true;
+      try{ stopAllSpeak(); }catch(e){}
+      renderAzkar();
       b.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
     });
     seg.appendChild(b);
@@ -973,15 +999,21 @@ function renderAzkar(){
       '<div class="txt">'+escapeHtml(text)+'</div>'+
       '<div class="meta">'+
         '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span>'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
+        '<span style="display:flex; gap:8px;">'+
+        '<button class="speak-btn" aria-label="استماع"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8a4 4 0 0 1 0 8"/><path d="M19 5a8 8 0 0 1 0 14"/></svg></button>'+
         (d.fadl||d.source ? '<button class="info-btn" aria-label="الفضل">ⓘ</button>':'')+
+        '</span>'+
       '</div>'+
       (d.fadl||d.source ? '<div class="fadl">'+
         (d.fadl?'<span class="lbl">الفضل</span>'+escapeHtml(d.fadl):'')+
         (d.source?'<span class="lbl">المصدر</span>'+escapeHtml(d.source):'')+
         '</div>':'');
 
-    // tap to count (ignore taps on info button / fadl)
+    // tap to count (ignore taps on info button / fadl / speak button)
     card.addEventListener('click', e=>{
+      if(e.target.closest('.speak-btn')){
+        toggleSpeakCard(card, text); return;
+      }
       if(e.target.closest('.info-btn')){
         card.querySelector('.fadl').classList.toggle('open'); return;
       }
@@ -1017,6 +1049,85 @@ function updateProgressBar(done,total){
 }
 
 function escapeHtml(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ==================== قراءة الأذكار صوتيًّا (تحويل النصّ إلى كلام على الجهاز) ==================== */
+let __arVoice=null;
+function pickArabicVoice(){
+  if(!('speechSynthesis' in window)) return null;
+  const voices=window.speechSynthesis.getVoices();
+  return voices.find(v=>/^ar/i.test(v.lang)) || null;
+}
+if('speechSynthesis' in window){
+  __arVoice=pickArabicVoice();
+  window.speechSynthesis.onvoiceschanged=()=>{ __arVoice=pickArabicVoice(); };
+}
+let __speakingCard=null;
+function speakOne(text, onEnd){
+  if(!('speechSynthesis' in window)){ showToast('هذا الجهاز لا يدعم القراءة الصوتية', 2200); return null; }
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ar-SA'; u.rate=0.9; u.pitch=1;
+  if(__arVoice){ try{ u.voice=__arVoice; }catch(e){} }
+  if(onEnd) u.onend=onEnd;
+  window.speechSynthesis.speak(u);
+  return u;
+}
+function stopSpeaking(){
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if(__speakingCard){ __speakingCard.classList.remove('speaking'); __speakingCard=null; }
+}
+function toggleSpeakCard(card, text){
+  vibrate(6);
+  stopAllSpeak(); // إيقاف وضع «استماع للكل» إن كان جاريًا
+  if(__speakingCard===card){ stopSpeaking(); return; }
+  stopSpeaking();
+  __speakingCard=card; card.classList.add('speaking');
+  speakOne(text, ()=>{ card.classList.remove('speaking'); if(__speakingCard===card) __speakingCard=null; });
+}
+/* استماع متسلسل لكل أذكار القائمة الحالية */
+let __speakAllOn=false, __speakAllIdx=0;
+function speakAllList(){ return azkarList(currentTab); }
+function updateSpeakAllPill(){
+  const pill=$('#speakall-pill'); if(!pill) return;
+  pill.classList.toggle('show', __speakAllOn);
+}
+function updateListenAllBtn(){
+  const lbl=$('#listen-all-label'); if(!lbl) return;
+  lbl.textContent = __speakAllOn ? 'جارٍ الاستماع…' : 'استماع لكل الأذكار';
+  const btn=$('#listen-all-btn'); if(btn) btn.classList.toggle('on', __speakAllOn);
+}
+function speakAllStep(){
+  if(!__speakAllOn) return;
+  const list=speakAllList();
+  if(__speakAllIdx>=list.length){ stopAllSpeak(); return; }
+  const d=list[__speakAllIdx];
+  const text = d.quran ? (settings.riwaya==='warsh'? d.warsh : d.hafs) : d.text;
+  const card=$('#az-list').children[__speakAllIdx];
+  if(__speakingCard) __speakingCard.classList.remove('speaking');
+  if(card){ card.classList.add('speaking'); __speakingCard=card; card.scrollIntoView({block:'center', behavior:'smooth'}); }
+  speakOne(text, ()=>{
+    if(!__speakAllOn) return;
+    __speakAllIdx++;
+    setTimeout(speakAllStep, 500); // فاصل قصير بين كل ذكر والذي يليه
+  });
+}
+function startSpeakAll(){
+  if(currentTab!=='morning' && currentTab!=='evening' && speakAllList().length===0) return;
+  stopSpeaking();
+  __speakAllOn=true; __speakAllIdx=0;
+  updateSpeakAllPill(); updateListenAllBtn();
+  speakAllStep();
+}
+function stopAllSpeak(){
+  __speakAllOn=false;
+  stopSpeaking();
+  updateSpeakAllPill(); updateListenAllBtn();
+}
+$('#listen-all-btn') && $('#listen-all-btn').addEventListener('click', ()=>{
+  vibrate(6);
+  __speakAllOn ? stopAllSpeak() : startSpeakAll();
+});
+$('#speakall-pill') && $('#speakall-pill').addEventListener('click', stopAllSpeak);
 
 buildCats();
 $$('#az-scope button').forEach(b=> b.addEventListener('click', ()=>{
@@ -1438,6 +1549,7 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   if(t.dataset.s==='s-listen') openListen();
   if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} }
   if(t.dataset.s!=='s-wird'){ try{ stopAutoRead(); }catch(e){} }
+  if(t.dataset.s!=='s-azkar'){ try{ stopAllSpeak(); }catch(e){} }
   try{ renderFollowPill(); renderAutoReadPill(); }catch(e){}
 }));
 
