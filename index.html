@@ -138,11 +138,12 @@
   .seg button{flex:1 0 auto; white-space:nowrap; border:0; background:transparent; color:var(--text); font:inherit;
     font-size:15px; font-weight:600; padding:7px 14px; border-radius:9px; z-index:1; transition:color .2s;}
   .seg button.on{background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.18);}
-  #wird-mode-seg button{flex:1 1 0; border-radius:12px;}
+  #wird-mode-seg button{flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
+  #wird-mode-seg button .gh-ic{margin:0;}
   #wird-mode-seg button[data-m="wird"]{background:var(--c-repeat-bg); color:var(--c-repeat);}
-  #wird-mode-seg button[data-m="mushaf"]{background:#D8E8F7; color:#4C7BAA;}
+  #wird-mode-seg button[data-m="mushaf"]{background:#EEF5FC; color:#7FA6C9;}
   #wird-mode-seg button[data-m="wird"].on{background:var(--c-repeat); color:#fff; box-shadow:0 1px 4px rgba(0,0,0,.18);}
-  #wird-mode-seg button[data-m="mushaf"].on{background:#AFCFEC; color:#1B3B5B; box-shadow:0 1px 4px rgba(0,0,0,.18);}
+  #wird-mode-seg button[data-m="mushaf"].on{background:#D8E8F7; color:#3E6C97; box-shadow:0 1px 4px rgba(0,0,0,.18);}
 
   .progressbar{margin:10px 16px 0; height:6px; border-radius:3px; background:var(--fill); overflow:hidden;}
   .progressbar i{display:block; height:100%; width:0; background:var(--c-repeat); border-radius:3px; transition:width .4s ease;}
@@ -550,8 +551,8 @@
   </div>
   <div class="wird-kpi" id="wird-kpi"></div>
   <div class="seg" id="wird-mode-seg">
-    <button data-m="wird" class="on">وِردي</button>
-    <button data-m="mushaf">المصحف كامل</button>
+    <button data-m="wird" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>وِردي</button>
+    <button data-m="mushaf"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>المصحف كامل</button>
   </div>
   <div id="wird-daily">
     <div class="progressbar"><i id="khatma-fill"></i></div>
