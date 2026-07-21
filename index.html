@@ -501,18 +501,6 @@
   .search-result .sr-sura{color:var(--c-read); font-weight:800; font-size:13px; margin-bottom:3px; display:block;}
   .search-result .sr-txt{font-family:'AmiriQuran',serif; font-size:17px; line-height:1.9;}
   .search-result .sr-txt mark{background:var(--c-repeat-bg); color:var(--c-repeat); border-radius:4px; padding:0 2px;}
-  .hifz-summary{padding:12px 20px; border-bottom:1px solid var(--sep); text-align:center; color:var(--text-2); font-size:14px;}
-  .hifz-summary b{color:var(--c-repeat); font-weight:800;}
-  .hifz-summary .hifz-bar{height:6px; border-radius:3px; background:var(--fill); overflow:hidden; margin-top:8px;}
-  .hifz-summary .hifz-bar i{display:block; height:100%; width:0; background:var(--c-repeat); border-radius:3px; transition:width .3s ease;}
-  .hifz-row{display:flex; align-items:center; gap:12px; width:100%; text-align:right; border:0; background:transparent;
-    color:var(--text); font:inherit; font-size:16px; font-weight:600; padding:12px 20px; border-bottom:1px solid var(--sep);}
-  .hifz-row:active{background:var(--fill);}
-  .hifz-row .hifz-check{flex:0 0 auto; width:24px; height:24px; border-radius:50%; border:2px solid var(--line);
-    display:flex; align-items:center; justify-content:center; color:#fff;}
-  .hifz-row.on .hifz-check{background:var(--c-repeat); border-color:var(--c-repeat);}
-  .hifz-row.on .hifz-name{color:var(--c-repeat); font-weight:800;}
-  .hifz-row .hifz-check svg{width:14px; height:14px;}
   .sura-list button{display:block; width:100%; text-align:right; border:0; background:transparent; color:var(--text);
     font:inherit; font-size:16px; font-weight:600; padding:13px 20px; border-bottom:1px solid var(--sep);}
   .sura-list button.cur{color:var(--accent); font-weight:800; background:var(--fill-2);}
@@ -571,7 +559,6 @@
     </div>
     <button class="mushaf-resume b-amber" id="mushaf-resume" style="display:none">↩︎ تابِع القراءة من حيث وصلت</button>
     <button class="mushaf-resume b-blue" id="quran-search-btn"><svg class="gh-ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>البحث في القرآن — سورة أو كلمة</button>
-    <button class="mushaf-resume b-amber" id="hifz-btn"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22.5v-18z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg>حفظ القرآن</button>
   </div>
   <div class="qzoom" id="q-zoom" title="تكبير خط القرآن">
     <button id="q-minus" aria-label="تصغير الخط">A−</button>
@@ -649,17 +636,6 @@
       <input type="search" id="quran-search-input" placeholder="اكتب اسم سورة أو كلمة من القرآن…" autocomplete="off">
     </div>
     <div class="sura-list" id="search-results"></div>
-  </div>
-</div>
-
-<div class="sura-overlay" id="hifz-overlay">
-  <div class="sura-sheet">
-    <div class="sura-sheet-head">
-      <span>حفظ القرآن</span>
-      <button id="hifz-overlay-close" aria-label="إغلاق">✕</button>
-    </div>
-    <div class="hifz-summary" id="hifz-summary"></div>
-    <div class="sura-list" id="hifz-list"></div>
   </div>
 </div>
 
@@ -1902,47 +1878,6 @@ $('#quran-search-btn') && $('#quran-search-btn').addEventListener('click', ()=>{
 });
 $('#search-overlay-close').addEventListener('click', closeSearchOverlay);
 $('#search-overlay').addEventListener('click', e=>{ if(e.target.id==='search-overlay') closeSearchOverlay(); });
-
-/* ==================== حفظ القرآن: قائمة بسيطة بالسور المحفوظة ==================== */
-const HIFZ_CHECK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>';
-function hifzData(){ return store.get('az_hifz', {}); }
-function saveHifzData(d){ store.set('az_hifz', d); }
-function closeHifzOverlay(){ $('#hifz-overlay').classList.remove('show'); }
-function updateHifzSummary(){
-  const el=$('#hifz-summary'); if(!el || !WIRD) return;
-  const n=Object.keys(hifzData()).length, total=WIRD.sur.length;
-  const pct = total? Math.round(n/total*100) : 0;
-  el.innerHTML = '<div><b>'+AR(n)+'</b> من '+AR(total)+' سورة محفوظة ('+AR(pct)+'٪)</div><div class="hifz-bar"><i style="width:'+pct+'%"></i></div>';
-}
-function renderHifzList(){
-  const wrap=$('#hifz-list'); if(!wrap || !WIRD) return;
-  const d=hifzData();
-  wrap.innerHTML='';
-  WIRD.sur.forEach((s,idx)=>{
-    const on=!!d[idx];
-    const b=document.createElement('button');
-    b.type='button'; b.className='hifz-row'+(on?' on':'');
-    b.innerHTML='<span class="hifz-check">'+(on?HIFZ_CHECK_SVG:'')+'</span><span class="hifz-name">'+AR(idx+1)+'. '+escapeHtml(s.n)+'</span>';
-    b.addEventListener('click', ()=>{
-      vibrate(6);
-      const dd=hifzData();
-      if(dd[idx]) delete dd[idx]; else dd[idx]=1;
-      saveHifzData(dd);
-      b.classList.toggle('on');
-      b.querySelector('.hifz-check').innerHTML = b.classList.contains('on') ? HIFZ_CHECK_SVG : '';
-      updateHifzSummary();
-    });
-    wrap.appendChild(b);
-  });
-  updateHifzSummary();
-}
-$('#hifz-btn') && $('#hifz-btn').addEventListener('click', ()=>{
-  vibrate(6);
-  $('#hifz-overlay').classList.add('show');
-  renderHifzList();
-});
-$('#hifz-overlay-close').addEventListener('click', closeHifzOverlay);
-$('#hifz-overlay').addEventListener('click', e=>{ if(e.target.id==='hifz-overlay') closeHifzOverlay(); });
 
 /* ==================== الاستماع بصوت القرّاء ==================== */
 const RECITERS=[
