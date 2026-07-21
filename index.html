@@ -139,8 +139,9 @@
     font-size:15px; font-weight:600; padding:7px 14px; border-radius:9px; z-index:1; transition:color .2s;}
   .seg button.on{background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.18);}
   #wird-mode-seg button{flex:1 1 0;}
-  #wird-mode-seg button[data-m="wird"]{color:var(--c-repeat);}
-  #wird-mode-seg button[data-m="mushaf"]{color:var(--c-read);}
+  #wird-mode-seg button[data-m="wird"]{background:#C8DBE3; color:var(--tab-on);}
+  #wird-mode-seg button[data-m="mushaf"]{background:#F3D9E2; color:var(--c-read);}
+  #wird-mode-seg button.on{box-shadow:0 0 0 2px currentColor inset, 0 1px 4px rgba(0,0,0,.18);}
 
   .progressbar{margin:10px 16px 0; height:6px; border-radius:3px; background:var(--fill); overflow:hidden;}
   .progressbar i{display:block; height:100%; width:0; background:var(--c-repeat); border-radius:3px; transition:width .4s ease;}
