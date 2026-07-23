@@ -512,6 +512,11 @@
     font:inherit; font-size:16px; font-weight:600; padding:13px 20px; border-bottom:1px solid var(--sep);}
   .sura-list button.cur{color:var(--accent); font-weight:800; background:var(--fill-2);}
   .sura-list button:active{background:var(--fill);}
+  .sura-list button.hz{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .sura-list button.hz .hz-pg{font-size:12px; font-weight:600; color:var(--text-3); background:var(--fill-2);
+    padding:3px 11px; border-radius:20px; flex:0 0 auto;}
+  .sura-list button.hz-head{color:var(--accent); font-weight:800; background:var(--fill-2);}
+  .sura-list button.hz-head .hz-pg{background:var(--card);}
   .wird-done{display:block; width:calc(100% - 32px); margin:6px 16px 0; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:17px; padding:15px; border-radius:16px;
     box-shadow:var(--shadow-2); transition:transform .13s ease, opacity .2s;}
   .wird-done:active{transform:scale(.98); opacity:.9;}
@@ -626,6 +631,7 @@
 <div class="sura-overlay" id="sura-overlay">
   <div class="sura-sheet">
     <div class="sura-sheet-head">
+      <button id="sura-overlay-back" aria-label="رجوع" style="display:none"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
       <span>اختر السورة</span>
       <button id="sura-overlay-close" aria-label="إغلاق">✕</button>
     </div>
@@ -1753,6 +1759,7 @@ function buildSuraList(curIdx, onPick){
   });
 }
 function openSuraOverlay(curIdx, onPick, title){
+  const bk=$('#sura-overlay-back'); if(bk) bk.style.display='none';
   $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = title || 'اختر السورة';
   buildSuraList(curIdx, onPick);
   $('#sura-overlay').classList.add('show');
@@ -1775,15 +1782,57 @@ function openLabelOverlay(items, curId, onPick, title){
   const cur=$('#sura-list button.cur');
   if(cur) cur.scrollIntoView({block:'center'});
 }
-function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); }
-$('#mushaf-jump').addEventListener('click', ()=>{
+function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); const bk=$('#sura-overlay-back'); if(bk) bk.style.display='none'; }
+
+/* التمرير إلى آية محدّدة (تُستعمل للقفز إلى بداية الحزب) */
+function scrollToAya(ai, smooth){
+  const sp=document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]');
+  if(!sp){ return; }
+  __progScroll=true; clearTimeout(__progScrollT);
+  sp.scrollIntoView({block:'center', behavior: smooth?'smooth':'auto'});
+  __progScrollT=setTimeout(()=>{ __progScroll=false; }, smooth?900:150);
+}
+
+/* المستوى الأول: قائمة السور ← الضغط على سورة يفتح اختيار الحزب داخلها */
+function openMushafPicker(){
+  openSuraOverlay(currentSuraFromScroll(), idx=> showHizbPicker(idx));
+}
+/* المستوى الثاني: الأحزاب التي تبدأ داخل السورة + خيار «بداية السورة» */
+function showHizbPicker(suraIdx){
+  const list=$('#sura-list'); if(!list||!WIRD) return;
+  const s=WIRD.sur[suraIdx];
+  const surStart=s.i;
+  const surEnd=(suraIdx+1<WIRD.sur.length)? WIRD.sur[suraIdx+1].i : WIRD.a.length;
+  $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = s.n;
+  const bk=$('#sura-overlay-back'); if(bk) bk.style.display='';
+  list.innerHTML='';
+  const mkBtn=(cls, label, page, ai)=>{
+    const b=document.createElement('button'); b.type='button'; b.className=cls;
+    b.innerHTML='<span>'+label+'</span><span class="hz-pg">ص '+page+'</span>';
+    b.addEventListener('click', ()=> commitMushafJump(suraIdx, ai));
+    list.appendChild(b);
+  };
+  mkBtn('hz hz-head','من بداية السورة', WIRD.a[surStart].p, surStart);
+  const hz=WIRD.hizb||[]; let count=0;
+  for(let k=0;k<hz.length-1;k++){
+    const ai=hz[k];
+    if(ai>=surStart && ai<surEnd){ count++; mkBtn('hz','الحزب '+(k+1), WIRD.a[ai].p, ai); }
+  }
+  if(!count){
+    const none=document.createElement('div'); none.className='khatma-done';
+    none.textContent='لا يبدأ حزب داخل هذه السورة'; list.appendChild(none);
+  }
+  list.scrollTop=0;
+}
+function commitMushafJump(suraIdx, ai){
+  settings.mushafSura=suraIdx; saveSettings();
+  const sel=$('#sura-select'); if(sel) sel.value=suraIdx;
+  closeSuraOverlay();
+  if(ai===WIRD.sur[suraIdx].i) scrollToSura(suraIdx, true); else scrollToAya(ai, true);
   vibrate(6);
-  openSuraOverlay(currentSuraFromScroll(), idx=>{
-    settings.mushafSura=idx; saveSettings();
-    const sel=$('#sura-select'); if(sel) sel.value=idx;
-    closeSuraOverlay(); scrollToSura(idx, true); vibrate(6);
-  });
-});
+}
+$('#mushaf-jump').addEventListener('click', ()=>{ vibrate(6); openMushafPicker(); });
+$('#sura-overlay-back').addEventListener('click', ()=>{ openMushafPicker(); });
 $('#sura-overlay-close').addEventListener('click', closeSuraOverlay);
 $('#sura-overlay').addEventListener('click', e=>{ if(e.target.id==='sura-overlay') closeSuraOverlay(); });
 
