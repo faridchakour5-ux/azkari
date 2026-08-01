@@ -22,6 +22,10 @@
   @font-face{font-family:'fCairo'; src:url('fonts/cairo.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fTajawal'; src:url('fonts/tajawal.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fRuqaa'; src:url('fonts/ruqaa.woff2') format('woff2'); font-display:swap;}
+  /* حفص/نسخ نوتو بتشكيل أخضر: خط ملوّن (COLR) تُطبع فيه الحركات بلون من لوحة الألوان */
+  @font-face{font-family:'NotoNaskhTashkeel'; src:url('fonts/naskh-tashkeel.woff2') format('woff2'); font-display:swap;}
+  @font-palette-values --hafsTashkeel{ font-family:'NotoNaskhTashkeel'; override-colors:0 #2E8B4E; }
+  @font-palette-values --hafsTashkeelDark{ font-family:'NotoNaskhTashkeel'; override-colors:0 #56C57F; }
 
   :root{
     --scale:1;
@@ -421,6 +425,11 @@
   body.qc-blue  .wird-text, body.qc-blue  .wird-basmala, body.qc-blue  .card.quran .txt{ color:var(--qc-blue); }
   body.qc-blue2 .wird-text, body.qc-blue2 .wird-basmala, body.qc-blue2 .card.quran .txt{ color:var(--qc-blue2); }
   body.qc-navy  .wird-text, body.qc-navy  .wird-basmala, body.qc-navy  .card.quran .txt{ color:var(--qc-navy); }
+  /* حفص + نسخ نوتو: الحروف بلونها العادي والتشكيل أخضر (يتجاوز اختيار لون خط القرآن) */
+  body.qtashkeel .wird-text, body.qtashkeel .wird-basmala, body.qtashkeel .card.quran .txt{
+    font-family:'NotoNaskhTashkeel','AmiriQuran',serif; font-palette:--hafsTashkeel; color:var(--text);}
+  html[data-bg="dark"] body.qtashkeel .wird-text, html[data-bg="dark"] body.qtashkeel .wird-basmala, html[data-bg="dark"] body.qtashkeel .card.quran .txt{
+    font-palette:--hafsTashkeelDark;}
   /* منتقي ألوان خطّ القرآن */
   .qcolor-swatches{display:flex; gap:10px; align-items:center;}
   .qcolor-swatches button{border:0; background:transparent; padding:0; cursor:pointer; line-height:0;}
@@ -883,6 +892,8 @@ function applyFont(){ document.documentElement.style.setProperty('--scale', sett
 function applyHafsFont(){
   const mag = (settings.hafsFont||'maghribi')==='maghribi';
   document.body.classList.toggle('qmaghribi', mag);
+  // حفص + نسخ ⇐ خط «نسخ نوتو» بتشكيل أخضر
+  document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh' && !mag);
   // mettre à jour les libellés sans recharger le mushaf
   const src=$('#quran-src');
   if(src && settings.riwaya!=='warsh') src.textContent = mag ? 'حفص — الخط المغربي' : 'حفص — خط النسخ';
@@ -929,6 +940,7 @@ function applyRiwaya(){
   if(currentTab==='evening'||currentTab==='morning') renderAzkar();
   if(window.__wirdReady){ WIRD=null; if($('#s-wird').classList.contains('active')) openWird(); }
   if(typeof syncRiwayaPills==='function') syncRiwayaPills();
+  document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh' && (settings.hafsFont||'maghribi')!=='maghribi');
 }
 function saveSettings(){ store.set('az_settings', settings); }
 
