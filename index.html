@@ -145,10 +145,9 @@
   #wird-mode-seg button{flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
   #wird-mode-seg button .gh-ic{margin:0;}
   /* ثنائي هادئ أنيق: أخضر مريمية للورد، أزرق رمادي ناعم للمصحف الكامل */
-  #wird-mode-seg button[data-m="wird"]{background:#E8EFE4; color:#6E8A66;}
-  #wird-mode-seg button[data-m="mushaf"]{background:#E7EDF1; color:#7690A0;}
-  #wird-mode-seg button[data-m="wird"].on{background:#8CA87F; color:#fff; box-shadow:0 1px 5px rgba(96,124,86,.35);}
-  #wird-mode-seg button[data-m="mushaf"].on{background:#8FAAB8; color:#fff; box-shadow:0 1px 5px rgba(102,128,140,.35);}
+  /* لون الزرّين مطابق للون التطبيق (الأخضر) */
+  #wird-mode-seg button[data-m="wird"], #wird-mode-seg button[data-m="mushaf"]{background:rgba(47,158,68,.12); color:var(--accent);}
+  #wird-mode-seg button.on{background:var(--accent); color:#fff; box-shadow:0 1px 5px rgba(47,158,68,.35);}
 
   .progressbar{margin:10px 16px 0; height:6px; border-radius:3px; background:var(--fill); overflow:hidden;}
   .progressbar i{display:block; height:100%; width:0; background:var(--c-repeat); border-radius:3px; transition:width .4s ease;}
