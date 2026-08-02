@@ -422,9 +422,10 @@
   body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
   body.qmaghribi .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
   /* لون خطّ القرآن (اختياري لورش وحفص) — أربع درجات */
-  body.qc-blue  .wird-text, body.qc-blue  .wird-basmala, body.qc-blue  .card.quran .txt{ color:var(--qc-blue); }
-  body.qc-blue2 .wird-text, body.qc-blue2 .wird-basmala, body.qc-blue2 .card.quran .txt{ color:var(--qc-blue2); }
-  body.qc-navy  .wird-text, body.qc-navy  .wird-basmala, body.qc-navy  .card.quran .txt{ color:var(--qc-navy); }
+  /* اللون يشمل كل بطاقات الأذكار (ذكر/حديث/قرآن) + نص المصحف */
+  body.qc-blue  .wird-text, body.qc-blue  .wird-basmala, body.qc-blue  .card .txt{ color:var(--qc-blue); }
+  body.qc-blue2 .wird-text, body.qc-blue2 .wird-basmala, body.qc-blue2 .card .txt{ color:var(--qc-blue2); }
+  body.qc-navy  .wird-text, body.qc-navy  .wird-basmala, body.qc-navy  .card .txt{ color:var(--qc-navy); }
   /* حفص + نسخ نوتو: التشكيل أخضر دائمًا (من لوحة ألوان الخط)، ولون الحروف يتبع اختيار «لون خط القرآن» */
   body.qtashkeel .wird-text, body.qtashkeel .wird-basmala, body.qtashkeel .card.quran .txt{
     font-family:'NotoNaskhTashkeel','AmiriQuran',serif; font-palette:--hafsTashkeel;}
@@ -869,7 +870,7 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', adhan:true, muezzin:'wadee', autoReadLevel:2.5 };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', adhan:true, muezzin:'wadee', autoReadLevel:1.75 };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
@@ -885,6 +886,7 @@ if(!settings.__d6){ settings.__d6=1; settings.quranColor='blue2'; store.set('az_
 if(!settings.__d8){ settings.__d8=1; settings.adhan=true; settings.muezzin='wadee'; store.set('az_settings', settings); }
 // ترقية: رواية ورش (بالخط المغربي) هي الافتراضية للعرض والكتابة
 if(!settings.__d9){ settings.__d9=1; settings.riwaya='warsh'; store.set('az_settings', settings); }
+if(!settings.__d10){ settings.__d10=1; settings.autoReadLevel=1.75; store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
@@ -2224,8 +2226,8 @@ $('#follow-pill') && $('#follow-pill').addEventListener('click', ()=>{ vibrate(6
 
 /* ==================== تمرير تلقائي لتلاوة الورد (بلا صوت) بسرعة قابلة للتحكّم ==================== */
 let __autoRead=false, __autoReadRAF=null, __autoReadLast=0, __autoReadPausedUntil=0, __autoReadY=0;
-const AR_LEVELS=[1,1.5,2,2.5,3,3.5,4,4.5,5]; // مستويات السرعة، الافتراضي 2.5
-function autoReadLevel(){ const l=settings.autoReadLevel; return AR_LEVELS.includes(l) ? l : 2.5; }
+const AR_LEVELS=[1,1.25,1.5,1.75,2,2.25,2.5,2.75,3,3.25,3.5,3.75,4,4.25,4.5,4.75,5]; // خطوات 0.25، الافتراضي 1.75
+function autoReadLevel(){ const l=settings.autoReadLevel; return AR_LEVELS.includes(l) ? l : 1.75; }
 function fmtLevel(l){ return String(l).replace('.', '٫'); } // فاصلة عربية للعرض
 function autoReadSpeed(){ return autoReadLevel()*18; } // بكسل/ثانية
 function wirdScreenActive(){ return $('#s-wird') && $('#s-wird').classList.contains('active'); }
