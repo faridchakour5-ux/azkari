@@ -188,6 +188,10 @@
     color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:800;}
   .info-btn{border:0; background:var(--fill); color:var(--text-2); width:34px; height:34px; border-radius:17px;
     font-size:17px; font-weight:700; line-height:1;}
+  .dhikr-play{border:0; background:var(--accent-soft,rgba(47,158,68,.14)); color:var(--accent); width:34px; height:34px;
+    border-radius:17px; display:inline-flex; align-items:center; justify-content:center; margin-inline-end:6px;}
+  .dhikr-play:active{transform:scale(.94);}
+  .dhikr-play .gh-ic{width:16px; height:16px;}
   .card.done{opacity:.5;}
   .card.done .rem{background:var(--text-3);}
   .card .tick{position:absolute; top:14px; left:14px; color:var(--c-read); font-size:20px; opacity:0; transition:opacity .25s; font-weight:800;}
@@ -676,6 +680,7 @@
 <div class="salat-toast" id="salat-toast">اللهم صلِّ وسلّم على سيّدنا محمد ﷺ</div>
 
 <audio id="adhan-audio" preload="none"></audio>
+<audio id="dhikr-audio" preload="none"></audio>
 <div class="adhan-banner" id="adhan-banner">
   <div class="ab-txt"><b id="adhan-banner-title">الأذان</b><span id="adhan-banner-sub"></span></div>
   <button id="adhan-stop" class="adhan-stop">إيقاف ✕</button>
@@ -1037,6 +1042,7 @@ function renderAzkar(){
       '<div class="txt">'+escapeHtml(text)+'</div>'+
       '<div class="meta">'+
         '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span>'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
+        (AZKAR_AUDIO[pid] ? '<button class="dhikr-play" data-pid="'+pid+'" aria-label="استماع">'+ICON_PLAY+'</button>':'')+
         (d.fadl||d.source ? '<button class="info-btn" aria-label="الفضل">ⓘ</button>':'')+
       '</div>'+
       (d.fadl||d.source ? '<div class="fadl">'+
@@ -1046,6 +1052,7 @@ function renderAzkar(){
 
     // tap to count (ignore taps on info button / fadl)
     card.addEventListener('click', e=>{
+      if(e.target.closest('.dhikr-play')){ toggleDhikrAudio(pid); return; }
       if(e.target.closest('.info-btn')){
         card.querySelector('.fadl').classList.toggle('open'); return;
       }
@@ -2057,6 +2064,25 @@ function pad3(n){ return String(n).padStart(3,'0'); }
 const ICON_PLAY  = '<svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M7 4v16l13-8z"/></svg>';
 const ICON_PAUSE = '<svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
 function setPlayBtn(playing){ const b=$('#reciter-play'); if(b) b.innerHTML = playing ? ICON_PAUSE : ICON_PLAY; }
+
+/* ===== سماع الأذكار بمقاطع صوتية حقيقية (يظهر الزرّ فقط لمن له مقطع) =====
+   المفتاح = tab_id (نفس data-pid). تُملأ عند توفّر المقاطع في مجلد audio/dhikr/ */
+const AZKAR_AUDIO = {
+  // مثال: 'morning_10':'audio/dhikr/tasbih.mp3',
+};
+let __dhikrPid=null;
+function refreshDhikrBtns(){
+  const a=$('#dhikr-audio'); const cur=(a && !a.paused)?__dhikrPid:null;
+  document.querySelectorAll('.dhikr-play').forEach(b=>{ b.innerHTML = (b.dataset.pid===cur)?ICON_PAUSE:ICON_PLAY; });
+}
+function toggleDhikrAudio(pid){
+  const a=$('#dhikr-audio'); const src=AZKAR_AUDIO[pid]; if(!a||!src) return;
+  if(__dhikrPid===pid && !a.paused){ a.pause(); return; }
+  try{ const r=$('#reciter-audio'); if(r) r.pause(); }catch(e){}
+  a.src=src; a.currentTime=0; __dhikrPid=pid;
+  a.play().catch(()=>{}); vibrate(6);
+}
+['play','pause','ended'].forEach(ev=> $('#dhikr-audio') && $('#dhikr-audio').addEventListener(ev, refreshDhikrBtns));
 function renderReciterChips(){
   const wrap=$('#reciter-chips'); if(!wrap) return;
   wrap.innerHTML='';
