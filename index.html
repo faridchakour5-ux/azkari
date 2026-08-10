@@ -528,7 +528,11 @@
     font:inherit; padding:12px 20px; border-bottom:1px solid var(--sep);}
   .search-result:active{background:var(--fill);}
   .search-result .sr-sura{color:var(--c-read); font-weight:800; font-size:13px; margin-bottom:3px; display:block;}
-  .search-result .sr-txt{font-family:'AmiriQuran',serif; font-size:17px; line-height:1.9;}
+  .search-result .sr-txt{font-family:'AmiriQuran',serif; font-size:19px; line-height:2;}
+  /* نتائج البحث تتبع نفس خط المصحف الحالي */
+  body.riw-warsh .search-result .sr-txt, body.qmaghribi .search-result .sr-txt{font-family:'Maghribi','AmiriQuran',serif; font-size:21px; line-height:2.3;}
+  body.qtashkeel .search-result .sr-txt{font-family:'NotoNaskhTashkeel','AmiriQuran',serif; font-palette:--hafsTashkeel;}
+  html[data-bg="dark"] body.qtashkeel .search-result .sr-txt{font-palette:--hafsTashkeelDark;}
   .search-result .sr-txt mark{background:var(--c-repeat-bg); color:var(--c-repeat); border-radius:4px; padding:0 2px;}
   .sura-list button{display:block; width:100%; text-align:right; border:0; background:transparent; color:var(--text);
     font:inherit; font-size:16px; font-weight:600; padding:13px 20px; border-bottom:1px solid var(--sep);}
