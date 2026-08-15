@@ -1,5 +1,5 @@
-/* صلاتي — service worker v112 */
-const CACHE = 'azkari-v112';
+/* صلاتي — service worker v113 */
+const CACHE = 'azkari-v113';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,6 @@ const ASSETS = [
   './adhan.min.js',
   './wird_hafs.js',
   './wird_warsh.js',
-  './audio/adhan-wadee.mp3',
   './manifest.json',
   './fonts/ui-400.woff2',
   './fonts/ui-600.woff2',
