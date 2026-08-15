@@ -1,5 +1,5 @@
-/* صلاتي — service worker v111 */
-const CACHE = 'azkari-v111';
+/* صلاتي — service worker v112 */
+const CACHE = 'azkari-v112';
 const ASSETS = [
   './',
   './index.html',
@@ -29,9 +29,10 @@ const ASSETS = [
 
 self.addEventListener('install', e => {
   e.waitUntil(
+    // لا نستعمل skipWaiting: تبقى النسخة الجديدة في الانتظار حتى يُغلق المستخدم التطبيق،
+    // حتى لا تُعاد الصفحة تلقائيًّا أثناء الاستماع أو القراءة.
     caches.open(CACHE)
       .then(c => c.addAll(ASSETS))
-      .then(() => self.skipWaiting())
   );
 });
 

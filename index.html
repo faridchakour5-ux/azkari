@@ -1430,10 +1430,18 @@ $('#adhan-banner') && $('#adhan-banner').addEventListener('click', ()=>{
 });
 $('#adhan-audio') && $('#adhan-audio').addEventListener('ended', ()=>{ const b=$('#adhan-banner'); if(b) b.classList.remove('show'); });
 /* فكّ قفل التشغيل التلقائي للأذان: يُعاد عند كل لمسة (بعض المتصفّحات تُلغي الإذن) */
+let __primedAt=0;
 function primeAdhanUnlock(){
   const a=$('#adhan-audio'); if(!a) return;
   // لا نُقاطع أذانًا جاريًا
   if(a.src && !/data:audio/.test(a.src) && !a.paused) return;
+  // مهمّ: لا نُشغّل الصوت الصامت أثناء تلاوة أو ذكر — تشغيل صوت آخر يسحب
+  // «التركيز الصوتي» في أندرويد فتنقطع التلاوة من تلقاء نفسها.
+  const r=$('#reciter-audio'), d=$('#dhikr-audio');
+  if(r && r.src && !r.paused && !r.ended) return;
+  if(d && d.src && !d.paused && !d.ended) return;
+  // يكفي فكّ القفل مرّة كل خمس دقائق بدل كل لمسة
+  const now=Date.now(); if(now-__primedAt < 5*60*1000) return; __primedAt=now;
   try{
     a.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
     a.muted=true;
@@ -2422,6 +2430,28 @@ $('#reciter-audio').addEventListener('ended', ()=>{
     playReciterSurah(info, __audioSura+1);
   }
 });
+/* استئناف تلقائي عند تعثّر الشبكة أثناء البثّ — يُكمل من نفس الموضع ولا يُعيد من البداية */
+let __recTimer=null, __recTry=0;
+function recoverReciter(){
+  const a=$('#reciter-audio');
+  if(!a || !a.src || a.ended || __recTimer) return;
+  const pos=a.currentTime||0, src=a.currentSrc||a.src;
+  __recTry=Math.min(__recTry+1, 6);
+  const st=$('#reciter-status'); if(st) st.textContent='ضعف في الاتصال — إعادة المحاولة…';
+  __recTimer=setTimeout(()=>{
+    __recTimer=null;
+    const b=$('#reciter-audio'); if(!b || !b.src || b.ended) return;
+    const resume=()=>{ try{ if(pos>0 && b.currentTime<pos) b.currentTime=pos; }catch(e){} b.play().catch(()=> recoverReciter()); };
+    if(b.error){                      // خطأ فعلي: أعِد تحميل المقطع ثمّ تابِع من الموضع نفسه
+      const onReady=()=>{ b.removeEventListener('loadeddata', onReady); resume(); };
+      b.addEventListener('loadeddata', onReady);
+      try{ b.src=src; b.load(); }catch(e){ recoverReciter(); }
+    } else resume();
+  }, Math.min(1200*__recTry, 6000));
+}
+$('#reciter-audio').addEventListener('error', recoverReciter);
+$('#reciter-audio').addEventListener('stalled', ()=>{ const a=$('#reciter-audio'); if(a && !a.paused) recoverReciter(); });
+$('#reciter-audio').addEventListener('playing', ()=>{ __recTry=0; if(__recTimer){ clearTimeout(__recTimer); __recTimer=null; } });
 $('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 $('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 $('#reciter-audio').addEventListener('ended', ()=>{ try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
@@ -2805,12 +2835,8 @@ if('serviceWorker' in navigator){
       setInterval(()=> reg.update().catch(()=>{}), 30*60*1000);
       document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) reg.update().catch(()=>{}); });
     }).catch(()=>{});
-    // بمجرّد أن تتولّى النسخة الجديدة التحكّم (بعد التنزيل في الخلفية)، أعِد تحميل الصفحة تلقائيًّا مرّة واحدة
-    let swRefreshed=false;
-    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
-      if(swRefreshed) return; swRefreshed=true;
-      window.location.reload();
-    });
+    // لا نُعيد تحميل الصفحة تلقائيًّا عند وصول نسخة جديدة — كان ذلك يقطع الاستماع
+    // ويُرجع التطبيق إلى البداية. تُطبَّق النسخة الجديدة عند فتح التطبيق في المرّة القادمة.
   });
 }
 </script>
