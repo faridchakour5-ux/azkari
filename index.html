@@ -504,6 +504,20 @@
   .sura-sheet-head button{border:0; background:var(--fill); color:var(--text-2); width:32px; height:32px;
     border-radius:50%; font-size:14px; line-height:1;}
   .sura-list{overflow-y:auto; padding:6px 0; -webkit-overflow-scrolling:touch;}
+  /* التفسير: الآية قابلة للّمس + الورقة السفلية */
+  .aya-t{cursor:pointer; border-radius:6px; transition:background-color .2s;}
+  .aya-t.tsel{background:var(--c-repeat-bg);}
+  .tafsir-body{overflow-y:auto; padding:16px 20px 22px; -webkit-overflow-scrolling:touch;}
+  .tafsir-body .t-aya{font-family:'AmiriQuran',serif; font-size:19px; line-height:2.1; color:var(--accent);
+    padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid var(--sep); text-align:center;}
+  body.riw-warsh .tafsir-body .t-aya, body.qmaghribi .tafsir-body .t-aya{font-family:'Maghribi','AmiriQuran',serif; font-size:21px;}
+  body.qtashkeel .tafsir-body .t-aya{font-family:'NotoNaskhTashkeel','AmiriQuran',serif; font-palette:--hafsTashkeel;}
+  html[data-bg="dark"] body.qtashkeel .tafsir-body .t-aya{font-palette:--hafsTashkeelDark;}
+  .tafsir-body .t-txt{font-size:16px; line-height:2.05; color:var(--text); text-align:justify; white-space:pre-wrap;}
+  .tafsir-body .t-intro{background:var(--fill-2); border-radius:14px; padding:12px 14px; margin-bottom:14px;
+    font-size:14.5px; line-height:1.95; color:var(--text-2); white-space:pre-wrap; text-align:justify;}
+  .tafsir-body .t-src{margin-top:16px; font-size:12px; color:var(--text-3); text-align:center;}
+  .tafsir-body .t-note{font-size:14.5px; line-height:1.9; color:var(--text-2); text-align:center; padding:10px 0;}
   .search-box{padding:4px 16px 10px; border-bottom:1px solid var(--sep);}
   .search-box input{width:100%; border:1px solid var(--line); background:var(--fill-2); color:var(--text);
     font:inherit; font-size:15px; padding:11px 14px; border-radius:12px; direction:rtl;}
@@ -650,6 +664,16 @@
       <button id="sura-overlay-close" aria-label="إغلاق">✕</button>
     </div>
     <div class="sura-list" id="sura-list"></div>
+  </div>
+</div>
+
+<div class="sura-overlay" id="tafsir-overlay">
+  <div class="sura-sheet">
+    <div class="sura-sheet-head">
+      <span id="tafsir-title">التفسير</span>
+      <button id="tafsir-close" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="tafsir-body" id="tafsir-body"></div>
   </div>
 </div>
 
@@ -1541,7 +1565,7 @@ function buildMushaf(body){
       const b=basmalaHtml(si); if(b) parts.push(b);
     }
     if(!textOpen){ parts.push('<div class="wird-text">'); textOpen=true; }
-    parts.push(a.t+'<span class="wird-num" data-ai="'+i+'">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
+    parts.push('<span class="aya-t" data-tai="'+i+'">'+a.t+'</span><span class="wird-num" data-ai="'+i+'">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
   }
   if(textOpen) parts.push('</div>');
   parts.push('</div>');
@@ -1562,6 +1586,65 @@ function markBookmarkedAya(){
   const el=document.querySelector('#wird-body .wird-num[data-ai="'+sp.ai+'"]');
   if(el) el.classList.add('bm');
 }
+/* ==================== تفسير الآية (التفسير الميسّر — حفص) ==================== */
+let __tafsirLoading=null;
+function loadTafsir(){
+  if(window.TAFSIR) return Promise.resolve(true);
+  if(__tafsirLoading) return __tafsirLoading;
+  __tafsirLoading=new Promise(res=>{
+    const s=document.createElement('script');
+    s.src='tafsir.js';
+    s.onload=()=>res(!!window.TAFSIR);
+    s.onerror=()=>{ __tafsirLoading=null; res(false); };
+    document.head.appendChild(s);
+  });
+  return __tafsirLoading;
+}
+function closeTafsir(){
+  $('#tafsir-overlay').classList.remove('show');
+  const sel=document.querySelector('.aya-t.tsel'); if(sel) sel.classList.remove('tsel');
+}
+async function openTafsir(ai){
+  if(!WIRD || isNaN(ai)) return;
+  const ov=$('#tafsir-overlay'), body=$('#tafsir-body'); if(!ov||!body) return;
+  const si=suraOf(ai), no=ai-WIRD.sur[si].i+1;
+  $('#tafsir-title').textContent='سورة '+WIRD.sur[si].n+' — آية '+AR(no);
+  ov.classList.add('show'); body.scrollTop=0;
+  const aya='<div class="t-aya">'+WIRD.a[ai].t+'</div>';
+  // التفسير مرتبط بترقيم حفص؛ ترقيم ورش يختلف في 50 سورة فلا يُعرض حتى تُضبط المطابقة
+  if(settings.riwaya==='warsh'){
+    body.innerHTML=aya+'<div class="t-note">التفسير متاح حاليًا في رواية حفص.<br>بدّل الرواية من الإعدادات لعرضه.</div>';
+    return;
+  }
+  body.innerHTML=aya+'<div class="t-note">…جارٍ تحميل التفسير</div>';
+  const ok=await loadTafsir();
+  if(!ov.classList.contains('show')) return;           // أُغلقت أثناء التحميل
+  const t=ok && window.TAFSIR ? (window.TAFSIR[ai]||'') : '';
+  let main='';
+  if(t){
+    // الآية الأولى من كل سورة تسبقها «تسمية السورة ومقاصدها» ثم علامة [التفسير]
+    const k=t.indexOf('[التفسير]');
+    if(k>-1){
+      const intro=t.slice(0,k).trim(), rest=t.slice(k+9).trim();
+      if(intro) main+='<div class="t-intro">'+escapeHtml(intro)+'</div>';
+      main+='<div class="t-txt">'+escapeHtml(rest)+'</div>';
+    } else main='<div class="t-txt">'+escapeHtml(t)+'</div>';
+    main+='<div class="t-src">التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف</div>';
+  } else {
+    main='<div class="t-note">'+(ok?'لا يوجد تفسير لهذه الآية.':'تعذّر تحميل التفسير — تحقّق من الإنترنت ثم أعِد المحاولة.')+'</div>';
+  }
+  body.innerHTML = aya + main;
+}
+document.addEventListener('click', e=>{
+  const t=e.target.closest('.aya-t'); if(!t) return;
+  const ai=parseInt(t.dataset.tai); if(isNaN(ai)) return;
+  const old=document.querySelector('.aya-t.tsel'); if(old) old.classList.remove('tsel');
+  t.classList.add('tsel');
+  vibrate(6); openTafsir(ai);
+});
+$('#tafsir-close') && $('#tafsir-close').addEventListener('click', closeTafsir);
+$('#tafsir-overlay') && $('#tafsir-overlay').addEventListener('click', e=>{ if(e.target.id==='tafsir-overlay') closeTafsir(); });
+
 /* الضغط على رقم الآية: يحفظ (أو يلغي) موضع القراءة هنا بالضبط — قابل للتبديل */
 document.addEventListener('click', e=>{
   const num=e.target.closest('.wird-num');
@@ -2394,7 +2477,7 @@ function renderWird(){
     const atSuraStart = (i===WIRD.sur[sura].i);
     html+='<div class="wird-sura">'+suraOrn(sura)+'</div>'+(atSuraStart?basmalaHtml(sura):'')+'<div class="wird-text">';
     while(i<e && suraOf(i)===sura){
-      html+=WIRD.a[i].t+'<span class="wird-num">۝'+ayaNoOf(i)+'</span> ';
+      html+='<span class="aya-t" data-tai="'+i+'">'+WIRD.a[i].t+'</span><span class="wird-num">۝'+ayaNoOf(i)+'</span> ';
       i++;
     }
     html+='</div>';
