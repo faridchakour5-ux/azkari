@@ -1611,15 +1611,21 @@ async function openTafsir(ai){
   $('#tafsir-title').textContent='سورة '+WIRD.sur[si].n+' — آية '+AR(no);
   ov.classList.add('show'); body.scrollTop=0;
   const aya='<div class="t-aya">'+WIRD.a[ai].t+'</div>';
-  // التفسير مرتبط بترقيم حفص؛ ترقيم ورش يختلف في 50 سورة فلا يُعرض حتى تُضبط المطابقة
-  if(settings.riwaya==='warsh'){
-    body.innerHTML=aya+'<div class="t-note">التفسير متاح حاليًا في رواية حفص.<br>بدّل الرواية من الإعدادات لعرضه.</div>';
-    return;
-  }
   body.innerHTML=aya+'<div class="t-note">…جارٍ تحميل التفسير</div>';
   const ok=await loadTafsir();
   if(!ov.classList.contains('show')) return;           // أُغلقت أثناء التحميل
-  const t=ok && window.TAFSIR ? (window.TAFSIR[ai]||'') : '';
+  // التفسير مرقّم بعدّ حفص (الكوفي)؛ في ورش (العدّ المدني) نمرّ عبر خريطة المطابقة
+  let idx=[ai];
+  if(settings.riwaya==='warsh'){
+    const m = window.TAFSIR_W2H ? window.TAFSIR_W2H[ai] : null;
+    if(m==null) idx=[];
+    else if(Array.isArray(m)){ idx=[]; for(let k=m[0];k<=m[1];k++) idx.push(k); }
+    else idx=[m];
+  }
+  const seen=new Set();
+  const t = ok && window.TAFSIR
+    ? idx.map(k=>window.TAFSIR[k]||'').filter(x=>{ if(!x||seen.has(x)) return false; seen.add(x); return true; }).join('\n\n')
+    : '';
   let main='';
   if(t){
     // الآية الأولى من كل سورة تسبقها «تسمية السورة ومقاصدها» ثم علامة [التفسير]
