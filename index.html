@@ -482,6 +482,13 @@
     box-shadow:var(--shadow-2); border-radius:20px; padding:6px 10px; opacity:0; pointer-events:none;
     transform:translateY(-8px); transition:opacity .2s ease, transform .2s ease;}
   .qzoom-float.show{opacity:1; pointer-events:auto; transform:translateY(0);}
+  /* مبدّل الرواية العائم — يسار الشريط، مقابل أزرار التكبير */
+  .riwaya-float{position:fixed; top:calc(env(safe-area-inset-top) + 10px); left:16px; right:auto;
+    z-index:60; background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow-2);
+    border-radius:20px; padding:4px; opacity:0; pointer-events:none;
+    transform:translateY(-8px); transition:opacity .2s ease, transform .2s ease;}
+  .riwaya-float.show{opacity:1; pointer-events:auto; transform:translateY(0);}
+  .riwaya-float button{font-size:12.5px; padding:6px 11px; border-radius:16px;}
   .qzoom-float button{width:30px; height:30px; border:1px solid var(--line); border-radius:9px; background:var(--fill-2);
     color:var(--accent); font-weight:800; font-size:14px; line-height:1;}
   .qzoom-float button:active{transform:scale(.92);}
@@ -700,6 +707,10 @@
   <button id="q-minus-float" aria-label="تصغير الخط">A−</button>
   <span class="qval" id="q-zoom-val-float">100%</span>
   <button id="q-plus-float" aria-label="تكبير الخط">A+</button>
+</div>
+
+<div class="riwaya-quick riwaya-float" id="riwaya-float" title="تبديل الرواية">
+  <button data-r="warsh">ورش</button><button data-r="hafs">حفص</button>
 </div>
 
 <button class="follow-pill" id="follow-pill" aria-label="تتبّع التلاوة">
@@ -1456,7 +1467,7 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   $('#'+t.dataset.s).classList.add('active');
   window.scrollTo(0,0);
   flashSalat();
-  if(t.dataset.s!=='s-wird' && $('#mushaf-jump')) $('#mushaf-jump').classList.remove('show');
+  if(t.dataset.s!=='s-wird'){ ['#mushaf-jump','#q-zoom-float','#riwaya-float'].forEach(x=>{ const e=$(x); if(e) e.classList.remove('show'); }); }
   if(t.dataset.s==='s-wird') openWird();
   if(t.dataset.s==='s-listen') openListen();
   if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} }
@@ -1489,6 +1500,11 @@ function initRiwayaPills(){
   });
   $$('.riwaya-quick button').forEach(b=> b.addEventListener('click', ()=>{
     if(settings.riwaya===b.dataset.r) return;
+    // إن كنّا وسط المصحف: احفظ السورة الحالية لنعود إليها بعد إعادة البناء بالرواية الجديدة
+    try{
+      if(wirdMode()==='mushaf' && $('#s-wird').classList.contains('active'))
+        settings.mushafSura=currentSuraFromScroll();
+    }catch(e){}
     settings.riwaya=b.dataset.r; saveSettings(); applyRiwaya(); syncRiwayaPills(); vibrate(6);
   }));
   syncRiwayaPills();
@@ -1953,6 +1969,7 @@ function updateMushafJump(){
   const show = inMushaf && window.scrollY>260 && __scrollDir==='up';
   jump.classList.toggle('show', show);
   const zf=$('#q-zoom-float'); if(zf) zf.classList.toggle('show', show);
+  const rf=$('#riwaya-float'); if(rf) rf.classList.toggle('show', show);
   if(!inMushaf || !WIRD) return;
   const si=currentSuraFromScroll();
   if(si===__lastJumpSura) return;
