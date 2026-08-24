@@ -145,17 +145,17 @@
     font-size:15px; font-weight:600; padding:7px 14px; border-radius:9px; z-index:1; transition:color .2s;}
   .seg button.on{background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.18);}
   /* التبويبات المزدوجة: الأول كهرماني والثاني أزرق — كأزرار «بلا تكرار» و«اقرأ نفس السورة» */
+  #wird-mode-seg, #listen-mode-seg, #tasbih-mode-seg{background:transparent; padding:0; gap:10px;}
   #wird-mode-seg button, #listen-mode-seg button, #tasbih-mode-seg button{
-    flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
+    flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    padding:11px 12px; font-weight:800;}
   #wird-mode-seg button .gh-ic, #listen-mode-seg button .gh-ic, #tasbih-mode-seg button .gh-ic{margin:0;}
   #wird-mode-seg button:first-child, #listen-mode-seg button:first-child, #tasbih-mode-seg button:first-child{
-    background:var(--c-repeat-bg); color:var(--c-repeat);}
+    background:var(--c-repeat-bg); color:var(--c-repeat); opacity:.45;}
   #wird-mode-seg button:last-child, #listen-mode-seg button:last-child, #tasbih-mode-seg button:last-child{
-    background:var(--c-read-bg); color:var(--c-read);}
-  #wird-mode-seg button:first-child.on, #listen-mode-seg button:first-child.on, #tasbih-mode-seg button:first-child.on{
-    background:var(--c-repeat); color:#fff; box-shadow:0 1px 5px rgba(0,0,0,.18);}
-  #wird-mode-seg button:last-child.on, #listen-mode-seg button:last-child.on, #tasbih-mode-seg button:last-child.on{
-    background:var(--c-read); color:#fff; box-shadow:0 1px 5px rgba(0,0,0,.18);}
+    background:var(--c-read-bg); color:var(--c-read); opacity:.45;}
+  #wird-mode-seg button.on, #listen-mode-seg button.on, #tasbih-mode-seg button.on{
+    opacity:1; box-shadow:0 1px 5px rgba(0,0,0,.12);}
   /* ثنائي هادئ أنيق: أخضر مريمية للورد، أزرق رمادي ناعم للمصحف الكامل */
   /* لون الزرّين مطابق للون التطبيق (الأخضر) */
 
