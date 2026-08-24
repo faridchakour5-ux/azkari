@@ -538,12 +538,13 @@
   .story-item .st-du{flex:0 0 auto; font-size:12px; color:var(--text-3); font-weight:600;}
 
   /* اختبار الثقافة الإسلامية */
-  .quiz-open{display:flex; width:calc(100% - 32px); margin:10px 16px 0; align-items:center; justify-content:center; gap:8px;
-    border:1px solid var(--line); background:var(--card); color:var(--accent); font:inherit; font-weight:800; font-size:15px;
-    padding:14px; border-radius:16px; box-shadow:var(--shadow-1); transition:transform .13s ease;}
-  .quiz-open:active{transform:scale(.98);}
-  .quiz-sheet{max-height:86vh;}
-  .quiz-body{overflow-y:auto; padding:18px 18px 24px; -webkit-overflow-scrolling:touch;}
+  .quiz-body{padding:14px 18px 26px;}
+  /* عنوان الاختبار أطول من بقية العناوين: نصغّره ونحجز مساحة أزرار الرواية */
+  #tasbih-title.long{font-size:calc(24px * var(--scale)); padding-inline-end:104px; line-height:1.35;}
+  #tasbih-mode-seg button{flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
+  #tasbih-mode-seg button .gh-ic{margin:0;}
+  #tasbih-mode-seg button.on{background:var(--accent); color:#fff; box-shadow:0 1px 5px rgba(47,158,68,.35);}
+  #tasbih-mode-seg button:not(.on){background:rgba(47,158,68,.12); color:var(--accent);}
   .qz-intro{text-align:center; color:var(--text-2); font-size:14.5px; line-height:1.9; margin-bottom:14px;}
   .qz-cats{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px;}
   .qz-cats button{border:1px solid var(--line); background:var(--fill-2); color:var(--text); font:inherit; font-weight:700;
@@ -755,8 +756,12 @@
 
 <!-- ===== المسبحة ===== -->
 <section id="s-tasbih" class="screen">
-  <div class="head"><h1>المسبحة</h1><div class="sub">اضغط في أي مكان للعدّ</div></div>
-  <div class="tasbih-wrap">
+  <div class="head"><h1 id="tasbih-title">المسبحة</h1><div class="sub" id="tasbih-sub">اضغط في أي مكان للعدّ</div></div>
+  <div class="seg" id="tasbih-mode-seg">
+    <button data-t="tasbih" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="3.2" r="1.6"/><circle cx="12" cy="20.8" r="1.6"/><circle cx="3.2" cy="12" r="1.6"/><circle cx="20.8" cy="12" r="1.6"/></svg>المسبحة</button>
+    <button data-t="quiz"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5"/><path d="M12 17.5h.01"/><circle cx="12" cy="12" r="9"/></svg>الثقافة الإسلامية</button>
+  </div>
+  <div class="tasbih-wrap" id="tasbih-wrap">
     <div class="chips" id="chips"></div>
     <div class="counter" id="counter">
       <svg viewBox="0 0 120 120">
@@ -779,22 +784,9 @@
       <button data-g="0">∞</button>
     </div>
     <button class="reset" id="t-reset">تصفير العدّاد</button>
-    <button class="quiz-open" id="quiz-open">
-      <svg class="gh-ic" viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5"/><path d="M12 17.5h.01"/><circle cx="12" cy="12" r="9"/></svg>
-      اختبار الثقافة الإسلامية
-    </button>
   </div>
+  <div class="quiz-body" id="quiz-body" style="display:none"></div>
 </section>
-
-<div class="sura-overlay" id="quiz-overlay">
-  <div class="sura-sheet quiz-sheet">
-    <div class="sura-sheet-head">
-      <span id="quiz-title">اختبار الثقافة الإسلامية</span>
-      <button id="quiz-close" aria-label="إغلاق">✕</button>
-    </div>
-    <div class="quiz-body" id="quiz-body"></div>
-  </div>
-</div>
 
 <!-- ===== الإعدادات ===== -->
 <section id="s-settings" class="screen">
@@ -1761,10 +1753,9 @@ function loadQuiz(){
 }
 function qzBest(){ return store.get('az_quizbest', {}); }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function openQuiz(){ $('#quiz-overlay').classList.add('show'); qzHome(); }
-function closeQuiz(){ $('#quiz-overlay').classList.remove('show'); }
+function qzSub(t){ const el=$('#tasbih-sub'); if(el) el.textContent=t; }
 async function qzHome(){
-  const body=$('#quiz-body'); $('#quiz-title').textContent='اختبار الثقافة الإسلامية';
+  const body=$('#quiz-body'); qzSub('اختر المجال ثمّ ابدأ الاختبار');
   body.innerHTML='<div class="qz-intro">…جارٍ التحميل</div>';
   const ok=await loadQuiz();
   if(!ok){ body.innerHTML='<div class="qz-intro">تعذّر تحميل الأسئلة.</div>'; return; }
@@ -1787,7 +1778,7 @@ function qzRender(){
   if(__qzI>=__qzSet.length) return qzResult();
   const item=__qzSet[__qzI];
   __qzAnswered=false;
-  $('#quiz-title').textContent='سؤال '+AR(__qzI+1)+' من '+AR(__qzSet.length);
+  qzSub('سؤال '+AR(__qzI+1)+' من '+AR(__qzSet.length));
   const opts=shuffle(item.o.map((t,i)=>({t, ok:i===item.a})));
   body.innerHTML=
     '<div class="qz-bar"><i style="width:'+Math.round(__qzI/__qzSet.length*100)+'%"></i></div>'+
@@ -1813,7 +1804,7 @@ function qzResult(){
             : pct>=0.7 ? 'أحسنت، نتيجة طيّبة — واصِل.'
             : pct>=0.4 ? 'جيّد، وفي الإعادة إفادة.'
             : 'لا بأس، العلم بالتعلّم — أعِد المحاولة.';
-  $('#quiz-title').textContent='النتيجة';
+  qzSub('نتيجة الاختبار');
   const body=$('#quiz-body');
   body.innerHTML='<div class="qz-res"><div class="score">'+AR(s)+'</div><div class="of">من '+AR(n)+'</div>'+
     '<div class="msg">'+msg+'</div></div>'+
@@ -1823,9 +1814,19 @@ function qzResult(){
   $('#qz-home').addEventListener('click', qzHome);
   vibrate(pct>=0.7?[20,60,20]:8);
 }
-$('#quiz-open') && $('#quiz-open').addEventListener('click', ()=>{ vibrate(6); openQuiz(); });
-$('#quiz-close') && $('#quiz-close').addEventListener('click', closeQuiz);
-$('#quiz-overlay') && $('#quiz-overlay').addEventListener('click', e=>{ if(e.target.id==='quiz-overlay') closeQuiz(); });
+/* تبديل صفحة المسبحة بين العدّاد والاختبار */
+function applyTasbihMode(mode){
+  const quiz = mode==='quiz';
+  const w=$('#tasbih-wrap'), q=$('#quiz-body');
+  if(w) w.style.display = quiz ? 'none' : '';
+  if(q) q.style.display = quiz ? '' : 'none';
+  const t=$('#tasbih-title');
+  if(t){ t.textContent = quiz ? 'اختبار الثقافة الإسلامية' : 'المسبحة'; t.classList.toggle('long', quiz); }
+  if(!quiz) qzSub('اضغط في أي مكان للعدّ');
+  $$('#tasbih-mode-seg button').forEach(b=> b.classList.toggle('on', b.dataset.t===mode));
+  if(quiz) qzHome();
+}
+$$('#tasbih-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{ vibrate(6); applyTasbihMode(b.dataset.t); }));
 
 /* ==================== تفسير الآية (التفسير الميسّر — حفص) ==================== */
 let __tafsirLoading=null;
