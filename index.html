@@ -520,6 +520,39 @@
     font-size:14.5px; line-height:1.95; color:var(--text-2); white-space:pre-wrap; text-align:justify;}
   .tafsir-body .t-src{margin-top:16px; font-size:12px; color:var(--text-3); text-align:center;}
   .tafsir-body .t-note{font-size:14.5px; line-height:1.9; color:var(--text-2); text-align:center; padding:10px 0;}
+
+  /* اختبار الثقافة الإسلامية */
+  .quiz-open{display:flex; width:calc(100% - 32px); margin:10px 16px 0; align-items:center; justify-content:center; gap:8px;
+    border:1px solid var(--line); background:var(--card); color:var(--accent); font:inherit; font-weight:800; font-size:15px;
+    padding:14px; border-radius:16px; box-shadow:var(--shadow-1); transition:transform .13s ease;}
+  .quiz-open:active{transform:scale(.98);}
+  .quiz-sheet{max-height:86vh;}
+  .quiz-body{overflow-y:auto; padding:18px 18px 24px; -webkit-overflow-scrolling:touch;}
+  .qz-intro{text-align:center; color:var(--text-2); font-size:14.5px; line-height:1.9; margin-bottom:14px;}
+  .qz-cats{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px;}
+  .qz-cats button{border:1px solid var(--line); background:var(--fill-2); color:var(--text); font:inherit; font-weight:700;
+    font-size:13.5px; padding:9px 15px; border-radius:20px;}
+  .qz-cats button.on{background:var(--accent); color:#fff; border-color:transparent;}
+  .qz-start{display:block; width:100%; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800;
+    font-size:16px; padding:15px; border-radius:16px; box-shadow:var(--shadow-2);}
+  .qz-start:active{transform:scale(.98);}
+  .qz-best{text-align:center; font-size:13px; color:var(--text-3); margin-top:12px;}
+  .qz-bar{height:6px; border-radius:3px; background:var(--fill); overflow:hidden; margin-bottom:6px;}
+  .qz-bar i{display:block; height:100%; background:var(--accent); border-radius:3px; transition:width .3s ease;}
+  .qz-meta{display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-3); margin-bottom:16px; font-weight:700;}
+  .qz-q{font-size:18px; font-weight:800; line-height:1.9; margin-bottom:16px; text-align:center;}
+  .qz-opts{display:flex; flex-direction:column; gap:9px;}
+  .qz-opts button{border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; font-weight:600;
+    font-size:15.5px; padding:14px 16px; border-radius:14px; text-align:right; transition:background-color .2s, color .2s;}
+  .qz-opts button:active{transform:scale(.99);}
+  .qz-opts button.ok{background:var(--accent); color:#fff; border-color:transparent;}
+  .qz-opts button.no{background:#C0392B; color:#fff; border-color:transparent;}
+  .qz-next{display:block; width:100%; margin-top:16px; border:0; background:var(--accent); color:#fff; font:inherit;
+    font-weight:800; font-size:15.5px; padding:14px; border-radius:14px;}
+  .qz-res{text-align:center; padding:10px 0;}
+  .qz-res .score{font-size:44px; font-weight:800; color:var(--accent); line-height:1.2;}
+  .qz-res .of{font-size:14px; color:var(--text-3); margin-bottom:10px;}
+  .qz-res .msg{font-size:16px; font-weight:700; line-height:1.9; margin-bottom:18px;}
   .search-box{padding:4px 16px 10px; border-bottom:1px solid var(--sep);}
   .search-box input{width:100%; border:1px solid var(--line); background:var(--fill-2); color:var(--text);
     font:inherit; font-size:15px; padding:11px 14px; border-radius:12px; direction:rtl;}
@@ -722,8 +755,22 @@
       <button data-g="0">∞</button>
     </div>
     <button class="reset" id="t-reset">تصفير العدّاد</button>
+    <button class="quiz-open" id="quiz-open">
+      <svg class="gh-ic" viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5"/><path d="M12 17.5h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      اختبار الثقافة الإسلامية
+    </button>
   </div>
 </section>
+
+<div class="sura-overlay" id="quiz-overlay">
+  <div class="sura-sheet quiz-sheet">
+    <div class="sura-sheet-head">
+      <span id="quiz-title">اختبار الثقافة الإسلامية</span>
+      <button id="quiz-close" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="quiz-body" id="quiz-body"></div>
+  </div>
+</div>
 
 <!-- ===== الإعدادات ===== -->
 <section id="s-settings" class="screen">
@@ -1588,6 +1635,87 @@ function markBookmarkedAya(){
   const el=document.querySelector('#wird-body .wird-num[data-ai="'+sp.ai+'"]');
   if(el) el.classList.add('bm');
 }
+/* ==================== اختبار الثقافة الإسلامية ==================== */
+const QZ_LEN=10;
+let __qzLoading=null, __qzCat='all', __qzSet=[], __qzI=0, __qzScore=0, __qzAnswered=false;
+function loadQuiz(){
+  if(window.QUIZ) return Promise.resolve(true);
+  if(__qzLoading) return __qzLoading;
+  __qzLoading=new Promise(res=>{
+    const s=document.createElement('script'); s.src='quiz.js';
+    s.onload=()=>res(!!window.QUIZ); s.onerror=()=>{ __qzLoading=null; res(false); };
+    document.head.appendChild(s);
+  });
+  return __qzLoading;
+}
+function qzBest(){ return store.get('az_quizbest', {}); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function openQuiz(){ $('#quiz-overlay').classList.add('show'); qzHome(); }
+function closeQuiz(){ $('#quiz-overlay').classList.remove('show'); }
+async function qzHome(){
+  const body=$('#quiz-body'); $('#quiz-title').textContent='اختبار الثقافة الإسلامية';
+  body.innerHTML='<div class="qz-intro">…جارٍ التحميل</div>';
+  const ok=await loadQuiz();
+  if(!ok){ body.innerHTML='<div class="qz-intro">تعذّر تحميل الأسئلة.</div>'; return; }
+  const best=qzBest(), b=best[__qzCat];
+  body.innerHTML=
+    '<div class="qz-intro">'+AR(QZ_LEN)+' أسئلة في كل جولة — اختر المجال ثم ابدأ.</div>'+
+    '<div class="qz-cats">'+QUIZ_CATS.map(c=>'<button data-c="'+c.id+'"'+(c.id===__qzCat?' class="on"':'')+'>'+c.name+'</button>').join('')+'</div>'+
+    '<button class="qz-start" id="qz-start">ابدأ الاختبار</button>'+
+    (b!=null?'<div class="qz-best">أفضل نتيجة في هذا المجال: '+AR(b)+' من '+AR(QZ_LEN)+'</div>':'');
+  body.querySelectorAll('.qz-cats button').forEach(btn=> btn.addEventListener('click', ()=>{ __qzCat=btn.dataset.c; vibrate(5); qzHome(); }));
+  $('#qz-start').addEventListener('click', qzStart);
+}
+function qzStart(){
+  const pool=(__qzCat==='all')? QUIZ.slice() : QUIZ.filter(q=>q.c===__qzCat);
+  __qzSet=shuffle(pool).slice(0, Math.min(QZ_LEN, pool.length));
+  __qzI=0; __qzScore=0; vibrate(8); qzRender();
+}
+function qzRender(){
+  const body=$('#quiz-body');
+  if(__qzI>=__qzSet.length) return qzResult();
+  const item=__qzSet[__qzI];
+  __qzAnswered=false;
+  $('#quiz-title').textContent='سؤال '+AR(__qzI+1)+' من '+AR(__qzSet.length);
+  const opts=shuffle(item.o.map((t,i)=>({t, ok:i===item.a})));
+  body.innerHTML=
+    '<div class="qz-bar"><i style="width:'+Math.round(__qzI/__qzSet.length*100)+'%"></i></div>'+
+    '<div class="qz-meta"><span>'+(QUIZ_CATS.find(c=>c.id===item.c)||{name:''}).name+'</span><span>النتيجة: '+AR(__qzScore)+'</span></div>'+
+    '<div class="qz-q">'+escapeHtml(item.q)+'</div>'+
+    '<div class="qz-opts">'+opts.map((o,i)=>'<button data-i="'+i+'">'+escapeHtml(o.t)+'</button>').join('')+'</div>';
+  const btns=[...body.querySelectorAll('.qz-opts button')];
+  btns.forEach((btn,i)=> btn.addEventListener('click', ()=>{
+    if(__qzAnswered) return; __qzAnswered=true;
+    const right=opts[i].ok;
+    if(right){ __qzScore++; btn.classList.add('ok'); vibrate(10); }
+    else { btn.classList.add('no'); btns[opts.findIndex(o=>o.ok)].classList.add('ok'); vibrate([30,60,30]); }
+    const nx=document.createElement('button');
+    nx.className='qz-next'; nx.textContent = (__qzI+1<__qzSet.length) ? 'السؤال التالي' : 'عرض النتيجة';
+    nx.addEventListener('click', ()=>{ __qzI++; qzRender(); });
+    body.appendChild(nx); nx.scrollIntoView({block:'nearest'});
+  }));
+}
+function qzResult(){
+  const n=__qzSet.length, s=__qzScore, pct=s/n;
+  const best=qzBest(); if(best[__qzCat]==null || s>best[__qzCat]){ best[__qzCat]=s; store.set('az_quizbest', best); }
+  const msg = pct===1 ? 'ما شاء الله! إجابات كاملة 🤍'
+            : pct>=0.7 ? 'أحسنت، نتيجة طيّبة — واصِل.'
+            : pct>=0.4 ? 'جيّد، وفي الإعادة إفادة.'
+            : 'لا بأس، العلم بالتعلّم — أعِد المحاولة.';
+  $('#quiz-title').textContent='النتيجة';
+  const body=$('#quiz-body');
+  body.innerHTML='<div class="qz-res"><div class="score">'+AR(s)+'</div><div class="of">من '+AR(n)+'</div>'+
+    '<div class="msg">'+msg+'</div></div>'+
+    '<button class="qz-start" id="qz-again">إعادة الاختبار</button>'+
+    '<button class="qz-next" id="qz-home" style="background:var(--fill-2); color:var(--text)">اختيار مجال آخر</button>';
+  $('#qz-again').addEventListener('click', qzStart);
+  $('#qz-home').addEventListener('click', qzHome);
+  vibrate(pct>=0.7?[20,60,20]:8);
+}
+$('#quiz-open') && $('#quiz-open').addEventListener('click', ()=>{ vibrate(6); openQuiz(); });
+$('#quiz-close') && $('#quiz-close').addEventListener('click', closeQuiz);
+$('#quiz-overlay') && $('#quiz-overlay').addEventListener('click', e=>{ if(e.target.id==='quiz-overlay') closeQuiz(); });
+
 /* ==================== تفسير الآية (التفسير الميسّر — حفص) ==================== */
 let __tafsirLoading=null;
 function loadTafsir(){
