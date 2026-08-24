@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- سياسة أمان المحتوى: كل الموارد من نطاق التطبيق فقط، والاتصال الخارجي محصور في mp3quran -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https:; connect-src 'self' https://*.mp3quran.net; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https:; connect-src 'self' https://*.mp3quran.net https://archive.org https://*.archive.org; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#EFE6D4">
 <meta name="description" content="صلاتي — أذكار الصباح والمساء، المصحف كامل برواية حفص وورش، المسبحة ومواقيت الصلاة. يعمل دون إنترنت.">
@@ -144,7 +144,10 @@
   .seg button{flex:1 0 auto; white-space:nowrap; border:0; background:transparent; color:var(--text); font:inherit;
     font-size:15px; font-weight:600; padding:7px 14px; border-radius:9px; z-index:1; transition:color .2s;}
   .seg button.on{background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.18);}
-  #wird-mode-seg button{flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
+  #wird-mode-seg button, #listen-mode-seg button{flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
+  #listen-mode-seg button .gh-ic{margin:0;}
+  #listen-mode-seg button.on{background:var(--accent); color:#fff; box-shadow:0 1px 5px rgba(47,158,68,.35);}
+  #listen-mode-seg button:not(.on){background:rgba(47,158,68,.12); color:var(--accent);}
   #wird-mode-seg button .gh-ic{margin:0;}
   /* ثنائي هادئ أنيق: أخضر مريمية للورد، أزرق رمادي ناعم للمصحف الكامل */
   /* لون الزرّين مطابق للون التطبيق (الأخضر) */
@@ -521,6 +524,19 @@
   .tafsir-body .t-src{margin-top:16px; font-size:12px; color:var(--text-3); text-align:center;}
   .tafsir-body .t-note{font-size:14.5px; line-height:1.9; color:var(--text-2); text-align:center; padding:10px 0;}
 
+  /* قصص الأنبياء (بثّ من أرشيف الإنترنت) */
+  .stories-note{margin:12px 16px 8px; font-size:12.5px; color:var(--text-3); line-height:1.8; text-align:center;}
+  .story-item{display:flex; align-items:center; gap:12px; width:calc(100% - 32px); margin:0 16px 8px;
+    border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; text-align:right;
+    padding:13px 15px; border-radius:14px; box-shadow:var(--shadow-1); transition:transform .13s ease;}
+  .story-item:active{transform:scale(.99);}
+  .story-item.on{border-color:transparent; background:var(--c-read-bg); color:var(--c-read);}
+  .story-item .st-ic{flex:0 0 auto; width:34px; height:34px; border-radius:17px; background:var(--fill-2);
+    color:var(--accent); display:inline-flex; align-items:center; justify-content:center;}
+  .story-item.on .st-ic{background:var(--c-read); color:#fff;}
+  .story-item .st-nm{flex:1; min-width:0; font-size:15px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .story-item .st-du{flex:0 0 auto; font-size:12px; color:var(--text-3); font-weight:600;}
+
   /* اختبار الثقافة الإسلامية */
   .quiz-open{display:flex; width:calc(100% - 32px); margin:10px 16px 0; align-items:center; justify-content:center; gap:8px;
     border:1px solid var(--line); background:var(--card); color:var(--accent); font:inherit; font-weight:800; font-size:15px;
@@ -645,7 +661,11 @@
 <section id="s-listen" class="screen">
   <div class="head">
     <h1>الاستماع</h1>
-    <div class="sub">اختر القارئ ثمّ السورة للاستماع إليها</div>
+    <div class="sub" id="listen-sub">اختر القارئ ثمّ السورة للاستماع إليها</div>
+  </div>
+  <div class="seg" id="listen-mode-seg">
+    <button data-l="quran" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>القرآن</button>
+    <button data-l="stories"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h4"/><path d="M15 7h4"/><circle cx="12" cy="12" r="9"/></svg>قصص الأنبياء</button>
   </div>
   <div class="reciter-box" id="reciter-box">
     <div class="reciter-chips" id="reciter-chips"></div>
@@ -664,6 +684,10 @@
     <audio id="reciter-audio" preload="none"></audio>
   </div>
   <div class="listen-list" id="listen-list"></div>
+  <div class="stories-box" id="stories-box" style="display:none">
+    <div class="stories-note">سلسلة قصص الأنبياء — الشيخ نبيل العوضي · تُشغَّل من أرشيف الإنترنت (يحتاج اتصالًا)</div>
+    <div id="stories-list"></div>
+  </div>
   <div style="height:20px"></div>
 </section>
 
@@ -1635,6 +1659,93 @@ function markBookmarkedAya(){
   const el=document.querySelector('#wird-body .wird-num[data-ai="'+sp.ai+'"]');
   if(el) el.classList.add('bm');
 }
+/* ==================== قصص الأنبياء (الشيخ نبيل العوضي) ====================
+   تُجلب قائمة الحلقات من أرشيف الإنترنت وقت الاستعمال، فلا تتعطّل بروابط ثابتة. */
+const STORY_IDS=['qasas-anbiya','prophets_stories_Nabel-ElAwadde','Kassas.Anbiyaa_Sheikh.Nabil.Al3awadhy'];
+let __stories=null, __storyLoading=false, __storyPlaying=null;
+function fmtDur(sec){
+  const s=Math.round(parseFloat(sec)||0); if(!s) return '';
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60);
+  return h? (AR(h)+':'+String(m).padStart(2,'0')) : (AR(m)+' د');
+}
+async function fetchStories(){
+  if(__stories) return __stories;
+  for(const id of STORY_IDS){
+    try{
+      const res=await fetch('https://archive.org/metadata/'+id, {mode:'cors'});
+      if(!res.ok) continue;
+      const d=await res.json();
+      const files=(d.files||[]).filter(f=>/\.mp3$/i.test(f.name||''));
+      if(!files.length) continue;
+      const base='https://archive.org/download/'+id+'/';
+      const list=files.map(f=>({
+        name:(f.title||f.name||'').replace(/\.mp3$/i,''),
+        url: base+encodeURIComponent(f.name),
+        dur: fmtDur(f.length)
+      })).sort((a,b)=> a.name.localeCompare(b.name,'ar',{numeric:true}));
+      __stories=list; return list;
+    }catch(e){ /* جرّب المعرّف التالي */ }
+  }
+  return null;
+}
+function renderStories(list){
+  const box=$('#stories-list'); if(!box) return;
+  if(!list || !list.length){
+    box.innerHTML='<div class="search-hint">تعذّر تحميل الحلقات — تحقّق من الإنترنت ثمّ أعِد المحاولة.</div>';
+    return;
+  }
+  box.innerHTML=list.map((s,i)=>
+    '<button class="story-item" data-i="'+i+'">'+
+      '<span class="st-ic">'+ICON_PLAY+'</span>'+
+      '<span class="st-nm">'+escapeHtml(s.name)+'</span>'+
+      '<span class="st-du">'+escapeHtml(s.dur)+'</span>'+
+    '</button>').join('');
+  box.querySelectorAll('.story-item').forEach(b=> b.addEventListener('click', ()=> playStory(parseInt(b.dataset.i))));
+  markStory();
+}
+function markStory(){
+  const a=$('#reciter-audio');
+  const cur=(a && !a.paused && __storyPlaying!=null) ? __storyPlaying : null;
+  document.querySelectorAll('.story-item').forEach(b=>{
+    const on = parseInt(b.dataset.i)===cur;
+    b.classList.toggle('on', on);
+    b.querySelector('.st-ic').innerHTML = on ? ICON_PAUSE : ICON_PLAY;
+  });
+}
+function playStory(i){
+  const a=$('#reciter-audio'); if(!a || !__stories || !__stories[i]) return;
+  if(__storyPlaying===i && !a.paused){ a.pause(); return; }
+  __storyPlaying=i; __audioSura=null;
+  a.src=__stories[i].url; a.currentTime=0;
+  a.play().catch(()=> showToast('تعذّر تشغيل الحلقة — تحقّق من الإنترنت', 3500));
+  vibrate(6);
+  if('mediaSession' in navigator){
+    try{ navigator.mediaSession.metadata=new MediaMetadata({ title:__stories[i].name, artist:'الشيخ نبيل العوضي', album:'قصص الأنبياء' }); }catch(e){}
+  }
+  markStory();
+}
+['play','pause','ended'].forEach(ev=> $('#reciter-audio') && $('#reciter-audio').addEventListener(ev, ()=>{ try{ markStory(); }catch(e){} }));
+async function openStories(){
+  const box=$('#stories-list'); if(!box) return;
+  if(__stories) return renderStories(__stories);
+  if(__storyLoading) return;
+  __storyLoading=true;
+  box.innerHTML='<div class="search-hint">…جارٍ تحميل الحلقات</div>';
+  const list=await fetchStories();
+  __storyLoading=false;
+  renderStories(list);
+}
+function applyListenMode(mode){
+  const stories = mode==='stories';
+  $('#reciter-box').style.display = stories ? 'none' : '';
+  $('#listen-list').style.display = stories ? 'none' : '';
+  $('#stories-box').style.display = stories ? '' : 'none';
+  $('#listen-sub').textContent = stories ? 'سلسلة قصص الأنبياء للشيخ نبيل العوضي' : 'اختر القارئ ثمّ السورة للاستماع إليها';
+  $$('#listen-mode-seg button').forEach(b=> b.classList.toggle('on', b.dataset.l===mode));
+  if(stories) openStories();
+}
+$$('#listen-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{ vibrate(6); applyListenMode(b.dataset.l); }));
+
 /* ==================== اختبار الثقافة الإسلامية ==================== */
 const QZ_LEN=10;
 let __qzLoading=null, __qzCat='all', __qzSet=[], __qzI=0, __qzScore=0, __qzAnswered=false;
