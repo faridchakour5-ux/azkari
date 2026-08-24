@@ -144,15 +144,20 @@
   .seg button{flex:1 0 auto; white-space:nowrap; border:0; background:transparent; color:var(--text); font:inherit;
     font-size:15px; font-weight:600; padding:7px 14px; border-radius:9px; z-index:1; transition:color .2s;}
   .seg button.on{background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.18);}
-  #wird-mode-seg button, #listen-mode-seg button{flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
-  #listen-mode-seg button .gh-ic{margin:0;}
-  #listen-mode-seg button.on{background:var(--accent); color:#fff; box-shadow:0 1px 5px rgba(47,158,68,.35);}
-  #listen-mode-seg button:not(.on){background:rgba(47,158,68,.12); color:var(--accent);}
-  #wird-mode-seg button .gh-ic{margin:0;}
+  /* التبويبات المزدوجة: الأول كهرماني والثاني أزرق — كأزرار «بلا تكرار» و«اقرأ نفس السورة» */
+  #wird-mode-seg button, #listen-mode-seg button, #tasbih-mode-seg button{
+    flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
+  #wird-mode-seg button .gh-ic, #listen-mode-seg button .gh-ic, #tasbih-mode-seg button .gh-ic{margin:0;}
+  #wird-mode-seg button:first-child, #listen-mode-seg button:first-child, #tasbih-mode-seg button:first-child{
+    background:var(--c-repeat-bg); color:var(--c-repeat);}
+  #wird-mode-seg button:last-child, #listen-mode-seg button:last-child, #tasbih-mode-seg button:last-child{
+    background:var(--c-read-bg); color:var(--c-read);}
+  #wird-mode-seg button:first-child.on, #listen-mode-seg button:first-child.on, #tasbih-mode-seg button:first-child.on{
+    background:var(--c-repeat); color:#fff; box-shadow:0 1px 5px rgba(0,0,0,.18);}
+  #wird-mode-seg button:last-child.on, #listen-mode-seg button:last-child.on, #tasbih-mode-seg button:last-child.on{
+    background:var(--c-read); color:#fff; box-shadow:0 1px 5px rgba(0,0,0,.18);}
   /* ثنائي هادئ أنيق: أخضر مريمية للورد، أزرق رمادي ناعم للمصحف الكامل */
   /* لون الزرّين مطابق للون التطبيق (الأخضر) */
-  #wird-mode-seg button[data-m="wird"], #wird-mode-seg button[data-m="mushaf"]{background:rgba(47,158,68,.12); color:var(--accent);}
-  #wird-mode-seg button.on{background:var(--accent); color:#fff; box-shadow:0 1px 5px rgba(47,158,68,.35);}
 
   .progressbar{margin:10px 16px 0; height:6px; border-radius:3px; background:var(--fill); overflow:hidden;}
   .progressbar i{display:block; height:100%; width:0; background:var(--c-repeat); border-radius:3px; transition:width .4s ease;}
@@ -216,7 +221,7 @@
   .counter{position:relative; width:270px; height:270px; margin:18px auto 4px;}
   .counter svg{width:100%; height:100%; transform:rotate(-90deg);}
   .counter .ring-bg{fill:none; stroke:var(--fill); stroke-width:14;}
-  .counter .ring-fg{fill:none; stroke:var(--c-read); stroke-width:14; stroke-linecap:round;
+  .counter .ring-fg{fill:none; stroke:var(--accent); stroke-width:14; stroke-linecap:round;
     transition:stroke-dashoffset .3s ease;}
   .counter .mid{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
   .counter .num{font-size:72px; font-weight:800; letter-spacing:-2px; line-height:1; font-variant-numeric:tabular-nums;}
@@ -548,10 +553,6 @@
   .quiz-body{padding:14px 18px 26px;}
   /* عنوان الاختبار أطول من بقية العناوين: نصغّره ونحجز مساحة أزرار الرواية */
   #tasbih-title.long{font-size:calc(24px * var(--scale)); padding-inline-end:104px; line-height:1.35;}
-  #tasbih-mode-seg button{flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
-  #tasbih-mode-seg button .gh-ic{margin:0;}
-  #tasbih-mode-seg button.on{background:var(--accent); color:#fff; box-shadow:0 1px 5px rgba(47,158,68,.35);}
-  #tasbih-mode-seg button:not(.on){background:rgba(47,158,68,.12); color:var(--accent);}
   .qz-intro{text-align:center; color:var(--text-2); font-size:14.5px; line-height:1.9; margin-bottom:14px;}
   .qz-cats{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px;}
   .qz-cats button{border:1px solid var(--line); background:var(--fill-2); color:var(--text); font:inherit; font-weight:700;
