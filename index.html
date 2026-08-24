@@ -1501,10 +1501,7 @@ function initRiwayaPills(){
   $$('.riwaya-quick button').forEach(b=> b.addEventListener('click', ()=>{
     if(settings.riwaya===b.dataset.r) return;
     // إن كنّا وسط المصحف: احفظ السورة الحالية لنعود إليها بعد إعادة البناء بالرواية الجديدة
-    try{
-      if(wirdMode()==='mushaf' && $('#s-wird').classList.contains('active'))
-        settings.mushafSura=currentSuraFromScroll();
-    }catch(e){}
+    markRiwayaKeep();
     settings.riwaya=b.dataset.r; saveSettings(); applyRiwaya(); syncRiwayaPills(); vibrate(6);
   }));
   syncRiwayaPills();
@@ -1657,7 +1654,10 @@ function buildMushaf(body){
   updateResumeBtn();
   markBookmarkedAya();
   collectSuraMarkers();
-  requestAnimationFrame(()=> scrollToSura(settings.mushafSura||0, false));
+  requestAnimationFrame(()=>{
+    if(__riwayaKeep){ const k=__riwayaKeep; __riwayaKeep=null; restoreRiwayaKeep(k); }
+    else scrollToSura(settings.mushafSura||0, false);
+  });
 }
 /* وضع علامة مرئية عند الآية المحفوظة (إن وُجدت) */
 function markBookmarkedAya(){
@@ -2037,6 +2037,37 @@ function openLabelOverlay(items, curId, onPick, title){
 function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); const bk=$('#sura-overlay-back'); if(bk) bk.style.display='none'; }
 
 /* التمرير إلى آية محدّدة (تُستعمل للقفز إلى بداية الحزب) */
+/* تبديل الرواية: احفظ الآية التي يقرؤها المستخدم واستعدها بعد إعادة البناء.
+   ترقيم الآيات يختلف بين الروايتين في بعض السور، فنثبّت رقم الآية داخل السورة ونقصّه عند اللزوم. */
+let __riwayaKeep=null;
+function currentAyaFromScroll(){
+  const els=document.querySelectorAll('#wird-body .aya-t[data-tai]');
+  let best=null;
+  for(const el of els){
+    if(el.getBoundingClientRect().top<=140) best=el; else break;
+  }
+  return best ? parseInt(best.dataset.tai) : null;
+}
+function markRiwayaKeep(){
+  try{
+    if(wirdMode()!=='mushaf' || !$('#s-wird').classList.contains('active') || !WIRD) return;
+    const ai=currentAyaFromScroll(); if(ai==null) return;
+    const si=suraOf(ai);
+    __riwayaKeep={ sura:si, no: ai-WIRD.sur[si].i+1 };
+    settings.mushafSura=si;
+  }catch(e){}
+}
+function restoreRiwayaKeep(k){
+  if(!WIRD || !WIRD.sur[k.sura]) return scrollToSura(settings.mushafSura||0, false);
+  const start=WIRD.sur[k.sura].i;
+  const end=(k.sura+1<WIRD.sur.length)? WIRD.sur[k.sura+1].i : WIRD.a.length;
+  const ai=start+Math.min(Math.max(k.no,1), end-start)-1;
+  const sp=document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]');
+  if(!sp) return scrollToSura(k.sura, false);
+  __progScroll=true; clearTimeout(__progScrollT);
+  window.scrollTo(0, Math.max(0, sp.getBoundingClientRect().top + window.scrollY - 150));
+  __progScrollT=setTimeout(()=>{ __progScroll=false; }, 200);
+}
 function scrollToAya(ai, smooth){
   const sp=document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]');
   if(!sp){ return; }
