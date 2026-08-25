@@ -792,7 +792,7 @@
     </div>
     <div class="ish-txt" id="ish-txt">يُثبَّت كتطبيق مستقلّ بأيقونته الخاصّة، يُفتح <b>بلا متصفّح</b> ويشتغل <b>دون إنترنت</b>. لا يأخذ إلا مساحة صغيرة.</div>
     <div class="ish-act">
-      <button class="ish-yes" id="ish-yes"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>تثبيت التطبيق</button>
+      <button class="ish-yes" id="ish-yes"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>Installer</button>
       <button class="ish-no" id="ish-no">لاحقًا</button>
     </div>
   </div>
@@ -3084,7 +3084,7 @@ function maybeShowInstallSheet(){
   if(isStandalone() || ishSnoozed()) return;
   if(!deferredInstall && !isIOS()) return;          // المتصفّح لا يدعم التثبيت المباشر
   if(isIOS()) $('#ish-txt').innerHTML = 'اضغط زرّ <b>المشاركة</b> ⬆︎ بأسفل سفاري، ثمّ اختر <b>«إضافة إلى الشاشة الرئيسية»</b> — سيُفتح كتطبيق مستقلّ ويشتغل دون إنترنت.';
-  if(isIOS()) $('#ish-yes').textContent = 'فهمت';
+  if(isIOS()) $('#ish-yes').textContent = 'OK';
   setTimeout(()=> el.classList.add('show'), 1400);
 }
 $('#install-sheet') && $('#install-sheet').addEventListener('click', e=>{ if(e.target.id==='install-sheet'){ ishSnooze(7); closeInstallSheet(); } });
