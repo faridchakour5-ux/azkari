@@ -392,6 +392,26 @@
   .listen-sura.playing .ls-num{background:var(--accent); color:#fff;}
 
   /* تذكير الصلاة على النبي ﷺ (شريط داخل التطبيق) */
+  /* بطاقة تثبيت التطبيق (تظهر تلقائيًّا عند فتح الرابط في المتصفّح) */
+  .install-sheet{position:fixed; inset:0; z-index:120; display:none; align-items:flex-end; justify-content:center;
+    background:rgba(0,0,0,.42); opacity:0; transition:opacity .28s ease;}
+  .install-sheet.show{display:flex; opacity:1;}
+  .install-sheet .ish-card{width:100%; max-width:480px; background:var(--card); color:var(--text);
+    border-radius:22px 22px 0 0; padding:22px 20px calc(20px + env(safe-area-inset-bottom));
+    box-shadow:0 -6px 34px rgba(0,0,0,.28); transform:translateY(24px); transition:transform .3s ease;}
+  .install-sheet.show .ish-card{transform:translateY(0);}
+  .install-sheet .ish-grip{width:42px; height:4px; border-radius:3px; background:var(--fill); margin:0 auto 16px;}
+  .install-sheet .ish-top{display:flex; align-items:center; gap:13px; margin-bottom:12px;}
+  .install-sheet .ish-top img{width:56px; height:56px; border-radius:14px; box-shadow:var(--shadow);}
+  .install-sheet .ish-ttl{font-size:18px; font-weight:800; line-height:1.35;}
+  .install-sheet .ish-sub{font-size:13px; color:var(--text-2); margin-top:2px;}
+  .install-sheet .ish-txt{font-size:14.5px; line-height:1.75; color:var(--text-2); margin-bottom:16px;}
+  .install-sheet .ish-txt b{color:var(--text); font-weight:700;}
+  .install-sheet .ish-act{display:flex; gap:10px;}
+  .install-sheet .ish-act button{flex:1 1 0; border:0; font:inherit; font-size:15.5px; font-weight:800;
+    padding:13px 10px; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px;}
+  .install-sheet .ish-yes{background:var(--accent); color:#fff; box-shadow:0 2px 10px rgba(47,158,68,.32);}
+  .install-sheet .ish-no{background:var(--fill-2); color:var(--text-2); flex:0 0 34%;}
   .salat-toast{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
     z-index:80; background:var(--accent); color:#fff; text-align:center; font-weight:700; font-size:15px;
     padding:14px 18px; border-radius:16px; box-shadow:var(--shadow-2); max-width:480px; margin:0 auto;
@@ -759,6 +779,22 @@
       <input type="search" id="quran-search-input" placeholder="اكتب اسم سورة أو كلمة من القرآن…" autocomplete="off">
     </div>
     <div class="sura-list" id="search-results"></div>
+  </div>
+</div>
+
+<div class="install-sheet" id="install-sheet">
+  <div class="ish-card">
+    <div class="ish-grip"></div>
+    <div class="ish-top">
+      <img src="icons/icon-192.png" alt="">
+      <div><div class="ish-ttl">ثبِّت «صلاتي» على هاتفك</div>
+        <div class="ish-sub">أذكار ومصحف — يعمل دون إنترنت</div></div>
+    </div>
+    <div class="ish-txt" id="ish-txt">يُثبَّت كتطبيق مستقلّ بأيقونته الخاصّة، يُفتح <b>بلا متصفّح</b> ويشتغل <b>دون إنترنت</b>. لا يأخذ إلا مساحة صغيرة.</div>
+    <div class="ish-act">
+      <button class="ish-yes" id="ish-yes"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>تثبيت التطبيق</button>
+      <button class="ish-no" id="ish-no">لاحقًا</button>
+    </div>
   </div>
 </div>
 
@@ -3039,8 +3075,34 @@ function refreshInstallUI(){
   if(btn) btn.parentElement.style.display = grpHidden ? 'none':'';
   if(note) note.style.display = grpHidden ? 'none':'';
 }
-window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredInstall=e; refreshInstallUI(); });
-window.addEventListener('appinstalled', ()=>{ deferredInstall=null; refreshInstallUI(); });
+const ISH_KEY='installSheetSnooze';
+function ishSnoozed(){ try{ const v=+(localStorage.getItem(ISH_KEY)||0); return v>Date.now(); }catch(e){ return false; } }
+function ishSnooze(days){ try{ localStorage.setItem(ISH_KEY, String(Date.now()+days*864e5)); }catch(e){} }
+function closeInstallSheet(){ const el=$('#install-sheet'); if(el) el.classList.remove('show'); }
+function maybeShowInstallSheet(){
+  const el=$('#install-sheet'); if(!el) return;
+  if(isStandalone() || ishSnoozed()) return;
+  if(!deferredInstall && !isIOS()) return;          // المتصفّح لا يدعم التثبيت المباشر
+  if(isIOS()) $('#ish-txt').innerHTML = 'اضغط زرّ <b>المشاركة</b> ⬆︎ بأسفل سفاري، ثمّ اختر <b>«إضافة إلى الشاشة الرئيسية»</b> — سيُفتح كتطبيق مستقلّ ويشتغل دون إنترنت.';
+  if(isIOS()) $('#ish-yes').textContent = 'فهمت';
+  setTimeout(()=> el.classList.add('show'), 1400);
+}
+$('#install-sheet') && $('#install-sheet').addEventListener('click', e=>{ if(e.target.id==='install-sheet'){ ishSnooze(7); closeInstallSheet(); } });
+$('#ish-no') && $('#ish-no').addEventListener('click', ()=>{ ishSnooze(7); closeInstallSheet(); });
+$('#ish-yes') && $('#ish-yes').addEventListener('click', async ()=>{
+  if(deferredInstall){
+    closeInstallSheet();
+    deferredInstall.prompt();
+    let out=null; try{ out=await deferredInstall.userChoice; }catch(e){}
+    deferredInstall=null; refreshInstallUI();
+    if(out && out.outcome!=='accepted') ishSnooze(3);
+    return;
+  }
+  ishSnooze(7); closeInstallSheet();   // آيفون: التعليمات مقروءة
+});
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredInstall=e; refreshInstallUI(); maybeShowInstallSheet(); });
+window.addEventListener('load', ()=> setTimeout(maybeShowInstallSheet, 2500));
+window.addEventListener('appinstalled', ()=>{ deferredInstall=null; closeInstallSheet(); ishSnooze(3650); refreshInstallUI(); });
 $('#install-btn') && $('#install-btn').addEventListener('click', async ()=>{
   if(deferredInstall){
     deferredInstall.prompt();
