@@ -476,6 +476,9 @@
     font-size:calc(20px * var(--scale) * var(--qscale,1)); line-height:2; margin:2px 0 10px;}
   body.riw-warsh .wird-basmala{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(22px * var(--scale) * var(--qscale,1));}
   body.qmaghribi .wird-basmala{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(22px * var(--scale) * var(--qscale,1));}
+  /* أداء: تُحسب مواضع كل صفحة عند اقترابها من الشاشة فقط (بدل حساب المصحف كاملاً دفعةً واحدة) */
+  .mushaf-pg{content-visibility:auto; contain-intrinsic-size:auto 2600px;}
+  .mushaf-pg.cv-on{content-visibility:visible;}
   .mushaf-page{display:flex; align-items:center; gap:12px; margin:18px 4px; color:var(--text-3);
     font-family:'PlexAr'; font-size:13px; font-weight:700;}
   .mushaf-page::before,.mushaf-page::after{content:''; flex:1; height:1px; background:var(--sep);}
@@ -1706,6 +1709,7 @@ function scrollToSura(si, smooth){
   const el=document.getElementById('msura-'+si);
   if(!el) return;
   __progScroll=true; clearTimeout(__progScrollT);
+  cvReveal(el);
   el.scrollIntoView({block:'start', behavior: smooth?'smooth':'auto'});
   __progScrollT=setTimeout(()=>{ __progScroll=false; }, smooth?900:150);
 }
@@ -1728,14 +1732,17 @@ function buildMushaf(body){
   if(!WIRD || wirdMode()!=='mushaf') return;
   const N=WIRD.a.length;
   const parts=['<div class="wird-card">'];
-  let textOpen=false, curSura=-1, prevPage=parseInt(WIRD.a[0].p);
+  let textOpen=false, pgOpen=false, curSura=-1, prevPage=parseInt(WIRD.a[0].p);
   for(let i=0;i<N;i++){
     const a=WIRD.a[i], pg=parseInt(a.p), si=suraOf(i);
     if(pg!==prevPage){
       if(textOpen){ parts.push('</div>'); textOpen=false; }
-      parts.push('<div class="mushaf-page">'+pg+'</div>');
+      if(pgOpen){ parts.push('</div>'); pgOpen=false; }
+      parts.push('<div class="mushaf-pg" data-pg="'+pg+'"><div class="mushaf-page">'+pg+'</div>');
+      pgOpen=true;
       prevPage=pg;
     }
+    if(!pgOpen){ parts.push('<div class="mushaf-pg" data-pg="'+pg+'">'); pgOpen=true; }
     if(si!==curSura){
       curSura=si;
       if(textOpen){ parts.push('</div>'); textOpen=false; }
@@ -1746,6 +1753,7 @@ function buildMushaf(body){
     parts.push('<span class="aya-t" data-tai="'+i+'">'+a.t+'</span><span class="wird-num" data-ai="'+i+'">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
   }
   if(textOpen) parts.push('</div>');
+  if(pgOpen) parts.push('</div>');
   parts.push('</div>');
   body.innerHTML=parts.join('');
   body.dataset.mode='mushaf';
@@ -2054,6 +2062,7 @@ function collectSuraMarkers(){
   __suraMarkers=Array.from(document.querySelectorAll('#wird-body [id^="msura-"]'));
 }
 function currentSuraFromScroll(){
+  if(WIRD){ const ai=currentAyaFromScroll(); if(ai!=null) return suraOf(ai); }
   if(!__suraMarkers || !__suraMarkers.length) return settings.mushafSura||0;
   let cur=0;
   for(const el of __suraMarkers){
@@ -2140,13 +2149,24 @@ function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); const 
 /* تبديل الرواية: احفظ الآية التي يقرؤها المستخدم واستعدها بعد إعادة البناء.
    ترقيم الآيات يختلف بين الروايتين في بعض السور، فنثبّت رقم الآية داخل السورة ونقصّه عند اللزوم. */
 let __riwayaKeep=null;
+/* يكشف صفحة العنصر ليُحسب موضعها بدقّة (لأنّ الصفحات البعيدة غير محسوبة) */
+function cvReveal(el){
+  const pg = el && el.closest ? el.closest('.mushaf-pg') : null;
+  if(pg) pg.classList.add('cv-on');
+  return el;
+}
+/* الآية عند أعلى الشاشة — عبر نقطة واحدة بدل قياس آلاف العناصر */
 function currentAyaFromScroll(){
-  const els=document.querySelectorAll('#wird-body .aya-t[data-tai]');
-  let best=null;
-  for(const el of els){
-    if(el.getBoundingClientRect().top<=140) best=el; else break;
+  const x=Math.round(window.innerWidth/2);
+  for(const y of [140,180,220,260,110]){
+    let el=document.elementFromPoint(x,y);
+    while(el && el!==document.body){
+      if(el.dataset && el.dataset.tai!=null) return parseInt(el.dataset.tai);
+      if(el.dataset && el.dataset.ai!=null)  return parseInt(el.dataset.ai);
+      el=el.parentElement;
+    }
   }
-  return best ? parseInt(best.dataset.tai) : null;
+  return null;
 }
 function markRiwayaKeep(){
   try{
@@ -2165,13 +2185,16 @@ function restoreRiwayaKeep(k){
   const sp=document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]');
   if(!sp) return scrollToSura(k.sura, false);
   __progScroll=true; clearTimeout(__progScrollT);
-  window.scrollTo(0, Math.max(0, sp.getBoundingClientRect().top + window.scrollY - 150));
-  __progScrollT=setTimeout(()=>{ __progScroll=false; }, 200);
+  cvReveal(sp);
+  sp.scrollIntoView({block:'start', behavior:'auto'});
+  window.scrollBy(0, -150);
+  __progScrollT=setTimeout(()=>{ __progScroll=false; }, 250);
 }
 function scrollToAya(ai, smooth){
   const sp=document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]');
   if(!sp){ return; }
   __progScroll=true; clearTimeout(__progScrollT);
+  cvReveal(sp);
   sp.scrollIntoView({block:'center', behavior: smooth?'smooth':'auto'});
   __progScrollT=setTimeout(()=>{ __progScroll=false; }, smooth?900:150);
 }
@@ -2532,6 +2555,7 @@ function suraRegion(si){
   const start=document.getElementById('msura-'+si); if(!start) return null;
   const next=document.getElementById('msura-'+(si+1));
   const body=$('#wird-body');
+  cvReveal(start); cvReveal(next);
   const top=start.getBoundingClientRect().top + window.scrollY;
   let bottom;
   if(next) bottom=next.getBoundingClientRect().top + window.scrollY;

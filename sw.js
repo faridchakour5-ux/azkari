@@ -1,5 +1,5 @@
-/* صلاتي — service worker v133 */
-const CACHE = 'azkari-v133';
+/* صلاتي — service worker v134 */
+const CACHE = 'azkari-v134';
 const ASSETS = [
   './',
   './index.html',
@@ -52,33 +52,59 @@ self.addEventListener('fetch', e => {
   const isNav  = e.request.mode === 'navigate' || /\.html(\?|$)/.test(url);
   const isData = /\/(data|wird_hafs|wird_warsh|adhan\.min)\.js/.test(url);
 
-  if (isNav || isData) {
-    // network-first : récupère la dernière version, repli sur le cache si hors-ligne
-    e.respondWith(
-      fetch(e.request).then(res => {
-        if (res && res.status === 200) {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, copy));
-        }
+  if (isNav) {
+    // HTML : réseau d'abord, mais on n'attend jamais plus de 2,5 s — sinon on sert le cache
+    // (sur un réseau lent ou instable l'appli s'ouvrait en plusieurs secondes).
+    e.respondWith((async () => {
+      const cached = caches.match(e.request).then(r => r || caches.match('./index.html')).then(r => r || caches.match('./'));
+      try {
+        const res = await Promise.race([
+          fetch(e.request).then(r => {
+            if (r && r.status === 200) { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
+            return r;
+          }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('slow')), 2500))
+        ]);
         return res;
-      }).catch(() =>
-        caches.match(e.request).then(r => r || (isNav ? caches.match('./index.html').then(x => x || caches.match('./')) : r))
-      )
-    );
-  } else {
-    // cache-first pour polices, icônes, manifest
+      } catch (err) {
+        const c = await cached;
+        if (c) return c;
+        return fetch(e.request);   // pas de cache : on attend le réseau
+      }
+    })());
+    return;
+  }
+
+  if (isData) {
+    // Données du Coran (~3 Mo) : on sert le cache immédiatement et on rafraîchit en arrière-plan.
+    // La nouvelle version s'applique à l'ouverture suivante — comme pour le reste de l'appli.
     e.respondWith(
       caches.match(e.request).then(cached => {
-        if (cached) return cached;
-        return fetch(e.request).then(res => {
-          if (res && res.status === 200 && res.type === 'basic') {
-            caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+        const net = fetch(e.request).then(res => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, copy));
           }
           return res;
-        });
+        }).catch(() => cached);
+        return cached || net;
       })
     );
+    return;
   }
+
+  // polices, icônes, manifest, scripts chargés à la demande : cache d'abord
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+        }
+        return res;
+      });
+    })
+  );
 });
 
 self.addEventListener('notificationclick', e => {
