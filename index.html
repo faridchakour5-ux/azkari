@@ -410,6 +410,9 @@
   .chal .ch-task.ok .ch-box{background:var(--accent); border-color:var(--accent);}
   .chal .ch-task.ok .ch-box svg{opacity:1;}
   .chal .ch-nm{flex:1 1 auto; font-size:15px; font-weight:700;}
+  .chal .ch-nm .gh-ic{width:1.35em; height:1.35em; vertical-align:-.28em; margin-inline-end:5px; color:var(--text-2);}
+  .chal .ch-task.ok .ch-nm .gh-ic{color:var(--accent);}
+  .chal .ch-streak .gh-ic{width:1.15em; height:1.15em; vertical-align:-.2em; margin-inline-end:3px;}
   .chal .ch-nm i{display:block; font-style:normal; font-size:12px; font-weight:600; color:var(--text-2); margin-top:2px;}
   .chal .ch-motto{font-family:'AmiriQuran',serif; font-size:13.5px; color:var(--text-2); text-align:center;
     margin:-4px 0 8px;}
@@ -794,7 +797,7 @@
     <div class="sura-sheet-head">
       <button id="sura-overlay-back" aria-label="رجوع" style="display:none"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
       <span>اختر السورة</span>
-      <button id="sura-overlay-close" aria-label="إغلاق">✕</button>
+      <button id="sura-overlay-close" aria-label="إغلاق"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="sura-list" id="sura-list"></div>
   </div>
@@ -804,7 +807,7 @@
   <div class="sura-sheet">
     <div class="sura-sheet-head">
       <span id="tafsir-title">التفسير</span>
-      <button id="tafsir-close" aria-label="إغلاق">✕</button>
+      <button id="tafsir-close" aria-label="إغلاق"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="tafsir-body" id="tafsir-body"></div>
   </div>
@@ -814,7 +817,7 @@
   <div class="sura-sheet">
     <div class="sura-sheet-head">
       <span>البحث في القرآن</span>
-      <button id="search-overlay-close" aria-label="إغلاق">✕</button>
+      <button id="search-overlay-close" aria-label="إغلاق"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="search-box">
       <input type="search" id="quran-search-input" placeholder="اكتب اسم سورة أو كلمة من القرآن…" autocomplete="off">
@@ -827,7 +830,7 @@
   <div class="ish-card">
     <div class="ish-grip"></div>
     <div class="ish-top">
-      <span class="ch-emo">🤍</span>
+      <span class="ch-emo"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.4A4 4 0 0 1 12 8a4 4 0 0 1 7 2.6C19 15.4 12 20 12 20z"/></svg></span>
       <div><div class="ish-ttl">أتممتَ تحدّي اليوم</div>
         <div class="ish-sub" id="chal-sheet-sub">تقبّل الله منك</div></div>
     </div>
@@ -1206,7 +1209,7 @@ function renderAzkar(){
     card.className = 'card'+(d.quran?' quran':'')+(isDone?' done':'');
     card.dataset.pid = pid;
     card.innerHTML =
-      '<div class="tick">✓</div>'+
+      '<div class="tick"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg></div>'+
       '<div class="txt">'+escapeHtml(text)+'</div>'+
       '<div class="meta">'+
         '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span>'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
@@ -1253,7 +1256,7 @@ function tapAzkar(card, d, pid){
 function updateProgressBar(done,total){
   $('#pg-fill').style.width = (total? (done/total*100):0)+'%';
   $('#pg-text').textContent = AR(done)+' من '+AR(total);
-  $('#pg-reset-day').textContent = done>=total && total>0 ? 'أتممت أذكارك ✓' : '';
+  $('#pg-reset-day').textContent = done>=total && total>0 ? 'أتممت أذكارك' : '';
 }
 
 function escapeHtml(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -1913,7 +1916,7 @@ function qzRender(){
 function qzResult(){
   const n=__qzSet.length, s=__qzScore, pct=s/n;
   const best=qzBest(); if(best[__qzCat]==null || s>best[__qzCat]){ best[__qzCat]=s; store.set('az_quizbest', best); }
-  const msg = pct===1 ? 'ما شاء الله! إجابات كاملة 🤍'
+  const msg = pct===1 ? 'ما شاء الله! إجابات كاملة'
             : pct>=0.7 ? 'أحسنت، نتيجة طيّبة — واصِل.'
             : pct>=0.4 ? 'جيّد، وفي الإعادة إفادة.'
             : 'لا بأس، العلم بالتعلّم — أعِد المحاولة.';
@@ -2860,7 +2863,7 @@ function renderWird(){
   $('#khatma-pct').textContent=Math.round(pos/N*100)+'%';
 
   if(pos>=N){
-    $('#wird-body').innerHTML='<div class="wird-card"><div class="khatma-done">ختمتَ القرآن كاملاً 🤍<br>تقبّل الله. اضغط للبدء من جديد.</div></div>';
+    $('#wird-body').innerHTML='<div class="wird-card"><div class="khatma-done">ختمتَ القرآن كاملاً <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.4A4 4 0 0 1 12 8a4 4 0 0 1 7 2.6C19 15.4 12 20 12 20z"/></svg><br>تقبّل الله. اضغط للبدء من جديد.</div></div>';
     $('#wird-done-btn').textContent='ابدأ ختمة جديدة';
     return;
   }
@@ -2915,6 +2918,11 @@ const CHAL_KEY = 'az_chal';
 function chalData(){ return store.get(CHAL_KEY, { last:null, count:0, best:0, shown:null, days:{} }); }
 function saveChal(c){ store.set(CHAL_KEY, c); }
 
+const SUN_IC   = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M4.9 7.9L7 10"/><path d="M19.1 7.9L17 10"/><path d="M2 17h3"/><path d="M19 17h3"/><path d="M8 17a4 4 0 0 1 8 0"/><path d="M2 21h20"/></svg>';
+const MOON_IC  = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>';
+const BOOK_IC  = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>';
+const FLAME_IC = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21c3.3 0 6-2.5 6-5.7 0-4.3-4.5-6.3-4-11.3-2.6 1.3-4.6 4-4.6 6.4 0 .9.3 1.7.8 2.4-1 0-2-.8-2.6-1.9-.9 1.3-1.6 2.9-1.6 4.4C6 18.5 8.7 21 12 21z"/></svg>';
+const CHK_IC   = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>';
 const WA_SVG='<svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.7.2s-.7 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.2 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
 
 /* «أحبُّ الأعمالِ إلى اللهِ أدومُها وإن قلَّ» — يكفي ٣ أذكار لإتمام المهمّة، والمقصد المداومة */
@@ -2937,9 +2945,9 @@ function goAzkarTab(tab){
 function chalTasks(){
   const m=azkarTabProg('morning'), e=azkarTabProg('evening');
   return [
-    { ic:'🌅', nm:'أذكار الصباح',   cur:m.cur, need:m.need, done:m.need>0 && m.cur>=m.need, go:()=>goAzkarTab('morning') },
-    { ic:'🌙', nm:'أذكار المساء',   cur:e.cur, need:e.need, done:e.need>0 && e.cur>=e.need, go:()=>goAzkarTab('evening') },
-    { ic:'📖', nm:'وِردك من القرآن', sh:'صفحة من القرآن', cur:qreadToday()?1:0, need:1, done:qreadToday(),
+    { ic:SUN_IC, em:'🌅', nm:'أذكار الصباح',   cur:m.cur, need:m.need, done:m.need>0 && m.cur>=m.need, go:()=>goAzkarTab('morning') },
+    { ic:MOON_IC, em:'🌙', nm:'أذكار المساء',   cur:e.cur, need:e.need, done:e.need>0 && e.cur>=e.need, go:()=>goAzkarTab('evening') },
+    { ic:BOOK_IC, em:'📖', nm:'وِردك من القرآن', sh:'صفحة من القرآن', cur:qreadToday()?1:0, need:1, done:qreadToday(),
       go:()=>{ const t=document.querySelector('.tab[data-s="s-wird"]'); if(t) t.click(); } }
   ];
 }
@@ -2969,7 +2977,7 @@ function renderChal(){
   el.innerHTML =
     '<div class="ch-head">'+
       '<div class="ch-ttl"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3l2.4 5 5.6.8-4 3.9 1 5.5-5-2.6-5 2.6 1-5.5-4-3.9 5.6-.8z"/></svg>تحدّي اليوم</div>'+
-      '<div class="ch-streak'+(c.count?'':' zero')+'">'+(c.count? ('🔥 '+AR(c.count)+' '+(c.count===1?'يوم':'أيام')+' متتابعة') : 'ابدأ سلسلتك')+'</div>'+
+      '<div class="ch-streak'+(c.count?'':' zero')+'">'+(c.count? (FLAME_IC+' '+AR(c.count)+' '+(c.count===1?'يوم':'أيام')+' متتابعة') : 'ابدأ سلسلتك')+'</div>'+
     '</div>'+
     '<div class="ch-motto">«أحبُّ الأعمالِ إلى اللهِ أدومُها وإن قلَّ»</div>'+
     tasks.map((x,i)=>
@@ -2981,7 +2989,7 @@ function renderChal(){
         '<span class="ch-go">ابدأ</span>'+
       '</div>').join('')+
     '<div class="ch-foot">'+
-      '<span class="ch-cnt">'+(full? 'أتممتَ تحدّي اليوم — تقبّل الله 🤍' : (AR(n)+' من '+AR(tasks.length)))+'</span>'+
+      '<span class="ch-cnt">'+(full? 'أتممتَ تحدّي اليوم — تقبّل الله' : (AR(n)+' من '+AR(tasks.length)))+'</span>'+
       '<button class="ch-share" id="chal-share-inline">'+WA_SVG+(full?'شارِك الأجر':'ادعُ صديقًا')+'</button>'+
     '</div>';
   $$('#chal-card .ch-task').forEach(d=> d.addEventListener('click', ()=>{
@@ -3004,14 +3012,16 @@ function chalShareText(){
     L.push('قال ﷺ: «مَن دلَّ على خيرٍ فله مثلُ أجرِ فاعِلِه» — رواه مسلم.');
   } else {
     L.push('ثلاثٌ في يومك لا تأخذ إلا دقائق — ولو القليل، المهمّ المداومة:');
-    tasks.forEach(x=> L.push(x.ic+' '+(x.sh||x.nm)));
+    tasks.forEach(x=> L.push(x.em+' '+(x.sh||x.nm)));
     L.push('');
     L.push('قال ﷺ: «أحبُّ الأعمالِ إلى اللهِ أدومُها وإن قلَّ» — متّفق عليه.');
   }
   L.push('');
-  L.push('خُذها معي، وأرسِلها لمن تحبّ فيجري لك أجرها.');
-  L.push('مجّانًا، بلا إعلانات، وتعمل دون إنترنت:');
+  L.push('افتح الرابط وابدأ — بلا تحميل ولا تسجيل، يعمل مباشرةً من المتصفّح،');
+  L.push('ومجّانًا بلا إعلانات، ويشتغل دون إنترنت:');
   L.push(APP_LINK);
+  L.push('');
+  L.push('وأرسِلها لمن تحبّ؛ فما عمل بها أحدٌ إلا وجرى لك مثلُ أجره.');
   return L.join('\n');
 }
 function shareChalWhatsApp(){
@@ -3026,7 +3036,7 @@ function openChalSheet(){
   const ins=$('#install-sheet'); if(ins) ins.classList.remove('show');   // لا تتراكم البطاقتان
   const c=chalData();
   const sub=$('#chal-sheet-sub');
-  if(sub) sub.textContent = c.count>1 ? ('🔥 '+AR(c.count)+' أيّام متتابعة — تقبّل الله منك') : 'تقبّل الله منك';
+  if(sub) sub.innerHTML = c.count>1 ? (FLAME_IC+' '+AR(c.count)+' أيّام متتابعة — تقبّل الله منك') : 'تقبّل الله منك';
   setTimeout(()=> el.classList.add('show'), 500);
 }
 function closeChalSheet(){ const el=$('#chal-sheet'); if(el) el.classList.remove('show'); }
@@ -3190,11 +3200,11 @@ function backupStatusHtml(){
   let posTxt;
   if(window.__wirdReady && WIRD && WIRD.__riwaya===settings.riwaya){
     const N=WIRD.a.length; const pg = pos>=N?604:parseInt(WIRD.a[pos].p);
-    posTxt = pos>=N ? 'أتممت الختمة 🤍' : ('صفحة '+pg+' من 604 ('+Math.round(pos/N*100)+'٪)');
+    posTxt = pos>=N ? 'أتممت الختمة' : ('صفحة '+pg+' من 604 ('+Math.round(pos/N*100)+'٪)');
   } else { posTxt = pos>0 ? ('عند الآية رقم '+pos+' — افتح الوِرد لرؤية الصفحة') : 'من البداية'; }
-  return '🔥 السلسلة: <b>'+(s.count||0)+'</b> يوم متتابع<br>'+
-         '📖 موضع الوِرد ('+(settings.riwaya==='warsh'?'ورش':'حفص')+'): <b>'+posTxt+'</b><br>'+
-         '✅ أيام القراءة (آخر أسبوع): <b>'+qdays+' / 7</b>';
+  return FLAME_IC+' السلسلة: <b>'+(s.count||0)+'</b> يوم متتابع<br>'+
+         BOOK_IC+' موضع الوِرد ('+(settings.riwaya==='warsh'?'ورش':'حفص')+'): <b>'+posTxt+'</b><br>'+
+         CHK_IC+' أيام القراءة (آخر أسبوع): <b>'+qdays+' / 7</b>';
 }
 function renderBackupStatus(){ const el=$('#backup-status'); if(el) el.innerHTML=backupStatusHtml(); }
 function exportBackup(){
@@ -3270,7 +3280,7 @@ function maybeShowInstallSheet(){
   const el=$('#install-sheet'); if(!el) return;
   if(isStandalone() || ishSnoozed()) return;
   if(!deferredInstall && !isIOS()) return;          // المتصفّح لا يدعم التثبيت المباشر
-  if(isIOS()) $('#ish-txt').innerHTML = 'اضغط زرّ <b>المشاركة</b> ⬆︎ بأسفل سفاري، ثمّ اختر <b>«إضافة إلى الشاشة الرئيسية»</b> — سيُفتح كتطبيق مستقلّ ويشتغل دون إنترنت.';
+  if(isIOS()) $('#ish-txt').innerHTML = 'اضغط زرّ <b>المشاركة</b> <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v13"/><path d="M8 7l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg> بأسفل سفاري، ثمّ اختر <b>«إضافة إلى الشاشة الرئيسية»</b> — سيُفتح كتطبيق مستقلّ ويشتغل دون إنترنت.';
   if(isIOS()) $('#ish-yes').textContent = 'OK';
   setTimeout(()=> el.classList.add('show'), 1400);
 }
