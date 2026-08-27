@@ -35,7 +35,7 @@
     --bg:#EFE6D4; --group:#EFE6D4; --card:#F6EDDB; --card-2:#F6EDDB;
     --text:#3A352E; --text-2:rgba(58,53,46,.58); --text-3:rgba(58,53,46,.3);
     --sep:rgba(58,53,46,.16); --fill:rgba(120,105,80,.18); --fill-2:rgba(120,105,80,.12);
-    --blur:rgba(239,230,212,.82); --accent:#2F9E44; --accent-2:#28893B;
+    --blur:rgba(239,230,212,.82); --accent:#2F9E44; --accent-2:#28893B; --accent-bg:rgba(47,158,68,.15);
     /* design tokens: élévation, lignes, tab bar */
     --line:rgba(58,53,46,.08);
     --shadow-1:0 1px 2px rgba(58,53,46,.05), 0 4px 14px rgba(58,53,46,.05);
@@ -50,37 +50,37 @@
     --bg:#F1E8D6; --group:#F1E8D6; --card:#F7EFDF; --card-2:#F7EFDF;
     --text:#3E382E; --text-2:rgba(62,56,46,.58); --text-3:rgba(62,56,46,.3);
     --sep:rgba(62,56,46,.16); --fill:rgba(130,112,82,.16); --fill-2:rgba(130,112,82,.1);
-    --blur:rgba(241,232,214,.82); --accent:#2F9E44;
+    --blur:rgba(241,232,214,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15);
   }
   :root[data-bg="peach"]{
     --bg:#F5C7AF; --group:#F5C7AF; --card:#F9D6C2; --card-2:#F9D6C2;
     --text:#4A352B; --text-2:rgba(74,53,43,.58); --text-3:rgba(74,53,43,.3);
     --sep:rgba(74,53,43,.16); --fill:rgba(175,110,80,.18); --fill-2:rgba(175,110,80,.12);
-    --blur:rgba(245,199,175,.82); --accent:#2F9E44;
+    --blur:rgba(245,199,175,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15);
   }
   :root[data-bg="greige"]{
     --bg:#E4DACB; --group:#E4DACB; --card:#ECE4D5; --card-2:#ECE4D5;
     --text:#3C372F; --text-2:rgba(60,55,47,.58); --text-3:rgba(60,55,47,.3);
     --sep:rgba(60,55,47,.16); --fill:rgba(120,105,82,.16); --fill-2:rgba(120,105,82,.1);
-    --blur:rgba(228,218,203,.82); --accent:#2F9E44;
+    --blur:rgba(228,218,203,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15);
   }
   :root[data-bg="taupe"]{
     --bg:#D8CCBE; --group:#D8CCBE; --card:#E1D7C9; --card-2:#E1D7C9;
     --text:#3A352D; --text-2:rgba(58,53,45,.58); --text-3:rgba(58,53,45,.3);
     --sep:rgba(58,53,45,.16); --fill:rgba(110,96,76,.16); --fill-2:rgba(110,96,76,.1);
-    --blur:rgba(216,204,190,.82); --accent:#2F9E44;
+    --blur:rgba(216,204,190,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15);
   }
   :root[data-bg="white"]{
     --bg:#F2F2F7; --group:#F2F2F7; --card:#FAFAF8; --card-2:#FAFAF8;
     --text:#2B2B2B; --text-2:rgba(43,43,43,.55); --text-3:rgba(43,43,43,.3);
     --sep:rgba(43,43,43,.16); --fill:rgba(120,120,128,.16); --fill-2:rgba(120,120,128,.1);
-    --blur:rgba(242,242,247,.82); --accent:#2E9E4F;
+    --blur:rgba(242,242,247,.82); --accent:#2E9E4F; --accent-bg:rgba(46,158,79,.15);
   }
   :root[data-bg="dark"]{
     --bg:#121212; --group:#121212; --card:#1E1E1E; --card-2:#262626;
     --text:#E6E1D6; --text-2:rgba(230,225,214,.6); --text-3:rgba(230,225,214,.3);
     --sep:rgba(230,225,214,.14); --fill:rgba(200,200,200,.12); --fill-2:rgba(200,200,200,.07);
-    --blur:rgba(18,18,18,.82); --accent:#34C77B;
+    --blur:rgba(18,18,18,.82); --accent:#34C77B; --accent-bg:rgba(52,199,123,.16);
     --line:rgba(255,255,255,.07);
     --shadow-1:0 1px 3px rgba(0,0,0,.45), 0 5px 16px rgba(0,0,0,.35);
     --shadow-2:0 4px 14px rgba(0,0,0,.5);
@@ -154,6 +154,11 @@
     background:var(--c-repeat-bg); color:var(--c-repeat); opacity:.45;}
   #wird-mode-seg button:last-child, #listen-mode-seg button:last-child, #tasbih-mode-seg button:last-child{
     background:var(--c-read-bg); color:var(--c-read); opacity:.45;}
+  /* الزرّ الأوسط (عند وجود ثلاثة) بلون التطبيق الأخضر */
+  #listen-mode-seg button:nth-child(2):not(:last-child){
+    background:var(--accent-bg); color:var(--accent); opacity:.45;}
+  #listen-mode-seg button{font-size:14px; padding:11px 6px; gap:5px;}
+  #listen-mode-seg button .gh-ic{width:1em; height:1em;}
   #wird-mode-seg button.on, #listen-mode-seg button.on, #tasbih-mode-seg button.on{
     opacity:1; box-shadow:0 1px 5px rgba(0,0,0,.12);}
   /* ثنائي هادئ أنيق: أخضر مريمية للورد، أزرق رمادي ناعم للمصحف الكامل */
@@ -752,6 +757,7 @@
   </div>
   <div class="seg" id="listen-mode-seg">
     <button data-l="quran" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>القرآن</button>
+    <button data-l="rushaidi"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>سعود الرشيدي</button>
     <button data-l="stories"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h4"/><path d="M15 7h4"/><circle cx="12" cy="12" r="9"/></svg>قصص الأنبياء</button>
   </div>
   <div class="reciter-box" id="reciter-box">
@@ -771,6 +777,10 @@
     <audio id="reciter-audio" preload="none"></audio>
   </div>
   <div class="listen-list" id="listen-list"></div>
+  <div class="stories-box" id="rushaidi-box" style="display:none">
+    <div class="stories-note">مقاطع الشيخ سعود الرشيدي · تُشغَّل من الرابط مباشرةً (يحتاج اتصالًا)</div>
+    <div id="rushaidi-list"></div>
+  </div>
   <div class="stories-box" id="stories-box" style="display:none">
     <div class="stories-note">سلسلة قصص الأنبياء — الشيخ نبيل العوضي · تُشغَّل من أرشيف الإنترنت (يحتاج اتصالًا)</div>
     <div id="stories-list"></div>
@@ -1874,14 +1884,72 @@ async function openStories(){
   __storyLoading=false;
   renderStories(list);
 }
+/* ==================== مقاطع الشيخ سعود الرشيدي ==================== */
+/* المصدر: ملفّات على Google Drive. تُشتقّ روابط التشغيل من معرّف الملفّ. */
+const RUSHAIDI = [
+  { id:'1sXzdsR23d3my3pct0f4Lpie9-Ttbko1l', name:'مقطع ١' },
+  { id:'1EZVETLPrJPsqrP9EFfc9_7DhlD8vdL5W', name:'مقطع ٢' }
+];
+function driveUrls(id){
+  return [ 'https://drive.usercontent.google.com/download?id='+id+'&export=download',
+           'https://drive.google.com/uc?export=download&id='+id ];
+}
+let __clipPlaying=null, __clipTry=0;
+function renderClips(){
+  const box=$('#rushaidi-list'); if(!box) return;
+  if(!RUSHAIDI.length){ box.innerHTML='<div class="search-hint">لا توجد مقاطع بعد.</div>'; return; }
+  box.innerHTML=RUSHAIDI.map((s,i)=>
+    '<button class="story-item" data-c="'+i+'">'+
+      '<span class="st-ic">'+ICON_PLAY+'</span>'+
+      '<span class="st-nm">'+escapeHtml(s.name)+'</span>'+
+      '<span class="st-du"></span>'+
+    '</button>').join('');
+  box.querySelectorAll('.story-item').forEach(b=> b.addEventListener('click', ()=> playClip(parseInt(b.dataset.c))));
+  markClip();
+}
+function markClip(){
+  const a=$('#reciter-audio');
+  const cur=(a && !a.paused && __clipPlaying!=null) ? __clipPlaying : null;
+  document.querySelectorAll('#rushaidi-list .story-item').forEach(b=>{
+    const on = parseInt(b.dataset.c)===cur;
+    b.classList.toggle('on', on);
+    b.querySelector('.st-ic').innerHTML = on ? ICON_PAUSE : ICON_PLAY;
+  });
+}
+function playClip(i){
+  const a=$('#reciter-audio'); const c=RUSHAIDI[i]; if(!a || !c) return;
+  if(__clipPlaying===i && !a.paused){ a.pause(); markClip(); return; }
+  __clipPlaying=i; __storyPlaying=null; __audioSura=null; __clipTry=0;
+  const urls=driveUrls(c.id);
+  const tryUrl=k=>{
+    if(k>=urls.length){ showToast('تعذّر تشغيل المقطع — تأكّد أنّ الملفّ متاح للجميع على Drive', 4500); return; }
+    a.src=urls[k]; a.currentTime=0;
+    a.play().catch(()=> tryUrl(k+1));
+    a.onerror=()=> tryUrl(k+1);
+  };
+  tryUrl(0);
+  vibrate(6);
+  if('mediaSession' in navigator){
+    try{ navigator.mediaSession.metadata=new MediaMetadata({ title:c.name, artist:'الشيخ سعود الرشيدي' }); }catch(e){}
+  }
+  markClip();
+}
+['play','pause','ended'].forEach(ev=> $('#reciter-audio') && $('#reciter-audio').addEventListener(ev, ()=>{ try{ markClip(); }catch(e){} }));
+
 function applyListenMode(mode){
-  const stories = mode==='stories';
-  $('#reciter-box').style.display = stories ? 'none' : '';
-  $('#listen-list').style.display = stories ? 'none' : '';
-  $('#stories-box').style.display = stories ? '' : 'none';
-  $('#listen-sub').textContent = stories ? 'سلسلة قصص الأنبياء للشيخ نبيل العوضي' : 'اختر القارئ ثمّ السورة للاستماع إليها';
+  const stories  = mode==='stories';
+  const rushaidi = mode==='rushaidi';
+  const quran    = !stories && !rushaidi;
+  $('#reciter-box').style.display   = quran ? '' : 'none';
+  $('#listen-list').style.display   = quran ? '' : 'none';
+  $('#stories-box').style.display   = stories ? '' : 'none';
+  $('#rushaidi-box').style.display  = rushaidi ? '' : 'none';
+  $('#listen-sub').textContent = stories  ? 'سلسلة قصص الأنبياء للشيخ نبيل العوضي'
+                               : rushaidi ? 'مقاطع مختارة للشيخ سعود الرشيدي'
+                               : 'اختر القارئ ثمّ السورة للاستماع إليها';
   $$('#listen-mode-seg button').forEach(b=> b.classList.toggle('on', b.dataset.l===mode));
   if(stories) openStories();
+  if(rushaidi) renderClips();
 }
 $$('#listen-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{ vibrate(6); applyListenMode(b.dataset.l); }));
 
