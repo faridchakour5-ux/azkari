@@ -426,49 +426,14 @@
   .quick-pop #qp-enter{background:var(--accent); color:#fff; box-shadow:0 2px 10px rgba(47,158,68,.3);}
   .quick-pop #qp-share{background:#25D366; color:#fff; flex:0 0 42%; box-shadow:0 2px 9px rgba(37,211,102,.3);}
   .quick-pop #qp-share svg{width:18px; height:18px; fill:#fff; stroke:none;}
-  /* ===== التحدّي اليومي ===== */
-  .chal{margin:12px 16px 0; background:var(--card); border-radius:18px; padding:14px 15px 12px; box-shadow:var(--shadow);
-    border:1.5px solid transparent; transition:border-color .3s ease;}
-  .chal.full{border-color:var(--accent);}
-  .chal .ch-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
-  .chal .ch-ttl{font-size:16.5px; font-weight:800; display:flex; align-items:center; gap:7px;}
-  .chal .ch-ttl .gh-ic{color:var(--accent);}
-  .chal .ch-streak{font-size:13px; font-weight:800; background:var(--c-repeat-bg); color:var(--c-repeat);
-    padding:5px 10px; border-radius:999px; white-space:nowrap;}
-  .chal .ch-streak.zero{background:var(--fill-2); color:var(--text-2);}
-  .chal .ch-task{display:flex; align-items:center; gap:11px; padding:9px 4px; border-radius:12px; cursor:pointer;}
-  .chal .ch-task + .ch-task{border-top:1px solid var(--sep);}
-  .chal .ch-box{width:24px; height:24px; flex:0 0 24px; border-radius:50%; border:2px solid var(--fill);
-    display:inline-flex; align-items:center; justify-content:center; transition:background .25s, border-color .25s;}
-  .chal .ch-box svg{width:14px; height:14px; stroke:#fff; stroke-width:3.2; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:0;}
-  .chal .ch-task.ok .ch-box{background:var(--accent); border-color:var(--accent);}
-  .chal .ch-task.ok .ch-box svg{opacity:1;}
-  .chal .ch-nm{flex:1 1 auto; font-size:15px; font-weight:700;}
-  .chal .ch-nm .gh-ic{width:1.35em; height:1.35em; vertical-align:-.28em; margin-inline-end:5px; color:var(--text-2);}
-  .chal .ch-task.ok .ch-nm .gh-ic{color:var(--accent);}
-  .chal .ch-streak .gh-ic{width:1.15em; height:1.15em; vertical-align:-.2em; margin-inline-end:3px;}
-  .chal .ch-nm i{display:block; font-style:normal; font-size:12px; font-weight:600; color:var(--text-2); margin-top:2px;}
-  .chal .ch-motto{font-family:'AmiriQuran',serif; font-size:13.5px; color:var(--text-2); text-align:center;
-    margin:-4px 0 8px;}
-  .chal .ch-task.ok .ch-nm{color:var(--text-2);}
-  .chal .ch-task.ok .ch-nm i{color:var(--accent); font-weight:700;}
-  .chal .ch-go{font-size:12.5px; font-weight:800; color:var(--c-read); background:var(--c-read-bg);
-    padding:5px 11px; border-radius:999px; white-space:nowrap;}
-  .chal .ch-task.ok .ch-go{display:none;}
-  .chal .ch-foot{display:flex; align-items:center; gap:10px; margin-top:11px;}
-  .chal .ch-cnt{font-size:13px; color:var(--text-2); font-weight:700; flex:1 1 auto;}
-  .chal .ch-share{border:0; font:inherit; font-size:14.5px; font-weight:800; color:#fff; background:#25D366;
-    padding:10px 15px; border-radius:12px; display:inline-flex; align-items:center; gap:7px;
-    box-shadow:0 2px 9px rgba(37,211,102,.34);}
-  .chal .ch-share svg{width:18px; height:18px; fill:#fff; stroke:none;}
-  /* بطاقة تهنئة إتمام التحدّي */
-  .chal-sheet .ish-ttl{font-size:19px;}
-  .chal-sheet .ish-top .ch-emo{width:56px; height:56px; border-radius:16px; background:var(--c-repeat-bg);
-    display:inline-flex; align-items:center; justify-content:center; font-size:28px; flex:0 0 56px;}
-  .chal-sheet .ish-yes{background:#25D366; box-shadow:0 2px 10px rgba(37,211,102,.34);}
-  .chal-sheet .ish-yes svg{width:19px; height:19px; fill:#fff; stroke:none;}
-  .chal-sheet .ish-hadith{font-family:'AmiriQuran',serif; font-size:16px; line-height:2; text-align:center;
-    background:var(--fill-2); border-radius:14px; padding:12px 14px; margin-bottom:14px; color:var(--text);}
+  /* زرّ إعادة فتح نافذة التذكير */
+  .qp-open{display:flex; align-items:center; gap:10px; margin:12px 16px 0; padding:12px 14px;
+    background:var(--card); border-radius:15px; box-shadow:var(--shadow); font-size:14.5px; font-weight:700;}
+  .qp-open .gh-ic{color:var(--accent); width:1.3em; height:1.3em; flex:0 0 auto;}
+  .qp-open .qo-t{flex:1 1 auto;}
+  .qp-open .qo-t small{display:block; font-size:12px; font-weight:600; color:var(--text-2); margin-top:2px;}
+  .qp-open .qo-go{font-size:12.5px; font-weight:800; color:var(--accent); background:var(--fill-2);
+    padding:6px 12px; border-radius:999px; white-space:nowrap;}
   /* بطاقة تثبيت التطبيق (تظهر تلقائيًّا عند فتح الرابط في المتصفّح) */
   .install-sheet{position:fixed; inset:0; z-index:120; display:none; align-items:flex-end; justify-content:center;
     background:rgba(0,0,0,.42); opacity:0; transition:opacity .28s ease;}
@@ -724,7 +689,11 @@
   </div>
   <button class="locbtn b-blue" id="loc-btn"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>تفعيل مواقيت الصلاة حسب موقعك</button>
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
-  <div class="chal" id="chal-card"></div>
+  <div class="qp-open" id="qp-open" role="button" tabindex="0">
+    <svg class="gh-ic" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
+    <span class="qo-t">تذكيرك<small>ذكر · صلاة على الحبيب ﷺ · ربع صفحة</small></span>
+    <span class="qo-go">افتح</span>
+  </div>
   <div class="seg" id="time-seg"></div>
   <div class="az-scope" id="az-scope" style="display:none">
     <button data-scope="sahih" class="on"><span class="scope-l1">القرآن</span><br><span class="scope-l2">والبخاري ومسلم</span></button>
@@ -875,23 +844,6 @@
     <div class="qp-act">
       <button id="qp-enter" type="button">ادخل التطبيق</button>
       <button id="qp-share" type="button">شارِكها</button>
-    </div>
-  </div>
-</div>
-
-<div class="install-sheet chal-sheet" id="chal-sheet">
-  <div class="ish-card">
-    <div class="ish-grip"></div>
-    <div class="ish-top">
-      <span class="ch-emo"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.4A4 4 0 0 1 12 8a4 4 0 0 1 7 2.6C19 15.4 12 20 12 20z"/></svg></span>
-      <div><div class="ish-ttl">أتممتَ تحدّي اليوم</div>
-        <div class="ish-sub" id="chal-sheet-sub">تقبّل الله منك</div></div>
-    </div>
-    <div class="ish-hadith">«مَن دلَّ على خيرٍ فله مثلُ أجرِ فاعِلِه»<br><span style="font-size:12.5px;font-family:inherit;opacity:.7">رواه مسلم</span></div>
-    <div class="ish-txt">أرسِلها لمن تحبّ؛ فإن عمل بها جرى لك مثلُ أجره — وهكذا تتّسع الدائرة.</div>
-    <div class="ish-act">
-      <button class="ish-yes" id="chal-share-btn"><svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.7.2s-.7 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.2 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>أرسِل عبر واتساب</button>
-      <button class="ish-no" id="chal-close-btn">لاحقًا</button>
     </div>
   </div>
 </div>
@@ -1301,7 +1253,6 @@ function tapAzkar(card, d, pid){
   rem.textContent = AR(Math.max(d.count-done,0));
   if(done>=d.count){
     card.classList.add('done'); vibrate([15,40,15]);
-    setTimeout(chalRefresh, 60);
     const list = azkarList(currentTab);
     const doneCount = list.filter(x=> (prog[currentTab+'_'+x.id]||0)>=x.count).length;
     updateProgressBar(doneCount, list.length);
@@ -1320,7 +1271,7 @@ function escapeHtml(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;',
 buildCats();
 $$('#az-scope button').forEach(b=> b.addEventListener('click', ()=>{
   const sc=b.dataset.scope; if((settings.azkarScope||'sahih')===sc) return;
-  settings.azkarScope=sc; saveSettings(); renderAzkar(); try{ renderChal(); }catch(e){} vibrate(6);
+  settings.azkarScope=sc; saveSettings(); renderAzkar(); vibrate(6);
 }));
 
 /* ---------- TASBIH ---------- */
@@ -1710,7 +1661,6 @@ function markQuranReadToday(){
   const d=qreadData(); const t=todayKey(); d[t]=1;
   const keep={}; for(const k in d){ if(dayDiff(k,t)<14) keep[k]=1; }
   store.set(QREAD_KEY, keep); renderWirdKpi();
-  try{ chalRefresh(); }catch(e){}
 }
 function renderWirdKpi(){
   const el=$('#wird-kpi'); if(!el) return;
@@ -3142,142 +3092,17 @@ function qpShare(){
   try{ const w=window.open(url,'_blank','noopener'); if(!w) location.href=url; }
   catch(e){ location.href=url; }
 }
+$('#qp-open')   && $('#qp-open').addEventListener('click', ()=>{ vibrate(6); openQuickPop(); });
 $('#qp-enter')  && $('#qp-enter').addEventListener('click', ()=>{ vibrate(6); closeQuickPop(); });
 $('#qp-share')  && $('#qp-share').addEventListener('click', ()=>{ vibrate(8); qpShare(); });
 $('#quick-pop') && $('#quick-pop').addEventListener('click', e=>{ if(e.target.id==='quick-pop') closeQuickPop(); });
 
 /* ================= التحدّي اليومي ================= */
 const APP_LINK = 'https://salatee.netlify.app';
-const CHAL_KEY = 'az_chal';
-function chalData(){ return store.get(CHAL_KEY, { last:null, count:0, best:0, shown:null, days:{} }); }
-function saveChal(c){ store.set(CHAL_KEY, c); }
-
-const SUN_IC   = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M4.9 7.9L7 10"/><path d="M19.1 7.9L17 10"/><path d="M2 17h3"/><path d="M19 17h3"/><path d="M8 17a4 4 0 0 1 8 0"/><path d="M2 21h20"/></svg>';
-const MOON_IC  = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>';
+const WA_SVG   = '<svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.7.2s-.7 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.2 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
+const CHK_IC   = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>';
 const BOOK_IC  = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>';
 const FLAME_IC = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21c3.3 0 6-2.5 6-5.7 0-4.3-4.5-6.3-4-11.3-2.6 1.3-4.6 4-4.6 6.4 0 .9.3 1.7.8 2.4-1 0-2-.8-2.6-1.9-.9 1.3-1.6 2.9-1.6 4.4C6 18.5 8.7 21 12 21z"/></svg>';
-const CHK_IC   = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>';
-const WA_SVG='<svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.7.2s-.7 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.2 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
-
-/* «أحبُّ الأعمالِ إلى اللهِ أدومُها وإن قلَّ» — يكفي ٣ أذكار لإتمام المهمّة، والمقصد المداومة */
-const CHAL_MIN = 3;
-function azkarTabProg(tab){
-  try{
-    const list = azkarList(tab); if(!list.length) return { cur:0, need:0 };
-    const prog = progressState();
-    const cur = list.filter(d => (prog[tab+'_'+d.id]||0) >= d.count).length;
-    return { cur, need: Math.min(CHAL_MIN, list.length) };
-  }catch(e){ return { cur:0, need:0 }; }
-}
-function goAzkarTab(tab){
-  const t=document.querySelector('.tab[data-s="s-azkar"]'); if(t) t.click();
-  currentTab=tab; window.__userPickedTime=true;
-  $$('#time-seg button').forEach(b=> b.classList.toggle('on', b.dataset.t===tab));
-  renderAzkar();
-  const el=$('#az-list'); if(el) window.scrollTo({top:Math.max(0, el.offsetTop-70), behavior:'smooth'});
-}
-function chalTasks(){
-  const m=azkarTabProg('morning'), e=azkarTabProg('evening');
-  return [
-    { ic:SUN_IC, em:'🌅', nm:'أذكار الصباح',   cur:m.cur, need:m.need, done:m.need>0 && m.cur>=m.need, go:()=>goAzkarTab('morning') },
-    { ic:MOON_IC, em:'🌙', nm:'أذكار المساء',   cur:e.cur, need:e.need, done:e.need>0 && e.cur>=e.need, go:()=>goAzkarTab('evening') },
-    { ic:BOOK_IC, em:'📖', nm:'وِردك من القرآن', sh:'صفحة من القرآن', cur:qreadToday()?1:0, need:1, done:qreadToday(),
-      go:()=>{ const t=document.querySelector('.tab[data-s="s-wird"]'); if(t) t.click(); } }
-  ];
-}
-
-/* تسجيل السلسلة عند إتمام الثلاث */
-function chalCheck(){
-  const tasks=chalTasks(); const all=tasks.every(x=>x.done);
-  if(!all) return false;
-  const c=chalData(), t=todayKey();
-  if(c.last!==t){
-    c.count = (c.last && dayDiff(c.last,t)===1) ? (c.count+1) : 1;
-    c.last=t; c.days[t]=1;
-    if(c.count > (c.best||0)) c.best=c.count;
-    const keep={}; for(const k in c.days){ if(dayDiff(k,t)<30) keep[k]=1; } c.days=keep;
-    saveChal(c);
-  }
-  if(c.shown!==t){ c.shown=t; saveChal(c); openChalSheet(); }
-  return true;
-}
-
-const CHK_SVG='<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>';
-function renderChal(){
-  const el=$('#chal-card'); if(!el) return;
-  const tasks=chalTasks(); const n=tasks.filter(x=>x.done).length; const full=(n===tasks.length);
-  const c=chalData();
-  el.className='chal'+(full?' full':'');
-  el.innerHTML =
-    '<div class="ch-head">'+
-      '<div class="ch-ttl"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3l2.4 5 5.6.8-4 3.9 1 5.5-5-2.6-5 2.6 1-5.5-4-3.9 5.6-.8z"/></svg>تحدّي اليوم</div>'+
-      '<div class="ch-streak'+(c.count?'':' zero')+'">'+(c.count? (FLAME_IC+' '+AR(c.count)+' '+(c.count===1?'يوم':'أيام')+' متتابعة') : 'ابدأ سلسلتك')+'</div>'+
-    '</div>'+
-    '<div class="ch-motto">«أحبُّ الأعمالِ إلى اللهِ أدومُها وإن قلَّ»</div>'+
-    tasks.map((x,i)=>
-      '<div class="ch-task'+(x.done?' ok':'')+'" data-i="'+i+'">'+
-        '<span class="ch-box">'+CHK_SVG+'</span>'+
-        '<span class="ch-nm">'+x.ic+' '+x.nm+
-          (x.need>1 ? '<i>'+(x.done?('ولو '+AR(x.need)+' — تمّ'):(AR(x.cur)+' من '+AR(x.need)+' · ولو القليل'))+'</i>' : '')+
-        '</span>'+
-        '<span class="ch-go">ابدأ</span>'+
-      '</div>').join('')+
-    '<div class="ch-foot">'+
-      '<span class="ch-cnt">'+(full? 'أتممتَ تحدّي اليوم — تقبّل الله' : (AR(n)+' من '+AR(tasks.length)))+'</span>'+
-      '<button class="ch-share" id="chal-share-inline">'+WA_SVG+(full?'شارِك الأجر':'ادعُ صديقًا')+'</button>'+
-    '</div>';
-  $$('#chal-card .ch-task').forEach(d=> d.addEventListener('click', ()=>{
-    const i=+d.dataset.i; if(tasks[i].done) return; vibrate(6); tasks[i].go();
-  }));
-  const sb=$('#chal-share-inline'); if(sb) sb.addEventListener('click', e=>{ e.stopPropagation(); vibrate(8); shareChalWhatsApp(); });
-}
-
-/* ---- نصّ الرسالة ---- */
-function chalShareText(){
-  const tasks=chalTasks(); const full=tasks.every(x=>x.done); const c=chalData();
-  const L=[];
-  L.push('🤍 *تحدّي اليوم* — تطبيق «صلاتي»');
-  L.push('');
-  if(full){
-    L.push('أتممتُ اليوم بحمد الله:');
-    tasks.forEach(x=> L.push('✅ '+(x.sh||x.nm)));
-    if(c.count>1){ L.push(''); L.push('🔥 '+c.count+' أيّام متتابعة… أتلحقني؟'); }
-    L.push('');
-    L.push('قال ﷺ: «مَن دلَّ على خيرٍ فله مثلُ أجرِ فاعِلِه» — رواه مسلم.');
-  } else {
-    L.push('ثلاثٌ في يومك لا تأخذ إلا دقائق — ولو القليل، المهمّ المداومة:');
-    tasks.forEach(x=> L.push(x.em+' '+(x.sh||x.nm)));
-    L.push('');
-    L.push('قال ﷺ: «أحبُّ الأعمالِ إلى اللهِ أدومُها وإن قلَّ» — متّفق عليه.');
-  }
-  L.push('');
-  L.push('افتح الرابط وابدأ — بلا تحميل ولا تسجيل، يعمل مباشرةً من المتصفّح،');
-  L.push('ومجّانًا بلا إعلانات، ويشتغل دون إنترنت:');
-  L.push(APP_LINK);
-  L.push('');
-  L.push('وأرسِلها لمن تحبّ؛ فما عمل بها أحدٌ إلا وجرى لك مثلُ أجره.');
-  return L.join('\n');
-}
-function shareChalWhatsApp(){
-  const txt=chalShareText();
-  const url='https://wa.me/?text='+encodeURIComponent(txt);
-  try{ const w=window.open(url,'_blank','noopener'); if(!w) location.href=url; }
-  catch(e){ location.href=url; }
-  closeChalSheet();
-}
-function openChalSheet(){
-  const el=$('#chal-sheet'); if(!el) return;
-  const ins=$('#install-sheet'); if(ins) ins.classList.remove('show');   // لا تتراكم البطاقتان
-  const c=chalData();
-  const sub=$('#chal-sheet-sub');
-  if(sub) sub.innerHTML = c.count>1 ? (FLAME_IC+' '+AR(c.count)+' أيّام متتابعة — تقبّل الله منك') : 'تقبّل الله منك';
-  setTimeout(()=> el.classList.add('show'), 500);
-}
-function closeChalSheet(){ const el=$('#chal-sheet'); if(el) el.classList.remove('show'); }
-
-/* تحديث البطاقة بعد أيّ إنجاز */
-function chalRefresh(){ try{ renderChal(); chalCheck(); }catch(e){} }
-
 /* ================= STREAK & weekly ================= */
 function streakData(){ return store.get('az_streak', { last:null, count:0, days:{} }); }
 function dayDiff(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
@@ -3421,7 +3246,6 @@ applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
 syncSeg('#riwaya-seg','riwaya'); syncSeg('#hafsfont-seg','hafsFont'); syncSeg('#qcolor-seg','quranColor'); syncSeg('#font-seg','font'); renderSwatches();
 applyHafsFont(); applyQuranColor();
 try{ renderAzkar(); }catch(e){} renderChips(); paintTasbih();
-try{ renderChal(); }catch(e){}
 /* نافذة التذكير عند فتح التطبيق */
 try{
   const sb=$('#qp-share'); if(sb) sb.innerHTML = WA_SVG + 'شارِكها';
@@ -3501,8 +3325,7 @@ document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ try{ s
 /* refresh on day change / resume */
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
   try{ renderAzkar(); }catch(e){}
-  try{ renderChal(); }catch(e){}
-  try{ const now=new Date(); if(settings.notif) checkPrayerReminder(now); }catch(e){}
+    try{ const now=new Date(); if(settings.notif) checkPrayerReminder(now); }catch(e){}
 } });
 
 /* ================= INSTALL (Add to Home Screen) ================= */
@@ -3528,9 +3351,6 @@ function maybeShowInstallSheet(){
   if(isIOS()) $('#ish-yes').textContent = 'OK';
   setTimeout(()=> el.classList.add('show'), 1400);
 }
-$('#chal-share-btn') && $('#chal-share-btn').addEventListener('click', ()=>{ vibrate(8); shareChalWhatsApp(); });
-$('#chal-close-btn') && $('#chal-close-btn').addEventListener('click', ()=> closeChalSheet());
-$('#chal-sheet') && $('#chal-sheet').addEventListener('click', e=>{ if(e.target.id==='chal-sheet') closeChalSheet(); });
 $('#install-sheet') && $('#install-sheet').addEventListener('click', e=>{ if(e.target.id==='install-sheet'){ ishSnooze(7); closeInstallSheet(); } });
 $('#ish-no') && $('#ish-no').addEventListener('click', ()=>{ ishSnooze(7); closeInstallSheet(); });
 $('#ish-yes') && $('#ish-yes').addEventListener('click', async ()=>{
