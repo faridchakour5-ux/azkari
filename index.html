@@ -3087,6 +3087,176 @@ function qpShareText(){
   L.push(APP_LINK);
   return L.join('\n');
 }
+/* ===== توليد صورة التذكير (لتُرسَل عبر واتساب كصورة لا كنصّ) ===== */
+function cssVar(n, fb){
+  const v=getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  return v || fb;
+}
+function quranFontFamily(){
+  const b=document.body;
+  if(b.classList.contains('qtashkeel')) return "'NotoNaskhTashkeel','AmiriQuran',serif";
+  if(b.classList.contains('qmaghribi') || settings.riwaya==='warsh') return "'Maghribi','AmiriQuran',serif";
+  return "'AmiriQuran',serif";
+}
+function wrapAr(ctx, text, maxW){
+  const words=String(text).split(/\s+/).filter(Boolean);
+  const lines=[]; let cur='';
+  for(const w of words){
+    const t = cur ? cur+' '+w : w;
+    if(!cur || ctx.measureText(t).width<=maxW) cur=t;
+    else { lines.push(cur); cur=w; }
+  }
+  if(cur) lines.push(cur);
+  return lines;
+}
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(x,y,w,h,r);
+  else{ ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+        ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+}
+async function qpEnsureFonts(){
+  const list=['700 30px PlexAr','600 17px PlexAr','400 16px PlexAr','40px AmiriQuran','40px Maghribi','40px NotoNaskhTashkeel'];
+  try{ await Promise.all(list.map(f=> document.fonts.load(f).catch(()=>{}))); await document.fonts.ready; }catch(e){}
+}
+
+async function buildQuickPopImage(){
+  await qpEnsureFonts();
+  const st=qpState();
+  const tas=QP_TASBIH[Math.max(st.tas,0)], sal=QP_SALAT[Math.max(st.sal,0)];
+  const q=__qpQuran;
+
+  const S=2;                      // دقّة مضاعفة
+  const W=560, PAD=30, BOX=22, IN=20;
+  const cCard=cssVar('--card','#F6F0E2'), cText=cssVar('--text','#2B2721'),
+        cText2=cssVar('--text-2','#6B6357'), cText3=cssVar('--text-3','#9A9084'),
+        cFill=cssVar('--fill-2','rgba(120,105,80,.12)'), cAcc=cssVar('--accent','#2F9E44'),
+        cRep=cssVar('--c-repeat','#9E6410'), cRepBg=cssVar('--c-repeat-bg','rgba(169,113,26,.17)');
+  const qFont=quranFontFamily();
+  const maghribi=/Maghribi/.test(qFont);
+  const QSZ = maghribi ? 27 : 24;              // الخط المغربي أصغر بصريًّا فيُكبَّر
+
+  // ---- تمرير أوّل: القياس ----
+  const m=document.createElement('canvas').getContext('2d');
+  const innerW=W-2*PAD-2*IN;
+  m.font="23px "+"'AmiriQuran',serif";
+  const l1=wrapAr(m,tas.t,innerW), l2=wrapAr(m,sal.t,innerW);
+  let qLines=[], qHead='';
+  if(q){
+    m.font=QSZ+"px "+qFont;
+    const txt=q.ayat.map(a=> a.t+' ۝'+AR(a.no)).join(' ');
+    qLines=wrapAr(m,txt,innerW);
+    qHead='سورة '+q.name+' · '+(q.ayat.length>1
+      ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no))
+      : ('الآية '+AR(q.ayat[0].no)))+' · صفحة '+AR(q.pg);
+  }
+  const LH1=44, LHQ = maghribi ? 60 : 50;
+  const hBox = ls => IN + ls.length*LH1 + 14 + 30 + IN;      // نصّ + سطر المصدر/العدّاد
+  const h1=hBox(l1), h2=hBox(l2);
+  const QGAP = maghribi ? 24 : 10;             // فراغ يمنع تداخل علامات الوقف مع العنوان
+  const h3 = q ? (IN + 28 + QGAP + qLines.length*LHQ + IN) : 0;
+  const H = PAD + 44 + 30 + 16 + h1 + 14 + h2 + (q? 14+h3 : 0) + 26 + 46 + PAD;
+
+  // ---- تمرير ثانٍ: الرسم ----
+  const cv=document.createElement('canvas');
+  cv.width=W*S; cv.height=H*S;
+  const c=cv.getContext('2d');
+  c.scale(S,S);
+  c.direction='rtl'; c.textAlign='center'; c.textBaseline='alphabetic';
+
+  c.fillStyle=cCard; c.fillRect(0,0,W,H);
+  let y=PAD+34;
+
+  // العنوان + جرس
+  c.font="700 25px 'PlexAr',sans-serif"; c.fillStyle=cText;
+  c.fillText('تذكيرك اليوم', W/2+16, y);
+  const bx=W/2 - m.measureText?0:0;
+  (function bell(cx,cy){
+    c.save(); c.strokeStyle=cAcc; c.lineWidth=2; c.lineCap='round'; c.lineJoin='round';
+    const s=1.1; c.translate(cx,cy); c.scale(s,s);
+    c.beginPath(); c.moveTo(6,-4); c.bezierCurveTo(6,-12,-6,-12,-6,-4); c.lineTo(-6,1); c.lineTo(-8,4); c.lineTo(8,4); c.lineTo(6,1); c.closePath(); c.stroke();
+    c.beginPath(); c.moveTo(-2.4,7); c.bezierCurveTo(-1,9,1,9,2.4,7); c.stroke();
+    c.restore();
+  })(W/2 - (c.measureText('تذكيرك اليوم').width/2) - 16, y-8);
+
+  y+=26;
+  c.font="600 15px 'PlexAr',sans-serif"; c.fillStyle=cText2;
+  c.fillText('ذكرٌ وصلاةٌ على الحبيب ﷺ وربعُ صفحةٍ من القرآن', W/2, y);
+  y+=22;
+
+  function drawBox(lines, src, n, top, h){
+    c.fillStyle=cFill; rrect(c,PAD,top,W-2*PAD,h,BOX); c.fill();
+    c.font="23px 'AmiriQuran',serif"; c.fillStyle=cText;
+    let ty=top+IN+30;
+    for(const ln of lines){ c.fillText(ln, W/2, ty); ty+=LH1; }
+    // العدّاد
+    const cy=top+h-IN-12;
+    const lbl=AR(n)+' مرّات';
+    c.font="700 15px 'PlexAr',sans-serif";
+    const pw=Math.round(c.measureText(lbl).width)+26;
+    c.fillStyle=cRepBg; rrect(c,PAD+IN,cy-17,pw,32,16); c.fill();
+    c.fillStyle=cRep; c.fillText(lbl, PAD+IN+pw/2, cy+5);
+    // المصدر
+    c.font="500 12.5px 'PlexAr',sans-serif"; c.fillStyle=cText3;
+    c.textAlign='right'; c.fillText(src, W-PAD-IN, cy+4); c.textAlign='center';
+  }
+  drawBox(l1, tas.s, 3, y, h1); y+=h1+14;
+  drawBox(l2, sal.s, 3, y, h2); y+=h2+14;
+
+  if(q){
+    c.fillStyle=cFill; rrect(c,PAD,y,W-2*PAD,h3,BOX); c.fill();
+    c.font="700 14px 'PlexAr',sans-serif"; c.fillStyle=cAcc;
+    c.fillText(qHead, W/2, y+IN+16);
+    c.font=QSZ+"px "+qFont; c.fillStyle=cText;
+    let ty=y+IN+28+QGAP+32;
+    for(const ln of qLines){ c.fillText(ln, W/2, ty); ty+=LHQ; }
+    y+=h3;
+  }
+
+  // التذييل
+  y+=34;
+  c.strokeStyle=cFill; c.lineWidth=1;
+  c.beginPath(); c.moveTo(PAD,y-20); c.lineTo(W-PAD,y-20); c.stroke();
+  c.font="700 17px 'PlexAr',sans-serif"; c.fillStyle=cText;
+  c.fillText('صلاتي — أذكار ومصحف', W/2, y);
+  c.font="700 15px 'PlexAr',sans-serif"; c.fillStyle=cAcc;
+  c.fillText('salatee.netlify.app', W/2, y+24);
+  return cv;
+}
+
+function qpImageCaption(){
+  return 'تذكيرك اليوم من تطبيق «صلاتي» 🤍 — ذكرٌ وصلاةٌ على الحبيب ﷺ وربعُ صفحةٍ من القرآن، يتغيّر في كلّ مرّة.\n'+
+         'افتح الرابط وخُذ نصيبك — بلا تحميل ولا تسجيل، ويعمل دون إنترنت:\n'+APP_LINK;
+}
+/* المشاركة: صورة أوّلاً، ونصّ عند تعذّرها */
+async function qpShare(){
+  let blob=null;
+  try{
+    const cv=await buildQuickPopImage();
+    blob=await new Promise(r=> cv.toBlob(r,'image/png'));
+  }catch(e){}
+  if(blob){
+    const file=new File([blob],'salaty-tazkir.png',{type:'image/png'});
+    try{
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({ files:[file], text:qpImageCaption() });
+        return;
+      }
+    }catch(e){ if(e && e.name==='AbortError') return; }
+    // تعذّرت مشاركة الملفّات: نحفظ الصورة ثمّ نفتح واتساب بالنصّ
+    try{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download='salaty-tazkir.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 4000);
+      showToast('حُفظت الصورة — أرفِقها في واتساب', 4200);
+    }catch(e){}
+  }
+  const url='https://wa.me/?text='+encodeURIComponent(qpShareText());
+  try{ const w=window.open(url,'_blank','noopener'); if(!w) location.href=url; }
+  catch(e){ location.href=url; }
+}
+
 function qpShare(){
   const url='https://wa.me/?text='+encodeURIComponent(qpShareText());
   try{ const w=window.open(url,'_blank','noopener'); if(!w) location.href=url; }
