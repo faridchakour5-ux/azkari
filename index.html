@@ -301,6 +301,10 @@
   .prayerbar{margin:6px 16px 0; background:var(--card); border-radius:16px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
     border:1px solid var(--line); box-shadow:var(--shadow-1);}
   .prayerbar .next{display:flex; flex-direction:column; gap:2px;}
+  .prayerbar .geo-refresh{border:0; background:var(--fill-2); color:var(--c-read); padding:5px; margin-top:6px;
+    width:30px; height:30px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center;}
+  .prayerbar .geo-refresh .gh-ic{width:16px; height:16px;}
+  .prayerbar .geo-refresh.spin{opacity:.5;}
   .prayerbar .next b{font-size:17px; font-weight:800; color:var(--c-read);}
   .prayerbar .next span{font-size:13px; color:var(--text-2);}
   .prayerbar .next .next-lbl{color:var(--c-read);}
@@ -403,7 +407,11 @@
   .quick-pop.show .qp-card{transform:none;}
   .quick-pop .qp-head{display:flex; align-items:center; gap:9px; margin-bottom:4px;}
   .quick-pop .qp-head .gh-ic{color:var(--accent); width:1.4em; height:1.4em;}
-  .quick-pop .qp-h1{font-size:19px; font-weight:800;}
+  .quick-pop .qp-h1{font-size:19px; font-weight:800; flex:1 1 auto;}
+  .quick-pop .qp-riw{display:flex; gap:2px; background:var(--fill-2); border-radius:999px; padding:3px;}
+  .quick-pop .qp-riw button{border:0; background:transparent; color:var(--text-2); font:inherit;
+    font-size:13px; font-weight:800; padding:5px 12px; border-radius:999px;}
+  .quick-pop .qp-riw button.on{background:var(--accent); color:#fff;}
   .quick-pop .qp-sub{font-size:13px; color:var(--text-2); margin-bottom:14px;}
   .quick-pop .qp-row{background:var(--fill-2); border-radius:15px; padding:13px 14px 10px; margin-bottom:10px;
     border:1.5px solid transparent; transition:border-color .25s, background .25s;}
@@ -837,6 +845,9 @@
     <div class="qp-head">
       <svg class="gh-ic" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
       <span class="qp-h1">تذكيرك اليوم</span>
+      <div class="qp-riw" id="qp-riw">
+        <button type="button" data-r="warsh">ورش</button><button type="button" data-r="hafs">حفص</button>
+      </div>
     </div>
     <div class="qp-sub">اضغط على كلّ ذكر حتى يكتمل العدد — ويتغيّر التذكير في كل مرّة.</div>
     <div id="qp-rows"></div>
@@ -1609,6 +1620,14 @@ function initRiwayaPills(){
     if(settings.riwaya===b.dataset.r) return;
     // إن كنّا وسط المصحف: احفظ السورة الحالية لنعود إليها بعد إعادة البناء بالرواية الجديدة
     markRiwayaKeep();
+    // امسح نصّ الرواية السابقة فورًا: وإلّا ظهر بخطّ الرواية الجديدة (حروف مشوَّهة) حتى تُحمَّل بياناتها
+    try{
+      const body=$('#wird-body');
+      if(body && $('#s-wird').classList.contains('active')){
+        body.innerHTML='<div class="khatma-done">…جارٍ تحميل المصحف</div>';
+        body.dataset.mode=''; __mushafRenderedRiwaya=null;
+      }
+    }catch(e){}
     settings.riwaya=b.dataset.r; saveSettings(); applyRiwaya(); syncRiwayaPills(); vibrate(6);
   }));
   syncRiwayaPills();
@@ -3029,6 +3048,8 @@ function buildQuickPop(){
       else { b.textContent=AR(left); vibrate(8); }
     });
   });
+  // اختيار الرواية
+  $$('#qp-riw button').forEach(x=> x.classList.toggle('on', x.dataset.r===settings.riwaya));
   // ربع صفحة من القرآن
   const box=$('#qp-quran');
   box.innerHTML='<div class="qp-load">…جارٍ إحضار ربع صفحة</div>';
@@ -3285,6 +3306,25 @@ function qpShare(){
   qpShareTextFallback();
 }
 
+$$('#qp-riw button').forEach(x=> x.addEventListener('click', ()=>{
+  const r=x.dataset.r; if(settings.riwaya===r) return;
+  settings.riwaya=r; saveSettings(); applyRiwaya(); syncRiwayaPills(); applyHafsFont(); vibrate(6);
+  $$('#qp-riw button').forEach(y=> y.classList.toggle('on', y.dataset.r===r));
+  // أعِد جلب ربع الصفحة بالرواية الجديدة
+  __pgIdx=null; __qpQuran=null; __qpFile=null;
+  const box=$('#qp-quran');
+  if(box) box.innerHTML='<div class="qp-load">…جارٍ إحضار ربع صفحة</div>';
+  ensureWirdForPop().then(()=>{
+    const q=quarterPage(); if(!q || !box){ if(box) box.innerHTML='<div class="qp-load">تعذّر إحضار الآيات</div>'; return; }
+    __qpQuran=q; qpPrepareImage();
+    box.innerHTML=
+      '<div class="qp-qhead">سورة '+escapeHtml(q.name)+' · '+
+        (q.ayat.length>1 ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no)) : ('الآية '+AR(q.ayat[0].no)))+
+        ' · صفحة '+AR(q.pg)+'</div>'+
+      '<div class="wird-text qp-qtext">'+q.ayat.map(a=>
+        '<span class="aya-t">'+a.t+'</span><span class="wird-num">۝'+AR(a.no)+'</span> ').join('')+'</div>';
+  });
+}));
 $('#qp-open')   && $('#qp-open').addEventListener('click', ()=>{ vibrate(6); openQuickPop(); });
 $('#qp-enter')  && $('#qp-enter').addEventListener('click', ()=>{ vibrate(6); closeQuickPop(); });
 $('#qp-share')  && $('#qp-share').addEventListener('click', ()=>{ vibrate(8); qpShare(); });
@@ -3314,6 +3354,31 @@ function markWirdDoneToday(){ markDoneToday(); }
 const PRAYERS=[['fajr','الفجر'],['sunrise','الشروق'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
 let prayerToday=null;
 function geoStore(){ return store.get('az_geo', null); }
+/* المسافة بالكيلومترات بين نقطتين */
+function geoKm(a,b){
+  const R=6371, d=x=>x*Math.PI/180;
+  const dLat=d(b.lat-a.lat), dLng=d(b.lng-a.lng);
+  const h=Math.sin(dLat/2)**2 + Math.cos(d(a.lat))*Math.cos(d(b.lat))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+/* يُحدَّث الموقع تلقائيًّا عند تقادمه — حتى تصحّ المواقيت إذا سافر المستخدم */
+let __geoBusy=false;
+function refreshGeo(force, cb){
+  if(__geoBusy || !navigator.geolocation) { cb && cb(false); return; }
+  const g=geoStore();
+  if(!g && !force){ cb && cb(false); return; }
+  if(!force && g && g.t && (Date.now()-g.t) < 3*3600*1000){ cb && cb(false); return; }  // أحدث من ٣ ساعات
+  __geoBusy=true;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    __geoBusy=false;
+    const nw={lat:pos.coords.latitude, lng:pos.coords.longitude, t:Date.now()};
+    const moved = !g || geoKm(g,nw) > 4;      // انتقال يزيد على ٤ كم
+    store.set('az_geo', nw);
+    if(moved || force){ renderPrayers(); try{ scheduleNativeNotifs(); }catch(e){} }
+    cb && cb(moved);
+  }, ()=>{ __geoBusy=false; cb && cb(false); },
+     {enableHighAccuracy:false, timeout:12000, maximumAge:0});
+}
 function fmtTime(d){ return d.toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit',hour12:true}); }
 
 function computePrayers(lat,lng,date){
@@ -3411,7 +3476,19 @@ function renderPrayers(){
   const cur = (()=>{ try{ return pt.currentPrayer(); }catch(e){ return null; } })();
   let times='';
   PRAYERS.forEach(([k,nm])=>{ const tv=pt[k]; if(!tv) return; const isCur=cur===k; const isNext=(k===nextKey); times+='<div class="t'+(isCur?' cur':'')+(isNext?' next-p':'')+'"><span class="nm">'+nm+'</span><span class="vl">'+fmtTime(tv)+'</span></div>'; });
-  bar.innerHTML='<div class="next"><b>'+nextName+'</b><span><span class="next-lbl">الصلاة القادمة</span> <span class="next-time">'+nextTime+'</span></span></div><div class="times">'+times+'</div>';
+  bar.innerHTML='<div class="next"><b>'+nextName+'</b><span><span class="next-lbl">الصلاة القادمة</span> <span class="next-time">'+nextTime+'</span></span>'+
+    '<button class="geo-refresh" id="geo-refresh" title="تحديث موقعي" aria-label="تحديث موقعي">'+
+    '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></button>'+
+    '</div><div class="times">'+times+'</div>';
+  const gr=$('#geo-refresh');
+  if(gr) gr.addEventListener('click', e=>{
+    e.stopPropagation(); vibrate(8);
+    gr.classList.add('spin'); showToast('…جارٍ تحديث موقعك', 2500);
+    refreshGeo(true, moved=>{
+      const el=$('#geo-refresh'); if(el) el.classList.remove('spin');
+      showToast(moved ? 'حُدِّثت المواقيت حسب موقعك الجديد ✓' : 'موقعك لم يتغيّر — المواقيت محدَّثة', 3200);
+    });
+  });
   // auto morning/evening by Asr
   autoTimeByPrayer(pt);
 }
@@ -3426,7 +3503,7 @@ $('#loc-btn').addEventListener('click', ()=>{
   if(!navigator.geolocation){ alert('الموقع غير مدعوم على هذا المتصفح.'); return; }
   $('#loc-btn').textContent='…جارٍ تحديد الموقع';
   navigator.geolocation.getCurrentPosition(p=>{
-    store.set('az_geo',{lat:p.coords.latitude,lng:p.coords.longitude});
+    store.set('az_geo',{lat:p.coords.latitude,lng:p.coords.longitude,t:Date.now()});
     renderPrayers(); vibrate(15); scheduleNativeNotifs();
   }, err=>{
     $('#loc-btn').innerHTML=LOC_PIN_SVG+'تفعيل مواقيت الصلاة حسب موقعك';
@@ -3456,6 +3533,7 @@ try{
   if(settings.qpop!==false && Date.now() - (st.last||0) > 15*60*1000) setTimeout(openQuickPop, 2700);   // بعد انتهاء شاشة البداية (2.5 ث)
 }catch(e){}
 try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
+try{ setTimeout(()=>refreshGeo(false), 4000); }catch(e){}
 try{ renderWirdKpi(); $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m===wirdMode())); }catch(e){}
 
 /* ================= BACKUP / RESTORE ================= */
@@ -3526,6 +3604,7 @@ document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ try{ s
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
   try{ renderAzkar(); }catch(e){}
     try{ const now=new Date(); if(settings.notif) checkPrayerReminder(now); }catch(e){}
+  try{ refreshGeo(false); }catch(e){}
 } });
 
 /* ================= INSTALL (Add to Home Screen) ================= */
