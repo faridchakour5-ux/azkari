@@ -3226,10 +3226,6 @@ async function buildQuickPopImage(){
   return cv;
 }
 
-function qpImageCaption(){
-  return 'تذكيرك اليوم من تطبيق «صلاتي» 🤍 — ذكرٌ وصلاةٌ على الحبيب ﷺ وربعُ صفحةٍ من القرآن، يتغيّر في كلّ مرّة.\n'+
-         'افتح الرابط وخُذ نصيبك — بلا تحميل ولا تسجيل، ويعمل دون إنترنت:\n'+APP_LINK;
-}
 /* تُجهَّز الصورة مسبقًا: عند الضغط تُشارَك فورًا بلا انتظار
    (الانتظار قبل navigator.share يُبطِل «تفاعل المستخدم» فيرفضه المتصفّح) */
 let __qpFile=null, __qpFileWork=null;
@@ -3267,7 +3263,7 @@ function qpShare(){
     let ok=false;
     try{ ok=navigator.canShare({files:[f]}); }catch(e){ ok=false; }
     if(ok){
-      navigator.share({ files:[f], text:qpImageCaption() })
+      navigator.share({ files:[f] })          // الصورة وحدها — الرابط مكتوب داخلها
         .catch(err=>{
           if(err && err.name==='AbortError') return;      // ألغى المستخدم
           if(qpSaveImage(f)) showToast('حُفظت الصورة — أرفِقها في واتساب', 4200);
