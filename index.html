@@ -1006,6 +1006,7 @@
   <div class="gtitle">عن التطبيق</div>
   <div class="group">
     <div class="row"><span class="k">التطبيق</span><span class="v">صلاتي</span></div>
+    <div class="row"><span class="k">الإصدار</span><span class="v" id="app-ver">—</span></div>
     <div class="row"><span class="k">الأذكار</span><span class="v">حصن المسلم</span></div>
     <div class="row"><span class="k">نص القرآن</span><span class="v" id="quran-src">رواية حفص</span></div>
     <a class="row" href="privacy.html" style="text-decoration:none; color:inherit;"><span class="k">سياسة الخصوصية</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
@@ -3036,6 +3037,7 @@ function buildQuickPop(){
     const q=quarterPage();
     if(!q){ box.innerHTML='<div class="qp-load">تعذّر إحضار الآيات</div>'; return; }
     __qpQuran=q;
+    qpPrepareImage();
     box.innerHTML=
       '<div class="qp-qhead">سورة '+escapeHtml(q.name)+' · '+
         (q.ayat.length>1 ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no)) : ('الآية '+AR(q.ayat[0].no)))+
@@ -3228,40 +3230,65 @@ function qpImageCaption(){
   return 'تذكيرك اليوم من تطبيق «صلاتي» 🤍 — ذكرٌ وصلاةٌ على الحبيب ﷺ وربعُ صفحةٍ من القرآن، يتغيّر في كلّ مرّة.\n'+
          'افتح الرابط وخُذ نصيبك — بلا تحميل ولا تسجيل، ويعمل دون إنترنت:\n'+APP_LINK;
 }
-/* المشاركة: صورة أوّلاً، ونصّ عند تعذّرها */
-async function qpShare(){
-  let blob=null;
-  try{
-    const cv=await buildQuickPopImage();
-    blob=await new Promise(r=> cv.toBlob(r,'image/png'));
-  }catch(e){}
-  if(blob){
-    const file=new File([blob],'salaty-tazkir.png',{type:'image/png'});
+/* تُجهَّز الصورة مسبقًا: عند الضغط تُشارَك فورًا بلا انتظار
+   (الانتظار قبل navigator.share يُبطِل «تفاعل المستخدم» فيرفضه المتصفّح) */
+let __qpFile=null, __qpFileWork=null;
+function qpPrepareImage(){
+  __qpFile=null;
+  __qpFileWork=(async()=>{
     try{
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({ files:[file], text:qpImageCaption() });
-        return;
-      }
-    }catch(e){ if(e && e.name==='AbortError') return; }
-    // تعذّرت مشاركة الملفّات: نحفظ الصورة ثمّ نفتح واتساب بالنصّ
-    try{
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a'); a.href=url; a.download='salaty-tazkir.png';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=> URL.revokeObjectURL(url), 4000);
-      showToast('حُفظت الصورة — أرفِقها في واتساب', 4200);
-    }catch(e){}
-  }
+      const cv=await buildQuickPopImage();
+      const blob=await new Promise(r=> cv.toBlob(r,'image/png'));
+      if(!blob) return null;
+      __qpFile=new File([blob],'salaty-tazkir.png',{type:'image/png'});
+      return __qpFile;
+    }catch(e){ return null; }
+  })();
+  return __qpFileWork;
+}
+function qpShareTextFallback(){
   const url='https://wa.me/?text='+encodeURIComponent(qpShareText());
   try{ const w=window.open(url,'_blank','noopener'); if(!w) location.href=url; }
   catch(e){ location.href=url; }
+}
+function qpSaveImage(file){
+  try{
+    const url=URL.createObjectURL(file);
+    const a=document.createElement('a'); a.href=url; a.download='salaty-tazkir.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+    return true;
+  }catch(e){ return false; }
+}
+function qpShare(){
+  const f=__qpFile;
+  // الصورة جاهزة ← نُشاركها فورًا داخل نفس نقرة المستخدم
+  if(f && navigator.canShare && navigator.share){
+    let ok=false;
+    try{ ok=navigator.canShare({files:[f]}); }catch(e){ ok=false; }
+    if(ok){
+      navigator.share({ files:[f], text:qpImageCaption() })
+        .catch(err=>{
+          if(err && err.name==='AbortError') return;      // ألغى المستخدم
+          if(qpSaveImage(f)) showToast('حُفظت الصورة — أرفِقها في واتساب', 4200);
+          qpShareTextFallback();
+        });
+      return;
+    }
+    if(qpSaveImage(f)){ showToast('حُفظت صورة التذكير — أرفِقها في واتساب', 4600); return; }
+  }
+  // الصورة لم تجهز بعد: ننتظرها قليلاً ثم نحفظها، وإلا نُرسل النصّ
+  if(__qpFileWork){
+    showToast('…جارٍ تحضير الصورة', 1800);
+    __qpFileWork.then(file=>{
+      if(file && qpSaveImage(file)){ showToast('حُفظت صورة التذكير — أرفِقها في واتساب', 4600); return; }
+      qpShareTextFallback();
+    });
+    return;
+  }
+  qpShareTextFallback();
 }
 
-function qpShare(){
-  const url='https://wa.me/?text='+encodeURIComponent(qpShareText());
-  try{ const w=window.open(url,'_blank','noopener'); if(!w) location.href=url; }
-  catch(e){ location.href=url; }
-}
 $('#qp-open')   && $('#qp-open').addEventListener('click', ()=>{ vibrate(6); openQuickPop(); });
 $('#qp-enter')  && $('#qp-enter').addEventListener('click', ()=>{ vibrate(6); closeQuickPop(); });
 $('#qp-share')  && $('#qp-share').addEventListener('click', ()=>{ vibrate(8); qpShare(); });
@@ -3415,6 +3442,13 @@ $('#loc-btn').addEventListener('click', ()=>{
 applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
 syncSeg('#riwaya-seg','riwaya'); syncSeg('#hafsfont-seg','hafsFont'); syncSeg('#qcolor-seg','quranColor'); syncSeg('#font-seg','font'); renderSwatches();
 applyHafsFont(); applyQuranColor();
+/* رقم الإصدار الفعليّ من عامل الخدمة — ليُعرف أيّ نسخة تعمل على الجهاز */
+(function(){
+  const el=$('#app-ver'); if(!el) return;
+  fetch('sw.js',{cache:'no-store'}).then(r=>r.text()).then(t=>{
+    const m=t.match(/azkari-v(\d+)/); if(m) el.textContent='v'+m[1];
+  }).catch(()=>{});
+})();
 try{ renderAzkar(); }catch(e){} renderChips(); paintTasbih();
 /* نافذة التذكير عند فتح التطبيق */
 try{
