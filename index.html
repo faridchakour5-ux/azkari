@@ -392,6 +392,40 @@
   .listen-sura.playing .ls-num{background:var(--accent); color:#fff;}
 
   /* تذكير الصلاة على النبي ﷺ (شريط داخل التطبيق) */
+  /* ===== نافذة التذكير السريع ===== */
+  .quick-pop{position:fixed; inset:0; z-index:130; display:none; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.5); opacity:0; transition:opacity .3s ease; padding:16px;}
+  .quick-pop.show{display:flex; opacity:1;}
+  .quick-pop .qp-card{width:100%; max-width:440px; max-height:88vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    background:var(--card); color:var(--text); border-radius:22px; padding:20px 18px 16px;
+    box-shadow:0 12px 40px rgba(0,0,0,.34); transform:translateY(18px) scale(.98);
+    transition:transform .32s cubic-bezier(.2,.8,.3,1);}
+  .quick-pop.show .qp-card{transform:none;}
+  .quick-pop .qp-head{display:flex; align-items:center; gap:9px; margin-bottom:4px;}
+  .quick-pop .qp-head .gh-ic{color:var(--accent); width:1.4em; height:1.4em;}
+  .quick-pop .qp-h1{font-size:19px; font-weight:800;}
+  .quick-pop .qp-sub{font-size:13px; color:var(--text-2); margin-bottom:14px;}
+  .quick-pop .qp-row{background:var(--fill-2); border-radius:15px; padding:13px 14px 10px; margin-bottom:10px;
+    border:1.5px solid transparent; transition:border-color .25s, background .25s;}
+  .quick-pop .qp-row.done{border-color:var(--accent); background:transparent;}
+  .quick-pop .qp-txt{font-family:'AmiriQuran',serif; font-size:17.5px; line-height:2.05; text-align:center;}
+  .quick-pop .qp-bot{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:9px;}
+  .quick-pop .qp-src{font-size:11.5px; color:var(--text-3);}
+  .quick-pop .qp-cnt{border:0; font:inherit; font-size:15px; font-weight:800; min-width:38px; height:32px;
+    border-radius:999px; background:var(--c-repeat-bg); color:var(--c-repeat);
+    display:inline-flex; align-items:center; justify-content:center;}
+  .quick-pop .qp-row.done .qp-cnt{background:var(--accent); color:#fff;}
+  .quick-pop .qp-row.done .qp-cnt .gh-ic{width:1em; height:1em; color:#fff;}
+  .quick-pop .qp-quran{background:var(--fill-2); border-radius:15px; padding:13px 14px; margin-bottom:14px;}
+  .quick-pop .qp-qhead{font-size:12.5px; font-weight:700; color:var(--accent); text-align:center; margin-bottom:8px;}
+  .quick-pop .qp-qtext{--qscale:.82; text-align:center;}
+  .quick-pop .qp-load{font-size:13.5px; color:var(--text-2); text-align:center; padding:8px 0;}
+  .quick-pop .qp-act{display:flex; gap:10px;}
+  .quick-pop .qp-act button{flex:1 1 0; border:0; font:inherit; font-size:15px; font-weight:800;
+    padding:12px 10px; border-radius:13px; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
+  .quick-pop #qp-enter{background:var(--accent); color:#fff; box-shadow:0 2px 10px rgba(47,158,68,.3);}
+  .quick-pop #qp-share{background:#25D366; color:#fff; flex:0 0 42%; box-shadow:0 2px 9px rgba(37,211,102,.3);}
+  .quick-pop #qp-share svg{width:18px; height:18px; fill:#fff; stroke:none;}
   /* ===== التحدّي اليومي ===== */
   .chal{margin:12px 16px 0; background:var(--card); border-radius:18px; padding:14px 15px 12px; box-shadow:var(--shadow);
     border:1.5px solid transparent; transition:border-color .3s ease;}
@@ -829,6 +863,22 @@
   </div>
 </div>
 
+<div class="quick-pop" id="quick-pop">
+  <div class="qp-card">
+    <div class="qp-head">
+      <svg class="gh-ic" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
+      <span class="qp-h1">تذكيرك اليوم</span>
+    </div>
+    <div class="qp-sub">اضغط على كلّ ذكر حتى يكتمل العدد — ويتغيّر التذكير في كل مرّة.</div>
+    <div id="qp-rows"></div>
+    <div class="qp-quran" id="qp-quran"></div>
+    <div class="qp-act">
+      <button id="qp-enter" type="button">ادخل التطبيق</button>
+      <button id="qp-share" type="button">شارِكها</button>
+    </div>
+  </div>
+</div>
+
 <div class="install-sheet chal-sheet" id="chal-sheet">
   <div class="ish-card">
     <div class="ish-grip"></div>
@@ -982,6 +1032,9 @@
     </div>
     <div class="row"><span class="k">تذكير بالصلاة على النبي ﷺ</span>
       <label class="sw"><input type="checkbox" id="salat-toggle"><span class="track"></span><span class="knob"></span></label>
+    </div>
+    <div class="row"><span class="k">نافذة التذكير عند الفتح</span>
+      <label class="sw"><input type="checkbox" id="qpop-toggle" checked><span class="track"></span><span class="knob"></span></label>
     </div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
   </div>
@@ -2936,6 +2989,163 @@ $$('#wird-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{
   vibrate(6);
 }));
 
+/* ================= تذكير سريع عند فتح التطبيق ================= */
+const QP_TASBIH = [
+  { t:'سُبْحَانَ اللهِ وَبِحَمْدِهِ، عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ', s:'رواه مسلم' },
+  { t:'سُبْحَانَ اللهِ وَبِحَمْدِهِ، سُبْحَانَ اللهِ الْعَظِيمِ', s:'متّفق عليه' },
+  { t:'لَا إِلَٰهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ', s:'متّفق عليه' },
+  { t:'سُبْحَانَ اللهِ، وَالْحَمْدُ لِلهِ، وَلَا إِلَٰهَ إِلَّا اللهُ، وَاللهُ أَكْبَرُ', s:'رواه مسلم' },
+  { t:'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ', s:'متّفق عليه' },
+  { t:'أَسْتَغْفِرُ اللهَ الْعَظِيمَ الَّذِي لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ', s:'رواه أبو داود والترمذي' },
+  { t:'سُبْحَانَ اللهِ وَبِحَمْدِهِ', s:'متّفق عليه' },
+  { t:'الْحَمْدُ لِلهِ رَبِّ الْعَالَمِينَ', s:'من فاتحة الكتاب' },
+  { t:'حَسْبِيَ اللهُ لَا إِلَٰهَ إِلَّا هُوَ، عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ', s:'رواه أبو داود' },
+  { t:'اللَّهُمَّ أَعِنِّي عَلَىٰ ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ', s:'رواه أبو داود والنسائي' }
+];
+const QP_SALAT = [
+  { t:'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ', s:'متّفق عليه' },
+  { t:'اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ عَلَىٰ نَبِيِّنَا مُحَمَّدٍ', s:'الصلاة على النبي ﷺ' },
+  { t:'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ عَبْدِكَ وَرَسُولِكَ، وَصَلِّ عَلَى الْمُؤْمِنِينَ وَالْمُؤْمِنَاتِ، وَالْمُسْلِمِينَ وَالْمُسْلِمَاتِ', s:'رواه البخاري' },
+  { t:'صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ تَسْلِيمًا كَثِيرًا', s:'الصلاة على النبي ﷺ' },
+  { t:'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَأَزْوَاجِهِ وَذُرِّيَّتِهِ، كَمَا صَلَّيْتَ عَلَىٰ آلِ إِبْرَاهِيمَ', s:'متّفق عليه' }
+];
+const QP_KEY='az_qpop';
+function qpState(){ return store.get(QP_KEY, { tas:-1, sal:-1, pg:-1, last:0 }); }
+function qpSave(s){ store.set(QP_KEY, s); }
+/* اختيار مختلف عن السابق دائمًا */
+function qpPick(n, prev){ if(n<2) return 0; let i; do{ i=Math.floor(Math.random()*n); }while(i===prev); return i; }
+
+/* ---- فهرس صفحات المصحف (يُبنى مرّة واحدة) ---- */
+let __pgIdx=null;
+function pageIndex(){
+  if(__pgIdx && __pgIdx.__riwaya===settings.riwaya) return __pgIdx;
+  if(!WIRD || !WIRD.a) return null;
+  const starts={}; const N=WIRD.a.length;
+  for(let i=0;i<N;i++){ const p=parseInt(WIRD.a[i].p); if(starts[p]==null) starts[p]=i; }
+  __pgIdx={ starts, __riwaya:settings.riwaya };
+  return __pgIdx;
+}
+/* ربع صفحة من القرآن، من سورة واحدة، يتغيّر في كلّ مرّة */
+function quarterPage(){
+  const idx=pageIndex(); if(!idx) return null;
+  const pages=Object.keys(idx.starts).map(Number).sort((a,b)=>a-b);
+  const st=qpState();
+  let pg, tries=0;
+  do{ pg=pages[Math.floor(Math.random()*pages.length)]; tries++; }while(pg===st.pg && tries<8);
+  const from=idx.starts[pg];
+  const nextPg=pages[pages.indexOf(pg)+1];
+  const to=(nextPg!=null? idx.starts[nextPg] : WIRD.a.length);
+  const count=Math.max(1, to-from);
+  // ربع الصفحة: نختار ربعًا من أرباعها الأربعة
+  const q=Math.floor(Math.random()*4);
+  let s=from+Math.floor(count*q/4);
+  let e=from+Math.max(Math.floor(count*(q+1)/4), Math.floor(count*q/4)+1);
+  if(e>to) e=to;
+  if(s>=e){ s=from; e=Math.min(from+1, to); }
+  // لا نتجاوز حدود السورة الواحدة
+  const si=suraOf(s);
+  const suraEnd=(si+1<WIRD.sur.length)? WIRD.sur[si+1].i : WIRD.a.length;
+  if(e>suraEnd) e=suraEnd;
+  if(s>=e) e=s+1;
+  const ayat=[]; for(let i=s;i<e;i++) ayat.push({ i, t:WIRD.a[i].t, no:i-WIRD.sur[si].i+1 });
+  st.pg=pg; qpSave(st);
+  return { pg, si, name:WIRD.sur[si].n, ayat, from:s };
+}
+
+/* ---- بناء النافذة ---- */
+let __qpQuran=null;
+function buildQuickPop(){
+  const st=qpState();
+  const ti=qpPick(QP_TASBIH.length, st.tas), si=qpPick(QP_SALAT.length, st.sal);
+  st.tas=ti; st.sal=si; st.last=Date.now(); qpSave(st);
+  const rows=[
+    { k:'t', d:QP_TASBIH[ti], n:3 },
+    { k:'s', d:QP_SALAT[si],  n:3 }
+  ];
+  $('#qp-rows').innerHTML = rows.map((r,i)=>
+    '<div class="qp-row" data-i="'+i+'" data-left="'+r.n+'">'+
+      '<div class="qp-txt">'+escapeHtml(r.d.t)+'</div>'+
+      '<div class="qp-bot"><span class="qp-src">'+escapeHtml(r.d.s)+'</span>'+
+        '<button class="qp-cnt" type="button">'+AR(r.n)+'</button></div>'+
+    '</div>').join('');
+  $$('#qp-rows .qp-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      let left=parseInt(row.dataset.left);
+      if(left<=0) return;
+      left--; row.dataset.left=left;
+      const b=row.querySelector('.qp-cnt');
+      if(left<=0){ row.classList.add('done'); b.innerHTML=CHK_IC; vibrate([12,35,12]); }
+      else { b.textContent=AR(left); vibrate(8); }
+    });
+  });
+  // ربع صفحة من القرآن
+  const box=$('#qp-quran');
+  box.innerHTML='<div class="qp-load">…جارٍ إحضار ربع صفحة</div>';
+  __qpQuran=null;
+  ensureWirdForPop().then(()=>{
+    const q=quarterPage();
+    if(!q){ box.innerHTML='<div class="qp-load">تعذّر إحضار الآيات</div>'; return; }
+    __qpQuran=q;
+    box.innerHTML=
+      '<div class="qp-qhead">سورة '+escapeHtml(q.name)+' · '+
+        (q.ayat.length>1 ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no)) : ('الآية '+AR(q.ayat[0].no)))+
+        ' · صفحة '+AR(q.pg)+'</div>'+
+      '<div class="wird-text qp-qtext">'+q.ayat.map(a=>
+        '<span class="aya-t">'+a.t+'</span><span class="wird-num">۝'+AR(a.no)+'</span> ').join('')+'</div>';
+  });
+}
+/* تحميل بيانات المصحف في الخلفية دون إبطاء الإقلاع */
+function ensureWirdForPop(){
+  if(WIRD && WIRD.__riwaya===settings.riwaya) return Promise.resolve();
+  return (async()=>{
+    try{
+      if(!wirdGlobal()) await loadScript(wirdFile());
+      WIRD=wirdGlobal();
+      if(WIRD){ WIRD.__riwaya=settings.riwaya; window.__wirdReady=true; }
+    }catch(e){}
+  })();
+}
+
+function openQuickPop(){
+  const el=$('#quick-pop'); if(!el) return;
+  buildQuickPop();
+  el.classList.add('show');
+}
+function closeQuickPop(){
+  const el=$('#quick-pop'); if(el) el.classList.remove('show');
+  try{ maybeShowInstallSheet(); }catch(e){}
+}
+/* نصّ المشاركة: الأذكار + ربع الصفحة + الرابط */
+function qpShareText(){
+  const st=qpState();
+  const L=[];
+  L.push('🤍 *تذكير* — تطبيق «صلاتي»');
+  L.push('');
+  L.push('سبِّح ثلاثًا:');
+  L.push('﴿ '+QP_TASBIH[Math.max(st.tas,0)].t+' ﴾');
+  L.push('');
+  L.push('وصلِّ على الحبيب ﷺ ثلاثًا:');
+  L.push('﴿ '+QP_SALAT[Math.max(st.sal,0)].t+' ﴾');
+  if(__qpQuran){
+    L.push('');
+    L.push('وربع صفحة من سورة '+__qpQuran.name+':');
+    L.push(__qpQuran.ayat.map(a=> a.t+' ۝'+a.no).join(' '));
+  }
+  L.push('');
+  L.push('يتغيّر التذكير في كل مرّة. افتح الرابط وخُذ نصيبك اليوم —');
+  L.push('بلا تحميل ولا تسجيل، ويعمل دون إنترنت:');
+  L.push(APP_LINK);
+  return L.join('\n');
+}
+function qpShare(){
+  const url='https://wa.me/?text='+encodeURIComponent(qpShareText());
+  try{ const w=window.open(url,'_blank','noopener'); if(!w) location.href=url; }
+  catch(e){ location.href=url; }
+}
+$('#qp-enter')  && $('#qp-enter').addEventListener('click', ()=>{ vibrate(6); closeQuickPop(); });
+$('#qp-share')  && $('#qp-share').addEventListener('click', ()=>{ vibrate(8); qpShare(); });
+$('#quick-pop') && $('#quick-pop').addEventListener('click', e=>{ if(e.target.id==='quick-pop') closeQuickPop(); });
+
 /* ================= التحدّي اليومي ================= */
 const APP_LINK = 'https://salatee.netlify.app';
 const CHAL_KEY = 'az_chal';
@@ -3212,6 +3422,15 @@ syncSeg('#riwaya-seg','riwaya'); syncSeg('#hafsfont-seg','hafsFont'); syncSeg('#
 applyHafsFont(); applyQuranColor();
 try{ renderAzkar(); }catch(e){} renderChips(); paintTasbih();
 try{ renderChal(); }catch(e){}
+/* نافذة التذكير عند فتح التطبيق */
+try{
+  const sb=$('#qp-share'); if(sb) sb.innerHTML = WA_SVG + 'شارِكها';
+  const qt=$('#qpop-toggle');
+  if(qt){ qt.checked = settings.qpop!==false;
+    qt.addEventListener('change', ()=>{ settings.qpop=qt.checked; saveSettings(); }); }
+  const st=qpState();
+  if(settings.qpop!==false && Date.now() - (st.last||0) > 15*60*1000) setTimeout(openQuickPop, 2700);   // بعد انتهاء شاشة البداية (2.5 ث)
+}catch(e){}
 try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
 try{ renderWirdKpi(); $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m===wirdMode())); }catch(e){}
 
@@ -3302,6 +3521,7 @@ function ishSnooze(days){ try{ localStorage.setItem(ISH_KEY, String(Date.now()+d
 function closeInstallSheet(){ const el=$('#install-sheet'); if(el) el.classList.remove('show'); }
 function maybeShowInstallSheet(){
   const el=$('#install-sheet'); if(!el) return;
+  const qp=$('#quick-pop'); if(qp && qp.classList.contains('show')) return;   // نافذة التذكير أوّلاً
   if(isStandalone() || ishSnoozed()) return;
   if(!deferredInstall && !isIOS()) return;          // المتصفّح لا يدعم التثبيت المباشر
   if(isIOS()) $('#ish-txt').innerHTML = 'اضغط زرّ <b>المشاركة</b> <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v13"/><path d="M8 7l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg> بأسفل سفاري، ثمّ اختر <b>«إضافة إلى الشاشة الرئيسية»</b> — سيُفتح كتطبيق مستقلّ ويشتغل دون إنترنت.';
