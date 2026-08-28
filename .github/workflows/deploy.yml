@@ -32,7 +32,3 @@ jobs:
           exclude_assets: '.github'
           force_orphan: true
           enable_jekyll: false
-          # Indispensable : force_orphan efface la branche à chaque déploiement.
-          # Sans cette option, un fichier CNAME ajouté à la main serait supprimé
-          # au push suivant et le domaine tomberait.
-          cname: salatee.org
