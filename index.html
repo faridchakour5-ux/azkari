@@ -439,6 +439,16 @@
   .quick-pop #qp-enter{background:var(--accent); color:#fff; box-shadow:0 2px 10px rgba(47,158,68,.3);}
   .quick-pop #qp-share{background:#25D366; color:#fff; flex:0 0 42%; box-shadow:0 2px 9px rgba(37,211,102,.3);}
   .quick-pop #qp-share svg{width:18px; height:18px; fill:#fff; stroke:none;}
+  /* تذكير دائم بتثبيت التطبيق (يظهر ما دام غير مثبَّت) */
+  .inst-row{display:none; align-items:center; gap:10px; margin:10px 16px 0; padding:12px 14px;
+    background:var(--accent); color:#fff; border-radius:15px; font-size:14.5px; font-weight:800;
+    box-shadow:0 2px 10px rgba(47,158,68,.3);}
+  .inst-row.show{display:flex;}
+  .inst-row .gh-ic{width:1.3em; height:1.3em; flex:0 0 auto; color:#fff;}
+  .inst-row .ir-t{flex:1 1 auto;}
+  .inst-row .ir-t small{display:block; font-size:12px; font-weight:600; opacity:.85; margin-top:2px;}
+  .inst-row .ir-go{font-size:12.5px; font-weight:800; color:var(--accent); background:#fff;
+    padding:6px 13px; border-radius:999px; white-space:nowrap;}
   /* زرّ إعادة فتح نافذة التذكير */
   .qp-open{display:flex; align-items:center; gap:10px; margin:12px 16px 0; padding:12px 14px;
     background:var(--card); border-radius:15px; box-shadow:var(--shadow); font-size:14.5px; font-weight:700;}
@@ -706,6 +716,11 @@
     <svg class="gh-ic" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
     <span class="qo-t">تذكيرك<small>ذكر · صلاة على الحبيب ﷺ · ربع صفحة</small></span>
     <span class="qo-go">افتح</span>
+  </div>
+  <div class="inst-row" id="inst-row" role="button" tabindex="0">
+    <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+    <span class="ir-t">ثبِّت «صلاتي» على هاتفك<small>يُفتح بلا متصفّح ويعمل دون إنترنت</small></span>
+    <span class="ir-go">تثبيت</span>
   </div>
   <div class="seg" id="time-seg"></div>
   <div class="az-scope" id="az-scope" style="display:none">
@@ -3684,36 +3699,70 @@ function refreshInstallUI(){
   const btn=$('#install-btn'); const note=$('#install-note');
   if(btn) btn.parentElement.style.display = grpHidden ? 'none':'';
   if(note) note.style.display = grpHidden ? 'none':'';
+  // تذكير دائم في صفحة الأذكار: يظهر ما دام التطبيق غير مثبَّت.
+  // ملاحظة: تُستدعى هذه الدالة عند الإقلاع قبل تعريف deferredInstall،
+  // فنحمي الوصول إليه بـ try حتى لا يتوقّف باقي السكربت.
+  let canInstall=false;
+  try{ canInstall = (!!deferredInstall) || isIOS(); }catch(e){ canInstall=false; }
+  const row=$('#inst-row');
+  if(row) row.classList.toggle('show', !isStandalone() && canInstall);
 }
 const ISH_KEY='installSheetSnooze';
 function ishSnoozed(){ try{ const v=+(localStorage.getItem(ISH_KEY)||0); return v>Date.now(); }catch(e){ return false; } }
 function ishSnooze(days){ try{ localStorage.setItem(ISH_KEY, String(Date.now()+days*864e5)); }catch(e){} }
 function closeInstallSheet(){ const el=$('#install-sheet'); if(el) el.classList.remove('show'); }
-function maybeShowInstallSheet(){
-  const el=$('#install-sheet'); if(!el) return;
-  const qp=$('#quick-pop'); if(qp && qp.classList.contains('show')) return;   // نافذة التذكير أوّلاً
-  if(isStandalone() || ishSnoozed()) return;
-  if(!deferredInstall && !isIOS()) return;          // المتصفّح لا يدعم التثبيت المباشر
-  if(isIOS()) $('#ish-txt').innerHTML = 'اضغط زرّ <b>المشاركة</b> <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v13"/><path d="M8 7l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg> بأسفل سفاري، ثمّ اختر <b>«إضافة إلى الشاشة الرئيسية»</b> — سيُفتح كتطبيق مستقلّ ويشتغل دون إنترنت.';
-  if(isIOS()) $('#ish-yes').textContent = 'OK';
-  setTimeout(()=> el.classList.add('show'), 1400);
+/* هل يجوز عرض بطاقة التثبيت الآن؟ يُعاد الفحص لحظة العرض لا لحظة الجدولة */
+function ishCanShow(){
+  if(isStandalone() || ishSnoozed()) return false;
+  if(!deferredInstall && !isIOS()) return false;              // المتصفّح لا يدعم التثبيت
+  const qp=$('#quick-pop'); if(qp && qp.classList.contains('show')) return false;  // نافذة الوِرد أوّلاً
+  if(__ishShownThisSession) return false;                     // مرّة واحدة في كلّ تشغيل
+  return true;
 }
-$('#install-sheet') && $('#install-sheet').addEventListener('click', e=>{ if(e.target.id==='install-sheet'){ ishSnooze(7); closeInstallSheet(); } });
-$('#ish-no') && $('#ish-no').addEventListener('click', ()=>{ ishSnooze(7); closeInstallSheet(); });
+let __ishShownThisSession=false, __ishTimer=null;
+function maybeShowInstallSheet(delay){
+  const el=$('#install-sheet'); if(!el || !ishCanShow()) return;
+  if(__ishTimer) clearTimeout(__ishTimer);
+  __ishTimer=setTimeout(()=>{
+    __ishTimer=null;
+    if(!ishCanShow()) return;                                 // ← الفحص الحاسم: الحالة قد تغيّرت
+    if(isIOS()){
+      $('#ish-txt').innerHTML = 'اضغط زرّ <b>المشاركة</b> <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v13"/><path d="M8 7l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg> بأسفل سفاري، ثمّ اختر <b>«إضافة إلى الشاشة الرئيسية»</b> — سيُفتح كتطبيق مستقلّ ويشتغل دون إنترنت.';
+      $('#ish-yes').textContent = 'OK';
+    }
+    __ishShownThisSession=true;
+    el.classList.add('show');
+  }, delay==null ? 1200 : delay);
+}
+$('#install-sheet') && $('#install-sheet').addEventListener('click', e=>{ if(e.target.id==='install-sheet'){ ishSnooze(1); closeInstallSheet(); } });
+$('#ish-no') && $('#ish-no').addEventListener('click', ()=>{ ishSnooze(2); closeInstallSheet(); });
 $('#ish-yes') && $('#ish-yes').addEventListener('click', async ()=>{
   if(deferredInstall){
     closeInstallSheet();
     deferredInstall.prompt();
     let out=null; try{ out=await deferredInstall.userChoice; }catch(e){}
     deferredInstall=null; refreshInstallUI();
-    if(out && out.outcome!=='accepted') ishSnooze(3);
+    if(out && out.outcome!=='accepted') ishSnooze(2);
     return;
   }
-  ishSnooze(7); closeInstallSheet();   // آيفون: التعليمات مقروءة
+  ishSnooze(2); closeInstallSheet();   // آيفون: التعليمات مقروءة
 });
-window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredInstall=e; refreshInstallUI(); maybeShowInstallSheet(); });
-window.addEventListener('load', ()=> setTimeout(maybeShowInstallSheet, 2500));
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredInstall=e; refreshInstallUI();
+  // إن لم تكن نافذة الوِرد ستظهر، اعرض بطاقة التثبيت بعد شاشة البداية
+  const qp=$('#quick-pop');
+  if(!(qp && qp.classList.contains('show'))) maybeShowInstallSheet(3200);
+});
+/* عند العودة إلى التطبيق: تذكير إن لم يُثبَّت بعد */
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) setTimeout(()=>{ try{ refreshInstallUI(); maybeShowInstallSheet(900); }catch(e){} }, 400); });
 window.addEventListener('appinstalled', ()=>{ deferredInstall=null; closeInstallSheet(); ishSnooze(3650); refreshInstallUI(); });
+$('#inst-row') && $('#inst-row').addEventListener('click', ()=>{
+  vibrate(8);
+  // ضغطة صريحة من المستخدم: تتجاوز أيّ تأجيل سابق
+  try{ localStorage.removeItem(ISH_KEY); }catch(e){}
+  __ishShownThisSession=false;
+  maybeShowInstallSheet(0);
+});
 $('#install-btn') && $('#install-btn').addEventListener('click', async ()=>{
   if(deferredInstall){
     deferredInstall.prompt();
