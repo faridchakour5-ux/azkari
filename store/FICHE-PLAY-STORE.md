@@ -65,7 +65,7 @@
 
 ### Politique de confidentialité
 ```
-https://salatee.netlify.app/privacy.html
+https://www.salatee.org/privacy.html
 ```
 
 ### Accès à l'application
@@ -98,7 +98,7 @@ https://salatee.netlify.app/privacy.html
 
 ## 4) COORDONNÉES (Fiche principale → Coordonnées)
 - E-mail : `faridchakour5@gmail.com`
-- Site web (facultatif) : `https://salatee.netlify.app`
+- Site web (facultatif) : `https://www.salatee.org`
 
 ---
 
