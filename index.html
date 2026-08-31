@@ -414,7 +414,13 @@
   .fiqh-body{padding:0 0 20px;}
   .fq-disc{margin:12px 16px 0; padding:12px 14px; border-radius:14px; background:var(--c-repeat-bg);
     color:var(--c-repeat); font-size:12.5px; line-height:1.85; font-weight:600;}
-  .fq-nav{display:flex; gap:8px; overflow-x:auto; padding:12px 16px 4px; scrollbar-width:none;}
+  .fq-cats{display:flex; gap:7px; overflow-x:auto; padding:12px 16px 0; scrollbar-width:none;}
+  .fq-cats::-webkit-scrollbar{display:none;}
+  .fq-cats button{flex:0 0 auto; border:0; font:inherit; font-size:13px; font-weight:800;
+    padding:8px 14px; border-radius:10px; background:var(--fill-2); color:var(--text-2); white-space:nowrap;}
+  .fq-cats button.on{background:var(--c-read-bg); color:var(--c-read);}
+  .fq-count{padding:8px 16px 0; font-size:12px; color:var(--text-3); font-weight:600;}
+  .fq-nav{display:flex; gap:8px; overflow-x:auto; padding:10px 16px 4px; scrollbar-width:none;}
   .fq-nav::-webkit-scrollbar{display:none;}
   .fq-nav button{flex:0 0 auto; border:0; font:inherit; font-size:13.5px; font-weight:800;
     padding:9px 14px; border-radius:999px; background:var(--fill-2); color:var(--text-2);
@@ -2223,19 +2229,32 @@ function fqBlock(b){
   return '';
 }
 
+let __fqCat='all';
 function renderFiqh(){
   const box=$('#fiqh-body'); if(!box) return;
   if(!window.FIQH){ box.innerHTML='<div class="search-hint">تعذّر تحميل صفحة الفقه — أعِد المحاولة.</div>'; return; }
-  const F=window.FIQH, cur=F[__fqCur] || F[0];
+  const F=window.FIQH;
+  const CATS=window.FIQH_CATS||[{id:'all',name:'الكلّ'}];
+  // الأبواب المعروضة حسب التصنيف المختار
+  const list = (__fqCat==='all') ? F.map((x,i)=>({x,i})) : F.map((x,i)=>({x,i})).filter(o=>o.x.cat===__fqCat);
+  if(!list.length){ __fqCat='all'; return renderFiqh(); }
+  if(!list.some(o=>o.i===__fqCur)) __fqCur=list[0].i;   // الباب الحالي خارج التصنيف
+  const cur=F[__fqCur];
   box.innerHTML =
     '<div class="fq-disc">هذه الصفحة عرضٌ تعليميّ مبسّط: يُذكر فيها <b>المتّفق عليه</b> بين الأئمّة الأربعة، ويُنبَّه على <b>مواضع الخلاف</b> صراحةً. وهي لا تُغني عن سؤال أهل العلم فيما أشكل عليك.</div>'+
-    '<div class="fq-nav">'+ F.map((x,i)=>
-      '<button data-i="'+i+'"'+(i===__fqCur?' class="on"':'')+'>'+x.ic+escapeHtml(x.t)+'</button>').join('') +'</div>'+
+    '<div class="fq-cats">'+ CATS.map(c=>
+      '<button data-c="'+c.id+'"'+(c.id===__fqCat?' class="on"':'')+'>'+escapeHtml(c.name)+'</button>').join('') +'</div>'+
+    '<div class="fq-count">'+AR(list.length)+' '+(list.length===1?'باب':'أبواب')+'</div>'+
+    '<div class="fq-nav">'+ list.map(o=>
+      '<button data-i="'+o.i+'"'+(o.i===__fqCur?' class="on"':'')+'>'+o.x.ic+escapeHtml(o.x.t)+'</button>').join('') +'</div>'+
     '<div class="fq-card">'+
       '<div class="fq-h">'+cur.ic+'<b>'+escapeHtml(cur.t)+'</b></div>'+
       '<div class="fq-sub">'+escapeHtml(cur.sub||'')+'</div>'+
       cur.blocks.map(fqBlock).join('')+
     '</div>';
+  box.querySelectorAll('.fq-cats button').forEach(btn=> btn.addEventListener('click', ()=>{
+    __fqCat=btn.dataset.c; vibrate(6); renderFiqh();
+  }));
   box.querySelectorAll('.fq-nav button').forEach(btn=> btn.addEventListener('click', ()=>{
     __fqCur=parseInt(btn.dataset.i); vibrate(6); renderFiqh();
     const t=$('#s-tasbih'); if(t) window.scrollTo({top:0, behavior:'smooth'});
