@@ -155,10 +155,11 @@
   #wird-mode-seg button:last-child, #listen-mode-seg button:last-child, #tasbih-mode-seg button:last-child{
     background:var(--c-read-bg); color:var(--c-read); opacity:.45;}
   /* الزرّ الأوسط (عند وجود ثلاثة) بلون التطبيق الأخضر */
-  #listen-mode-seg button:nth-child(2):not(:last-child){
+  #listen-mode-seg button:nth-child(2):not(:last-child),
+  #tasbih-mode-seg button:nth-child(2):not(:last-child){
     background:var(--accent-bg); color:var(--accent); opacity:.45;}
-  #listen-mode-seg button{font-size:14px; padding:11px 6px; gap:5px;}
-  #listen-mode-seg button .gh-ic{width:1em; height:1em;}
+  #listen-mode-seg button, #tasbih-mode-seg button{font-size:14px; padding:11px 6px; gap:5px;}
+  #listen-mode-seg button .gh-ic, #tasbih-mode-seg button .gh-ic{width:1em; height:1em;}
   #wird-mode-seg button.on, #listen-mode-seg button.on, #tasbih-mode-seg button.on{
     opacity:1; box-shadow:0 1px 5px rgba(0,0,0,.12);}
   /* ثنائي هادئ أنيق: أخضر مريمية للورد، أزرق رمادي ناعم للمصحف الكامل */
@@ -401,6 +402,100 @@
   .listen-sura.playing .ls-num{background:var(--accent); color:#fff;}
 
   /* تذكير الصلاة على النبي ﷺ (شريط داخل التطبيق) */
+  /* ===== صفحة الفقه ===== */
+  .fiqh-body{padding:0 0 20px;}
+  .fq-disc{margin:12px 16px 0; padding:12px 14px; border-radius:14px; background:var(--c-repeat-bg);
+    color:var(--c-repeat); font-size:12.5px; line-height:1.85; font-weight:600;}
+  .fq-nav{display:flex; gap:8px; overflow-x:auto; padding:12px 16px 4px; scrollbar-width:none;}
+  .fq-nav::-webkit-scrollbar{display:none;}
+  .fq-nav button{flex:0 0 auto; border:0; font:inherit; font-size:13.5px; font-weight:800;
+    padding:9px 14px; border-radius:999px; background:var(--fill-2); color:var(--text-2);
+    display:inline-flex; align-items:center; gap:6px; white-space:nowrap;}
+  .fq-nav button .gh-ic{width:1.1em; height:1.1em;}
+  .fq-nav button.on{background:var(--accent); color:#fff;}
+  .fq-card{margin:12px 16px 0; background:var(--card); border-radius:18px; padding:16px 15px; box-shadow:var(--shadow);}
+  .fq-h{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
+  .fq-h .gh-ic{color:var(--accent); width:1.5em; height:1.5em;}
+  .fq-h b{font-size:19px; font-weight:800;}
+  .fq-sub{font-size:13px; color:var(--text-2); margin-bottom:6px;}
+  .fq-bt{font-size:14.5px; font-weight:800; color:var(--accent); margin:16px 0 9px;
+    display:flex; align-items:center; gap:7px;}
+  .fq-bt::before{content:''; width:4px; height:15px; border-radius:2px; background:var(--accent); flex:0 0 auto;}
+
+  /* قائمة */
+  .fq-ul{margin:0; padding:0; list-style:none;}
+  .fq-ul li{position:relative; padding:7px 20px 7px 0; font-size:14.5px; line-height:1.8;}
+  .fq-ul li::before{content:''; position:absolute; right:6px; top:16px; width:6px; height:6px;
+    border-radius:50%; background:var(--accent);}
+  .fq-ul.warn li::before{background:var(--c-repeat);}
+
+  /* خطوات مرقّمة */
+  .fq-steps{margin:0; padding:0; list-style:none;}
+  .fq-step{display:flex; gap:11px; padding:10px 0;}
+  .fq-step + .fq-step{border-top:1px solid var(--sep);}
+  .fq-step .n{flex:0 0 26px; width:26px; height:26px; border-radius:50%; background:var(--fill-2);
+    color:var(--text-2); font-size:12.5px; font-weight:800; display:inline-flex;
+    align-items:center; justify-content:center; margin-top:2px;}
+  .fq-step .b{flex:1 1 auto;}
+  .fq-step .b i{display:block; font-style:normal; font-size:13px; color:var(--text-2); line-height:1.7; margin-top:2px;}
+  .fq-step .s{font-size:15px; font-weight:700;}
+  .fq-tag{font-size:11px; font-weight:800; padding:3px 8px; border-radius:999px; margin-inline-start:7px;
+    vertical-align:2px; white-space:nowrap;}
+  .fq-tag.f{background:var(--accent); color:#fff;}
+  .fq-tag.s{background:var(--fill-2); color:var(--text-2);}
+
+  /* خطاطة تسلسل */
+  .fq-flow{display:flex; flex-direction:column; gap:0;}
+  .fq-fn{display:flex; align-items:flex-start; gap:11px; background:var(--fill-2);
+    border-radius:13px; padding:11px 13px;}
+  .fq-fn .k{flex:0 0 26px; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff;
+    font-size:12.5px; font-weight:800; display:inline-flex; align-items:center; justify-content:center;}
+  .fq-fn .v b{display:block; font-size:15px; font-weight:800;}
+  .fq-fn .v span{display:block; font-size:12.5px; color:var(--text-2); line-height:1.7; margin-top:2px;}
+  .fq-arrow{display:flex; justify-content:center; padding:3px 0;}
+  .fq-arrow svg{width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:2.2;
+    stroke-linecap:round; stroke-linejoin:round; opacity:.55;}
+
+  /* شجرة القرار */
+  .fq-tree{display:flex; flex-direction:column; gap:10px;}
+  .fq-tn{background:var(--fill-2); border-radius:14px; padding:12px 13px; border-inline-start:4px solid var(--accent);}
+  .fq-tn .c{font-size:15px; font-weight:800;}
+  .fq-tn .e{font-size:12.5px; color:var(--text-3); margin-top:2px;}
+  .fq-tn .r{display:flex; align-items:flex-start; gap:7px; margin-top:9px; font-size:14px;
+    font-weight:700; color:var(--accent); line-height:1.7;}
+  .fq-tn .r svg{width:15px; height:15px; flex:0 0 auto; margin-top:4px; stroke:currentColor;
+    fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round;}
+
+  /* عمودان (يفطر / لا يفطر) */
+  .fq-cols{display:flex; gap:10px;}
+  .fq-col{flex:1 1 0; border-radius:14px; padding:12px 11px; background:var(--fill-2);}
+  .fq-col.bad{background:var(--c-repeat-bg);}
+  .fq-col.good{background:var(--accent-bg);}
+  .fq-col h4{margin:0 0 8px; font-size:14px; font-weight:800; text-align:center;}
+  .fq-col.bad h4{color:var(--c-repeat);}
+  .fq-col.good h4{color:var(--accent);}
+  .fq-col ul{margin:0; padding:0; list-style:none;}
+  .fq-col li{font-size:13px; line-height:1.75; padding:4px 0; border-top:1px solid var(--sep);}
+  .fq-col li:first-child{border-top:0;}
+
+  /* جدول */
+  .fq-tbl{width:100%; border-collapse:collapse; font-size:14px;}
+  .fq-tbl th{background:var(--fill-2); font-weight:800; font-size:13px; padding:9px 8px; text-align:center;}
+  .fq-tbl td{padding:9px 8px; text-align:center; border-top:1px solid var(--sep);}
+  .fq-tbl th:first-child, .fq-tbl td:first-child{text-align:start; font-weight:700;}
+
+  /* اختلاف المذاهب */
+  .fq-kh{background:var(--c-read-bg); border-radius:14px; padding:4px 13px;}
+  .fq-ki{padding:11px 0;}
+  .fq-ki + .fq-ki{border-top:1px solid rgba(128,128,128,.18);}
+  .fq-ki .q{font-size:14px; font-weight:800; color:var(--c-read); margin-bottom:3px;}
+  .fq-ki .a{font-size:13.5px; line-height:1.9; color:var(--text);}
+
+  /* تنبيه */
+  .fq-note{border-radius:14px; padding:12px 13px; font-size:13.5px; line-height:1.9;}
+  .fq-note.core{background:var(--accent-bg); color:var(--text); border-inline-start:4px solid var(--accent);}
+  .fq-note.warn{background:var(--c-repeat-bg); color:var(--text); border-inline-start:4px solid var(--c-repeat);}
+  .fq-note.info{background:var(--fill-2); color:var(--text-2); border-inline-start:4px solid var(--text-3);}
   /* ===== نافذة التذكير السريع ===== */
   .quick-pop{position:fixed; inset:0; z-index:130; display:none; align-items:center; justify-content:center;
     background:rgba(0,0,0,.5); opacity:0; transition:opacity .3s ease; padding:16px;}
@@ -909,7 +1004,8 @@
   <div class="head"><h1 id="tasbih-title">المسبحة</h1><div class="sub" id="tasbih-sub">اضغط في أي مكان للعدّ</div></div>
   <div class="seg" id="tasbih-mode-seg">
     <button data-t="tasbih" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="3.2" r="1.6"/><circle cx="12" cy="20.8" r="1.6"/><circle cx="3.2" cy="12" r="1.6"/><circle cx="20.8" cy="12" r="1.6"/></svg>المسبحة</button>
-    <button data-t="quiz"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5"/><path d="M12 17.5h.01"/><circle cx="12" cy="12" r="9"/></svg>الثقافة الإسلامية</button>
+    <button data-t="fiqh"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/><path d="M8 16h4"/></svg>الفقه</button>
+    <button data-t="quiz"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5"/><path d="M12 17.5h.01"/><circle cx="12" cy="12" r="9"/></svg>الثقافة</button>
   </div>
   <div class="tasbih-wrap" id="tasbih-wrap">
     <div class="chips" id="chips"></div>
@@ -936,6 +1032,7 @@
     <button class="reset" id="t-reset">تصفير العدّاد</button>
   </div>
   <div class="quiz-body" id="quiz-body" style="display:none"></div>
+  <div class="fiqh-body" id="fiqh-body" style="display:none"></div>
 </section>
 
 <!-- ===== الإعدادات ===== -->
@@ -2045,16 +2142,117 @@ function qzResult(){
   vibrate(pct>=0.7?[20,60,20]:8);
 }
 /* تبديل صفحة المسبحة بين العدّاد والاختبار */
+/* ==================== الفقه العملي ==================== */
+let __fqLoading=null, __fqCur=0;
+function loadFiqh(){
+  if(window.FIQH) return Promise.resolve(true);
+  if(__fqLoading) return __fqLoading;
+  __fqLoading=new Promise(res=>{
+    const s=document.createElement('script'); s.src='fiqh.js';
+    s.onload=()=>res(true); s.onerror=()=>res(false);
+    document.head.appendChild(s);
+  });
+  return __fqLoading;
+}
+const FQ_DOWN='<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>';
+const FQ_CHK ='<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+
+function fqBlock(b){
+  const T = b.t ? '<div class="fq-bt">'+escapeHtml(b.t)+'</div>' : '';
+  switch(b.k){
+    case 'list':
+      return T + (b.note ? '<div class="fq-note info" style="margin-bottom:10px">'+escapeHtml(b.note)+'</div>' : '')
+        + '<ul class="fq-ul'+(b.tone==='warn'?' warn':'')+'">'
+        + b.v.map(x=>'<li>'+escapeHtml(x)+'</li>').join('') + '</ul>';
+
+    case 'steps':
+      return T + '<div class="fq-steps">' + b.v.map((x,i)=>
+        '<div class="fq-step"><span class="n">'+AR(i+1)+'</span><span class="b">'+
+          '<span class="s">'+escapeHtml(x.s)+
+            (x.tag ? '<span class="fq-tag '+((x.tag==='فرض'||x.tag==='ركن')?'f':'s')+'">'+escapeHtml(x.tag)+'</span>' : '')+
+          '</span>'+
+          (x.d ? '<i>'+escapeHtml(x.d)+'</i>' : '')+
+        '</span></div>').join('') + '</div>';
+
+    case 'flow':
+      return T + '<div class="fq-flow">' + b.v.map((x,i)=>
+        (i ? '<div class="fq-arrow">'+FQ_DOWN+'</div>' : '') +
+        '<div class="fq-fn"><span class="k">'+AR(i+1)+'</span><span class="v">'+
+          '<b>'+escapeHtml(x.n)+'</b><span>'+escapeHtml(x.d||'')+'</span></span></div>'
+        ).join('') + '</div>';
+
+    case 'tree':
+      return T + '<div class="fq-tree">' + b.v.map(x=>
+        '<div class="fq-tn"><div class="c">'+escapeHtml(x.c)+'</div>'+
+          (x.e?'<div class="e">'+escapeHtml(x.e)+'</div>':'')+
+          '<div class="r">'+FQ_CHK+'<span>'+escapeHtml(x.r)+'</span></div></div>').join('') + '</div>';
+
+    case 'cols':
+      return T + '<div class="fq-cols">' + ['a','b'].map(k=>{
+        const c=b.v[k];
+        return '<div class="fq-col '+(c.tone||'')+'"><h4>'+escapeHtml(c.t)+'</h4><ul>'+
+          c.items.map(i=>'<li>'+escapeHtml(i)+'</li>').join('')+'</ul></div>';
+      }).join('') + '</div>';
+
+    case 'table':
+      return T + '<div style="overflow-x:auto"><table class="fq-tbl"><thead><tr>'+
+        b.v.head.map(h=>'<th>'+escapeHtml(h)+'</th>').join('')+'</tr></thead><tbody>'+
+        b.v.rows.map(r=>'<tr>'+r.map(c=>'<td>'+escapeHtml(c)+'</td>').join('')+'</tr>').join('')+
+        '</tbody></table></div>';
+
+    case 'khilaf':
+      return T + '<div class="fq-kh">' + b.v.map(x=>
+        '<div class="fq-ki"><div class="q">'+escapeHtml(x.q)+'</div><div class="a">'+escapeHtml(x.a)+'</div></div>'
+        ).join('') + '</div>';
+
+    case 'note':
+      return '<div class="fq-note '+(b.tone||'info')+'">'+escapeHtml(b.v)+'</div>';
+  }
+  return '';
+}
+
+function renderFiqh(){
+  const box=$('#fiqh-body'); if(!box) return;
+  if(!window.FIQH){ box.innerHTML='<div class="search-hint">تعذّر تحميل صفحة الفقه — أعِد المحاولة.</div>'; return; }
+  const F=window.FIQH, cur=F[__fqCur] || F[0];
+  box.innerHTML =
+    '<div class="fq-disc">هذه الصفحة عرضٌ تعليميّ مبسّط: يُذكر فيها <b>المتّفق عليه</b> بين الأئمّة الأربعة، ويُنبَّه على <b>مواضع الخلاف</b> صراحةً. وهي لا تُغني عن سؤال أهل العلم فيما أشكل عليك.</div>'+
+    '<div class="fq-nav">'+ F.map((x,i)=>
+      '<button data-i="'+i+'"'+(i===__fqCur?' class="on"':'')+'>'+x.ic+escapeHtml(x.t)+'</button>').join('') +'</div>'+
+    '<div class="fq-card">'+
+      '<div class="fq-h">'+cur.ic+'<b>'+escapeHtml(cur.t)+'</b></div>'+
+      '<div class="fq-sub">'+escapeHtml(cur.sub||'')+'</div>'+
+      cur.blocks.map(fqBlock).join('')+
+    '</div>';
+  box.querySelectorAll('.fq-nav button').forEach(btn=> btn.addEventListener('click', ()=>{
+    __fqCur=parseInt(btn.dataset.i); vibrate(6); renderFiqh();
+    const t=$('#s-tasbih'); if(t) window.scrollTo({top:0, behavior:'smooth'});
+  }));
+}
+async function openFiqh(){
+  const box=$('#fiqh-body'); if(!box) return;
+  if(window.FIQH) return renderFiqh();
+  box.innerHTML='<div class="search-hint">…جارٍ التحميل</div>';
+  await loadFiqh();
+  renderFiqh();
+}
+
 function applyTasbihMode(mode){
-  const quiz = mode==='quiz';
-  const w=$('#tasbih-wrap'), q=$('#quiz-body');
-  if(w) w.style.display = quiz ? 'none' : '';
+  const quiz = mode==='quiz', fiqh = mode==='fiqh', tas = !quiz && !fiqh;
+  const w=$('#tasbih-wrap'), q=$('#quiz-body'), f=$('#fiqh-body');
+  if(w) w.style.display = tas  ? '' : 'none';
   if(q) q.style.display = quiz ? '' : 'none';
+  if(f) f.style.display = fiqh ? '' : 'none';
   const t=$('#tasbih-title');
-  if(t){ t.textContent = quiz ? 'اختبار الثقافة الإسلامية' : 'المسبحة'; t.classList.toggle('long', quiz); }
-  if(!quiz) qzSub('اضغط في أي مكان للعدّ');
+  if(t){
+    t.textContent = quiz ? 'اختبار الثقافة الإسلامية' : fiqh ? 'الفقه العملي' : 'المسبحة';
+    t.classList.toggle('long', quiz);
+  }
+  if(tas)  qzSub('اضغط في أي مكان للعدّ');
+  if(fiqh) qzSub('كيف أتوضّأ · أصلّي · أغتسل · أصوم');
   $$('#tasbih-mode-seg button').forEach(b=> b.classList.toggle('on', b.dataset.t===mode));
   if(quiz) qzHome();
+  if(fiqh) openFiqh();
 }
 $$('#tasbih-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{ vibrate(6); applyTasbihMode(b.dataset.t); }));
 
