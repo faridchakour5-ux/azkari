@@ -847,7 +847,7 @@
   </div>
   <div id="wird-daily">
     <div class="progressbar"><i id="khatma-fill"></i></div>
-    <div class="wird-meta"><span id="khatma-page">صفحة 1 من 604</span><span id="khatma-pct">0%</span></div>
+    <div class="wird-meta"><span id="khatma-page">صفحة ١ من ٦٠٤</span><span id="khatma-pct">٠٪</span></div>
     <div class="wird-amount" id="wird-amount"></div>
   </div>
   <div id="mushaf-controls" style="display:none">
@@ -1186,7 +1186,7 @@
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
-const AR = n => String(n);
+const AR = n => String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[+d]);
 const todayKey = () => new Date().toISOString().slice(0,10);
 function vibrate(ms){ try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} }
 
@@ -1252,7 +1252,7 @@ const Q_MIN=0.8, Q_MAX=2.2;
 function applyQuranScale(){
   let q=parseFloat(settings.quranScale)||1; q=Math.min(Q_MAX,Math.max(Q_MIN,q));
   document.documentElement.style.setProperty('--qscale', q);
-  const pct=Math.round(q*100)+'%';
+  const pct=AR(Math.round(q*100))+'٪';
   const v=$('#q-zoom-val'); if(v) v.textContent=pct;
   const vf=$('#q-zoom-val-float'); if(vf) vf.textContent=pct;
 }
@@ -1939,7 +1939,7 @@ let __stories=null, __storyLoading=false, __storyPlaying=null;
 function fmtDur(sec){
   const s=Math.round(parseFloat(sec)||0); if(!s) return '';
   const h=Math.floor(s/3600), m=Math.floor((s%3600)/60);
-  return h? (AR(h)+':'+String(m).padStart(2,'0')) : (AR(m)+' د');
+  return h? (AR(h)+':'+AR(String(m).padStart(2,'0'))) : (AR(m)+' د');
 }
 async function fetchStories(){
   if(__stories) return __stories;
@@ -3199,8 +3199,8 @@ function renderWird(){
   // khatma progress by page
   const curPage = pos>=N ? 604 : parseInt(WIRD.a[pos].p);
   $('#khatma-fill').style.width=(pos/N*100)+'%';
-  $('#khatma-page').textContent='صفحة '+curPage+' من 604';
-  $('#khatma-pct').textContent=Math.round(pos/N*100)+'%';
+  $('#khatma-page').textContent='صفحة '+AR(curPage)+' من '+AR(604);
+  $('#khatma-pct').textContent=AR(Math.round(pos/N*100))+'٪';
 
   if(pos>=N){
     $('#wird-body').innerHTML='<div class="wird-card"><div class="khatma-done">ختمتَ القرآن كاملاً <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.4A4 4 0 0 1 12 8a4 4 0 0 1 7 2.6C19 15.4 12 20 12 20z"/></svg><br>تقبّل الله. اضغط للبدء من جديد.</div></div>';
@@ -3672,7 +3672,7 @@ function refreshGeo(force, cb){
   }, ()=>{ __geoBusy=false; cb && cb(false); },
      {enableHighAccuracy:false, timeout:12000, maximumAge:0});
 }
-function fmtTime(d){ return d.toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+function fmtTime(d){ return AR(d.toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit',hour12:true})); }
 
 function computePrayers(lat,lng,date){
   try{
@@ -3838,7 +3838,7 @@ function backupStatusHtml(){
   let posTxt;
   if(window.__wirdReady && WIRD && WIRD.__riwaya===settings.riwaya){
     const N=WIRD.a.length; const pg = pos>=N?604:parseInt(WIRD.a[pos].p);
-    posTxt = pos>=N ? 'أتممت الختمة' : ('صفحة '+pg+' من 604 ('+Math.round(pos/N*100)+'٪)');
+    posTxt = pos>=N ? 'أتممت الختمة' : ('صفحة '+AR(pg)+' من '+AR(604)+' ('+AR(Math.round(pos/N*100))+'٪)');
   } else { posTxt = pos>0 ? ('عند الآية رقم '+pos+' — افتح الوِرد لرؤية الصفحة') : 'من البداية'; }
   return FLAME_IC+' السلسلة: <b>'+(s.count||0)+'</b> يوم متتابع<br>'+
          BOOK_IC+' موضع الوِرد ('+(settings.riwaya==='warsh'?'ورش':'حفص')+'): <b>'+posTxt+'</b><br>'+
