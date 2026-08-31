@@ -35,7 +35,7 @@
     --bg:#EFE6D4; --group:#EFE6D4; --card:#F6EDDB; --card-2:#F6EDDB;
     --text:#3A352E; --text-2:rgba(58,53,46,.58); --text-3:rgba(58,53,46,.3);
     --sep:rgba(58,53,46,.16); --fill:rgba(120,105,80,.18); --fill-2:rgba(120,105,80,.12);
-    --blur:rgba(239,230,212,.82); --accent:#2F9E44; --accent-2:#28893B; --accent-bg:rgba(47,158,68,.15);
+    --blur:rgba(239,230,212,.82); --accent:#2F9E44; --accent-2:#28893B; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
     /* design tokens: élévation, lignes, tab bar */
     --line:rgba(58,53,46,.08);
     --shadow-1:0 1px 2px rgba(58,53,46,.05), 0 4px 14px rgba(58,53,46,.05);
@@ -50,37 +50,37 @@
     --bg:#F1E8D6; --group:#F1E8D6; --card:#F7EFDF; --card-2:#F7EFDF;
     --text:#3E382E; --text-2:rgba(62,56,46,.58); --text-3:rgba(62,56,46,.3);
     --sep:rgba(62,56,46,.16); --fill:rgba(130,112,82,.16); --fill-2:rgba(130,112,82,.1);
-    --blur:rgba(241,232,214,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15);
+    --blur:rgba(241,232,214,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
   }
   :root[data-bg="peach"]{
     --bg:#F5C7AF; --group:#F5C7AF; --card:#F9D6C2; --card-2:#F9D6C2;
     --text:#4A352B; --text-2:rgba(74,53,43,.58); --text-3:rgba(74,53,43,.3);
     --sep:rgba(74,53,43,.16); --fill:rgba(175,110,80,.18); --fill-2:rgba(175,110,80,.12);
-    --blur:rgba(245,199,175,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15);
+    --blur:rgba(245,199,175,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
   }
   :root[data-bg="greige"]{
     --bg:#E4DACB; --group:#E4DACB; --card:#ECE4D5; --card-2:#ECE4D5;
     --text:#3C372F; --text-2:rgba(60,55,47,.58); --text-3:rgba(60,55,47,.3);
     --sep:rgba(60,55,47,.16); --fill:rgba(120,105,82,.16); --fill-2:rgba(120,105,82,.1);
-    --blur:rgba(228,218,203,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15);
+    --blur:rgba(228,218,203,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
   }
   :root[data-bg="taupe"]{
     --bg:#D8CCBE; --group:#D8CCBE; --card:#E1D7C9; --card-2:#E1D7C9;
     --text:#3A352D; --text-2:rgba(58,53,45,.58); --text-3:rgba(58,53,45,.3);
     --sep:rgba(58,53,45,.16); --fill:rgba(110,96,76,.16); --fill-2:rgba(110,96,76,.1);
-    --blur:rgba(216,204,190,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15);
+    --blur:rgba(216,204,190,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
   }
   :root[data-bg="white"]{
     --bg:#F2F2F7; --group:#F2F2F7; --card:#FAFAF8; --card-2:#FAFAF8;
     --text:#2B2B2B; --text-2:rgba(43,43,43,.55); --text-3:rgba(43,43,43,.3);
     --sep:rgba(43,43,43,.16); --fill:rgba(120,120,128,.16); --fill-2:rgba(120,120,128,.1);
-    --blur:rgba(242,242,247,.82); --accent:#2E9E4F; --accent-bg:rgba(46,158,79,.15);
+    --blur:rgba(242,242,247,.82); --accent:#2E9E4F; --accent-bg:rgba(46,158,79,.15); --accent-txt:#1E7A3B;
   }
   :root[data-bg="dark"]{
     --bg:#121212; --group:#121212; --card:#1E1E1E; --card-2:#262626;
     --text:#E6E1D6; --text-2:rgba(230,225,214,.6); --text-3:rgba(230,225,214,.3);
     --sep:rgba(230,225,214,.14); --fill:rgba(200,200,200,.12); --fill-2:rgba(200,200,200,.07);
-    --blur:rgba(18,18,18,.82); --accent:#34C77B; --accent-bg:rgba(52,199,123,.16);
+    --blur:rgba(18,18,18,.82); --accent:#34C77B; --accent-bg:rgba(52,199,123,.16); --accent-txt:#34C77B;
     --line:rgba(255,255,255,.07);
     --shadow-1:0 1px 3px rgba(0,0,0,.45), 0 5px 16px rgba(0,0,0,.35);
     --shadow-2:0 4px 14px rgba(0,0,0,.5);
@@ -150,14 +150,22 @@
     flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;
     padding:11px 12px; font-weight:800;}
   #wird-mode-seg button .gh-ic, #listen-mode-seg button .gh-ic, #tasbih-mode-seg button .gh-ic{margin:0;}
+  /* غير المفعَّل: خلفية محايدة ولونٌ كاملُ الوضوح — الشفافية كانت تُذيب النصّ في الخلفية */
   #wird-mode-seg button:first-child, #listen-mode-seg button:first-child, #tasbih-mode-seg button:first-child{
-    background:var(--c-repeat-bg); color:var(--c-repeat); opacity:.45;}
+    background:var(--fill-2); color:var(--c-repeat); opacity:1;}
   #wird-mode-seg button:last-child, #listen-mode-seg button:last-child, #tasbih-mode-seg button:last-child{
-    background:var(--c-read-bg); color:var(--c-read); opacity:.45;}
-  /* الزرّ الأوسط (عند وجود ثلاثة) بلون التطبيق الأخضر */
+    background:var(--fill-2); color:var(--c-read); opacity:1;}
   #listen-mode-seg button:nth-child(2):not(:last-child),
   #tasbih-mode-seg button:nth-child(2):not(:last-child){
-    background:var(--accent-bg); color:var(--accent); opacity:.45;}
+    background:var(--fill-2); color:var(--accent-txt); opacity:1;}
+  /* المفعَّل: خلفية بلونه + ظلّ */
+  #wird-mode-seg button:first-child.on, #listen-mode-seg button:first-child.on, #tasbih-mode-seg button:first-child.on{
+    background:var(--c-repeat-bg);}
+  #wird-mode-seg button:last-child.on, #listen-mode-seg button:last-child.on, #tasbih-mode-seg button:last-child.on{
+    background:var(--c-read-bg);}
+  #listen-mode-seg button:nth-child(2):not(:last-child).on,
+  #tasbih-mode-seg button:nth-child(2):not(:last-child).on{
+    background:var(--accent-bg); color:var(--accent);}
   #listen-mode-seg button, #tasbih-mode-seg button{font-size:14px; padding:11px 6px; gap:5px;}
   #listen-mode-seg button .gh-ic, #tasbih-mode-seg button .gh-ic{width:1em; height:1em;}
   #wird-mode-seg button.on, #listen-mode-seg button.on, #tasbih-mode-seg button.on{
