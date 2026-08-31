@@ -3672,7 +3672,11 @@ function refreshGeo(force, cb){
   }, ()=>{ __geoBusy=false; cb && cb(false); },
      {enableHighAccuracy:false, timeout:12000, maximumAge:0});
 }
-function fmtTime(d){ return d.toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+function fmtTime(d){
+  // 'u-nu-latn' يفرض الأرقام اللاتينية مهما كانت إعدادات الجهاز
+  try{ return d.toLocaleTimeString('ar-MA-u-nu-latn',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+  catch(e){ return d.toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+}
 
 function computePrayers(lat,lng,date){
   try{
