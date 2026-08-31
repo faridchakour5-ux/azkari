@@ -1234,8 +1234,20 @@ function applyBg(){
   const mc = $('meta[name=theme-color]'); if(mc) mc.setAttribute('content', BG_COLORS[b]||'#EFE6D4');
 }
 function applyFont(){ document.documentElement.style.setProperty('--scale', settings.font); }
+let __lastMaghribi=null;
 function applyHafsFont(){
   const mag = (settings.hafsFont||'maghribi')==='maghribi';
+  // تغيّر الخطّ ⇒ تغيّر شكل التنوين المطلوب ⇒ يلزم إعادة بناء المصحف
+  try{
+    const now = qIsMaghribi();
+    if(__lastMaghribi!==null && __lastMaghribi!==now){
+      const body=$('#wird-body');
+      if(body && body.dataset.mode==='mushaf'){ __mushafRenderedRiwaya=null; renderMushaf(true); }
+      else if(typeof renderWird==='function' && WIRD){ try{ renderWird(); }catch(e){} }
+      try{ renderAzkar(); }catch(e){}
+    }
+    __lastMaghribi=now;
+  }catch(e){}
   document.body.classList.toggle('qmaghribi', mag);
   // حفص + نسخ ⇐ خط «نسخ نوتو» بتشكيل أخضر
   document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh' && !mag);
@@ -1359,7 +1371,7 @@ function renderAzkar(){
     const done = prog[pid]||0;
     const isDone = done>=d.count;
     if(isDone) doneCount++;
-    const text = d.quran ? (settings.riwaya==='warsh'? d.warsh : d.hafs) : d.text;
+    const text = d.quran ? qFix(settings.riwaya==='warsh'? d.warsh : d.hafs) : d.text;
 
     const card = document.createElement('div');
     card.className = 'card'+(d.quran?' quran':'')+(isDone?' done':'');
@@ -1856,6 +1868,21 @@ function buildSuraSelect(){
   __suraBuiltRiwaya=settings.riwaya;
   sel.onchange=()=>{ settings.mushafSura=parseInt(sel.value)||0; saveSettings(); scrollToSura(settings.mushafSura, true); };
 }
+/* ===== تصحيح رسم التنوين المُدغَم مع الخطّ المغربي =====
+   نصّ المصحف يستعمل ترميز مجمع الملك فهد: U+0657 و U+065E و U+0656
+   للتنوين المُدغَم (المائل). خطّ حفص يرسمها تنوينًا صحيحًا، أمّا الخطّ المغربي
+   فيرسمها بمعناها الحرفيّ في يونيكود (شرطة/ألف صغيرة) فيختفي التنوين.
+   لذلك نستبدلها — عند العرض بالخطّ المغربي فقط — بأشكال التنوين القياسية.
+   والاستبدال حرفٌ بحرف فلا يتغيّر طول النصّ، ولا تُمَسّ بيانات المصحف إطلاقًا. */
+const QTNW = { '\u0656':'\u064D', '\u0657':'\u064B', '\u065E':'\u064C' };
+function qIsMaghribi(){
+  return settings.riwaya==='warsh' || (settings.hafsFont||'maghribi')==='maghribi';
+}
+function qFix(t){
+  if(t==null) return '';
+  return qIsMaghribi() ? String(t).replace(/[\u0656\u0657\u065E]/g, m=>QTNW[m]) : String(t);
+}
+
 const BASMALA = {
   hafs:  'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ',
   warsh: 'بِسْمِ اِ۬للَّهِ اِ۬لرَّحْمَٰنِ اِ۬لرَّحِيمِ'
@@ -1913,7 +1940,7 @@ function buildMushaf(body){
       const b=basmalaHtml(si); if(b) parts.push(b);
     }
     if(!textOpen){ parts.push('<div class="wird-text">'); textOpen=true; }
-    parts.push('<span class="aya-t" data-tai="'+i+'">'+a.t+'</span><span class="wird-num" data-ai="'+i+'">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
+    parts.push('<span class="aya-t" data-tai="'+i+'">'+qFix(a.t)+'</span><span class="wird-num" data-ai="'+i+'">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
   }
   if(textOpen) parts.push('</div>');
   if(pgOpen) parts.push('</div>');
@@ -2311,7 +2338,7 @@ async function openTafsir(ai){
   const si=suraOf(ai), no=ai-WIRD.sur[si].i+1;
   $('#tafsir-title').textContent='سورة '+WIRD.sur[si].n+' — آية '+AR(no);
   ov.classList.add('show'); body.scrollTop=0;
-  const aya='<div class="t-aya">'+WIRD.a[ai].t+'</div>';
+  const aya='<div class="t-aya">'+qFix(WIRD.a[ai].t)+'</div>';
   body.innerHTML=aya+'<div class="t-note">…جارٍ تحميل التفسير</div>';
   const ok=await loadTafsir();
   if(!ov.classList.contains('show')) return;           // أُغلقت أثناء التحميل
@@ -2624,7 +2651,7 @@ function runQuranSearch(q){
       if(hits.length){
         html += '<div class="search-hint" style="text-align:right; padding:10px 20px 4px;">آيات ('+hits.length+(hits.length>=40?'+':'')+')</div>';
         hits.forEach(h=>{
-          const si=suraOf(h.i), t=WIRD.a[h.i].t, mi=h.m.index, ml=h.m[0].length;
+          const si=suraOf(h.i), t=qFix(WIRD.a[h.i].t), mi=h.m.index, ml=h.m[0].length;
           const snippet = escapeHtml(t.slice(0,mi))+'<mark>'+escapeHtml(t.slice(mi,mi+ml))+'</mark>'+escapeHtml(t.slice(mi+ml));
           html += '<button type="button" class="search-result" data-jump-aya="'+h.i+'"><span class="sr-sura">سورة '+escapeHtml(WIRD.sur[si].n)+' — آية '+AR(h.i-WIRD.sur[si].i+1)+'</span><span class="sr-txt">'+snippet+'</span></button>';
         });
@@ -3234,7 +3261,7 @@ function renderWird(){
     const atSuraStart = (i===WIRD.sur[sura].i);
     html+='<div class="wird-sura">'+suraOrn(sura)+'</div>'+(atSuraStart?basmalaHtml(sura):'')+'<div class="wird-text">';
     while(i<e && suraOf(i)===sura){
-      html+='<span class="aya-t" data-tai="'+i+'">'+WIRD.a[i].t+'</span><span class="wird-num">۝'+ayaNoOf(i)+'</span> ';
+      html+='<span class="aya-t" data-tai="'+i+'">'+qFix(WIRD.a[i].t)+'</span><span class="wird-num">۝'+ayaNoOf(i)+'</span> ';
       i++;
     }
     html+='</div>';
@@ -3329,7 +3356,7 @@ function quarterPage(){
   const suraEnd=(si+1<WIRD.sur.length)? WIRD.sur[si+1].i : WIRD.a.length;
   if(e>suraEnd) e=suraEnd;
   if(s>=e) e=s+1;
-  const ayat=[]; for(let i=s;i<e;i++) ayat.push({ i, t:WIRD.a[i].t, no:i-WIRD.sur[si].i+1 });
+  const ayat=[]; for(let i=s;i<e;i++) ayat.push({ i, t:qFix(WIRD.a[i].t), no:i-WIRD.sur[si].i+1 });
   st.pg=pg; qpSave(st);
   return { pg, si, name:WIRD.sur[si].n, ayat, from:s };
 }
