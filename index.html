@@ -1880,7 +1880,12 @@ function qIsMaghribi(){
 }
 function qFix(t){
   if(t==null) return '';
-  return qIsMaghribi() ? String(t).replace(/[\u0656\u0657\u065E]/g, m=>QTNW[m]) : String(t);
+  let x = String(t);
+  if(qIsMaghribi()) x = x.replace(/[\u0656\u0657\u065E]/g, m=>QTNW[m]);
+  // فراغٌ مزدوج زائد في أربعة مواضع من نصّ ورش (النساء 44، طه 86، النور 36 و42)
+  // يُدمَج عند العرض فقط — ولا يُمَسّ حرفٌ ولا علامة، والملفّ على القرص كما هو.
+  x = x.replace(/ {2,}/g, ' ');
+  return x;
 }
 
 const BASMALA = {
@@ -2645,7 +2650,7 @@ function runQuranSearch(q){
     if(rx){
       const hits=[];
       for(let i=0;i<WIRD.a.length;i++){
-        const m=rx.exec(WIRD.a[i].t);
+        const m=rx.exec(qFix(WIRD.a[i].t));
         if(m){ hits.push({i, m}); if(hits.length>=40) break; }
       }
       if(hits.length){
