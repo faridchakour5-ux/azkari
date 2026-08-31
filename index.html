@@ -1001,13 +1001,13 @@
 
 <!-- ===== المسبحة ===== -->
 <section id="s-tasbih" class="screen">
-  <div class="head"><h1 id="tasbih-title">المسبحة</h1><div class="sub" id="tasbih-sub">اضغط في أي مكان للعدّ</div></div>
+  <div class="head"><h1 id="tasbih-title">الفقه العملي</h1><div class="sub" id="tasbih-sub">كيف أتوضّأ · أصلّي · أغتسل · أصوم</div></div>
   <div class="seg" id="tasbih-mode-seg">
-    <button data-t="tasbih" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="3.2" r="1.6"/><circle cx="12" cy="20.8" r="1.6"/><circle cx="3.2" cy="12" r="1.6"/><circle cx="20.8" cy="12" r="1.6"/></svg>المسبحة</button>
-    <button data-t="fiqh"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/><path d="M8 16h4"/></svg>الفقه</button>
+    <button data-t="fiqh" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/><path d="M8 16h4"/></svg>الفقه</button>
+    <button data-t="tasbih"><svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="3.2" r="1.6"/><circle cx="12" cy="20.8" r="1.6"/><circle cx="3.2" cy="12" r="1.6"/><circle cx="20.8" cy="12" r="1.6"/></svg>المسبحة</button>
     <button data-t="quiz"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5"/><path d="M12 17.5h.01"/><circle cx="12" cy="12" r="9"/></svg>الثقافة</button>
   </div>
-  <div class="tasbih-wrap" id="tasbih-wrap">
+  <div class="tasbih-wrap" id="tasbih-wrap" style="display:none">
     <div class="chips" id="chips"></div>
     <div class="counter" id="counter">
       <svg viewBox="0 0 120 120">
@@ -1032,7 +1032,7 @@
     <button class="reset" id="t-reset">تصفير العدّاد</button>
   </div>
   <div class="quiz-body" id="quiz-body" style="display:none"></div>
-  <div class="fiqh-body" id="fiqh-body" style="display:none"></div>
+  <div class="fiqh-body" id="fiqh-body"></div>
 </section>
 
 <!-- ===== الإعدادات ===== -->
@@ -1163,8 +1163,8 @@
     <span>الاستماع</span>
   </button>
   <button class="tab" data-s="s-tasbih">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4" fill="currentColor" stroke="none"/></svg>
-    <span>المسبحة</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/><path d="M8 16h4"/></svg>
+    <span>الفقه</span>
   </button>
   <button class="tab" data-s="s-settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 8.3 19a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H2a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 3.6 8.3a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H8a1.6 1.6 0 0 0 1-1.5V2a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V8a1.6 1.6 0 0 0 1.5 1H22a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
@@ -1711,6 +1711,10 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   if(t.dataset.s==='s-wird') openWird();
   if(t.dataset.s==='s-listen') openListen();
   if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} }
+  if(t.dataset.s==='s-tasbih'){
+    const on=document.querySelector('#tasbih-mode-seg button.on');
+    if(on && on.dataset.t==='fiqh'){ try{ openFiqh(); }catch(e){} }
+  }
   if(t.dataset.s!=='s-wird'){ try{ stopAutoRead(); }catch(e){} }
   try{ renderFollowPill(); renderAutoReadPill(); }catch(e){}
 }));
