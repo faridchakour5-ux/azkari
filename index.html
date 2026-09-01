@@ -1320,6 +1320,7 @@ function saveSettings(){ store.set('az_settings', settings); }
 
 /* ---------- AZKAR screen ---------- */
 const CATS = [
+  {id:'fadl',     name:'فضل الذكر',  title:'فضل الذكر'},
   {id:'morning',  name:'الصباح',    title:'أذكار الصباح'},
   {id:'evening',  name:'المساء',    title:'أذكار المساء'},
   {id:'sleep',    name:'النوم',     title:'أذكار النوم'},
@@ -1327,10 +1328,9 @@ const CATS = [
   {id:'istiqama', name:'الاستقامة', title:'أدعية الاستقامة'},
   {id:'travel',   name:'السفر',     title:'أذكار السفر'},
   {id:'riding',   name:'الركوب',    title:'أذكار الركوب'},
-  {id:'fadl',     name:'فضل الذكر',  title:'فضل الذكر'},
 ];
 const catMeta = id => CATS.find(c=>c.id===id) || CATS[0];
-let currentTab = (new Date().getHours()>=4 && new Date().getHours()<16) ? 'morning':'evening';
+let currentTab = 'fadl';   // الصفحة الأولى عند الفتح: فضل الذكر
 
 function buildCats(){
   const seg=$('#time-seg'); seg.innerHTML='';
@@ -3892,6 +3892,8 @@ function renderPrayers(){
   autoTimeByPrayer(pt);
 }
 function autoTimeByPrayer(pt){
+  // لا نُبدّل التبويب إلا إذا كان المستخدم في الصباح أو المساء أصلًا
+  if(currentTab!=='morning' && currentTab!=='evening') return;
   try{ const now=new Date(); const isMorning = now>=pt.fajr && now<pt.asr;
     const want=isMorning?'morning':'evening';
     if(currentTab!==want && !window.__userPickedTime){ currentTab=want; $$('#time-seg button').forEach(b=>b.classList.toggle('on',b.dataset.t===want)); renderAzkar(); }
