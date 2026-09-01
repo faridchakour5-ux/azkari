@@ -1,5 +1,5 @@
-/* صلاتي — service worker v153 */
-const CACHE = 'azkari-v155';
+/* صلاتي — service worker v156 */
+const CACHE = 'azkari-v156';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   './wird_warsh.js',
   './quiz.js',
   './fiqh.js',
+  './fadl.js',
   './manifest.json',
   './fonts/ui-400.woff2',
   './fonts/ui-600.woff2',
@@ -35,6 +36,11 @@ self.addEventListener('install', e => {
     caches.open(CACHE)
       .then(c => c.addAll(ASSETS))
   );
+});
+
+/* لا نُفعّل skipWaiting تلقائيًّا؛ ننتظر طلب المستخدم من شريط التحديث */
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'skipWaiting') self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {

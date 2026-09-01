@@ -427,6 +427,7 @@
     display:inline-flex; align-items:center; gap:6px; white-space:nowrap;}
   .fq-nav button .gh-ic{width:1.1em; height:1.1em;}
   .fq-nav button.on{background:var(--accent); color:#fff;}
+  .fq-card.az-fadl{margin:4px 0 0;}
   .fq-card{margin:12px 16px 0; background:var(--card); border-radius:18px; padding:16px 15px; box-shadow:var(--shadow);}
   .fq-h{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
   .fq-h .gh-ic{color:var(--accent); width:1.5em; height:1.5em;}
@@ -549,6 +550,17 @@
   .quick-pop #qp-share{background:#25D366; color:#fff; flex:0 0 42%; box-shadow:0 2px 9px rgba(37,211,102,.3);}
   .quick-pop #qp-share svg{width:18px; height:18px; fill:#fff; stroke:none;}
   /* تذكير دائم بتثبيت التطبيق (يظهر ما دام غير مثبَّت) */
+  /* شريط التحديث: يظهر حين تصل نسخةٌ جديدة، ولا يُعيد التحميل إلا بضغط المستخدم */
+  .upd-bar{display:none; position:fixed; z-index:60; inset-inline:12px;
+    bottom:calc(64px + env(safe-area-inset-bottom)); align-items:center; gap:10px;
+    padding:12px 14px; border-radius:15px; background:var(--c-read); color:#fff;
+    font-size:14.5px; font-weight:800; box-shadow:0 4px 16px rgba(21,83,204,.35);}
+  .upd-bar.show{display:flex;}
+  .upd-bar .gh-ic{width:1.3em; height:1.3em; flex:0 0 auto; color:#fff;}
+  .upd-bar .ub-t{flex:1 1 auto;}
+  .upd-bar .ub-t small{display:block; font-size:12px; font-weight:600; opacity:.9; margin-top:2px;}
+  .upd-bar .ub-go{font-size:12.5px; font-weight:800; color:var(--c-read); background:#fff;
+    padding:6px 13px; border-radius:999px; white-space:nowrap;}
   .inst-row{display:none; align-items:center; gap:10px; margin:10px 16px 0; padding:12px 14px;
     background:var(--accent); color:#fff; border-radius:15px; font-size:14.5px; font-weight:800;
     box-shadow:0 2px 10px rgba(47,158,68,.3);}
@@ -1163,6 +1175,11 @@
 </section>
 
 <!-- ===== Tab bar ===== -->
+<div class="upd-bar" id="upd-bar" role="button" tabindex="0">
+  <svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 11.5A8 8 0 1 1 17.6 6"/><path d="M20 4v5h-5"/></svg>
+  <span class="ub-t">تحديثٌ جديد جاهز<small>اضغط لتطبيقه الآن</small></span>
+  <span class="ub-go">حدِّث</span>
+</div>
 <nav class="tabbar">
   <button class="tab on" data-s="s-azkar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>
@@ -1310,6 +1327,7 @@ const CATS = [
   {id:'istiqama', name:'الاستقامة', title:'أدعية الاستقامة'},
   {id:'travel',   name:'السفر',     title:'أذكار السفر'},
   {id:'riding',   name:'الركوب',    title:'أذكار الركوب'},
+  {id:'fadl',     name:'فضل الذكر',  title:'فضل الذكر'},
 ];
 const catMeta = id => CATS.find(c=>c.id===id) || CATS[0];
 let currentTab = (new Date().getHours()>=4 && new Date().getHours()<16) ? 'morning':'evening';
@@ -1353,7 +1371,40 @@ function azkarList(cat){
   return list;
 }
 
+/* ---------- فضل الذكر: صفحةٌ بخطاطات داخل تبويب الأذكار ---------- */
+let __fadlLoading=null;
+function loadFadl(){
+  if(window.FADL) return Promise.resolve(true);
+  if(__fadlLoading) return __fadlLoading;
+  __fadlLoading=new Promise(res=>{
+    const s=document.createElement('script'); s.src='fadl.js';
+    s.onload=()=>res(true); s.onerror=()=>res(false);
+    document.head.appendChild(s);
+  });
+  return __fadlLoading;
+}
+function renderFadl(){
+  const wrap=$('#az-list'); if(!wrap) return;
+  $('#az-title').textContent='فضل الذكر';
+  $('#az-source').textContent='وأثرُه في حياتك اليوميّة';
+  $('#az-scope').style.display='none';
+  $('.progressbar').style.display='none';
+  $('.progresslabel').style.display='none';
+  if(!window.FADL){
+    wrap.innerHTML='<div class="search-hint">جارٍ التحميل…</div>';
+    loadFadl().then(ok=>{
+      if(currentTab!=='fadl') return;
+      if(ok) renderFadl();
+      else wrap.innerHTML='<div class="search-hint">تعذّر التحميل — أعِد المحاولة.</div>';
+    });
+    return;
+  }
+  wrap.innerHTML='<div class="fq-card az-fadl">'+window.FADL.map(fqBlock).join('')+'</div>';
+}
+
 function renderAzkar(){
+  if(currentTab==='fadl') return renderFadl();
+  $('.progressbar').style.display=''; $('.progresslabel').style.display='';
   const list = azkarList(currentTab);
   const prog = progressState();
   const wrap = $('#az-list'); wrap.innerHTML='';
@@ -4044,16 +4095,40 @@ $('#install-btn') && $('#install-btn').addEventListener('click', async ()=>{
 
 
 /* service worker: تحديث تلقائي كامل — لا حاجة لأيّ تحديث يدوي من المستخدم */
+let __swWaiting=null, __updWanted=false;
+function showUpdBar(w){
+  __swWaiting=w;
+  const b=$('#upd-bar'); if(b) b.classList.add('show');
+}
 if('serviceWorker' in navigator){
+  // لا نُعيد التحميل تلقائيًّا — كان ذلك يقطع الاستماع ويُرجع التطبيق إلى البداية.
+  // بدلًا منه: شريطٌ صغير يظهر للمستخدم فيحدّث متى شاء.
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    if(__updWanted){ __updWanted=false; location.reload(); }
+  });
+  const ub=$('#upd-bar');
+  if(ub) ub.addEventListener('click', ()=>{
+    ub.classList.remove('show');
+    if(!__swWaiting){ location.reload(); return; }
+    __updWanted=true;
+    try{ __swWaiting.postMessage({type:'skipWaiting'}); }catch(e){}
+    setTimeout(()=>{ if(__updWanted){ __updWanted=false; location.reload(); } }, 2000);
+  });
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('sw.js').then(reg=>{
+      // نسخةٌ جاهزةٌ تنتظر من جلسةٍ سابقة
+      if(reg.waiting && navigator.serviceWorker.controller) showUpdBar(reg.waiting);
+      reg.addEventListener('updatefound', ()=>{
+        const w=reg.installing; if(!w) return;
+        w.addEventListener('statechange', ()=>{
+          if(w.state==='installed' && navigator.serviceWorker.controller) showUpdBar(w);
+        });
+      });
       // تحقّق فوري من وجود نسخة أحدث، ثمّ كل 30 دقيقة، وكلّما عاد المستخدم للتطبيق
       reg.update().catch(()=>{});
       setInterval(()=> reg.update().catch(()=>{}), 30*60*1000);
       document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) reg.update().catch(()=>{}); });
     }).catch(()=>{});
-    // لا نُعيد تحميل الصفحة تلقائيًّا عند وصول نسخة جديدة — كان ذلك يقطع الاستماع
-    // ويُرجع التطبيق إلى البداية. تُطبَّق النسخة الجديدة عند فتح التطبيق في المرّة القادمة.
   });
 }
 </script>
