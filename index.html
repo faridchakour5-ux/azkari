@@ -782,6 +782,8 @@
   .duat-pick .dp-nm{flex:1 1 auto;}
   .duat-pick .chev{color:var(--text-3); font-size:15px;}
   .duat-pick:active{transform:scale(.98);}
+  .story-item.bad{opacity:.55;}
+  .story-item.bad .st-du{color:var(--danger,#C0392B); font-weight:800;}
   .st-open{border:0; background:var(--fill-2); color:var(--c-read); border-radius:9px;
     padding:5px 9px; font:inherit; font-size:11.5px; font-weight:800; flex:0 0 auto;}
   /* قصص الأنبياء (بثّ من أرشيف الإنترنت) */
@@ -2402,51 +2404,101 @@ function cleanTitle(t){
   const n=(ar.match(/[؀-ۿ]/g)||[]).length;
   return n>=8 ? ar : s;
 }
+/* تمييز التلاوة من الخطبة: المطلوب هنا الخطب والدروس لا تلاوة القرآن */
+const RE_KHUTBA=/(خطب|درس|دروس|محاضر|تفسير|شرح|موعظ|مواعظ|لقاء|فتو|سيرة|حديث|قصص|قصة|رقائق|khutb|dars|lecture|muhadar|tafsir|seerah)/i;
+const RE_TILAWA=/(تلاو|ترتيل|مرتل|مجوّد|مجود|المصحف|مصحف|تجويد|recitation|murattal|mujawwad|tilaw|quran|qur.?an|holy)/i;
+const RE_SURA_FILE=/^\s*\d{0,3}\s*[-._ ]*\s*(سورة|سوره|surat|surah)\b/i;
+function looksQuran(t){
+  const x=String(t||'');
+  if(RE_KHUTBA.test(x)) return false;          // درسٌ أو تفسيرٌ ولو ذُكرت فيه سورة
+  return RE_TILAWA.test(x) || RE_SURA_FILE.test(x);
+}
+/* اسم الملفّ قد يحتوي مجلّدات، فيُرمَّز كلّ مقطعٍ وحده وإلّا صار / إلى %2F وفشل الرابط */
+function archiveUrl(id, name){
+  return 'https://archive.org/download/'+encodeURIComponent(id)+'/'
+       + String(name).split('/').map(encodeURIComponent).join('/');
+}
+/* يُرجع {t:عنوان المادّة, files:[…]} أو null */
 async function archiveItem(id){
   try{
-    const r=await fetch('https://archive.org/metadata/'+id, {mode:'cors'});
-    if(!r.ok) return [];
+    const r=await fetch('https://archive.org/metadata/'+encodeURIComponent(id), {mode:'cors'});
+    if(!r.ok) return null;
     const d=await r.json();
-    const files=(d.files||[]).filter(f=>AV_RE.test(f.name||''));
-    if(!files.length) return [];
-    const base='https://archive.org/download/'+id+'/';
-    return files.map(f=>({
-      name: cleanTitle((f.title||f.name||'').replace(AV_RE,'')),
-      url: base+encodeURIComponent(f.name),
-      dur: fmtDur(f.length),
-      vid: /\.mp4$/i.test(f.name||'')
-    })).sort((a,b)=> a.name.localeCompare(b.name,'ar',{numeric:true}));
-  }catch(e){ return []; }
+    const md=d.metadata||{};
+    const raw=(d.files||[]).filter(f=>{
+      if(!AV_RE.test(f.name||'')) return false;
+      if(String(f.private)==='true') return false;
+      const sz=parseFloat(f.size||0);
+      return !sz || sz>200000;                 // نتجاهل القصاصات الصغيرة جدًّا
+    });
+    if(!raw.length) return null;
+    // رابطٌ مباشر إلى خادم الأرشيف يتفادى التحويل، ويُجرَّب إن فشل الأوّل
+    const enc = n => String(n).split('/').map(encodeURIComponent).join('/');
+    const direct = (d.server && d.dir) ? ('https://'+d.server+d.dir+'/') : null;
+    const files=raw.map(f=>{
+      const nm=cleanTitle((f.title||f.name||'').replace(AV_RE,''));
+      return { name:nm, url:archiveUrl(id,f.name),
+               alt: direct ? (direct+enc(f.name)) : null,
+               dur:fmtDur(f.length),
+               vid:/\.mp4$/i.test(f.name||''), q:looksQuran(nm) };
+    });
+    const nq=files.filter(f=>f.q).length;
+    const title=[md.title, (Array.isArray(md.subject)?md.subject.join(' '):md.subject)||''].join(' ');
+    const coll=(Array.isArray(md.collection)?md.collection.join(' '):md.collection)||'';
+    return {
+      id, t:String(md.title||id), creator:String(md.creator||''),
+      quranItem: (nq/files.length)>0.6 || looksQuran(title) || /quran|tilawa|recitation/i.test(coll),
+      files
+    };
+  }catch(e){ return null; }
 }
-async function archiveSearch(q){
+async function archiveSearch(q, page){
   try{
-    const u='https://archive.org/advancedsearch.php?q='
-      + encodeURIComponent('('+q+') AND (mediatype:audio OR mediatype:movies)')
-      + '&fl%5B%5D=identifier&rows=8&page=1&output=json';
+    const query='('+q+') AND (mediatype:audio OR mediatype:movies)'
+      + ' AND NOT title:(quran OR recitation OR murattal OR mujawwad OR tilawa OR تلاوة OR ترتيل OR مصحف)';
+    const u='https://archive.org/advancedsearch.php?q='+encodeURIComponent(query)
+      + '&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=creator&rows=25&page='+(page||1)+'&output=json';
     const r=await fetch(u,{mode:'cors'}); if(!r.ok) return [];
     const d=await r.json();
-    return ((((d||{}).response||{}).docs)||[]).map(x=>x.identifier).filter(Boolean);
+    const docs=((((d||{}).response||{}).docs)||[]).filter(x=>x && x.identifier);
+    // نُرتّب: ما ليس تلاوةً أوّلًا، ثمّ ما فيه لفظُ خطبةٍ أو درس
+    return docs.map(x=>{
+      const t=[x.title,x.creator,x.identifier].join(' ');
+      let sc=0;
+      if(looksQuran(t)) sc-=5;
+      if(RE_KHUTBA.test(t)) sc+=3;
+      return {id:x.identifier, sc};
+    }).sort((a,b)=> b.sc-a.sc).map(x=>x.id);
   }catch(e){ return []; }
 }
-async function fetchDuat(d){
-  if(__duatCache[d.id]) return __duatCache[d.id];
-  let out=[];
-  if(d.files && d.files.length)
+/* مرشّحو البحث محفوظون لكلّ داعية، ليُجرَّب مصدرٌ آخر عند الطلب */
+const __duatPool={}, __duatPage={};
+async function fetchDuat(d, more){
+  if(!more && __duatCache[d.id]) return __duatCache[d.id];
+  let out = (more && __duatCache[d.id]) ? __duatCache[d.id].slice() : [];
+  if(!out.length && d.files && d.files.length)
     out = d.files.map(f=>({ name:f.name, drive:f.drive, dur:'', vid:false }));
-  for(const id of (d.ids||[])){
+  if(!more) for(const id of (d.ids||[])){
     if(out.length>=300) break;
-    out = out.concat(await archiveItem(id));
+    const it=await archiveItem(id);
+    if(it) out=out.concat(it.files.filter(f=>!f.q));
   }
-  if(out.length<3){
-    const ids=await archiveSearch(d.q||d.name);
-    let n=0;
-    for(const id of ids){
-      if(n>=3 || out.length>=300) break;
-      const l=await archiveItem(id);
-      if(l.length){ out=out.concat(l); n++; }
-    }
+  if(!__duatPool[d.id] || (more && !__duatPool[d.id].length)){
+    __duatPage[d.id]=(__duatPage[d.id]||0)+1;
+    __duatPool[d.id]=await archiveSearch(d.q||d.name, __duatPage[d.id]);
   }
-  out=out.slice(0,300);
+  const pool=__duatPool[d.id]||[];
+  let taken=0;
+  while(pool.length && taken<3 && out.length<300){
+    const it=await archiveItem(pool.shift());
+    if(!it || it.quranItem) continue;
+    const good=it.files.filter(f=>!f.q);
+    if(good.length){ out=out.concat(good); taken++; }
+  }
+  // إزالة المكرّر بالاسم
+  const seen=new Set();
+  out=out.filter(f=>{ const k=f.url||f.drive||f.name; if(seen.has(k)) return false; seen.add(k); return true; })
+         .slice(0,300);
   __duatCache[d.id]=out;
   return out;
 }
@@ -2455,16 +2507,20 @@ function renderDuat(){
   if(!__duatCur){ box.innerHTML='<div class="search-hint">اختر داعيةً من القائمة أعلاه.</div>'; return; }
   if(__duatLoading){ box.innerHTML='<div class="search-hint">…جارٍ البحث عن التسجيلات</div>'; return; }
   if(!__duatItems.length){
-    box.innerHTML='<div class="search-hint">لم نجد تسجيلاتٍ لهذا الداعية الآن — جرّب داعيةً آخر أو تحقّق من الإنترنت.</div>';
+    box.innerHTML='<div class="search-hint">لم نجد خُطبًا لهذا الداعية في الأرشيف الآن.</div>'+
+      '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>';
+    const mb=$('#duat-more'); if(mb) mb.addEventListener('click', ()=> moreDuat());
     return;
   }
   box.innerHTML=__duatItems.map((s,i)=>
-    '<button class="story-item" data-d="'+i+'">'+
+    '<button class="story-item'+(s.bad?' bad':'')+'" data-d="'+i+'">'+
       '<span class="st-ic">'+ICON_PLAY+'</span>'+
       '<span class="st-nm">'+escapeHtml(s.name)+'</span>'+
       (s.vid?'<span class="st-open" data-open="'+i+'">فيديو</span>':'')+
-      '<span class="st-du">'+escapeHtml(s.dur||'')+'</span>'+
+      '<span class="st-du">'+escapeHtml(s.bad?'تعذّر':(s.dur||''))+'</span>'+
     '</button>').join('');
+  box.insertAdjacentHTML('beforeend',
+    '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>');
   box.querySelectorAll('.story-item').forEach(b=> b.addEventListener('click', e=>{
     const o=e.target.closest('.st-open');
     if(o){ e.stopPropagation();
@@ -2473,6 +2529,7 @@ function renderDuat(){
       return; }
     playDuat(parseInt(b.dataset.d));
   }));
+  const mb=$('#duat-more'); if(mb) mb.addEventListener('click', ()=> moreDuat());
   markDuat();
 }
 function markDuat(){
@@ -2488,11 +2545,15 @@ function playDuat(i){
   const a=$('#reciter-audio'); const c=__duatItems[i]; if(!a || !c) return;
   if(__duatPlaying===i && !a.paused){ a.pause(); markDuat(); return; }
   __duatPlaying=i; __storyPlaying=null; __audioSura=null;
-  const urls = c.drive ? driveUrls(c.drive) : [c.url];
+  const urls = c.drive ? driveUrls(c.drive) : [c.url, c.alt].filter(Boolean);
   const tryUrl=k=>{
-    if(k>=urls.length){ showToast('تعذّر تشغيل التسجيل — تحقّق من الإنترنت', 4000); return; }
+    if(k>=urls.length){
+      a.onerror=null; c.bad=true; __duatPlaying=null;
+      showToast('تعذّر تشغيل هذا التسجيل — جرّب غيره أو «مصدرًا آخر»', 4200);
+      renderDuat(); return;
+    }
     a.src=urls[k]; a.currentTime=0;
-    a.play().catch(()=> tryUrl(k+1));
+    a.play().then(()=>{ a.onerror=null; c.bad=false; }).catch(()=> tryUrl(k+1));
     a.onerror=()=> tryUrl(k+1);
   };
   tryUrl(0);
@@ -2509,16 +2570,29 @@ function openDuatPicker(){
   openLabelOverlay(DUAT.map(d=>({id:d.id,label:d.name})), __duatCur?__duatCur.id:null,
     id=>{ closeSuraOverlay(); pickDuat(id); }, 'اختر الداعية');
 }
+async function loadDuatList(d, more){
+  __duatLoading=true; renderDuat();
+  const before=__duatItems.length;
+  const list=await fetchDuat(d, more);
+  if(__duatCur!==d) return;
+  __duatItems=list; __duatLoading=false; renderDuat();
+  if(more){
+    if(!list.length) showToast('لم نجد خُطبًا لهذا الداعية في الأرشيف', 3400);
+    else if(list.length<=before) showToast('لا يوجد مصدرٌ آخر لهذا الداعية', 3400);
+    else showToast('أُضيف '+AR(list.length-before)+' تسجيلًا', 2600);
+  }
+}
 async function pickDuat(id){
   const d=DUAT.find(x=>x.id===id); if(!d) return;
   __duatCur=d; __duatPlaying=null;
   const nm=$('#duat-name'); if(nm) nm.textContent=d.name;
-  const nt=$('#duat-note'); if(nt) nt.textContent='تسجيلات '+d.name+' · تُشغَّل من الإنترنت مباشرةً';
+  const nt=$('#duat-note'); if(nt) nt.textContent='خُطب ودروس '+d.name+' · تُشغَّل من الإنترنت مباشرةً';
   try{ store.set('az_duat', id); }catch(e){}
-  __duatLoading=true; renderDuat();
-  const list=await fetchDuat(d);
-  if(__duatCur!==d) return;
-  __duatItems=list; __duatLoading=false; renderDuat();
+  await loadDuatList(d, false);
+}
+function moreDuat(){
+  if(!__duatCur || __duatLoading) return;
+  vibrate(6); loadDuatList(__duatCur, true);
 }
 function openDuat(){
   const btn=$('#duat-pick');
