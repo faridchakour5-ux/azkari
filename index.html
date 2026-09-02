@@ -745,6 +745,35 @@
   .tafsir-body .t-src{margin-top:16px; font-size:12px; color:var(--text-3); text-align:center;}
   .tafsir-body .t-note{font-size:14.5px; line-height:1.9; color:var(--text-2); text-align:center; padding:10px 0;}
 
+  /* ==== المشاركة: بطاقة الالتقاط (صورة أو PDF) ==== */
+  #print-area{display:none;}
+  .share-shot{width:620px; box-sizing:border-box; background:var(--bg); color:var(--text);
+    padding:26px 24px 20px; font-family:'PlexAr',system-ui,sans-serif;}
+  .share-shot .ss-head{text-align:center; padding-bottom:14px; border-bottom:1px solid var(--sep); margin-bottom:16px;}
+  .share-shot .ss-ttl{display:block; font-size:24px; font-weight:800; color:var(--text); line-height:1.6;}
+  .share-shot .ss-sub{display:block; font-size:14.5px; font-weight:600; color:var(--text-2); margin-top:5px;}
+  .share-shot .card, .share-shot .fq-card{margin:0; box-shadow:none;}
+  .share-shot .ss-note{margin-top:12px; font-size:13.5px; line-height:1.9; color:var(--text-2);}
+  .share-shot .ss-note b{color:var(--accent); font-weight:800; margin-left:6px;}
+  .share-shot .ss-foot{margin-top:18px; padding-top:14px; border-top:1px solid var(--sep);
+    text-align:center; font-size:14px; font-weight:700; color:var(--text-2);}
+  .share-shot .ss-foot span{color:var(--accent);}
+  .share-shot .tick, .share-shot .dhikr-play, .share-shot .info-btn, .share-shot .fq-share{display:none !important;}
+  .share-shot .t-aya{margin-bottom:14px;}
+  .share-shot .t-txt, .share-shot .t-intro{font-size:15px; line-height:2;}
+  /* زرّ المشاركة */
+  .share-btn{border:0; background:var(--fill-2); color:var(--c-read); border-radius:10px; padding:6px 10px;
+    font:inherit; font-size:12px; font-weight:800; display:inline-flex; align-items:center; gap:5px;}
+  .share-btn .gh-ic{width:1.05em; height:1.05em;}
+  .share-btn:active{transform:scale(.94);}
+  .fq-share{display:flex; justify-content:center; margin-top:20px;}
+  .fq-share .share-btn{font-size:13.5px; padding:10px 18px; background:var(--c-read-bg);}
+  @media print{
+    body.printing > *{display:none !important;}
+    body.printing #print-area{display:block !important;}
+    body.printing .share-shot{width:100% !important; background:#fff !important;}
+    @page{margin:12mm;}
+  }
   /* قائمة الدعاة المنسدلة */
   .duat-pick{display:flex; align-items:center; gap:9px; width:calc(100% - 32px); margin:2px 16px 10px;
     padding:13px 15px; border:1px solid var(--line); border-radius:15px; background:var(--card);
@@ -1190,6 +1219,7 @@
 </section>
 
 <!-- ===== Tab bar ===== -->
+<div id="print-area" aria-hidden="true"></div>
 <div class="upd-bar" id="upd-bar" role="button" tabindex="0">
   <svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 11.5A8 8 0 1 1 17.6 6"/><path d="M20 4v5h-5"/></svg>
   <span class="ub-t">تحديثٌ جديد جاهز<small>اضغط لتطبيقه الآن</small></span>
@@ -1414,7 +1444,14 @@ function renderFadl(){
     });
     return;
   }
-  wrap.innerHTML='<div class="fq-card az-fadl">'+window.FADL.map(fqBlock).join('')+'</div>';
+  wrap.innerHTML='<div class="fq-card az-fadl">'+window.FADL.map(fqBlock).join('')+
+    '<div class="fq-share"><button class="share-btn" id="fadl-share-btn">'+SHARE_IC+'شارِك هذه الصفحة</button></div>'+
+    '</div>';
+  const sb=$('#fadl-share-btn');
+  if(sb) sb.addEventListener('click', ()=>{
+    vibrate(6);
+    openShareSheet(()=> cardShotHTML('#az-list .fq-card'), 'فضل الذكر', 'وأثرُه في حياتك اليوميّة', 'salaty-fadl');
+  });
 }
 
 function renderAzkar(){
@@ -1449,6 +1486,7 @@ function renderAzkar(){
         '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span>'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
         (AZKAR_AUDIO[pid] ? '<button class="dhikr-play" data-pid="'+pid+'" aria-label="استماع">'+ICON_PLAY+'</button>':'')+
         (d.fadl||d.source ? '<button class="info-btn" aria-label="الفضل">ⓘ</button>':'')+
+        '<button class="share-btn" aria-label="مشاركة">'+SHARE_IC+'شارِك</button>'+
       '</div>'+
       (d.fadl||d.source ? '<div class="fadl">'+
         (d.fadl?'<span class="lbl">الفضل</span>'+escapeHtml(d.fadl):'')+
@@ -1460,6 +1498,11 @@ function renderAzkar(){
       if(e.target.closest('.dhikr-play')){ toggleDhikrAudio(pid); return; }
       if(e.target.closest('.info-btn')){
         card.querySelector('.fadl').classList.toggle('open'); return;
+      }
+      if(e.target.closest('.share-btn')){
+        e.stopPropagation();
+        openShareSheet(()=> dhikrShotHTML(d), meta.title, null, 'salaty-dhikr');
+        return;
       }
       if(e.target.closest('.fadl')) return;
       tapAzkar(card, d, pid);
@@ -2112,6 +2155,180 @@ async function openStories(){
   __storyLoading=false;
   renderStories(list);
 }
+/* ==================== المشاركة: صورة أو PDF لأيّ شيء ====================
+   يُلتقط المحتوى كما هو معروضٌ بخطوطه وألوانه عبر SVG/foreignObject —
+   بلا أيّ مكتبةٍ خارجيّة، فيبقى التطبيق يعمل دون إنترنت. */
+const SHARE_IC='<svg class="gh-ic" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+let __shotCss=null, __shotKey='';
+function quranFontFile(){
+  const b=document.body;
+  if(b.classList.contains('qtashkeel')) return { f:'NotoNaskhTashkeel', u:'fonts/naskh-tashkeel.woff2' };
+  if(b.classList.contains('qmaghribi') || settings.riwaya==='warsh') return { f:'Maghribi', u:'fonts/maghribi.woff2' };
+  return { f:'AmiriQuran', u:'fonts/amiri-quran.woff2' };
+}
+async function fontDataUrl(u){
+  const r=await fetch(u); if(!r.ok) throw new Error('font');
+  const b=await r.blob();
+  return await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(b); });
+}
+async function shotCss(){
+  const qf=quranFontFile();
+  if(__shotCss && __shotKey===qf.f) return __shotCss;
+  let css='';
+  for(const sh of Array.from(document.styleSheets)){
+    let rules=null; try{ rules=sh.cssRules; }catch(e){ continue; }
+    if(!rules) continue;
+    for(const r of Array.from(rules)){
+      if(r.type===5) continue;                       // @font-face: نُبدّلها بروابط مضمَّنة
+      try{ css += r.cssText + '\n'; }catch(e){}
+    }
+  }
+  const list=[ {f:'PlexAr',w:400,u:'fonts/ui-400.woff2'},
+               {f:'PlexAr',w:700,u:'fonts/ui-700.woff2'},
+               {f:qf.f,   w:400,u:qf.u} ];
+  const faces=[];
+  for(const x of list){
+    try{ faces.push("@font-face{font-family:'"+x.f+"';font-weight:"+x.w+";src:url("+(await fontDataUrl(x.u))+") format('woff2');}"); }
+    catch(e){}
+  }
+  // داخل SVG لا يوجد عنصر body، فتُحوَّل قواعده إلى جذر البطاقة نفسها
+  css = css.replace(/(^|[\s,>+~])body\b/g, '$1.share-shot');
+  __shotCss=faces.join('\n')+'\n'+css; __shotKey=qf.f;
+  return __shotCss;
+}
+/* الألوان والمقاسات تُنسخ إلى العنصر نفسه فلا تعتمد الصورة على :root */
+function shotVarStyle(){
+  const names=[...new Set((__shotCss||'').match(/--[a-zA-Z0-9_-]+/g)||[])];
+  const cs=getComputedStyle(document.body);
+  let out='';
+  for(const n of names){ const v=cs.getPropertyValue(n); if(v && v.trim()) out+=n+':'+v.trim()+';'; }
+  return out;
+}
+function buildShotNode(innerHTML, title, sub){
+  const el=document.createElement('div');
+  // نحمل أصناف body (الوضع الليليّ، خطّ المصحف…) حتى تنطبق القواعد نفسها
+  el.className='share-shot '+document.body.className;
+  el.setAttribute('dir','rtl');
+  el.style.cssText=shotVarStyle();
+  el.innerHTML=
+    '<div class="ss-head"><span class="ss-ttl">'+escapeHtml(title||'صلاتي')+'</span>'+
+      (sub?'<span class="ss-sub">'+escapeHtml(sub)+'</span>':'')+'</div>'+
+    '<div class="ss-body">'+innerHTML+'</div>'+
+    '<div class="ss-foot">صلاتي — أذكار ومصحف · <span>www.salatee.org</span></div>';
+  return el;
+}
+async function shotToCanvas(innerHTML, title, sub){
+  const css=await shotCss();
+  const el=buildShotNode(innerHTML,title,sub);
+  el.style.position='fixed'; el.style.top='0'; el.style.insetInlineStart='-20000px'; el.style.zIndex='-1';
+  document.body.appendChild(el);
+  await new Promise(r=> requestAnimationFrame(()=> requestAnimationFrame(r)));
+  const W=el.offsetWidth||620, H=el.offsetHeight||420;
+  // تُنزع أنماط الإخفاء قبل التسلسل، وإلا رُسم العنصر خارج الصورة فخرجت فارغة
+  el.style.cssText=shotVarStyle();
+  const xml=new XMLSerializer().serializeToString(el);
+  el.remove();
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'">'+
+    '<defs><style type="text/css"><![CDATA['+css+']]></style></defs>'+
+    '<foreignObject x="0" y="0" width="'+W+'" height="'+H+'">'+xml+'</foreignObject></svg>';
+  const img=new Image();
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  await img.decode();
+  const S=2, cv=document.createElement('canvas');
+  cv.width=W*S; cv.height=H*S;
+  const c=cv.getContext('2d'); c.scale(S,S);
+  c.fillStyle=cssVar('--bg','#F7F3E8'); c.fillRect(0,0,W,H);
+  c.drawImage(img,0,0,W,H);
+  return cv;
+}
+function saveFile(file, name){
+  try{
+    const url=URL.createObjectURL(file);
+    const a=document.createElement('a'); a.href=url; a.download=name||file.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+    return true;
+  }catch(e){ return false; }
+}
+/* تُحضَّر الصورة فور فتح ورقة الاختيار، فتُشارَك فورًا داخل نقرة المستخدم */
+let __shotWork=null, __shotFile=null;
+function prepareShot(innerHTML, title, sub, fname){
+  __shotFile=null;
+  __shotWork=(async()=>{
+    try{
+      const cv=await shotToCanvas(innerHTML,title,sub);
+      const blob=await new Promise(r=> cv.toBlob(r,'image/png'));
+      if(!blob) return null;
+      __shotFile=new File([blob],(fname||'salaty')+'.png',{type:'image/png'});
+      return __shotFile;
+    }catch(e){ return null; }
+  })();
+  return __shotWork;
+}
+function doShareFile(f){
+  if(navigator.canShare && navigator.share){
+    let ok=false; try{ ok=navigator.canShare({files:[f]}); }catch(e){ ok=false; }
+    if(ok){
+      navigator.share({ files:[f] }).catch(err=>{
+        if(err && err.name==='AbortError') return;
+        if(saveFile(f)) showToast('حُفظت الصورة في هاتفك', 3800);
+      });
+      return true;
+    }
+  }
+  if(saveFile(f)){ showToast('حُفظت الصورة في هاتفك', 3800); return true; }
+  return false;
+}
+function shareShotNow(){
+  if(__shotFile){ doShareFile(__shotFile); return; }
+  showToast('…جارٍ تحضير الصورة', 1800);
+  if(!__shotWork){ showToast('تعذّر إنشاء الصورة', 3000); return; }
+  __shotWork.then(f=>{
+    if(f) doShareFile(f);
+    else showToast('تعذّر إنشاء الصورة — جرّب PDF', 3800);
+  });
+}
+function printShot(innerHTML, title, sub){
+  const pa=$('#print-area'); if(!pa) return;
+  pa.innerHTML=''; pa.appendChild(buildShotNode(innerHTML,title,sub));
+  document.body.classList.add('printing');
+  setTimeout(()=>{
+    try{ window.print(); }catch(e){}
+    setTimeout(()=>{ document.body.classList.remove('printing'); pa.innerHTML=''; }, 900);
+  }, 90);
+}
+/* HTML بطاقةٍ معروضة (بابُ فقهٍ مثلًا) بعد نزع الأزرار */
+function cardShotHTML(sel){
+  const src=document.querySelector(sel); if(!src) return '';
+  const c=src.cloneNode(true);
+  c.querySelectorAll('.fq-share, .share-btn, .info-btn, .dhikr-play, .tick').forEach(x=> x.remove());
+  c.classList.remove('az-fadl');
+  return c.outerHTML;
+}
+function dhikrShotHTML(d){
+  const text = d.quran ? qFix(settings.riwaya==='warsh'? d.warsh : d.hafs) : d.text;
+  return '<div class="card'+(d.quran?' quran':'')+'">'+
+      '<div class="txt">'+escapeHtml(text)+'</div>'+
+      '<div class="meta"><span class="badge">'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span></div>'+
+      (d.fadl  ?'<div class="ss-note"><b>الفضل</b>'+escapeHtml(d.fadl)+'</div>':'')+
+      (d.source?'<div class="ss-note"><b>المصدر</b>'+escapeHtml(d.source)+'</div>':'')+
+    '</div>';
+}
+function openShareSheet(getHTML, title, sub, fname){
+  let html='';
+  try{ html=getHTML()||''; }catch(e){ html=''; }
+  if(!html){ showToast('لا يوجد ما يُشارَك', 2500); return; }
+  prepareShot(html, title, sub, fname);          // تُحضَّر أثناء اختيار المستخدم
+  openLabelOverlay(
+    [ {id:'img', label:'صورة — أرسِلها في واتساب'},
+      {id:'pdf', label:'PDF — للحفظ أو الطباعة'} ],
+    'img',
+    id=>{ closeSuraOverlay();
+          if(id==='img') shareShotNow();
+          else printShot(html, title, sub); },
+    'شارِك أو احفظ');
+}
+
 /* ==================== الدعاة ====================
    قائمةٌ منسدلة بأسماء الدعاة. لكلّ داعيةٍ معرّفاتٌ معروفة في أرشيف الإنترنت،
    فإن لم تُثمر بُحث عنه في الأرشيف وقتَ الاستعمال — فلا تموت الروابط مع الزمن.
@@ -2463,6 +2680,7 @@ function renderFiqh(){
       '<div class="fq-h">'+cur.ic+'<b>'+escapeHtml(cur.t)+'</b></div>'+
       '<div class="fq-sub">'+escapeHtml(cur.sub||'')+'</div>'+
       cur.blocks.map(fqBlock).join('')+
+      '<div class="fq-share"><button class="share-btn" id="fq-share-btn">'+SHARE_IC+'شارِك هذا الباب</button></div>'+
     '</div>';
   box.querySelectorAll('.fq-cats button').forEach(btn=> btn.addEventListener('click', ()=>{
     __fqCat=btn.dataset.c; vibrate(6); renderFiqh();
@@ -2471,6 +2689,11 @@ function renderFiqh(){
     __fqCur=parseInt(btn.dataset.i); vibrate(6); renderFiqh();
     const t=$('#s-tasbih'); if(t) window.scrollTo({top:0, behavior:'smooth'});
   }));
+  const sb=$('#fq-share-btn');
+  if(sb) sb.addEventListener('click', ()=>{
+    vibrate(6);
+    openShareSheet(()=> cardShotHTML('#fiqh-body .fq-card'), cur.t, cur.sub||'', 'salaty-fiqh');
+  });
 }
 async function openFiqh(){
   const box=$('#fiqh-body'); if(!box) return;
@@ -2552,7 +2775,13 @@ async function openTafsir(ai){
   } else {
     main='<div class="t-note">'+(ok?'لا يوجد تفسير لهذه الآية.':'تعذّر تحميل التفسير — تحقّق من الإنترنت ثم أعِد المحاولة.')+'</div>';
   }
-  body.innerHTML = aya + main;
+  body.innerHTML = aya + main +
+    '<div class="fq-share"><button class="share-btn" id="tf-share-btn">'+SHARE_IC+'شارِك الآية وتفسيرها</button></div>';
+  const sb=$('#tf-share-btn');
+  if(sb) sb.addEventListener('click', ()=>{
+    vibrate(6);
+    openShareSheet(()=> aya + main, 'سورة '+WIRD.sur[si].n+' — آية '+AR(no), null, 'salaty-aya');
+  });
 }
 document.addEventListener('click', e=>{
   const t=e.target.closest('.aya-t'); if(!t) return;
