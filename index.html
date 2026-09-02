@@ -745,6 +745,16 @@
   .tafsir-body .t-src{margin-top:16px; font-size:12px; color:var(--text-3); text-align:center;}
   .tafsir-body .t-note{font-size:14.5px; line-height:1.9; color:var(--text-2); text-align:center; padding:10px 0;}
 
+  /* قائمة الدعاة المنسدلة */
+  .duat-pick{display:flex; align-items:center; gap:9px; width:calc(100% - 32px); margin:2px 16px 10px;
+    padding:13px 15px; border:1px solid var(--line); border-radius:15px; background:var(--card);
+    color:var(--text); font:inherit; font-size:15.5px; font-weight:800; text-align:start;}
+  .duat-pick .gh-ic{width:1.2em; height:1.2em; flex:0 0 auto; color:var(--accent);}
+  .duat-pick .dp-nm{flex:1 1 auto;}
+  .duat-pick .chev{color:var(--text-3); font-size:15px;}
+  .duat-pick:active{transform:scale(.98);}
+  .st-open{border:0; background:var(--fill-2); color:var(--c-read); border-radius:9px;
+    padding:5px 9px; font:inherit; font-size:11.5px; font-weight:800; flex:0 0 auto;}
   /* قصص الأنبياء (بثّ من أرشيف الإنترنت) */
   .stories-note{margin:12px 16px 8px; font-size:12.5px; color:var(--text-3); line-height:1.8; text-align:center;}
   .story-item{display:flex; align-items:center; gap:12px; width:calc(100% - 32px); margin:0 16px 8px;
@@ -893,7 +903,7 @@
   </div>
   <div class="seg" id="listen-mode-seg">
     <button data-l="quran" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>القرآن</button>
-    <button data-l="rushaidi"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>سعود الرشيدي</button>
+    <button data-l="duat"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>الدعاة</button>
     <button data-l="stories"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h4"/><path d="M15 7h4"/><circle cx="12" cy="12" r="9"/></svg>قصص الأنبياء</button>
   </div>
   <div class="reciter-box" id="reciter-box">
@@ -913,9 +923,14 @@
     <audio id="reciter-audio" preload="none"></audio>
   </div>
   <div class="listen-list" id="listen-list"></div>
-  <div class="stories-box" id="rushaidi-box" style="display:none">
-    <div class="stories-note">مقاطع الشيخ سعود الرشيدي · تُشغَّل من الرابط مباشرةً (يحتاج اتصالًا)</div>
-    <div id="rushaidi-list"></div>
+  <div class="stories-box" id="duat-box" style="display:none">
+    <button class="duat-pick" id="duat-pick" type="button">
+      <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+      <span class="dp-nm" id="duat-name">اختر الداعية</span>
+      <span class="chev">&#8964;</span>
+    </button>
+    <div class="stories-note" id="duat-note">اختر داعيةً من القائمة — تُشغَّل التسجيلات من أرشيف الإنترنت (يحتاج اتصالًا)</div>
+    <div id="duat-list"></div>
   </div>
   <div class="stories-box" id="stories-box" style="display:none">
     <div class="stories-note">سلسلة قصص الأنبياء — الشيخ نبيل العوضي · تُشغَّل من أرشيف الإنترنت (يحتاج اتصالًا)</div>
@@ -2097,45 +2112,132 @@ async function openStories(){
   __storyLoading=false;
   renderStories(list);
 }
-/* ==================== مقاطع الشيخ سعود الرشيدي ==================== */
-/* المصدر: ملفّات على Google Drive. تُشتقّ روابط التشغيل من معرّف الملفّ. */
-const RUSHAIDI = [
-  { id:'1sXzdsR23d3my3pct0f4Lpie9-Ttbko1l', name:'مقطع 1' },
-  { id:'1EZVETLPrJPsqrP9EFfc9_7DhlD8vdL5W', name:'مقطع 2' }
+/* ==================== الدعاة ====================
+   قائمةٌ منسدلة بأسماء الدعاة. لكلّ داعيةٍ معرّفاتٌ معروفة في أرشيف الإنترنت،
+   فإن لم تُثمر بُحث عنه في الأرشيف وقتَ الاستعمال — فلا تموت الروابط مع الزمن.
+   ولا يُعرض إلا ما كان mp3 أو mp4 (وm4a وهي حاوية mp4 للصوت). */
+const DUAT = [
+  { id:'awadi',    name:'نبيل العوضي',          q:'نبيل العوضي',
+    ids:['qasas-anbiya','prophets_stories_Nabel-ElAwadde','Kassas.Anbiyaa_Sheikh.Nabil.Al3awadhy'] },
+  { id:'rushaidi', name:'سعود الرشيدي',          q:'سعود الرشيدي', ids:[],
+    files:[ { name:'مقطع 1', drive:'1sXzdsR23d3my3pct0f4Lpie9-Ttbko1l' },
+            { name:'مقطع 2', drive:'1EZVETLPrJPsqrP9EFfc9_7DhlD8vdL5W' } ] },
+  { id:'shaarawi', name:'محمد متولّي الشعراوي',   q:'الشعراوي خواطر' },
+  { id:'kishk',    name:'عبد الحميد كشك',        q:'عبد الحميد كشك' },
+  { id:'hassan',   name:'محمد حسّان',            q:'محمد حسان' },
+  { id:'yaqub',    name:'محمد حسين يعقوب',       q:'محمد حسين يعقوب' },
+  { id:'huwayni',  name:'أبو إسحاق الحويني',      q:'الحويني' },
+  { id:'abdelkafi',name:'عمر عبد الكافي',        q:'عمر عبد الكافي' },
+  { id:'nabulsi',  name:'محمد راتب النابلسي',     q:'راتب النابلسي' },
+  { id:'arifi',    name:'محمد العريفي',          q:'محمد العريفي' },
+  { id:'qarni',    name:'عائض القرني',           q:'عائض القرني' },
+  { id:'rashed',   name:'خالد الراشد',           q:'خالد الراشد' },
+  { id:'suwaidan', name:'طارق السويدان',         q:'طارق السويدان' },
+  { id:'munajjid', name:'محمد صالح المنجّد',      q:'محمد صالح المنجد' },
+  { id:'uthaymin', name:'ابن عثيمين',            q:'ابن عثيمين' },
+  { id:'baz',      name:'ابن باز',               q:'ابن باز' },
+  { id:'albani',   name:'الألباني',              q:'الألباني' },
+  { id:'benhamza', name:'مصطفى بنحمزة',          q:'مصطفى بنحمزة' },
+  { id:'qazabri',  name:'عمر القزابري',          q:'عمر القزابري' },
+  { id:'tantawi',  name:'علي الطنطاوي',          q:'علي الطنطاوي' }
 ];
+const AV_RE=/\.(mp3|mp4|m4a)$/i;
 function driveUrls(id){
   return [ 'https://drive.usercontent.google.com/download?id='+id+'&export=download',
            'https://drive.google.com/uc?export=download&id='+id ];
 }
-let __clipPlaying=null, __clipTry=0;
-function renderClips(){
-  const box=$('#rushaidi-list'); if(!box) return;
-  if(!RUSHAIDI.length){ box.innerHTML='<div class="search-hint">لا توجد مقاطع بعد.</div>'; return; }
-  box.innerHTML=RUSHAIDI.map((s,i)=>
-    '<button class="story-item" data-c="'+i+'">'+
+let __duatCur=null, __duatItems=[], __duatPlaying=null, __duatLoading=false;
+const __duatCache={};
+
+async function archiveItem(id){
+  try{
+    const r=await fetch('https://archive.org/metadata/'+id, {mode:'cors'});
+    if(!r.ok) return [];
+    const d=await r.json();
+    const files=(d.files||[]).filter(f=>AV_RE.test(f.name||''));
+    if(!files.length) return [];
+    const base='https://archive.org/download/'+id+'/';
+    return files.map(f=>({
+      name:(f.title||f.name||'').replace(AV_RE,''),
+      url: base+encodeURIComponent(f.name),
+      dur: fmtDur(f.length),
+      vid: /\.mp4$/i.test(f.name||'')
+    })).sort((a,b)=> a.name.localeCompare(b.name,'ar',{numeric:true}));
+  }catch(e){ return []; }
+}
+async function archiveSearch(q){
+  try{
+    const u='https://archive.org/advancedsearch.php?q='
+      + encodeURIComponent('('+q+') AND (mediatype:audio OR mediatype:movies)')
+      + '&fl%5B%5D=identifier&rows=8&page=1&output=json';
+    const r=await fetch(u,{mode:'cors'}); if(!r.ok) return [];
+    const d=await r.json();
+    return ((((d||{}).response||{}).docs)||[]).map(x=>x.identifier).filter(Boolean);
+  }catch(e){ return []; }
+}
+async function fetchDuat(d){
+  if(__duatCache[d.id]) return __duatCache[d.id];
+  let out=[];
+  if(d.files && d.files.length)
+    out = d.files.map(f=>({ name:f.name, drive:f.drive, dur:'', vid:false }));
+  for(const id of (d.ids||[])){
+    if(out.length>=300) break;
+    out = out.concat(await archiveItem(id));
+  }
+  if(out.length<3){
+    const ids=await archiveSearch(d.q||d.name);
+    let n=0;
+    for(const id of ids){
+      if(n>=3 || out.length>=300) break;
+      const l=await archiveItem(id);
+      if(l.length){ out=out.concat(l); n++; }
+    }
+  }
+  out=out.slice(0,300);
+  __duatCache[d.id]=out;
+  return out;
+}
+function renderDuat(){
+  const box=$('#duat-list'); if(!box) return;
+  if(!__duatCur){ box.innerHTML='<div class="search-hint">اختر داعيةً من القائمة أعلاه.</div>'; return; }
+  if(__duatLoading){ box.innerHTML='<div class="search-hint">…جارٍ البحث عن التسجيلات</div>'; return; }
+  if(!__duatItems.length){
+    box.innerHTML='<div class="search-hint">لم نجد تسجيلاتٍ لهذا الداعية الآن — جرّب داعيةً آخر أو تحقّق من الإنترنت.</div>';
+    return;
+  }
+  box.innerHTML=__duatItems.map((s,i)=>
+    '<button class="story-item" data-d="'+i+'">'+
       '<span class="st-ic">'+ICON_PLAY+'</span>'+
       '<span class="st-nm">'+escapeHtml(s.name)+'</span>'+
-      '<span class="st-du"></span>'+
+      (s.vid?'<span class="st-open" data-open="'+i+'">فيديو</span>':'')+
+      '<span class="st-du">'+escapeHtml(s.dur||'')+'</span>'+
     '</button>').join('');
-  box.querySelectorAll('.story-item').forEach(b=> b.addEventListener('click', ()=> playClip(parseInt(b.dataset.c))));
-  markClip();
+  box.querySelectorAll('.story-item').forEach(b=> b.addEventListener('click', e=>{
+    const o=e.target.closest('.st-open');
+    if(o){ e.stopPropagation();
+      const it=__duatItems[parseInt(o.dataset.open)];
+      if(it && it.url) window.open(it.url,'_blank','noopener');
+      return; }
+    playDuat(parseInt(b.dataset.d));
+  }));
+  markDuat();
 }
-function markClip(){
+function markDuat(){
   const a=$('#reciter-audio');
-  const cur=(a && !a.paused && __clipPlaying!=null) ? __clipPlaying : null;
-  document.querySelectorAll('#rushaidi-list .story-item').forEach(b=>{
-    const on = parseInt(b.dataset.c)===cur;
+  const cur=(a && !a.paused && __duatPlaying!=null) ? __duatPlaying : null;
+  document.querySelectorAll('#duat-list .story-item').forEach(b=>{
+    const on = parseInt(b.dataset.d)===cur;
     b.classList.toggle('on', on);
     b.querySelector('.st-ic').innerHTML = on ? ICON_PAUSE : ICON_PLAY;
   });
 }
-function playClip(i){
-  const a=$('#reciter-audio'); const c=RUSHAIDI[i]; if(!a || !c) return;
-  if(__clipPlaying===i && !a.paused){ a.pause(); markClip(); return; }
-  __clipPlaying=i; __storyPlaying=null; __audioSura=null; __clipTry=0;
-  const urls=driveUrls(c.id);
+function playDuat(i){
+  const a=$('#reciter-audio'); const c=__duatItems[i]; if(!a || !c) return;
+  if(__duatPlaying===i && !a.paused){ a.pause(); markDuat(); return; }
+  __duatPlaying=i; __storyPlaying=null; __audioSura=null;
+  const urls = c.drive ? driveUrls(c.drive) : [c.url];
   const tryUrl=k=>{
-    if(k>=urls.length){ showToast('تعذّر تشغيل المقطع — تأكّد أنّ الملفّ متاح للجميع على Drive', 4500); return; }
+    if(k>=urls.length){ showToast('تعذّر تشغيل التسجيل — تحقّق من الإنترنت', 4000); return; }
     a.src=urls[k]; a.currentTime=0;
     a.play().catch(()=> tryUrl(k+1));
     a.onerror=()=> tryUrl(k+1);
@@ -2143,26 +2245,53 @@ function playClip(i){
   tryUrl(0);
   vibrate(6);
   if('mediaSession' in navigator){
-    try{ navigator.mediaSession.metadata=new MediaMetadata({ title:c.name, artist:'الشيخ سعود الرشيدي' }); }catch(e){}
+    try{ navigator.mediaSession.metadata=new MediaMetadata({
+      title:c.name, artist:(__duatCur?__duatCur.name:'') }); }catch(e){}
   }
-  markClip();
+  markDuat();
 }
-['play','pause','ended'].forEach(ev=> $('#reciter-audio') && $('#reciter-audio').addEventListener(ev, ()=>{ try{ markClip(); }catch(e){} }));
+['play','pause','ended'].forEach(ev=> $('#reciter-audio') && $('#reciter-audio').addEventListener(ev, ()=>{ try{ markDuat(); }catch(e){} }));
+
+function openDuatPicker(){
+  openLabelOverlay(DUAT.map(d=>({id:d.id,label:d.name})), __duatCur?__duatCur.id:null,
+    id=>{ closeSuraOverlay(); pickDuat(id); }, 'اختر الداعية');
+}
+async function pickDuat(id){
+  const d=DUAT.find(x=>x.id===id); if(!d) return;
+  __duatCur=d; __duatPlaying=null;
+  const nm=$('#duat-name'); if(nm) nm.textContent=d.name;
+  const nt=$('#duat-note'); if(nt) nt.textContent='تسجيلات '+d.name+' · تُشغَّل من الإنترنت مباشرةً';
+  try{ store.set('az_duat', id); }catch(e){}
+  __duatLoading=true; renderDuat();
+  const list=await fetchDuat(d);
+  if(__duatCur!==d) return;
+  __duatItems=list; __duatLoading=false; renderDuat();
+}
+function openDuat(){
+  const btn=$('#duat-pick');
+  if(btn && !btn.__wired){ btn.__wired=true; btn.addEventListener('click', ()=>{ vibrate(6); openDuatPicker(); }); }
+  if(!__duatCur){
+    const saved=store.get('az_duat', null);
+    if(saved && DUAT.find(d=>d.id===saved)) return pickDuat(saved);
+    return renderDuat();
+  }
+  renderDuat();
+}
 
 function applyListenMode(mode){
-  const stories  = mode==='stories';
-  const rushaidi = mode==='rushaidi';
-  const quran    = !stories && !rushaidi;
-  $('#reciter-box').style.display   = quran ? '' : 'none';
-  $('#listen-list').style.display   = quran ? '' : 'none';
-  $('#stories-box').style.display   = stories ? '' : 'none';
-  $('#rushaidi-box').style.display  = rushaidi ? '' : 'none';
-  $('#listen-sub').textContent = stories  ? 'سلسلة قصص الأنبياء للشيخ نبيل العوضي'
-                               : rushaidi ? 'مقاطع مختارة للشيخ سعود الرشيدي'
+  const stories = mode==='stories';
+  const duat    = mode==='duat';
+  const quran   = !stories && !duat;
+  $('#reciter-box').style.display  = quran ? '' : 'none';
+  $('#listen-list').style.display  = quran ? '' : 'none';
+  $('#stories-box').style.display  = stories ? '' : 'none';
+  $('#duat-box').style.display     = duat ? '' : 'none';
+  $('#listen-sub').textContent = stories ? 'سلسلة قصص الأنبياء للشيخ نبيل العوضي'
+                               : duat    ? 'اختر الداعية ثمّ التسجيل'
                                : 'اختر القارئ ثمّ السورة للاستماع إليها';
   $$('#listen-mode-seg button').forEach(b=> b.classList.toggle('on', b.dataset.l===mode));
   if(stories) openStories();
-  if(rushaidi) renderClips();
+  if(duat) openDuat();
 }
 $$('#listen-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{ vibrate(6); applyListenMode(b.dataset.l); }));
 

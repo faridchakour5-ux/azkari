@@ -1,5 +1,5 @@
-/* صلاتي — service worker v157 */
-const CACHE = 'azkari-v157';
+/* صلاتي — service worker v158 */
+const CACHE = 'azkari-v158';
 const ASSETS = [
   './',
   './index.html',
@@ -56,6 +56,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = e.request.url;
+  // الطلبات الخارجيّة (أرشيف الإنترنت وغيره) تمرّ كما هي بلا اعتراض
+  try { if (new URL(url).origin !== self.location.origin) return; } catch (err) { return; }
   const isNav  = e.request.mode === 'navigate' || /\.html(\?|$)/.test(url);
   const isData = /\/(data|wird_hafs|wird_warsh|adhan\.min)\.js/.test(url);
 
