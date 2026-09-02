@@ -2336,30 +2336,47 @@ function openShareSheet(getHTML, title, sub, fname){
    فإن لم تُثمر بُحث عنه في الأرشيف وقتَ الاستعمال — فلا تموت الروابط مع الزمن.
    ولا يُعرض إلا ما كان mp3 أو mp4 (وm4a وهي حاوية mp4 للصوت). */
 const DUAT = [
-  { id:'awadi',    name:'نبيل العوضي',          q:'نبيل العوضي',
-    ids:['qasas-anbiya','prophets_stories_Nabel-ElAwadde','Kassas.Anbiyaa_Sheikh.Nabil.Al3awadhy'] },
-  { id:'rushaidi', name:'سعود الرشيدي',          q:'سعود الرشيدي', ids:[],
+  { id:'kamali',   name:'سعيد الكملي',           q:'سعيد الكملي',
+    ids:['Khottab_Said-Kamli-mp3','SaidAlKamaliKhotab','al-mowataa_Mp3','sa3edelkmly'] },
+  { id:'awadi',    name:'نبيل العوضي',           q:'نبيل العوضي',
+    ids:['Nabil-3awadi_Mawsoa-mp3','Nabil_Al_Awadi_Mawsoaa_mp3_Up-By-MusleM','Al_Awadhi_uP_bY_mUSLEm'] },
+  { id:'rushaidi', name:'سعود الرشيدي',           q:null, ids:[],
     files:[ { name:'مقطع 1', drive:'1sXzdsR23d3my3pct0f4Lpie9-Ttbko1l' },
             { name:'مقطع 2', drive:'1EZVETLPrJPsqrP9EFfc9_7DhlD8vdL5W' } ] },
-  { id:'shaarawi', name:'محمد متولّي الشعراوي',   q:'الشعراوي خواطر' },
-  { id:'kishk',    name:'عبد الحميد كشك',        q:'عبد الحميد كشك' },
-  { id:'hassan',   name:'محمد حسّان',            q:'محمد حسان' },
-  { id:'yaqub',    name:'محمد حسين يعقوب',       q:'محمد حسين يعقوب' },
-  { id:'huwayni',  name:'أبو إسحاق الحويني',      q:'الحويني' },
-  { id:'abdelkafi',name:'عمر عبد الكافي',        q:'عمر عبد الكافي' },
-  { id:'nabulsi',  name:'محمد راتب النابلسي',     q:'راتب النابلسي' },
-  { id:'arifi',    name:'محمد العريفي',          q:'محمد العريفي' },
-  { id:'qarni',    name:'عائض القرني',           q:'عائض القرني' },
-  { id:'rashed',   name:'خالد الراشد',           q:'خالد الراشد' },
-  { id:'suwaidan', name:'طارق السويدان',         q:'طارق السويدان' },
-  { id:'munajjid', name:'محمد صالح المنجّد',      q:'محمد صالح المنجد' },
-  { id:'uthaymin', name:'ابن عثيمين',            q:'ابن عثيمين' },
-  { id:'baz',      name:'ابن باز',               q:'ابن باز' },
-  { id:'albani',   name:'الألباني',              q:'الألباني' },
-  { id:'kamali',   name:'سعيد الكملي',            q:'سعيد الكملي' },
-  { id:'benhamza', name:'مصطفى بنحمزة',          q:'مصطفى بنحمزة' },
-  { id:'qazabri',  name:'عمر القزابري',          q:'عمر القزابري' },
-  { id:'tantawi',  name:'علي الطنطاوي',          q:'علي الطنطاوي' }
+  { id:'shaarawi', name:'محمد متولّي الشعراوي',    q:'الشعراوي خواطر',
+    ids:['Khwater.El-Sharawy.Fi.Tafsir.EL-Quran-Karim-Up-By-mUSLEm','Sha3rawy_Audio_Parts'] },
+  { id:'kishk',    name:'عبد الحميد كشك',         q:'عبد الحميد كشك',
+    ids:['Sermon-Sheikh-Kishk-mp3','Lectures-voice-abd-hamid-Kishk-mp3_koonoz_blogspot_com','Keshik_uP_bY_mUSLEm','Abdel-Hamid_Kichk_Mawsoaa_Mp3_uP_bY_mUSLEm'] },
+  { id:'hassan',   name:'محمد حسّان',             q:'محمد حسان',
+    ids:['Khotab_Moahamed-Hassan-mp3','mohammad-hassaan-155-khotab-moassera-almawso3a-alsawteyya-mp3','Mp3-___-----MAWSO3AH-428-BY-MOHAMMAD-HASSAN','mohamed-hassan-mp3'] },
+  { id:'yaqub',    name:'محمد حسين يعقوب',        q:'محمد حسين يعقوب',
+    ids:['mp3----MAWSO3AH______497-BY-MOHAMMAD---YA3QOOB','mohamed-hussein-yaqob-825-mp3','Hesin-Yaqob_Mawsoa-mp3'] },
+  { id:'huwayni',  name:'أبو إسحاق الحويني',       q:'الحويني',
+    ids:['Al-Alheweny','Al_Houwaini_Mawsoaa_577-lectures_uP_bY_mUSLEm','by_hassan_alhowayni'] },
+  { id:'abdelkafi',name:'عمر عبد الكافي',         q:'عمر عبد الكافي',
+    ids:['mawsoa-mp3_Omar-abdlkafee','Mawsoa_Omar-abdlkafee_mp3','Dr_Omar-Abdulkafy_uP_bY_mUSLEm','40-khotab-selelt-alwa3d-al7aq--mp3-BY-3omar-abd-alkafi'] },
+  { id:'nabulsi',  name:'محمد راتب النابلسي',      q:'راتب النابلسي',
+    ids:['abdulrahman4321_gmail_1','abdulrahman4321_gmail_11','20231228_20231228_1740'] },
+  { id:'arifi',    name:'محمد العريفي',           q:'محمد العريفي',
+    ids:['lectures-alarefe','lecture-mp3-alarefe','Dr-Mohammad-Arifi_Mawsoaa_uP_bY_mUSLEm','by_hassan_la3rifi'] },
+  { id:'qarni',    name:'عائض القرني',            q:'عائض القرني',
+    ids:['Aaed-alqarni_Mawsoa-mp3','Ayed_Al-Qarni_458_Lectures_Mp3_up-by-muslem','3aedAlqrni1'] },
+  { id:'rashed',   name:'خالد الراشد',            q:'خالد الراشد',
+    ids:['kalrashed','khaledRashedmp3','khalid-alrashid-m','khaled-alrashed_94_Lectures_Mp3_up-by-muslem'] },
+  { id:'suwaidan', name:'طارق السويدان',          q:'طارق السويدان',
+    ids:['keddo_is4','Islamic_Hustory','scrom.miui.gallery'] },
+  { id:'munajjid', name:'محمد صالح المنجّد',       q:'محمد صالح المنجد',
+    ids:['Mohammed_saleh_munajjid_mp3','islami-689','297-mohammad-sale7-almonged--dros-khotab-droos-dars-khotba-islamic-almawso3a'] },
+  { id:'uthaymin', name:'ابن عثيمين',             q:'ابن عثيمين',
+    ids:['Uthaymin-doros','Islamic_Tape-846_uP_bY_mUSLEm','Riyad_As-Salihin_al-othaymeen','thalathah_alosool_othaimeen_C_03'] },
+  { id:'baz',      name:'ابن باز',                q:'ابن باز',
+    ids:['Ibn_Baz_uP_bY_mUSLEm','Fatawa_ibn_Baz_bY_mUSLEm','056-up-by-muslem','0006_20231225'] },
+  { id:'albani',   name:'الألباني',               q:'الألباني الهدى والنور',
+    ids:['AlHodaWaAlNoor_albani-mp3','selselat_Alhoda-wa-nnor_Torath_Cheikh_Al_Albani_up-by-muslem','Silsilat_Al-Huda_Wan-Noor'] },
+  { id:'benhamza', name:'مصطفى بنحمزة',           q:'مصطفى بنحمزة',
+    ids:['mantiq_doroos','OssolAlFiqh'] },
+  { id:'tantawi',  name:'علي الطنطاوي',           q:'علي الطنطاوي',
+    ids:['blindeg_201509'] }
 ];
 const AV_RE=/\.(mp3|mp4|m4a)$/i;
 /* عناوين الأرشيف تأتي أحيانًا بترميز windows-1256 (أو utf-8) مقروءًا على أنّه latin-1،
@@ -2483,11 +2500,12 @@ async function fetchDuat(d, more){
     const it=await archiveItem(id);
     if(it) out=out.concat(it.files.filter(f=>!f.q));
   }
-  if(!__duatPool[d.id] || (more && !__duatPool[d.id].length)){
+  const needSearch = !!d.q && (more || out.length<5);
+  if(needSearch && (!__duatPool[d.id] || (more && !__duatPool[d.id].length))){
     __duatPage[d.id]=(__duatPage[d.id]||0)+1;
-    __duatPool[d.id]=await archiveSearch(d.q||d.name, __duatPage[d.id]);
+    __duatPool[d.id]=await archiveSearch(d.q, __duatPage[d.id]);
   }
-  const pool=__duatPool[d.id]||[];
+  const pool=(needSearch && __duatPool[d.id]) ? __duatPool[d.id] : [];
   let taken=0;
   while(pool.length && taken<3 && out.length<300){
     const it=await archiveItem(pool.shift());
