@@ -2099,7 +2099,7 @@ async function fetchStories(){
       if(!files.length) continue;
       const base='https://archive.org/download/'+id+'/';
       const list=files.map(f=>({
-        name:(f.title||f.name||'').replace(/\.mp3$/i,''),
+        name: cleanTitle((f.title||f.name||'').replace(/\.mp3$/i,'')),
         url: base+encodeURIComponent(f.name),
         dur: fmtDur(f.length)
       })).sort((a,b)=> a.name.localeCompare(b.name,'ar',{numeric:true}));
@@ -2354,11 +2354,37 @@ const DUAT = [
   { id:'uthaymin', name:'ابن عثيمين',            q:'ابن عثيمين' },
   { id:'baz',      name:'ابن باز',               q:'ابن باز' },
   { id:'albani',   name:'الألباني',              q:'الألباني' },
+  { id:'kamali',   name:'سعيد الكملي',            q:'سعيد الكملي' },
   { id:'benhamza', name:'مصطفى بنحمزة',          q:'مصطفى بنحمزة' },
   { id:'qazabri',  name:'عمر القزابري',          q:'عمر القزابري' },
   { id:'tantawi',  name:'علي الطنطاوي',          q:'علي الطنطاوي' }
 ];
 const AV_RE=/\.(mp3|mp4|m4a)$/i;
+/* عناوين الأرشيف تأتي أحيانًا بترميز windows-1256 (أو utf-8) مقروءًا على أنّه latin-1،
+   فتظهر حروفًا مشوّشة مثل «ÓæÑÉ ÇáÝÇÊÍÉ». نُعيد فكّها هنا عند العرض. */
+const CP1252_BACK={'\u20AC':0x80,'\u201A':0x82,'\u0192':0x83,'\u201E':0x84,'\u2026':0x85,'\u2020':0x86,'\u2021':0x87,'\u02C6':0x88,'\u2030':0x89,'\u0160':0x8A,'\u2039':0x8B,'\u0152':0x8C,'\u017D':0x8E,'\u2018':0x91,'\u2019':0x92,'\u201C':0x93,'\u201D':0x94,'\u2022':0x95,'\u2013':0x96,'\u2014':0x97,'\u02DC':0x98,'\u2122':0x99,'\u0161':0x9A,'\u203A':0x9B,'\u0153':0x9C,'\u017E':0x9E,'\u0178':0x9F};
+function fixMojibake(t){
+  let s=String(t||'');
+  if(!s || /[؀-ۿ]/.test(s)) return s;      // عربيّ سليم أصلًا
+  if(!/[¡-ÿ]/.test(s)) return s;           // لا شيء يُفكّ
+  let bytes;
+  try{
+    bytes=new Uint8Array([...s].map(c=>{
+      const n=c.codePointAt(0);
+      if(n<=0xFF) return n;
+      const b=CP1252_BACK[c];           // ‚ƒ„…†‡ˆ‰Š‹Œ… تُقابل بايتات 80–9F
+      if(b==null) throw new Error('x');
+      return b;
+    }));
+  }catch(e){ return s; }
+  for(const enc of ['utf-8','windows-1256']){
+    try{
+      const out=new TextDecoder(enc,{fatal:true}).decode(bytes);
+      if(/[؀-ۿ]/.test(out)) return out.replace(/\s{2,}/g,' ').trim();
+    }catch(e){}
+  }
+  return s;
+}
 function driveUrls(id){
   return [ 'https://drive.usercontent.google.com/download?id='+id+'&export=download',
            'https://drive.google.com/uc?export=download&id='+id ];
@@ -2366,6 +2392,16 @@ function driveUrls(id){
 let __duatCur=null, __duatItems=[], __duatPlaying=null, __duatLoading=false;
 const __duatCache={};
 
+/* عنوانٌ أنظف: إن كان فيه اسمٌ عربيّ كاملٌ إلى جانب نقحرةٍ لاتينيّة، نُبقي العربيّة والأرقام */
+function cleanTitle(t){
+  const s=fixMojibake(t);
+  if(!/[؀-ۿ]/.test(s) || !/[A-Za-z]{3}/.test(s)) return s;
+  const ar=s.replace(/[A-Za-z][A-Za-z'’\-]*/g,' ')
+            .replace(/\s{2,}/g,' ')
+            .replace(/^[\s._\-]+|[\s._\-]+$/g,'');
+  const n=(ar.match(/[؀-ۿ]/g)||[]).length;
+  return n>=8 ? ar : s;
+}
 async function archiveItem(id){
   try{
     const r=await fetch('https://archive.org/metadata/'+id, {mode:'cors'});
@@ -2375,7 +2411,7 @@ async function archiveItem(id){
     if(!files.length) return [];
     const base='https://archive.org/download/'+id+'/';
     return files.map(f=>({
-      name:(f.title||f.name||'').replace(AV_RE,''),
+      name: cleanTitle((f.title||f.name||'').replace(AV_RE,'')),
       url: base+encodeURIComponent(f.name),
       dur: fmtDur(f.length),
       vid: /\.mp4$/i.test(f.name||'')
