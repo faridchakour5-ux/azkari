@@ -2312,27 +2312,67 @@ function findCutRow(ctx, W, from, to, bg){
   }
   return to;
 }
+/* ترويسةٌ وتذييلٌ في كلّ صفحة من PDF، فيهما اسم الموقع */
+function drawPdfBands(g, W, pageH, HEAD, FOOT, S, no, total){
+  const bg=cssVar('--bg','#F7F3E8'), acc=cssVar('--accent','#2F9E44'),
+        t2=cssVar('--text-2','#6B6357'), sep=cssVar('--sep','rgba(0,0,0,.12)');
+  const PAD=Math.round(22*S);
+  g.save();
+  g.direction='rtl'; g.textBaseline='alphabetic';
+  // الترويسة
+  g.fillStyle=bg; g.fillRect(0,0,W,HEAD);
+  g.strokeStyle=sep; g.lineWidth=Math.max(1,Math.round(S));
+  g.beginPath(); g.moveTo(PAD,HEAD-0.5*S); g.lineTo(W-PAD,HEAD-0.5*S); g.stroke();
+  g.font='700 '+Math.round(13*S)+"px 'PlexAr',sans-serif";
+  g.textAlign='right'; g.fillStyle=t2;
+  g.fillText('صلاتي — أذكار ومصحف', W-PAD, HEAD-Math.round(12*S));
+  g.textAlign='left'; g.fillStyle=acc;
+  g.fillText('www.salatee.org', PAD, HEAD-Math.round(12*S));
+  // التذييل
+  const fy=pageH-FOOT;
+  g.fillStyle=bg; g.fillRect(0,fy,W,FOOT);
+  g.beginPath(); g.moveTo(PAD,fy+0.5*S); g.lineTo(W-PAD,fy+0.5*S); g.stroke();
+  const by=fy+Math.round(25*S);
+  g.font='700 '+Math.round(13.5*S)+"px 'PlexAr',sans-serif";
+  g.textAlign='right'; g.fillStyle=acc;
+  g.fillText('www.salatee.org', W-PAD, by);
+  if(total>1){
+    g.font='600 '+Math.round(12*S)+"px 'PlexAr',sans-serif";
+    g.textAlign='left'; g.fillStyle=t2;
+    g.fillText('صفحة '+AR(no)+' من '+AR(total), PAD, by);
+  }
+  g.restore();
+}
 /* الصورة نفسها مقسّمةً إلى صفحاتٍ بنسبة A4 — فيخرج PDF مطابقًا للهاتف بألوانه */
 async function shotToPages(innerHTML, title, sub){
+  await qpEnsureFonts();
   const cv=await shotToCanvas(innerHTML,title,sub);
   const W=cv.width, H=cv.height;
   // أقصر بقليلٍ من نسبة A4 حتى لا تفيض الصورة فتُولّد صفحةً بيضاء بعد كلّ صفحة
   const pageH=Math.floor(W*297/210)-2;
+  const S=W/620;                              // البطاقة تُبنى بعرض 620 نقطة
+  const HEAD=Math.round(36*S), FOOT=Math.round(40*S);
+  const bodyH=pageH-HEAD-FOOT;
   const g0=cv.getContext('2d');
   const bg=g0.getImageData(2,2,1,1).data;
-  if(H<=pageH*1.02) return [cv.toDataURL('image/png')];
-  const pages=[]; let y=0;
-  while(y<H && pages.length<40){
-    let end=Math.min(y+pageH,H);
-    if(end<H) end=findCutRow(g0,W,y+Math.round(pageH*0.7),end,bg);
-    const h=end-y;
+  const bgcss='rgb('+bg[0]+','+bg[1]+','+bg[2]+')';
+  // تمريرٌ أوّل: مواضع القطع، لنعرف عدد الصفحات قبل الرسم
+  const cuts=[]; let y=0;
+  while(y<H && cuts.length<40){
+    let end=Math.min(y+bodyH,H);
+    if(end<H) end=findCutRow(g0,W,y+Math.round(bodyH*0.7),end,bg);
+    cuts.push([y,end]); y=end;
+  }
+  // تمريرٌ ثانٍ: الرسم مع الترويسة والتذييل
+  const pages=[];
+  cuts.forEach(([a,z],i)=>{
     const c2=document.createElement('canvas'); c2.width=W; c2.height=pageH;
     const g=c2.getContext('2d');
-    g.fillStyle='rgb('+bg[0]+','+bg[1]+','+bg[2]+')'; g.fillRect(0,0,W,pageH);
-    g.drawImage(cv, 0,y,W,h, 0,0,W,h);
+    g.fillStyle=bgcss; g.fillRect(0,0,W,pageH);
+    g.drawImage(cv, 0,a,W,(z-a), 0,HEAD,W,(z-a));
+    drawPdfBands(g, W, pageH, HEAD, FOOT, S, i+1, cuts.length);
     pages.push(c2.toDataURL('image/png'));
-    y=end;
-  }
+  });
   return pages;
 }
 async function printShot(innerHTML, title, sub){
