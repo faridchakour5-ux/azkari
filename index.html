@@ -768,11 +768,21 @@
   .share-btn:active{transform:scale(.94);}
   .fq-share{display:flex; justify-content:center; margin-top:20px;}
   .fq-share .share-btn{font-size:13.5px; padding:10px 18px; background:var(--c-read-bg);}
+  .print-pg{display:none;}
   @media print{
+    @page{margin:0;}
     body.printing > *{display:none !important;}
     body.printing #print-area{display:block !important;}
-    body.printing .share-shot{width:100% !important; background:#fff !important;}
-    @page{margin:12mm;}
+    /* صفحاتٌ صُوَريّة: تحفظ الألوان والخطوط كما تُرى على الهاتف تمامًا */
+    body.printing{margin:0 !important; padding:0 !important;}
+    body.printing #print-area{margin:0; padding:0;}
+    body.printing .print-pg{display:block !important; width:100%; margin:0; vertical-align:top;
+      page-break-after:always; break-after:page;}
+    body.printing .print-pg.last{page-break-after:auto; break-after:auto;}
+    /* الاحتياط إن تعذّرت الصورة: نطبع العناصر مع فرض الألوان */
+    body.printing .share-shot{width:100% !important;
+      -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    body.printing .share-shot *{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
   }
   /* قائمة الدعاة المنسدلة */
   .duat-pick{display:flex; align-items:center; gap:9px; width:calc(100% - 32px); margin:2px 16px 10px;
@@ -2290,14 +2300,60 @@ function shareShotNow(){
     else showToast('تعذّر إنشاء الصورة — جرّب PDF', 3800);
   });
 }
-function printShot(innerHTML, title, sub){
+/* يبحث عن سطرٍ فارغٍ قريبٍ من موضع القطع حتى لا يُقطع النصّ في منتصفه */
+function findCutRow(ctx, W, from, to, bg){
+  for(let y=to; y>from; y--){
+    const d=ctx.getImageData(0,y,W,1).data;
+    let uniform=true;
+    for(let i=0;i<d.length;i+=32){
+      if(Math.abs(d[i]-bg[0])>6 || Math.abs(d[i+1]-bg[1])>6 || Math.abs(d[i+2]-bg[2])>6){ uniform=false; break; }
+    }
+    if(uniform) return y;
+  }
+  return to;
+}
+/* الصورة نفسها مقسّمةً إلى صفحاتٍ بنسبة A4 — فيخرج PDF مطابقًا للهاتف بألوانه */
+async function shotToPages(innerHTML, title, sub){
+  const cv=await shotToCanvas(innerHTML,title,sub);
+  const W=cv.width, H=cv.height;
+  // أقصر بقليلٍ من نسبة A4 حتى لا تفيض الصورة فتُولّد صفحةً بيضاء بعد كلّ صفحة
+  const pageH=Math.floor(W*297/210)-2;
+  const g0=cv.getContext('2d');
+  const bg=g0.getImageData(2,2,1,1).data;
+  if(H<=pageH*1.02) return [cv.toDataURL('image/png')];
+  const pages=[]; let y=0;
+  while(y<H && pages.length<40){
+    let end=Math.min(y+pageH,H);
+    if(end<H) end=findCutRow(g0,W,y+Math.round(pageH*0.7),end,bg);
+    const h=end-y;
+    const c2=document.createElement('canvas'); c2.width=W; c2.height=pageH;
+    const g=c2.getContext('2d');
+    g.fillStyle='rgb('+bg[0]+','+bg[1]+','+bg[2]+')'; g.fillRect(0,0,W,pageH);
+    g.drawImage(cv, 0,y,W,h, 0,0,W,h);
+    pages.push(c2.toDataURL('image/png'));
+    y=end;
+  }
+  return pages;
+}
+async function printShot(innerHTML, title, sub){
   const pa=$('#print-area'); if(!pa) return;
-  pa.innerHTML=''; pa.appendChild(buildShotNode(innerHTML,title,sub));
+  showToast('…جارٍ تحضير الصفحات', 2400);
+  let pages=null;
+  try{ pages=await shotToPages(innerHTML,title,sub); }catch(e){ pages=null; }
+  if(pages && pages.length){
+    pa.innerHTML=pages.map((u,i)=>
+      '<img class="print-pg'+(i===pages.length-1?' last':'')+'" src="'+u+'" alt="">').join('');
+    await Promise.all([...pa.querySelectorAll('img')].map(im=>
+      im.complete ? Promise.resolve() : new Promise(r=>{ im.onload=im.onerror=r; })));
+  } else {
+    // احتياط: طباعة العناصر نفسها مع فرض الألوان
+    pa.innerHTML=''; pa.appendChild(buildShotNode(innerHTML,title,sub));
+  }
   document.body.classList.add('printing');
   setTimeout(()=>{
     try{ window.print(); }catch(e){}
-    setTimeout(()=>{ document.body.classList.remove('printing'); pa.innerHTML=''; }, 900);
-  }, 90);
+    setTimeout(()=>{ document.body.classList.remove('printing'); pa.innerHTML=''; }, 1200);
+  }, 150);
 }
 /* HTML بطاقةٍ معروضة (بابُ فقهٍ مثلًا) بعد نزع الأزرار */
 function cardShotHTML(sel){
