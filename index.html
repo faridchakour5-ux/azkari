@@ -2300,15 +2300,24 @@ function shareShotNow(){
     else showToast('تعذّر إنشاء الصورة — جرّب PDF', 3800);
   });
 }
-/* يبحث عن سطرٍ فارغٍ قريبٍ من موضع القطع حتى لا يُقطع النصّ في منتصفه */
-function findCutRow(ctx, W, from, to, bg){
-  for(let y=to; y>from; y--){
-    const d=ctx.getImageData(0,y,W,1).data;
+/* يبحث عن فراغٍ بين السطور قرب موضع القطع.
+   السطر «فارغ» إذا كان لونه واحدًا على عرضه كلّه — أيًّا كان هذا اللون،
+   فالقطع قد يقع داخل بطاقةٍ لونها غير لون الصفحة. ونشترط عدّة أسطرٍ
+   متتالية ثمّ نقطع في وسطها، حتى لا يُقطع حرفٌ أبدًا. */
+function findCutRow(ctx, W, from, to){
+  from=Math.max(0,from); if(to-from<8) return to;
+  let img; try{ img=ctx.getImageData(0,from,W,to-from+1); }catch(e){ return to; }
+  const d=img.data, stride=W*4, rows=to-from+1;
+  let run=0;
+  for(let ry=rows-1; ry>=0; ry--){
+    const o=ry*stride;
+    const r=d[o], g=d[o+1], b=d[o+2];
     let uniform=true;
-    for(let i=0;i<d.length;i+=32){
-      if(Math.abs(d[i]-bg[0])>6 || Math.abs(d[i+1]-bg[1])>6 || Math.abs(d[i+2]-bg[2])>6){ uniform=false; break; }
+    for(let i=o+4; i<o+stride; i+=4){
+      if(Math.abs(d[i]-r)>8 || Math.abs(d[i+1]-g)>8 || Math.abs(d[i+2]-b)>8){ uniform=false; break; }
     }
-    if(uniform) return y;
+    if(uniform){ run++; if(run>=5) return from+ry+Math.floor(run/2); }
+    else run=0;
   }
   return to;
 }
@@ -2360,7 +2369,7 @@ async function shotToPages(innerHTML, title, sub){
   const cuts=[]; let y=0;
   while(y<H && cuts.length<40){
     let end=Math.min(y+bodyH,H);
-    if(end<H) end=findCutRow(g0,W,y+Math.round(bodyH*0.7),end,bg);
+    if(end<H) end=findCutRow(g0,W,y+Math.round(bodyH*0.55),end);
     cuts.push([y,end]); y=end;
   }
   // تمريرٌ ثانٍ: الرسم مع الترويسة والتذييل
