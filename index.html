@@ -974,7 +974,12 @@
     <div id="duat-list"></div>
   </div>
   <div class="stories-box" id="stories-box" style="display:none">
-    <div class="stories-note">سلسلة قصص الأنبياء — الشيخ نبيل العوضي · تُشغَّل من أرشيف الإنترنت (يحتاج اتصالًا)</div>
+    <button class="duat-pick" id="stories-pick" type="button">
+      <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h4"/><path d="M15 7h4"/><circle cx="12" cy="12" r="9"/></svg>
+      <span class="dp-nm" id="stories-name">اختر السلسلة</span>
+      <span class="chev">&#8964;</span>
+    </button>
+    <div class="stories-note" id="stories-note">اختر سلسلةً من القائمة · تُشغَّل من أرشيف الإنترنت (يحتاج اتصالًا)</div>
     <div id="stories-list"></div>
   </div>
   <div style="height:20px"></div>
@@ -2093,44 +2098,52 @@ function markBookmarkedAya(){
 }
 /* ==================== قصص الأنبياء (الشيخ نبيل العوضي) ====================
    تُجلب قائمة الحلقات من أرشيف الإنترنت وقت الاستعمال، فلا تتعطّل بروابط ثابتة. */
-const STORY_IDS=['qasas-anbiya','prophets_stories_Nabel-ElAwadde','Kassas.Anbiyaa_Sheikh.Nabil.Al3awadhy'];
-let __stories=null, __storyLoading=false, __storyPlaying=null;
+/* سلاسل قصص الأنبياء — من عدّة شيوخ، ولكلّ سلسلةٍ معرّفاتٌ محقَّقة في الأرشيف */
+const QISAS = [
+  { id:'awadi',  name:'قصص الأنبياء — نبيل العوضي',
+    ids:['qasas-anbiya','Kassas.Anbiyaa_Sheikh.Nabil.Al3awadhy','prophets_stories_Nabel-ElAwadde',
+         'Selselet_9isas_al-anbia_Cheikh_Nabil_Al-awadi_up-by-muslem','way_12_20160523'] },
+  { id:'khamis', name:'قصص الأنبياء — عثمان الخميس',
+    ids:['Qisas_al_Anbiya','Prophets_stories-othman_khamis_up_by_muslem','khamis-kasas'] },
+  { id:'suwaidan', name:'قصص الأنبياء — طارق السويدان',
+    ids:['yt-1s.com-01'] },
+  { id:'abdelmalik', name:'قصص الأنبياء — محمد عبد الملك',
+    ids:['rabi23462363265eaaa2020_yahoo_65'] },
+  { id:'baqa',   name:'قصص الأنبياء — باقةٌ من الشيوخ',
+    ids:['Prophets_stories_up_by_muslem'] },
+  { id:'ahsan',  name:'أحسن القصص — مجموعة',
+    ids:['beststories'] }
+];
+let __stories=null, __storyLoading=false, __storyPlaying=null, __qisasCur=null;
+const __qisasCache={};
 function fmtDur(sec){
   const s=Math.round(parseFloat(sec)||0); if(!s) return '';
   const h=Math.floor(s/3600), m=Math.floor((s%3600)/60);
   return h? (AR(h)+':'+String(m).padStart(2,'0')) : (AR(m)+' د');
 }
-async function fetchStories(){
-  if(__stories) return __stories;
-  for(const id of STORY_IDS){
-    try{
-      const res=await fetch('https://archive.org/metadata/'+id, {mode:'cors'});
-      if(!res.ok) continue;
-      const d=await res.json();
-      const files=(d.files||[]).filter(f=>/\.mp3$/i.test(f.name||''));
-      if(!files.length) continue;
-      const base='https://archive.org/download/'+id+'/';
-      const list=files.map(f=>({
-        name: cleanTitle((f.title||f.name||'').replace(/\.mp3$/i,'')),
-        url: base+encodeURIComponent(f.name),
-        dur: fmtDur(f.length)
-      })).sort((a,b)=> a.name.localeCompare(b.name,'ar',{numeric:true}));
-      __stories=list; return list;
-    }catch(e){ /* جرّب المعرّف التالي */ }
+async function fetchQisas(q){
+  if(__qisasCache[q.id]) return __qisasCache[q.id];
+  let best=null;
+  for(const id of (q.ids||[])){
+    const it=await archiveItem(id);
+    if(!it || !it.files.length) continue;
+    if(!best || it.files.length>best.length) best=it.files;
+    if(it.files.length>=3) break;          // سلسلةٌ معتبرة، يكفي
   }
-  return null;
+  if(best) __qisasCache[q.id]=best;
+  return best;
 }
 function renderStories(list){
   const box=$('#stories-list'); if(!box) return;
   if(!list || !list.length){
-    box.innerHTML='<div class="search-hint">تعذّر تحميل الحلقات — تحقّق من الإنترنت ثمّ أعِد المحاولة.</div>';
+    box.innerHTML='<div class="search-hint">تعذّر تحميل هذه السلسلة — جرّب سلسلةً أخرى أو تحقّق من الإنترنت.</div>';
     return;
   }
   box.innerHTML=list.map((s,i)=>
-    '<button class="story-item" data-i="'+i+'">'+
+    '<button class="story-item'+(s.bad?' bad':'')+'" data-i="'+i+'">'+
       '<span class="st-ic">'+ICON_PLAY+'</span>'+
       '<span class="st-nm">'+escapeHtml(s.name)+'</span>'+
-      '<span class="st-du">'+escapeHtml(s.dur)+'</span>'+
+      '<span class="st-du">'+escapeHtml(s.bad?'تعذّر':(s.dur||''))+'</span>'+
     '</button>').join('');
   box.querySelectorAll('.story-item').forEach(b=> b.addEventListener('click', ()=> playStory(parseInt(b.dataset.i))));
   markStory();
@@ -2138,34 +2151,60 @@ function renderStories(list){
 function markStory(){
   const a=$('#reciter-audio');
   const cur=(a && !a.paused && __storyPlaying!=null) ? __storyPlaying : null;
-  document.querySelectorAll('.story-item').forEach(b=>{
+  document.querySelectorAll('#stories-list .story-item').forEach(b=>{
     const on = parseInt(b.dataset.i)===cur;
     b.classList.toggle('on', on);
     b.querySelector('.st-ic').innerHTML = on ? ICON_PAUSE : ICON_PLAY;
   });
 }
 function playStory(i){
-  const a=$('#reciter-audio'); if(!a || !__stories || !__stories[i]) return;
-  if(__storyPlaying===i && !a.paused){ a.pause(); return; }
-  __storyPlaying=i; __audioSura=null;
-  a.src=__stories[i].url; a.currentTime=0;
-  a.play().catch(()=> showToast('تعذّر تشغيل الحلقة — تحقّق من الإنترنت', 3500));
+  const a=$('#reciter-audio'); const c=__stories && __stories[i]; if(!a || !c) return;
+  if(__storyPlaying===i && !a.paused){ a.pause(); markStory(); return; }
+  __storyPlaying=i; __duatPlaying=null; __audioSura=null;
+  const urls=[c.url, c.alt].filter(Boolean);
+  const tryUrl=k=>{
+    if(k>=urls.length){
+      a.onerror=null; c.bad=true; __storyPlaying=null;
+      showToast('تعذّر تشغيل هذه الحلقة — جرّب غيرها أو سلسلةً أخرى', 4200);
+      renderStories(__stories); return;
+    }
+    a.src=urls[k]; a.currentTime=0;
+    a.play().then(()=>{ a.onerror=null; c.bad=false; }).catch(()=> tryUrl(k+1));
+    a.onerror=()=> tryUrl(k+1);
+  };
+  tryUrl(0);
   vibrate(6);
   if('mediaSession' in navigator){
-    try{ navigator.mediaSession.metadata=new MediaMetadata({ title:__stories[i].name, artist:'الشيخ نبيل العوضي', album:'قصص الأنبياء' }); }catch(e){}
+    try{ navigator.mediaSession.metadata=new MediaMetadata({
+      title:c.name, artist:(__qisasCur?__qisasCur.name:'قصص الأنبياء'), album:'قصص الأنبياء' }); }catch(e){}
   }
   markStory();
 }
 ['play','pause','ended'].forEach(ev=> $('#reciter-audio') && $('#reciter-audio').addEventListener(ev, ()=>{ try{ markStory(); }catch(e){} }));
-async function openStories(){
-  const box=$('#stories-list'); if(!box) return;
-  if(__stories) return renderStories(__stories);
-  if(__storyLoading) return;
+function openQisasPicker(){
+  openLabelOverlay(QISAS.map(q=>({id:q.id,label:q.name})), __qisasCur?__qisasCur.id:null,
+    id=>{ closeSuraOverlay(); pickQisas(id); }, 'اختر السلسلة');
+}
+async function pickQisas(id){
+  const q=QISAS.find(x=>x.id===id); if(!q) return;
+  __qisasCur=q; __storyPlaying=null; __stories=null;
+  const nm=$('#stories-name'); if(nm) nm.textContent=q.name;
+  const nt=$('#stories-note'); if(nt) nt.textContent=q.name+' · تُشغَّل من أرشيف الإنترنت';
+  try{ store.set('az_qisas', id); }catch(e){}
+  const box=$('#stories-list');
+  if(box) box.innerHTML='<div class="search-hint">…جارٍ تحميل الحلقات</div>';
   __storyLoading=true;
-  box.innerHTML='<div class="search-hint">…جارٍ تحميل الحلقات</div>';
-  const list=await fetchStories();
-  __storyLoading=false;
+  const list=await fetchQisas(q);
+  if(__qisasCur!==q) return;
+  __storyLoading=false; __stories=list;
   renderStories(list);
+}
+async function openStories(){
+  const btn=$('#stories-pick');
+  if(btn && !btn.__wired){ btn.__wired=true; btn.addEventListener('click', ()=>{ vibrate(6); openQisasPicker(); }); }
+  if(__qisasCur) return renderStories(__stories);
+  const saved=store.get('az_qisas', null);
+  return pickQisas((saved && QISAS.find(q=>q.id===saved)) ? saved : QISAS[0].id);
 }
 /* ==================== المشاركة: صورة أو PDF لأيّ شيء ====================
    يُلتقط المحتوى كما هو معروضٌ بخطوطه وألوانه عبر SVG/foreignObject —
