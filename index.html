@@ -1231,7 +1231,7 @@
     <div class="row"><span class="k">نص القرآن</span><span class="v" id="quran-src">رواية حفص</span></div>
     <a class="row" href="privacy.html" style="text-decoration:none; color:inherit;"><span class="k">سياسة الخصوصية</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
   </div>
-  <div class="gnote">الأذكار من كتاب «حصن المسلم». الخط المغربي مأخوذ من المصحف المحمدي (رواية ورش). اللهم تقبّل واغفر لنا.</div>
+  <div class="gnote">الأذكار من كتاب «حصن المسلم». ونصّ ورش يُعرض بالخطّ المغربي. اللهم تقبّل واغفر لنا.</div>
   <div style="height:30px"></div>
 </section>
 
@@ -1369,7 +1369,7 @@ function applyRiwaya(){
   const hafsMag = (settings.hafsFont||'maghribi')==='maghribi';
   $('#quran-src').textContent = settings.riwaya==='warsh' ? 'ورش — الخط المغربي' : (hafsMag ? 'حفص — الخط المغربي' : 'حفص — خط النسخ');
   $('#riwaya-note').textContent = settings.riwaya==='warsh'
-    ? 'الآيات بالخط المغربي من المصحف المحمدي. الأدعية موحَّدة في الروايتين.'
+    ? 'رواية ورش عن نافع بالخطّ المغربي. الأدعية موحَّدة في الروايتين.'
     : (hafsMag
         ? 'رواية حفص عن عاصم بحروف الخط المغربي — وتُستكمل رموز حفص الخاصة من خط النسخ.'
         : 'رواية حفص عن عاصم بخط النسخ — المعتمدة في أغلب العالم الإسلامي.');
