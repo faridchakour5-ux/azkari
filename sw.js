@@ -1,5 +1,5 @@
-/* صلاتي — service worker v168 */
-const CACHE = 'azkari-v168';
+/* صلاتي — service worker v169 */
+const CACHE = 'azkari-v169';
 const ASSETS = [
   './',
   './index.html',

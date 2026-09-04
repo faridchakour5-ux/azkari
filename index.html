@@ -1229,9 +1229,11 @@
     <div class="row"><span class="k">الإصدار</span><span class="v" id="app-ver">—</span></div>
     <div class="row"><span class="k">الأذكار</span><span class="v">حصن المسلم</span></div>
     <div class="row"><span class="k">نص القرآن</span><span class="v" id="quran-src">رواية حفص</span></div>
+    <div class="row"><span class="k">مرجع حفص</span><span class="v">مصحف الملك فهد</span></div>
+    <div class="row"><span class="k">مرجع ورش</span><span class="v">المصحف المحمدي</span></div>
     <a class="row" href="privacy.html" style="text-decoration:none; color:inherit;"><span class="k">سياسة الخصوصية</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
   </div>
-  <div class="gnote">الأذكار من كتاب «حصن المسلم». ونصّ ورش يُعرض بالخطّ المغربي. اللهم تقبّل واغفر لنا.</div>
+  <div class="gnote">الأذكار من كتاب «حصن المسلم». ونصّ القرآن: رواية حفص عن <b>مصحف الملك فهد</b>، ورواية ورش عن <b>المصحف المحمدي</b>. اللهم تقبّل واغفر لنا.</div>
   <div style="height:30px"></div>
 </section>
 
@@ -1369,10 +1371,10 @@ function applyRiwaya(){
   const hafsMag = (settings.hafsFont||'maghribi')==='maghribi';
   $('#quran-src').textContent = settings.riwaya==='warsh' ? 'ورش — الخط المغربي' : (hafsMag ? 'حفص — الخط المغربي' : 'حفص — خط النسخ');
   $('#riwaya-note').textContent = settings.riwaya==='warsh'
-    ? 'رواية ورش عن نافع بالخطّ المغربي. الأدعية موحَّدة في الروايتين.'
+    ? 'رواية ورش عن نافع — عن المصحف المحمدي، بالخطّ المغربي. الأدعية موحَّدة في الروايتين.'
     : (hafsMag
-        ? 'رواية حفص عن عاصم بحروف الخط المغربي — وتُستكمل رموز حفص الخاصة من خط النسخ.'
-        : 'رواية حفص عن عاصم بخط النسخ — المعتمدة في أغلب العالم الإسلامي.');
+        ? 'رواية حفص عن عاصم — عن مصحف الملك فهد، بحروف الخطّ المغربي.'
+        : 'رواية حفص عن عاصم — عن مصحف الملك فهد، بخطّ النسخ.');
   if(currentTab==='evening'||currentTab==='morning') renderAzkar();
   if(window.__wirdReady){ WIRD=null; if($('#s-wird').classList.contains('active')) openWird(); }
   if(typeof syncRiwayaPills==='function') syncRiwayaPills();

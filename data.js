@@ -1,4 +1,6 @@
-/* Adhkar: du'as from Hisn al-Muslim (MIT). Qur'an: King Fahd Complex (KFGQPC) certified text — Hafs (Uthmani) + Warsh. */
+/* Adhkar: du'as from Hisn al-Muslim (MIT).
+   Qur'an — Hafs: King Fahd Complex mushaf (KFGQPC, Uthmani).
+   Qur'an — Warsh: al-Mushaf al-Muhammadi (Morocco). */
 window.AZKAR = {
  "morning": [
   {
