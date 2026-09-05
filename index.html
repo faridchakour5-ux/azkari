@@ -732,6 +732,8 @@
   .sura-sheet-head button{border:0; background:var(--fill); color:var(--text-2); width:32px; height:32px;
     border-radius:50%; font-size:14px; line-height:1;}
   .sura-list{overflow-y:auto; padding:6px 0; -webkit-overflow-scrolling:touch;}
+  /* ورقة الاختيار (ومنها ورقة «شارِك») فوق ورقة التفسير، وإلا اختفت خلفها */
+  #sura-overlay{z-index:100;}
   /* التفسير: الآية قابلة للّمس + الورقة السفلية */
   .aya-t{cursor:pointer; border-radius:6px; transition:background-color .2s;}
   .aya-t.tsel{background:var(--c-repeat-bg);}
@@ -744,7 +746,9 @@
   .tafsir-body .t-txt{font-size:16px; line-height:2.05; color:var(--text); text-align:justify; white-space:pre-wrap;}
   .tafsir-body .t-intro{background:var(--fill-2); border-radius:14px; padding:12px 14px; margin-bottom:14px;
     font-size:14.5px; line-height:1.95; color:var(--text-2); white-space:pre-wrap; text-align:justify;}
-  .tafsir-body .t-src{margin-top:16px; font-size:12px; color:var(--text-3); text-align:center;}
+  .tafsir-body .t-src{margin-top:14px; padding-top:10px; border-top:1px solid var(--sep);
+    font-size:13.5px; line-height:1.85; color:var(--text-2);}
+  .tafsir-body .t-src .lbl{color:var(--accent); font-weight:800; font-size:12.5px; margin-left:6px;}
   .tafsir-body .t-note{font-size:14.5px; line-height:1.9; color:var(--text-2); text-align:center; padding:10px 0;}
 
   /* ==== المشاركة: بطاقة الالتقاط (صورة أو PDF) ==== */
@@ -1296,6 +1300,10 @@ if(!settings.__d5){ settings.__d5=1; settings.notif=true; settings.salat=true; s
 if(!settings.__d6){ settings.__d6=1; settings.quranColor='blue2'; store.set('az_settings', settings); }
 // ترقية: رواية ورش (بالخط المغربي) هي الافتراضية للعرض والكتابة
 if(!settings.__d9){ settings.__d9=1; settings.riwaya='warsh'; store.set('az_settings', settings); }
+// ترقية: فصلُ علامة القراءة اليدويّة عن موضع التمرير المحفوظ تلقائيًّا
+if(!settings.__d10){ settings.__d10=1;
+  if(settings.mushafPos && settings.mushafPos.ai!=null) settings.mushafMark={ ai: settings.mushafPos.ai };
+  store.set('az_settings', settings); }
 if(!settings.__d10){ settings.__d10=1; settings.autoReadLevel=1.75; store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', white:'#F2F2F7', dark:'#121212' };
@@ -1840,9 +1848,11 @@ $('#salat-toast') && $('#salat-toast').addEventListener('click', ()=> $('#salat-
     if(ov && ov.classList.contains('show')){
       closeSuraOverlay(); history.pushState({az:1},''); return;
     }
-    // 2) فتح الفضل داخل بطاقة ذكر → أغلقه
-    const openFadl=document.querySelector('.fadl.open');
-    if(openFadl){ openFadl.classList.remove('open'); history.pushState({az:1},''); return; }
+    // 2) ورقة التفسير مفتوحة → أغلقها
+    const tf=$('#tafsir-overlay');
+    if(tf && tf.classList.contains('show')){
+      closeTafsir(); history.pushState({az:1},''); return;
+    }
     // 3) لست في تبويب الأذكار → ارجع إليه
     const active=document.querySelector('.tab.on');
     if(active && active.dataset.s!=='s-azkar'){
@@ -2104,9 +2114,9 @@ function buildMushaf(body){
 /* وضع علامة مرئية عند الآية المحفوظة (إن وُجدت) */
 function markBookmarkedAya(){
   const old=document.querySelector('#wird-body .wird-num.bm'); if(old) old.classList.remove('bm');
-  const sp=settings.mushafPos;
-  if(!sp || sp.ai==null) return;
-  const el=document.querySelector('#wird-body .wird-num[data-ai="'+sp.ai+'"]');
+  const mk=settings.mushafMark;
+  if(!mk || mk.ai==null) return;
+  const el=document.querySelector('#wird-body .wird-num[data-ai="'+mk.ai+'"]');
   if(el) el.classList.add('bm');
 }
 /* ==================== قصص الأنبياء (الشيخ نبيل العوضي) ====================
@@ -3054,7 +3064,7 @@ async function openTafsir(ai){
       if(intro) main+='<div class="t-intro">'+escapeHtml(intro)+'</div>';
       main+='<div class="t-txt">'+escapeHtml(rest)+'</div>';
     } else main='<div class="t-txt">'+escapeHtml(t)+'</div>';
-    main+='<div class="t-src">التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف</div>';
+    main+='<div class="t-src"><span class="lbl">المصدر</span>التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف</div>';
   } else {
     main='<div class="t-note">'+(ok?'لا يوجد تفسير لهذه الآية.':'تعذّر تحميل التفسير — تحقّق من الإنترنت ثم أعِد المحاولة.')+'</div>';
   }
@@ -3087,7 +3097,7 @@ document.addEventListener('click', e=>{
   __tapSaveUntil=Date.now()+800;
   if(wasOn){
     // إلغاء العلامة
-    settings.mushafPos=null;
+    settings.mushafMark=null;
     saveSettings();
     updateResumeBtn();
     vibrate(8);
@@ -3095,25 +3105,48 @@ document.addEventListener('click', e=>{
   }
   const si=suraOf(ai);
   num.classList.add('bm');
-  const y=Math.max(0, Math.round(num.getBoundingClientRect().top + window.scrollY - 110));
   settings.mushafSura=si;
-  settings.mushafPos={ sura:si, y:y, ai:ai };
+  /* العلامةُ اليدويّة تُحفظ برقم الآية وحدَه في حقلٍ مستقلّ، فلا يمحوها
+     الحفظُ التلقائيُّ للتمرير — وكان يمحوها قبلُ فيضيع اسمُ السورة والآية. */
+  settings.mushafMark={ ai:ai };
   saveSettings();
   updateResumeBtn();
   vibrate([10,30,10]);
 });
-/* remember reading position (surah + scroll) in mushaf mode */
+/* زرّ «تابِع القراءة»: يُفضّل العلامةَ اليدويّة (سورة وآية) على موضع التمرير المحفوظ */
 function updateResumeBtn(){
-  const sp=settings.mushafPos, btn=$('#mushaf-resume'); if(!btn) return;
-  if(sp && sp.y>240){
-    let label='↩︎ تابِع القراءة من حيث وصلت';
-    if(sp.ai!=null && WIRD){
-      const si=suraOf(sp.ai), no=sp.ai-WIRD.sur[si].i+1;
-      label='↩︎ تابِع القراءة — سورة '+WIRD.sur[si].n+'، آية '+no;
+  const btn=$('#mushaf-resume'); if(!btn) return;
+  const mk=settings.mushafMark, sp=settings.mushafPos;
+  if(mk && mk.ai!=null){
+    let label='↩︎ تابِع القراءة من علامتك';
+    if(WIRD && WIRD.sur){
+      const si=suraOf(mk.ai), no=mk.ai-WIRD.sur[si].i+1;
+      label='↩︎ تابِع القراءة — سورة '+WIRD.sur[si].n+' · الآية '+AR(no);
     }
     btn.textContent=label;
+    btn.style.display='';
+    btn.onclick=()=>{ jumpToMark(mk.ai); };
+    return;
+  }
+  if(sp && sp.y>240){
+    btn.textContent='↩︎ تابِع القراءة من حيث وصلت';
     btn.style.display=''; btn.onclick=()=>{ window.scrollTo({top:sp.y, behavior:'smooth'}); };
   } else { btn.style.display='none'; btn.onclick=null; }
+}
+/* القفزُ إلى الآية المُعلَّمة — وإن لم تكن صفحتُها مبنيّةً بعد، نمرّ بالسورة أوّلًا.
+   والصفحاتُ البعيدة لا يُقاس ارتفاعُها إلا بعد كشفها، فيزيح التخطيطُ الآيةَ عن مكانها،
+   ولذلك نُمرّر مرّةً ثمّ نُصحّح بعد استقرار التخطيط. */
+function jumpToMark(ai){
+  if(!WIRD || ai==null) return;
+  const go=()=>{
+    if(!document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]')) return false;
+    scrollToAya(ai, false);
+    requestAnimationFrame(()=> setTimeout(()=> scrollToAya(ai, true), 80));
+    return true;
+  };
+  if(go()) return;
+  scrollToSura(suraOf(ai), false);
+  setTimeout(go, 320);
 }
 /* ---- pastille السورة الحالية: تظهر عند التمرير للأعلى فقط، وتُخفى أثناء القراءة للأسفل ---- */
 let __suraMarkers=null;
@@ -3183,8 +3216,13 @@ function openSuraOverlay(curIdx, onPick, title){
   $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = title || 'اختر السورة';
   buildSuraList(curIdx, onPick);
   $('#sura-overlay').classList.add('show');
-  const cur=$('#sura-list button.cur');
-  if(cur) cur.scrollIntoView({block:'center'});
+  centerInList($('#sura-list button.cur'));
+}
+/* تمريرٌ داخل القائمة وحدها. scrollIntoView كان يُمرِّر الصفحةَ خلفها أيضًا،
+   فيرجع القارئُ إلى أوّل المصحف (البقرة) كلّما فتح ورقةَ المشاركة. */
+function centerInList(cur){
+  const list=$('#sura-list'); if(!list||!cur) return;
+  list.scrollTop = Math.max(0, cur.offsetTop - (list.clientHeight/2) + (cur.offsetHeight/2));
 }
 /* ورقة سفلية عامّة بقائمة تسميات جاهزة (تُستعمل لاختيار عدد مرّات التكرار مثلًا) */
 function openLabelOverlay(items, curId, onPick, title){
@@ -3199,8 +3237,7 @@ function openLabelOverlay(items, curId, onPick, title){
   });
   $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = title || 'اختر';
   $('#sura-overlay').classList.add('show');
-  const cur=$('#sura-list button.cur');
-  if(cur) cur.scrollIntoView({block:'center'});
+  centerInList($('#sura-list button.cur'));
 }
 function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); const bk=$('#sura-overlay-back'); if(bk) bk.style.display='none'; }
 
