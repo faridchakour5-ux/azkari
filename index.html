@@ -1384,14 +1384,17 @@ function saveSettings(){ store.set('az_settings', settings); }
 
 /* ---------- AZKAR screen ---------- */
 const CATS = [
-  {id:'fadl',     name:'فضل الذكر',  title:'فضل الذكر'},
-  {id:'morning',  name:'الصباح',    title:'أذكار الصباح'},
-  {id:'evening',  name:'المساء',    title:'أذكار المساء'},
-  {id:'sleep',    name:'النوم',     title:'أذكار النوم'},
-  {id:'wakeup',   name:'الاستيقاظ', title:'أذكار الاستيقاظ'},
-  {id:'istiqama', name:'الاستقامة', title:'أدعية الاستقامة'},
-  {id:'travel',   name:'السفر',     title:'أذكار السفر'},
-  {id:'riding',   name:'الركوب',    title:'أذكار الركوب'},
+  {id:'fadl',     name:'فضل الذكر',      title:'فضل الذكر'},
+  {id:'thabat',   name:'لا تترك الصلاة', title:'لا تترك الصلاة'},
+  {id:'morning',  name:'الصباح',        title:'أذكار الصباح'},
+  {id:'evening',  name:'المساء',        title:'أذكار المساء'},
+  {id:'baad',     name:'بعد الصلاة',    title:'أذكار ما بعد الصلاة'},
+  {id:'sleep',    name:'النوم',         title:'أذكار النوم'},
+  {id:'wakeup',   name:'الاستيقاظ',     title:'أذكار الاستيقاظ'},
+  {id:'istiqama', name:'الاستقامة',     title:'أدعية الاستقامة'},
+  {id:'shidda',   name:'الامتحان',      title:'أدعية الامتحان والشدّة'},
+  {id:'travel',   name:'السفر',         title:'أذكار السفر'},
+  {id:'riding',   name:'الركوب',        title:'أذكار الركوب'},
 ];
 const catMeta = id => CATS.find(c=>c.id===id) || CATS[0];
 let currentTab = 'fadl';   // الصفحة الأولى عند الفتح: فضل الذكر
@@ -1435,46 +1438,52 @@ function azkarList(cat){
   return list;
 }
 
-/* ---------- فضل الذكر: صفحةٌ بخطاطات داخل تبويب الأذكار ---------- */
-let __fadlLoading=null;
-function loadFadl(){
-  if(window.FADL) return Promise.resolve(true);
-  if(__fadlLoading) return __fadlLoading;
-  __fadlLoading=new Promise(res=>{
-    const s=document.createElement('script'); s.src='fadl.js';
+/* ---------- صفحاتُ العرض بخطاطات داخل تبويب الأذكار ---------- */
+const ARTICLES = {
+  fadl:   {src:'fadl.js',   g:'FADL',   sub:'وأثرُه في حياتك اليوميّة',            file:'salaty-fadl'},
+  thabat: {src:'thabat.js', g:'THABAT', sub:'ولو كنتَ على معصية — ماذا يقول أهلُ العلم؟', file:'salaty-thabat'},
+};
+const __artLoading={};
+function loadArticle(id){
+  const a=ARTICLES[id];
+  if(window[a.g]) return Promise.resolve(true);
+  if(__artLoading[id]) return __artLoading[id];
+  __artLoading[id]=new Promise(res=>{
+    const s=document.createElement('script'); s.src=a.src;
     s.onload=()=>res(true); s.onerror=()=>res(false);
     document.head.appendChild(s);
   });
-  return __fadlLoading;
+  return __artLoading[id];
 }
-function renderFadl(){
+function renderArticle(id){
+  const a=ARTICLES[id], meta=catMeta(id);
   const wrap=$('#az-list'); if(!wrap) return;
-  $('#az-title').textContent='فضل الذكر';
-  $('#az-source').textContent='وأثرُه في حياتك اليوميّة';
+  $('#az-title').textContent=meta.title;
+  $('#az-source').textContent=a.sub;
   $('#az-scope').style.display='none';
   $('.progressbar').style.display='none';
   $('.progresslabel').style.display='none';
-  if(!window.FADL){
+  if(!window[a.g]){
     wrap.innerHTML='<div class="search-hint">جارٍ التحميل…</div>';
-    loadFadl().then(ok=>{
-      if(currentTab!=='fadl') return;
-      if(ok) renderFadl();
+    loadArticle(id).then(ok=>{
+      if(currentTab!==id) return;
+      if(ok) renderArticle(id);
       else wrap.innerHTML='<div class="search-hint">تعذّر التحميل — أعِد المحاولة.</div>';
     });
     return;
   }
-  wrap.innerHTML='<div class="fq-card az-fadl">'+window.FADL.map(fqBlock).join('')+
-    '<div class="fq-share"><button class="share-btn" id="fadl-share-btn">'+SHARE_IC+'شارِك هذه الصفحة</button></div>'+
+  wrap.innerHTML='<div class="fq-card az-fadl">'+window[a.g].map(fqBlock).join('')+
+    '<div class="fq-share"><button class="share-btn" id="art-share-btn">'+SHARE_IC+'شارِك هذه الصفحة</button></div>'+
     '</div>';
-  const sb=$('#fadl-share-btn');
+  const sb=$('#art-share-btn');
   if(sb) sb.addEventListener('click', ()=>{
     vibrate(6);
-    openShareSheet(()=> cardShotHTML('#az-list .fq-card'), 'فضل الذكر', 'وأثرُه في حياتك اليوميّة', 'salaty-fadl');
+    openShareSheet(()=> cardShotHTML('#az-list .fq-card'), meta.title, a.sub, a.file);
   });
 }
 
 function renderAzkar(){
-  if(currentTab==='fadl') return renderFadl();
+  if(ARTICLES[currentTab]) return renderArticle(currentTab);
   $('.progressbar').style.display=''; $('.progresslabel').style.display='';
   const list = azkarList(currentTab);
   const prog = progressState();
