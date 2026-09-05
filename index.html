@@ -220,10 +220,12 @@
   .card.done .rem{background:var(--text-3);}
   .card .tick{position:absolute; top:14px; left:14px; color:var(--c-read); font-size:20px; opacity:0; transition:opacity .25s; font-weight:800;}
   .card.done .tick{opacity:1;}
-  .fadl{margin-top:12px; font-size:14px; line-height:1.7; color:var(--text-2);
-    max-height:0; overflow:hidden; transition:max-height .3s ease;}
-  .fadl.open{max-height:600px;}
-  .fadl .lbl{color:var(--accent); font-weight:700; display:block; margin:8px 0 2px; font-size:13px;}
+  /* الفضل والمصدر: ظاهران دائمًا تحت الذكر، بلا زرٍّ يُضغط */
+  .fadl{margin-top:11px; padding-top:10px; border-top:1px solid var(--sep);
+    font-size:13.5px; line-height:1.85; color:var(--text-2);}
+  .fadl p{margin:0 0 6px;}
+  .fadl p:last-child{margin-bottom:0;}
+  .fadl .lbl{color:var(--accent); font-weight:800; font-size:12.5px; margin-left:6px;}
 
   /* Tasbih */
   .tasbih-wrap{padding:14px 20px 0; text-align:center;}
@@ -1510,20 +1512,16 @@ function renderAzkar(){
       '<div class="meta">'+
         '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span>'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
         (AZKAR_AUDIO[pid] ? '<button class="dhikr-play" data-pid="'+pid+'" aria-label="استماع">'+ICON_PLAY+'</button>':'')+
-        (d.fadl||d.source ? '<button class="info-btn" aria-label="الفضل">ⓘ</button>':'')+
         '<button class="share-btn" aria-label="مشاركة">'+SHARE_IC+'شارِك</button>'+
       '</div>'+
       (d.fadl||d.source ? '<div class="fadl">'+
-        (d.fadl?'<span class="lbl">الفضل</span>'+escapeHtml(d.fadl):'')+
-        (d.source?'<span class="lbl">المصدر</span>'+escapeHtml(d.source):'')+
+        (d.fadl  ?'<p><span class="lbl">الفضل</span>'+escapeHtml(d.fadl)+'</p>':'')+
+        (d.source?'<p><span class="lbl">المصدر</span>'+escapeHtml(d.source)+'</p>':'')+
         '</div>':'');
 
-    // tap to count (ignore taps on info button / fadl)
+    // الضغط على البطاقة يَعُدّ — إلا على الفضل والمصدر أو أزرار الاستماع والمشاركة
     card.addEventListener('click', e=>{
       if(e.target.closest('.dhikr-play')){ toggleDhikrAudio(pid); return; }
-      if(e.target.closest('.info-btn')){
-        card.querySelector('.fadl').classList.toggle('open'); return;
-      }
       if(e.target.closest('.share-btn')){
         e.stopPropagation();
         openShareSheet(()=> dhikrShotHTML(d), meta.title, null, 'salaty-dhikr');
