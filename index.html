@@ -1205,9 +1205,6 @@
     <div class="row"><span class="k">تذكير بالصلاة على النبي ﷺ</span>
       <label class="sw"><input type="checkbox" id="salat-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
-    <div class="row"><span class="k">نافذة التذكير عند الفتح</span>
-      <label class="sw"><input type="checkbox" id="qpop-toggle" checked><span class="track"></span><span class="knob"></span></label>
-    </div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
   </div>
   <div class="gnote">تذكير بالأذكار: أذكار الصباح (7)، المساء (17)، والنوم (22)، وتذكير بقراءة القرآن مرّتين (12 · 20) يتوقّف تلقائيًّا إن كنت قد قرأت وِردك، وتذكير قبل كل صلاة بـ10 دقائق (يحتاج تفعيل «مواقيت الصلاة حسب موقعك» من صفحة الأذكار). تذكير الصلاة على النبي ﷺ: 6 مرّات متفرّقة يوميًّا، و10 مرّات يوم الجمعة، مع تذكير بقراءة سورة الكهف صباح الجمعة. دقّة وصول الإشعار تعتمد على جهازك؛ على الآيفون أضِف التطبيق إلى الشاشة الرئيسية أولاً.</div>
@@ -4570,14 +4567,9 @@ applyHafsFont(); applyQuranColor();
   }).catch(()=>{});
 })();
 try{ renderAzkar(); }catch(e){} renderChips(); paintTasbih();
-/* نافذة التذكير عند فتح التطبيق */
+/* نافذة التذكير: لا تُفتح تلقائيًّا — تُفتح بالضغط على شريط «تذكيرك» في صفحة الأذكار */
 try{
   const sb=$('#qp-share'); if(sb) sb.innerHTML = WA_SVG + 'شارِكها';
-  const qt=$('#qpop-toggle');
-  if(qt){ qt.checked = settings.qpop!==false;
-    qt.addEventListener('change', ()=>{ settings.qpop=qt.checked; saveSettings(); }); }
-  const st=qpState();
-  if(settings.qpop!==false && Date.now() - (st.last||0) > 15*60*1000) setTimeout(openQuickPop, 2700);   // بعد انتهاء شاشة البداية (2.5 ث)
 }catch(e){}
 try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
 try{ setTimeout(()=>refreshGeo(false), 4000); }catch(e){}
