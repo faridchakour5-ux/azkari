@@ -1384,8 +1384,8 @@ function saveSettings(){ store.set('az_settings', settings); }
 
 /* ---------- AZKAR screen ---------- */
 const CATS = [
-  {id:'fadl',     name:'فضل الذكر',      title:'فضل الذكر'},
   {id:'thabat',   name:'لا تترك الصلاة', title:'لا تترك الصلاة'},
+  {id:'fadl',     name:'فضل الذكر',      title:'فضل الذكر'},
   {id:'morning',  name:'الصباح',        title:'أذكار الصباح'},
   {id:'evening',  name:'المساء',        title:'أذكار المساء'},
   {id:'baad',     name:'بعد الصلاة',    title:'أذكار ما بعد الصلاة'},
@@ -1397,7 +1397,7 @@ const CATS = [
   {id:'riding',   name:'الركوب',        title:'أذكار الركوب'},
 ];
 const catMeta = id => CATS.find(c=>c.id===id) || CATS[0];
-let currentTab = 'fadl';   // الصفحة الأولى عند الفتح: فضل الذكر
+let currentTab = 'thabat';   // الصفحة الأولى عند الفتح: لا تترك الصلاة
 
 function buildCats(){
   const seg=$('#time-seg'); seg.innerHTML='';
@@ -2536,9 +2536,7 @@ const DUAT = [
   { id:'albani',   name:'الألباني',               q:'الألباني الهدى والنور',
     ids:['AlHodaWaAlNoor_albani-mp3','selselat_Alhoda-wa-nnor_Torath_Cheikh_Al_Albani_up-by-muslem','Silsilat_Al-Huda_Wan-Noor'] },
   { id:'benhamza', name:'مصطفى بنحمزة',           q:'مصطفى بنحمزة',
-    ids:['mantiq_doroos','OssolAlFiqh'] },
-  { id:'tantawi',  name:'علي الطنطاوي',           q:'علي الطنطاوي',
-    ids:['blindeg_201509'] }
+    ids:['mantiq_doroos','OssolAlFiqh'] }
 ];
 const AV_RE=/\.(mp3|mp4|m4a)$/i;
 /* عناوين الأرشيف تأتي أحيانًا بترميز windows-1256 (أو utf-8) مقروءًا على أنّه latin-1،
