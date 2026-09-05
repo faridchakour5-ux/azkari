@@ -1,0 +1,16 @@
+{
+  "appId": "app.salaty.twa",
+  "appName": "صلاتي",
+  "webDir": "www",
+  "backgroundColor": "#ffffff",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#2F9E44",
+      "sound": "adhan_wadee"
+    }
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
