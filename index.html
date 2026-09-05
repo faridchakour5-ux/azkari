@@ -40,7 +40,8 @@
     --line:rgba(58,53,46,.08);
     --shadow-1:0 1px 2px rgba(58,53,46,.05), 0 4px 14px rgba(58,53,46,.05);
     --shadow-2:0 4px 14px rgba(47,158,68,.25);
-    --tab-idle:#2F9E44; --tab-on:#C71585; --tab-on-bg:rgba(199,21,133,.10);
+    /* الشريط السفليّ: الخامل رماديّ هادئ، والنشِط بلون التطبيق — لا لونَ غريبًا عنه */
+    --tab-idle:rgba(58,53,46,.5); --tab-on:#2F9E44; --tab-on-bg:rgba(47,158,68,.14);
     --qc-blue:#2166D6; --qc-blue2:#16509E; --qc-navy:#0B2C66;
     /* ألوان زرّي «اقرأ» (أزرق) و«تكرار» (كهرماني) في صفحة الاستماع */
     --c-read:#1553CC; --c-read-bg:rgba(28,95,191,.16);
@@ -84,7 +85,7 @@
     --line:rgba(255,255,255,.07);
     --shadow-1:0 1px 3px rgba(0,0,0,.45), 0 5px 16px rgba(0,0,0,.35);
     --shadow-2:0 4px 14px rgba(0,0,0,.5);
-    --tab-idle:#34C77B; --tab-on:#F06CB1; --tab-on-bg:rgba(240,108,177,.14);
+    --tab-idle:rgba(230,225,214,.5); --tab-on:#34C77B; --tab-on-bg:rgba(52,199,123,.18);
     --qc-blue:#78B0FF; --qc-blue2:#5E97F2; --qc-navy:#4C86E6;
     --c-read:#7FB2FF; --c-read-bg:rgba(127,178,255,.16);
     --c-repeat:#E3B25A; --c-repeat-bg:rgba(227,178,90,.16);
@@ -231,6 +232,10 @@
   .tasbih-wrap{padding:14px 20px 0; text-align:center;}
   .chips{display:flex; gap:8px; overflow-x:auto; padding:6px 2px 12px; -ms-overflow-style:none; scrollbar-width:none;}
   .chips::-webkit-scrollbar{display:none;}
+  /* تلاشٍ عند الحافّة اليسرى يدلّ على أنّ الصفَّ يُمرَّر — كان الاسمُ يُقصّ بلا إشارة */
+  .chips, .fq-cats, .fq-nav, #time-seg, .reciter-chips{
+    -webkit-mask-image:linear-gradient(to left, #000 calc(100% - 26px), transparent 100%);
+    mask-image:linear-gradient(to left, #000 calc(100% - 26px), transparent 100%);}
   .chip{flex:0 0 auto; border:0; background:var(--card); color:var(--text); font:inherit; font-weight:600;
     font-size:15px; padding:9px 15px; border-radius:20px;}
   .chip.on{background:var(--accent); color:#fff;}
@@ -265,7 +270,8 @@
   .miniseg button.on{background:var(--accent); color:#fff;}
 
   /* background color swatches */
-  .swatches{display:flex; gap:14px; flex-wrap:wrap; justify-content:space-between;}
+  /* شبكةٌ منتظمة: مع flex-wrap كان الصفُّ الثاني يترك فجوةً في وسطه */
+  .swatches{display:grid; grid-template-columns:repeat(auto-fill, minmax(64px, 1fr)); gap:16px 10px; justify-items:center;}
   .swatch{display:flex; flex-direction:column; align-items:center; gap:6px; border:0; background:transparent; font:inherit; cursor:pointer; padding:0;}
   .swatch .dot{width:48px; height:48px; border-radius:50%; border:2px solid var(--sep); box-shadow:0 1px 3px rgba(0,0,0,.12); transition:transform .15s;}
   .swatch.on .dot{border-color:var(--accent); border-width:3px; transform:scale(1.06);}
@@ -298,8 +304,9 @@
 
   /* Tab bar */
   .tabbar{position:fixed; bottom:0; left:0; right:0; display:flex;
-    padding:8px 0 calc(6px + env(safe-area-inset-bottom)); background:var(--blur);
-    backdrop-filter:saturate(180%) blur(22px); -webkit-backdrop-filter:saturate(180%) blur(22px);
+    padding:8px 0 calc(6px + env(safe-area-inset-bottom));
+    /* خلفيّةٌ صمّاء: الشفّافةُ كانت تُظهر كلماتِ الصفحة تحت الأيقونات */
+    background:var(--bg);
     border-top:.5px solid var(--sep); z-index:50;}
   .tab{flex:1; border:0; background:transparent; color:var(--tab-idle); font:inherit; padding:0;
     display:flex; flex-direction:column; align-items:center; gap:3px; transition:color .2s ease;}
@@ -420,7 +427,9 @@
   .fq-cats::-webkit-scrollbar{display:none;}
   .fq-cats button{flex:0 0 auto; border:0; font:inherit; font-size:13px; font-weight:800;
     padding:8px 14px; border-radius:10px; background:var(--fill-2); color:var(--text-2); white-space:nowrap;}
-  .fq-cats button.on{background:var(--c-read-bg); color:var(--c-read);}
+  /* التصنيفُ المختار بتدرّجٍ خفيفٍ من لون التطبيق، والبابُ المختار بلونه كاملًا —
+     مستويان من لونٍ واحد بدل لونين مختلفين في صفّين متجاورين */
+  .fq-cats button.on{background:var(--accent-bg); color:var(--accent-txt);}
   .fq-count{padding:8px 16px 0; font-size:12px; color:var(--text-3); font-weight:600;}
   .fq-nav{display:flex; gap:8px; overflow-x:auto; padding:10px 16px 4px; scrollbar-width:none;}
   .fq-nav::-webkit-scrollbar{display:none;}
@@ -1895,7 +1904,11 @@ function flashSalat(){
   s.style.visibility='visible';
   s.style.opacity='1';
   clearTimeout(__splashTimer);
-  __splashTimer=setTimeout(()=>{ s.style.opacity='0'; }, 550);
+  __splashTimer=setTimeout(()=>{
+    s.style.opacity='0';
+    /* بعد التلاشي تُخفى الطبقةُ تمامًا، فلا تبقى شاشةٌ كاملةٌ معلّقةً فوق التطبيق */
+    setTimeout(()=>{ if(s.style.opacity==='0') s.style.visibility='hidden'; }, 320);
+  }, 550);
 }
 
 /* quick riwaya switcher on every page */
@@ -1904,7 +1917,12 @@ function syncRiwayaPills(){
   $$('#riwaya-seg button').forEach(b=> b.classList.toggle('on', b.dataset.r===settings.riwaya));
 }
 function initRiwayaPills(){
+  /* الحبّةُ لا تُوضع إلا حيث تُغيّر شيئًا مرئيًّا: الأذكار (آياتُها) والوِرد (المصحف).
+     وكانت تظهر في الاستماع والفقه بلا أثر، وفي الإعدادات فوق مفتاحٍ يفعل الشيء نفسَه. */
+  const OK={'s-azkar':1,'s-wird':1};
   $$('.head').forEach(h=>{
+    const sec=h.closest('.screen');
+    if(!sec || !OK[sec.id]) return;
     if(h.querySelector('.riwaya-quick')) return;
     const q=document.createElement('div'); q.className='riwaya-quick';
     q.innerHTML='<button data-r="warsh">ورش</button><button data-r="hafs">حفص</button>';
