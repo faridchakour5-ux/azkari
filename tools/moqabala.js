@@ -51,16 +51,38 @@ function diffMots(a,b){
   return out.reverse();
 }
 
+
+/* ── تسويةُ فروقِ الترميز ──────────────────────────────────────
+ * مصادرُ ورشٍ الرقميّة تختلف في ترميزِ ثلاثةِ أشياءَ لا في رسمِها:
+ *   ١) ترتيبُ الشدّةِ والحركة: بعضُها «شدّةٌ ثمّ حركة» وبعضُها العكس.
+ *      والترتيبُ القياسيُّ في يونيكود (NFC) هو الحركةُ ثمّ الشدّة.
+ *   ٢) التنوينُ المتراكب: بعضُها U+08F0/08F1/08F2 وبعضُها U+0657/065E/0656
+ *   ٣) الألفُ المقصورةُ في آخرِ الكلمة: بعضُها ى وبعضُها ي —
+ *      وهما في الخطِّ المغربيِّ رسمٌ واحدٌ مجرَّدٌ من النَّقْط.
+ * فتُسوَّى الثلاثةُ قبل المقابلة، ويُحصى عددُها على حِدَة،
+ * حتى لا تُحسَبَ خطأً وهي ليست خطأً.
+ */
+const EQ_TNW={'\u08F0':'\u0657','\u08F1':'\u065E','\u08F2':'\u0656'};
+let eqTnw=0, eqYa=0;
+function equalize(t){
+  return String(t).normalize('NFC')
+    .replace(/[\u08F0\u08F1\u08F2]/g, m=>{eqTnw++; return EQ_TNW[m];})
+    .replace(/\u064A(?=[\u064B-\u0655\u0657-\u0670\u06D6-\u06ED]*(?:\s|$))/g,
+             ()=>{eqYa++; return '\u0649';})
+    .normalize('NFC');
+}
+
 const nomSura=process.argv[2], fichier=process.argv[3];
 if(!nomSura||!fichier){ console.log('الاستعمال: node tools/moqabala.js "اسم السورة" ملفّ-المرجع.txt [warsh|hafs]'); process.exit(1); }
 const si=suraIdx(nomSura);
 if(si===-2) process.exit(1);
 if(si<0){ console.log('لم أجد السورة:', nomSura); process.exit(1); }
 const deb=M.sur[si].i, fin=(si+1<M.sur.length? M.sur[si+1].i : M.a.length);
-const app=clean(M.a.slice(deb,fin).map(a=>a.t).join(' '));
-const ref=clean(fs.readFileSync(fichier,'utf8'));
+const app=equalize(clean(M.a.slice(deb,fin).map(a=>a.t).join(' ')));
+const ref=equalize(clean(fs.readFileSync(fichier,'utf8')));
 console.log('السورة: '+M.sur[si].n+'   ('+riwaya+')   عدد الآيات: '+(fin-deb));
 console.log('حروف التطبيق: '+app.length+'   |   حروف المرجع: '+ref.length);
+console.log('سُوِّي من فروق الترميز: تنوينٌ متراكب '+eqTnw+'   |   ألفٌ مقصورة/ياء '+eqYa);
 if(app===ref){ console.log(''); console.log('>>> مطابقٌ تمامًا — صفر فرق <<<'); process.exit(0); }
 const d=diffMots(app,ref);
 console.log('كلمات مختلفة: '+d.filter(x=>x.t!=='=').length);
