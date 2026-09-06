@@ -226,7 +226,7 @@
     font-size:13.5px; line-height:1.85; color:var(--text-2);}
   .fadl p{margin:0 0 6px;}
   .fadl p:last-child{margin-bottom:0;}
-  .fadl .lbl{color:var(--accent); font-weight:800; font-size:12.5px; margin-left:6px;}
+  .fadl .lbl{color:var(--accent); font-weight:800; font-size:12.5px;}
 
   /* Tasbih */
   .tasbih-wrap{padding:14px 20px 0; text-align:center;}
@@ -465,8 +465,10 @@
   .fq-step .b{flex:1 1 auto;}
   .fq-step .b i{display:block; font-style:normal; font-size:13px; color:var(--text-2); line-height:1.7; margin-top:2px;}
   .fq-step .s{font-size:15px; font-weight:700;}
-  .fq-tag{font-size:11px; font-weight:800; padding:3px 8px; border-radius:999px; margin-inline-start:7px;
-    vertical-align:2px; white-space:nowrap;}
+  /* الوسمُ داخل «‎.fq-step .s‎»، وتلك القاعدةُ أقوى، فكان الوسمُ يُرسَم بحجم ١٥ بدل ١١.
+     يُذكر الانتقاءان معًا ليتساويا في القوّة. */
+  .fq-tag, .fq-step .fq-tag{font-size:11px; font-weight:800; padding:3px 8px; border-radius:999px;
+    margin-inline-start:3px; vertical-align:2px; white-space:nowrap;}
   .fq-tag.f{background:var(--accent); color:#fff;}
   .fq-tag.s{background:var(--fill-2); color:var(--text-2);}
 
@@ -757,7 +759,7 @@
     font-size:14.5px; line-height:1.95; color:var(--text-2); white-space:pre-wrap; text-align:justify;}
   .tafsir-body .t-src{margin-top:14px; padding-top:10px; border-top:1px solid var(--sep);
     font-size:13.5px; line-height:1.85; color:var(--text-2);}
-  .tafsir-body .t-src .lbl{color:var(--accent); font-weight:800; font-size:12.5px; margin-left:6px;}
+  .tafsir-body .t-src .lbl{color:var(--accent); font-weight:800; font-size:12.5px;}
   .tafsir-body .t-note{font-size:14.5px; line-height:1.9; color:var(--text-2); text-align:center; padding:10px 0;}
 
   /* ==== المشاركة: بطاقة الالتقاط (صورة أو PDF) ==== */
@@ -769,7 +771,7 @@
   .share-shot .ss-sub{display:block; font-size:14.5px; font-weight:600; color:var(--text-2); margin-top:5px;}
   .share-shot .card, .share-shot .fq-card{margin:0; box-shadow:none;}
   .share-shot .ss-note{margin-top:12px; font-size:13.5px; line-height:1.9; color:var(--text-2);}
-  .share-shot .ss-note b{color:var(--accent); font-weight:800; margin-left:6px;}
+  .share-shot .ss-note b{color:var(--accent); font-weight:800;}
   .share-shot .ss-foot{margin-top:18px; padding-top:14px; border-top:1px solid var(--sep);
     text-align:center; font-size:14px; font-weight:700; color:var(--text-2);}
   .share-shot .ss-foot span{color:var(--accent);}
@@ -1527,13 +1529,13 @@ function renderAzkar(){
       '<div class="tick"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg></div>'+
       '<div class="txt">'+escapeHtml(text)+'</div>'+
       '<div class="meta">'+
-        '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span>'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
+        '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span> '+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
         (AZKAR_AUDIO[pid] ? '<button class="dhikr-play" data-pid="'+pid+'" aria-label="استماع">'+ICON_PLAY+'</button>':'')+
         '<button class="share-btn" aria-label="مشاركة">'+SHARE_IC+'شارِك</button>'+
       '</div>'+
       (d.fadl||d.source ? '<div class="fadl">'+
-        (d.fadl  ?'<p><span class="lbl">الفضل</span>'+escapeHtml(d.fadl)+'</p>':'')+
-        (d.source?'<p><span class="lbl">المصدر</span>'+escapeHtml(d.source)+'</p>':'')+
+        (d.fadl  ?'<p><span class="lbl">الفضل</span> '+escapeHtml(d.fadl)+'</p>':'')+
+        (d.source?'<p><span class="lbl">المصدر</span> '+escapeHtml(d.source)+'</p>':'')+
         '</div>':'');
 
     // الضغط على البطاقة يَعُدّ — إلا على الفضل والمصدر أو أزرار الاستماع والمشاركة
@@ -2497,8 +2499,8 @@ function dhikrShotHTML(d){
   return '<div class="card'+(d.quran?' quran':'')+'">'+
       '<div class="txt">'+escapeHtml(text)+'</div>'+
       '<div class="meta"><span class="badge">'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span></div>'+
-      (d.fadl  ?'<div class="ss-note"><b>الفضل</b>'+escapeHtml(d.fadl)+'</div>':'')+
-      (d.source?'<div class="ss-note"><b>المصدر</b>'+escapeHtml(d.source)+'</div>':'')+
+      (d.fadl  ?'<div class="ss-note"><b>الفضل</b> '+escapeHtml(d.fadl)+'</div>':'')+
+      (d.source?'<div class="ss-note"><b>المصدر</b> '+escapeHtml(d.source)+'</div>':'')+
     '</div>';
 }
 function openShareSheet(getHTML, title, sub, fname){
@@ -2927,7 +2929,7 @@ function fqBlock(b){
       return T + '<div class="fq-steps">' + b.v.map((x,i)=>
         '<div class="fq-step"><span class="n">'+AR(i+1)+'</span><span class="b">'+
           '<span class="s">'+escapeHtml(x.s)+
-            (x.tag ? '<span class="fq-tag '+((x.tag==='فرض'||x.tag==='ركن')?'f':'s')+'">'+escapeHtml(x.tag)+'</span>' : '')+
+            (x.tag ? ' <span class="fq-tag '+((x.tag==='فرض'||x.tag==='ركن')?'f':'s')+'">'+escapeHtml(x.tag)+'</span>' : '')+
           '</span>'+
           (x.d ? '<i>'+escapeHtml(x.d)+'</i>' : '')+
         '</span></div>').join('') + '</div>';
@@ -2936,7 +2938,7 @@ function fqBlock(b){
       return T + '<div class="fq-flow">' + b.v.map((x,i)=>
         (i ? '<div class="fq-arrow">'+FQ_DOWN+'</div>' : '') +
         '<div class="fq-fn"><span class="k">'+AR(i+1)+'</span><span class="v">'+
-          '<b>'+escapeHtml(x.n)+'</b><span>'+escapeHtml(x.d||'')+'</span></span></div>'
+          '<b>'+escapeHtml(x.n)+'</b> <span>'+escapeHtml(x.d||'')+'</span></span></div>'
         ).join('') + '</div>';
 
     case 'tree':
@@ -2986,9 +2988,9 @@ function renderFiqh(){
       '<button data-c="'+c.id+'"'+(c.id===__fqCat?' class="on"':'')+'>'+escapeHtml(c.name)+'</button>').join('') +'</div>'+
     '<div class="fq-count">'+AR(list.length)+' '+(list.length===1?'باب':'أبواب')+'</div>'+
     '<div class="fq-nav">'+ list.map(o=>
-      '<button data-i="'+o.i+'"'+(o.i===__fqCur?' class="on"':'')+'>'+o.x.ic+escapeHtml(o.x.t)+'</button>').join('') +'</div>'+
+      '<button data-i="'+o.i+'"'+(o.i===__fqCur?' class="on"':'')+'> '+o.x.ic+' '+escapeHtml(o.x.t)+'</button>').join('') +'</div>'+
     '<div class="fq-card">'+
-      '<div class="fq-h">'+cur.ic+'<b>'+escapeHtml(cur.t)+'</b></div>'+
+      '<div class="fq-h">'+cur.ic+' <b>'+escapeHtml(cur.t)+'</b></div>'+
       '<div class="fq-sub">'+escapeHtml(cur.sub||'')+'</div>'+
       cur.blocks.map(fqBlock).join('')+
       '<div class="fq-share"><button class="share-btn" id="fq-share-btn">'+SHARE_IC+'شارِك هذا الباب</button></div>'+
@@ -3082,7 +3084,7 @@ async function openTafsir(ai){
       if(intro) main+='<div class="t-intro">'+escapeHtml(intro)+'</div>';
       main+='<div class="t-txt">'+escapeHtml(rest)+'</div>';
     } else main='<div class="t-txt">'+escapeHtml(t)+'</div>';
-    main+='<div class="t-src"><span class="lbl">المصدر</span>التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف</div>';
+    main+='<div class="t-src"><span class="lbl">المصدر</span> التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف</div>';
   } else {
     main='<div class="t-note">'+(ok?'لا يوجد تفسير لهذه الآية.':'تعذّر تحميل التفسير — تحقّق من الإنترنت ثم أعِد المحاولة.')+'</div>';
   }
