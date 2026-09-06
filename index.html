@@ -524,6 +524,28 @@
   .fq-note.core{background:var(--accent-bg); color:var(--text); border-inline-start:4px solid var(--accent);}
   .fq-note.warn{background:var(--c-repeat-bg); color:var(--text); border-inline-start:4px solid var(--c-repeat);}
   .fq-note.info{background:var(--fill-2); color:var(--text-2); border-inline-start:4px solid var(--text-3);}
+
+  /* بطاقةُ مصادر الباب — بألوان الصفحات المصوَّرة نفسِها: لكلّ صنفٍ لونُه،
+     قرآنٌ ثمّ سنّةٌ ثمّ كتبُ الفقه ثمّ التنبيه. */
+  .fq-src{margin-top:18px; border:1px solid var(--line); border-radius:16px;
+    background:var(--card); overflow:hidden;}
+  .fq-src-h{display:flex; align-items:center; gap:8px; padding:11px 13px;
+    background:var(--accent-bg); color:var(--accent); font-weight:800; font-size:13.5px;
+    border-bottom:1px solid var(--line);}
+  .fq-src-h svg{width:16px; height:16px; flex:0 0 auto;}
+  .fq-si{display:flex; gap:9px; align-items:flex-start; padding:11px 13px;}
+  .fq-si + .fq-si{border-top:1px solid var(--sep);}
+  .fq-si .tag{flex:0 0 auto; font-size:11px; font-weight:800; padding:3px 9px; border-radius:999px;
+    margin-top:2px; white-space:nowrap;}
+  .fq-si .tag.q{background:var(--accent-bg);   color:var(--accent);}
+  .fq-si .tag.h{background:var(--c-read-bg);   color:var(--c-read);}
+  .fq-si .tag.f{background:var(--c-repeat-bg); color:var(--c-repeat);}
+  .fq-si .tag.n{background:var(--fill-2);      color:var(--text-3);}
+  .fq-si .b{min-width:0;}
+  .fq-si .b b{display:block; font-size:13.5px; font-weight:800; color:var(--text); line-height:1.7;}
+  .fq-si .b i{display:block; font-style:normal; font-size:12.5px; color:var(--text-2); line-height:1.8; margin-top:2px;}
+  .fq-src-f{padding:10px 13px; background:var(--fill-2); color:var(--text-3);
+    font-size:12px; line-height:1.85; border-top:1px solid var(--sep);}
   /* ===== نافذة التذكير السريع ===== */
   .quick-pop{position:fixed; inset:0; z-index:130; display:none; align-items:center; justify-content:center;
     background:rgba(0,0,0,.5); opacity:0; transition:opacity .3s ease; padding:16px;}
@@ -3002,6 +3024,19 @@ function fqBlock(b){
   return '';
 }
 
+const FQ_BOOK='<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+/* مصادرُ الباب: من أين أُخذ ما فيه — قرآنٌ وسنّةٌ وكتبُ الفقه المعتمدة.
+   وهي معروضةٌ دائمًا في آخر الباب لا تُخفى خلف علامة. */
+function fqSrcBlock(id){
+  const v=(window.FIQH_SRC||{})[id];
+  if(!v || !v.length) return '';
+  const TAG={ q:'قرآن', h:'سنّة', f:'فقه', n:'تنبيه' };
+  return '<div class="fq-src"><div class="fq-src-h">'+FQ_BOOK+'مصادر هذا الباب</div>'+
+    v.map(x=>'<div class="fq-si"><span class="tag '+(x.k||'n')+'">'+(TAG[x.k]||TAG.n)+'</span>'+
+      '<span class="b"><b>'+escapeHtml(x.t)+'</b>'+(x.d?'<i>'+escapeHtml(x.d)+'</i>':'')+'</span></div>').join('')+
+    '<div class="fq-src-f">المذاهبُ الأربعة تُذكر بأسمائها عند الخلاف. وما لم يُنسب إلى مذهبٍ بعينه فهو المتّفق عليه بينها.</div>'+
+  '</div>';
+}
 let __fqCat='all';
 function renderFiqh(){
   const box=$('#fiqh-body'); if(!box) return;
@@ -3024,6 +3059,7 @@ function renderFiqh(){
       '<div class="fq-h">'+cur.ic+' <b>'+escapeHtml(cur.t)+'</b></div>'+
       '<div class="fq-sub">'+escapeHtml(cur.sub||'')+'</div>'+
       cur.blocks.map(fqBlock).join('')+
+      fqSrcBlock(cur.id)+
       '<div class="fq-share"><button class="share-btn" id="fq-share-btn">'+SHARE_IC+'شارِك هذا الباب</button></div>'+
     '</div>';
   box.querySelectorAll('.fq-cats button').forEach(btn=> btn.addEventListener('click', ()=>{
