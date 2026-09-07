@@ -804,6 +804,24 @@
   /* التفسير: الآية قابلة للّمس + الورقة السفلية */
   .aya-t{cursor:pointer; border-radius:6px; transition:background-color .2s;}
   .aya-t.tsel{background:var(--c-repeat-bg);}
+
+  /* مشغّلُ الفيديو: يُعرض داخل التطبيق بدل فتح صفحةٍ أخرى */
+  .vid-overlay{position:fixed; inset:0; z-index:110; display:none; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.72); padding:16px;}
+  .vid-overlay.show{display:flex;}
+  .vid-sheet{width:100%; max-width:560px; background:var(--card); border-radius:18px; overflow:hidden;
+    box-shadow:var(--shadow-2);}
+  .vid-head{display:flex; align-items:center; gap:10px; padding:11px 13px; border-bottom:1px solid var(--sep);
+    font-weight:800; font-size:14px; color:var(--text);}
+  .vid-head span{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .vid-head button{width:32px; height:32px; border:0; background:var(--fill-2); border-radius:10px; color:var(--text-2);}
+  #duat-video{display:block; width:100%; max-height:62vh; background:#000;}
+  .vid-foot{padding:10px 13px;}
+  /* شارةُ الجودة: عنصرٌ مستقلٌّ في الصفّ لا داخلَ الاسم، لئلّا يختلط رقمُها
+     بالاسم اللاتينيّ في نصٍّ عربيّ. و‎bdi‎ يعزل اتّجاهَها عمّا حولها. */
+  .st-kb{flex:0 0 auto; font-size:11px; font-weight:800; padding:2px 7px; border-radius:999px;
+    background:var(--fill-2); color:var(--text-3); white-space:nowrap;}
+  .st-kb.hi{background:var(--accent-bg); color:var(--accent);}
   /* الآيةُ المتلوّة الآن أثناء التتبّع — ظِلٌّ خفيفٌ يدلُّ ولا يُنازع لونَ الخطّ.
      ولا ظِلَّ خارجيًّا هنا: الآيةُ تمتدّ على أسطرٍ فيتكرّر على كلّ سطرٍ فيبدو
      النصُّ محبوسًا في مربّعات. */
@@ -1098,6 +1116,15 @@
 <button class="totop-btn" id="totop-btn" aria-label="العودة إلى أعلى الصفحة" title="العودة إلى الأعلى">
   <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>
 </button>
+
+<div class="vid-overlay" id="vid-overlay">
+  <div class="vid-sheet">
+    <div class="vid-head"><span id="vid-title">فيديو</span>
+      <button id="vid-close" aria-label="إغلاق"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button></div>
+    <video id="duat-video" controls playsinline preload="metadata"></video>
+    <div class="vid-foot"><button class="share-btn" id="vid-open">فتحُه في المتصفّح</button></div>
+  </div>
+</div>
 
 <div class="sura-overlay" id="sura-overlay">
   <div class="sura-sheet">
@@ -2604,7 +2631,9 @@ const DUAT = [
     ids:['Khottab_Said-Kamli-mp3','SaidAlKamaliKhotab','al-mowataa_Mp3','sa3edelkmly'] },
   { id:'awadi',    name:'نبيل العوضي',           q:'نبيل العوضي',
     ids:['Nabil-3awadi_Mawsoa-mp3','Nabil_Al_Awadi_Mawsoaa_mp3_Up-By-MusleM','Al_Awadhi_uP_bY_mUSLEm'] },
-  { id:'rushaidi', name:'سعود الرشيدي',           q:null, ids:[],
+  /* المقطعان الأوّلان مرفوعان على درايف فيثبتان، وما بعدهما يُبحث عنه في
+     الأرشيف وقتَ الاستعمال كسائر الدعاة — وكان q معطّلًا فاقتصر على المقطعين. */
+  { id:'rushaidi', name:'سعود الرشيدي',           q:'سعود الرشيدي', ids:[],
     files:[ { name:'مقطع 1', drive:'1sXzdsR23d3my3pct0f4Lpie9-Ttbko1l' },
             { name:'مقطع 2', drive:'1EZVETLPrJPsqrP9EFfc9_7DhlD8vdL5W' } ] },
   { id:'shaarawi', name:'محمد متولّي الشعراوي',    q:'الشعراوي خواطر',
@@ -2698,27 +2727,54 @@ function archiveUrl(id, name){
        + String(name).split('/').map(encodeURIComponent).join('/');
 }
 /* يُرجع {t:عنوان المادّة, files:[…]} أو null */
+/* الأرشيفُ يُولّد من كلّ تسجيلٍ نسخًا: الأصلَ ثمّ ‎64Kbps‎ و‎VBR‎ وغيرَها،
+   فتظهر الخطبةُ الواحدة مرارًا وأرداؤها أوّلًا. نجمعُها بأصلها ونُبقي أجودَها:
+   الأصلَ إن وُجد، وإلا أكبرَها حجمًا — فالحجمُ عند تساوي المدّة هو الجودة. */
+function fileBitrate(f){
+  const L=parseFloat(f.length||0), S=parseFloat(f.size||0);
+  return (L>1 && S>0) ? (S*8)/L/1000 : 0;      // كيلوبت في الثانية
+}
+function bestOfEach(files){
+  const groups=new Map();
+  for(const f of files){
+    const key=String(f.original || f.name).replace(AV_RE,'').replace(/_(64kb|128kb|vbr|ia|spoken)$/i,'');
+    const g=groups.get(key);
+    if(!g){ groups.set(key,f); continue; }
+    const better = (a,b)=>{
+      const ao=String(a.source||'')==='original', bo=String(b.source||'')==='original';
+      if(ao!==bo) return ao;                                        // الأصلُ مُقدَّم
+      const av=/\.mp4$/i.test(a.name||''), bv=/\.mp4$/i.test(b.name||'');
+      if(av!==bv) return av;                                        // ثمّ الفيديو
+      return (parseFloat(a.size||0) > parseFloat(b.size||0));       // ثمّ الأكبر حجمًا
+    };
+    if(better(f,g)) groups.set(key,f);
+  }
+  return [...groups.values()];
+}
 async function archiveItem(id){
   try{
     const r=await fetch('https://archive.org/metadata/'+encodeURIComponent(id), {mode:'cors'});
     if(!r.ok) return null;
     const d=await r.json();
     const md=d.metadata||{};
-    const raw=(d.files||[]).filter(f=>{
+    let raw=(d.files||[]).filter(f=>{
       if(!AV_RE.test(f.name||'')) return false;
       if(String(f.private)==='true') return false;
       const sz=parseFloat(f.size||0);
       return !sz || sz>200000;                 // نتجاهل القصاصات الصغيرة جدًّا
     });
     if(!raw.length) return null;
+    raw=bestOfEach(raw);
     // رابطٌ مباشر إلى خادم الأرشيف يتفادى التحويل، ويُجرَّب إن فشل الأوّل
     const enc = n => String(n).split('/').map(encodeURIComponent).join('/');
     const direct = (d.server && d.dir) ? ('https://'+d.server+d.dir+'/') : null;
     const files=raw.map(f=>{
       const nm=cleanTitle((f.title||f.name||'').replace(AV_RE,''));
+      const kb=Math.round(fileBitrate(f));
       return { name:nm, url:archiveUrl(id,f.name),
                alt: direct ? (direct+enc(f.name)) : null,
                dur:fmtDur(f.length),
+               kb: kb>=32 ? kb : 0,
                vid:/\.mp4$/i.test(f.name||''), q:looksQuran(nm) };
     });
     const nq=files.filter(f=>f.q).length;
@@ -2796,6 +2852,7 @@ function renderDuat(){
     '<button class="story-item'+(s.bad?' bad':'')+'" data-d="'+i+'">'+
       '<span class="st-ic">'+ICON_PLAY+'</span>'+
       '<span class="st-nm">'+escapeHtml(s.name)+'</span>'+
+      (s.kb?'<span class="st-kb'+(s.kb>=160?' hi':'')+'"><bdi>'+AR(s.kb)+' ك.ب/ث</bdi></span>':'')+
       (s.vid?'<span class="st-open" data-open="'+i+'">فيديو</span>':'')+
       '<span class="st-du">'+escapeHtml(s.bad?'تعذّر':(s.dur||''))+'</span>'+
     '</button>').join('');
@@ -2804,8 +2861,7 @@ function renderDuat(){
   box.querySelectorAll('.story-item').forEach(b=> b.addEventListener('click', e=>{
     const o=e.target.closest('.st-open');
     if(o){ e.stopPropagation();
-      const it=__duatItems[parseInt(o.dataset.open)];
-      if(it && it.url) window.open(it.url,'_blank','noopener');
+      openVideo(__duatItems[parseInt(o.dataset.open)]);
       return; }
     playDuat(parseInt(b.dataset.d));
   }));
@@ -2821,6 +2877,35 @@ function markDuat(){
     b.querySelector('.st-ic').innerHTML = on ? ICON_PAUSE : ICON_PLAY;
   });
 }
+/* ---- مشغّلُ الفيديو داخل التطبيق ----
+   كانت ضغطةُ «فيديو» تفتح صفحةً في المتصفّح فيخرج المستمعُ من التطبيق.
+   صارت تُشغّله في مكانه، ويبقى فتحُه في المتصفّح خيارًا إن تعذّر. */
+function openVideo(it){
+  if(!it) return;
+  const ov=$('#vid-overlay'), v=$('#duat-video'); if(!ov||!v) return;
+  try{ const a=$('#reciter-audio'); if(a) a.pause(); }catch(e){}
+  const urls=[it.url, it.alt].filter(Boolean);
+  $('#vid-title').textContent=it.name||'فيديو';
+  const ob=$('#vid-open');
+  if(ob) ob.onclick=()=>{ if(urls[0]) window.open(urls[0],'_blank','noopener'); };
+  let k=0;
+  const tryUrl=()=>{
+    if(k>=urls.length){ showToast('تعذّر تشغيل الفيديو — جرّب فتحَه في المتصفّح', 3600); return; }
+    v.src=urls[k++];
+    v.play().catch(()=>{});          // بعضُ الأجهزة تمنع التشغيل التلقائيّ فيبقى الزرّ
+  };
+  v.onerror=tryUrl;
+  ov.classList.add('show');
+  tryUrl();
+  vibrate(6);
+}
+function closeVideo(){
+  const ov=$('#vid-overlay'), v=$('#duat-video'); if(!ov) return;
+  ov.classList.remove('show');
+  if(v){ try{ v.pause(); }catch(e){} v.onerror=null; v.removeAttribute('src'); v.load(); }
+}
+$('#vid-close') && $('#vid-close').addEventListener('click', closeVideo);
+$('#vid-overlay') && $('#vid-overlay').addEventListener('click', e=>{ if(e.target.id==='vid-overlay') closeVideo(); });
 function playDuat(i){
   const a=$('#reciter-audio'); const c=__duatItems[i]; if(!a || !c) return;
   if(__duatPlaying===i && !a.paused){ a.pause(); markDuat(); return; }
