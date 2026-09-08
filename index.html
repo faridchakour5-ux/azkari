@@ -2634,6 +2634,7 @@ const DUAT = [
   /* المقطعان الأوّلان مرفوعان على درايف فيثبتان، وما بعدهما يُبحث عنه في
      الأرشيف وقتَ الاستعمال كسائر الدعاة — وكان q معطّلًا فاقتصر على المقطعين. */
   { id:'rushaidi', name:'سعود الرشيدي',           q:'سعود الرشيدي', ids:[],
+    must:['سعود','الرشيدي'],
     files:[ { name:'مقطع 1', drive:'1sXzdsR23d3my3pct0f4Lpie9-Ttbko1l' },
             { name:'مقطع 2', drive:'1EZVETLPrJPsqrP9EFfc9_7DhlD8vdL5W' } ] },
   { id:'shaarawi', name:'محمد متولّي الشعراوي',    q:'الشعراوي خواطر',
@@ -2789,7 +2790,9 @@ async function archiveItem(id){
 }
 async function archiveSearch(q, page){
   try{
-    const query='('+q+') AND (mediatype:audio OR mediatype:movies)'
+    /* يُقصر البحثُ على «المؤلّف» و«العنوان» لا على النصّ كلِّه، فذِكرُ الاسم
+       في وصفٍ أو تعليقٍ لا يجعل المادّةَ له. */
+    const query='(creator:("'+q+'") OR title:("'+q+'")) AND (mediatype:audio OR mediatype:movies)'
       + ' AND NOT title:(quran OR recitation OR murattal OR mujawwad OR tilawa OR تلاوة OR ترتيل OR مصحف)';
     const u='https://archive.org/advancedsearch.php?q='+encodeURIComponent(query)
       + '&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=creator&rows=25&page='+(page||1)+'&output=json';
@@ -2808,6 +2811,49 @@ async function archiveSearch(q, page){
 }
 /* مرشّحو البحث محفوظون لكلّ داعية، ليُجرَّب مصدرٌ آخر عند الطلب */
 const __duatPool={}, __duatPage={};
+/* ==================== التحقّقُ من نسبة التسجيل إلى صاحبه ====================
+   بحثُ الأرشيف بحثٌ في النصّ كلِّه، فيُخرِج موادَّ لا تخصّ الداعية أصلًا:
+   يكفي أن يُذكر اسمُه في وصفِ باقةٍ لمشايخَ شتّى، أو أن يتقارب اسمُه باسم
+   غيره، فتُنسب إليه خُطبُ سواه. فلا يُقبل من نتائج البحث إلا ما كان اسمُه
+   في «المؤلّف» أو «العنوان» — أي ما كانت المادّةُ له هي نفسُها، لا ما ذُكر
+   فيه عرَضًا. أمّا المعرّفاتُ المنتقاةُ يدًا (ids) فمُسلَّمةٌ لا تُمتحن. */
+function normAr(t){
+  return String(t||'')
+    .replace(/[ً-ْٰـٓ-ٟ]/g,'')   // تشكيلٌ وتطويل
+    .replace(/[أإآٱ]/g,'ا')           // أ إ آ ٱ ← ا
+    .replace(/ة/g,'ه').replace(/ى/g,'ي')   // ة ← ه ، ى ← ي
+    .replace(/[^ء-يa-zA-Z0-9]+/g,' ')
+    .toLowerCase().trim();
+}
+/* الكلماتُ المميّزة في الاسم: تُسقط «ال» وما يشترك فيه الناس كـ«عبد» و«محمد» */
+const NAME_SKIP=/^(ابو|ابن|بن|عبد|محمد|احمد|شيخ|دكتور|سيد|حاج)$/;
+function nameTokens(name){
+  return normAr(name).split(' ')
+    .map(w=> w.replace(/^ال/,''))
+    .filter(w=> w.length>=3 && !NAME_SKIP.test(w));
+}
+/* لقبُ الداعية: آخرُ كلمةٍ مميّزةٍ في اسمه، وهي أدلُّ ما فيه */
+function preacherOk(d, it){
+  const hay=normAr([it.creator, it.t, it.id].join(' '));
+  const toks=nameTokens(d.name);
+  const lastName=toks.length? toks[toks.length-1] : '';
+  if(lastName && !hay.includes(lastName)) return false;
+  // ومن شُدّد عليه لتشابه اسمه بغيره لزمته كلُّ كلماتِ ‎must‎
+  if(d.must && !d.must.every(w=> hay.includes(normAr(w)))) return false;
+  return true;
+}
+/* وقد تكون المادّةُ له ثمّ يُدسّ فيها ملفٌّ باسم داعيةٍ آخر، فيُستبعد وحدَه */
+function fileNotSomeoneElse(d, fname){
+  const hay=normAr(fname);
+  const mine=nameTokens(d.name);
+  for(const o of DUAT){
+    if(o.id===d.id) continue;
+    const t=nameTokens(o.name); if(!t.length) continue;
+    const other=t[t.length-1];
+    if(other.length>=4 && hay.includes(other) && !mine.includes(other)) return false;
+  }
+  return true;
+}
 async function fetchDuat(d, more){
   if(!more && __duatCache[d.id]) return __duatCache[d.id];
   let out = (more && __duatCache[d.id]) ? __duatCache[d.id].slice() : [];
@@ -2825,10 +2871,12 @@ async function fetchDuat(d, more){
   }
   const pool=(needSearch && __duatPool[d.id]) ? __duatPool[d.id] : [];
   let taken=0;
-  while(pool.length && taken<3 && out.length<300){
-    const it=await archiveItem(pool.shift());
+  let tried=0;
+  while(pool.length && taken<3 && tried<12 && out.length<300){
+    const it=await archiveItem(pool.shift()); tried++;
     if(!it || it.quranItem) continue;
-    const good=it.files.filter(f=>!f.q);
+    if(!preacherOk(d, it)) continue;                       // ليست له فتُترك
+    const good=it.files.filter(f=> !f.q && fileNotSomeoneElse(d, f.name));
     if(good.length){ out=out.concat(good); taken++; }
   }
   // إزالة المكرّر بالاسم
@@ -2843,7 +2891,7 @@ function renderDuat(){
   if(!__duatCur){ box.innerHTML='<div class="search-hint">اختر داعيةً من القائمة أعلاه.</div>'; return; }
   if(__duatLoading){ box.innerHTML='<div class="search-hint">…جارٍ البحث عن التسجيلات</div>'; return; }
   if(!__duatItems.length){
-    box.innerHTML='<div class="search-hint">لم نجد خُطبًا لهذا الداعية في الأرشيف الآن.</div>'+
+    box.innerHTML='<div class="search-hint">لم نجد في الأرشيف تسجيلًا ثابتةً نسبتُه إلى هذا الداعية الآن. ولا يُعرض إلا ما كان اسمُه في مؤلِّف المادّة أو عنوانها، لئلّا يُنسب إليه كلامُ غيره.</div>'+
       '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>';
     const mb=$('#duat-more'); if(mb) mb.addEventListener('click', ()=> moreDuat());
     return;
@@ -2943,7 +2991,7 @@ async function loadDuatList(d, more){
   __duatItems=list; __duatLoading=false; renderDuat();
   if(more){
     if(!list.length) showToast('لم نجد خُطبًا لهذا الداعية في الأرشيف', 3400);
-    else if(list.length<=before) showToast('لا يوجد مصدرٌ آخر لهذا الداعية', 3400);
+    else if(list.length<=before) showToast('لا مصدرَ آخرَ ثابتةً نسبتُه إلى هذا الداعية', 3400);
     else showToast('أُضيف '+AR(list.length-before)+' تسجيلًا', 2600);
   }
 }
