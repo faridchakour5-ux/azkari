@@ -2016,7 +2016,9 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   $$('.tab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
   $$('.screen').forEach(s=>s.classList.remove('active'));
   $('#'+t.dataset.s).classList.add('active');
-  window.scrollTo(0,0);
+  /* صفحةُ الوِرد تُموضِع نفسَها بعدُ على آخر موضعٍ بلغه القارئ، فلا تُصفَّر
+     هنا وإلّا رجع إلى أوّل الصفحة ثمّ قفز، وربّما كُتب الصفرُ مكانَ موضعه. */
+  if(t.dataset.s!=='s-wird') window.scrollTo(0,0);
   flashSalat();
   if(t.dataset.s!=='s-wird'){ ['#mushaf-jump','#q-zoom-float','#riwaya-float'].forEach(x=>{ const e=$(x); if(e) e.classList.remove('show'); }); }
   if(t.dataset.s==='s-wird') openWird();
@@ -2209,6 +2211,28 @@ function scrollToSura(si, smooth){
   el.scrollIntoView({block:'start', behavior: smooth?'smooth':'auto'});
   __progScrollT=setTimeout(()=>{ __progScroll=false; }, smooth?900:150);
 }
+/* العودةُ إلى موضع القراءة بالضبط عند الرجوع إلى الوِرد.
+   كان التطبيق يرجع إلى رأس السورة، فيضيع مكانُ القارئ إن لم يضع علامة.
+   ونمرّر مرّتين: مرّةً ثمّ نُصحّح بعد استقرار التخطيط، لأنّ كشف الصفحات
+   يُغيّر الارتفاعات فيزيح الموضعُ عن مكانه. */
+function restoreMushafSpot(){
+  const sp=settings.mushafPos;
+  if(!sp || sp.ai==null) return false;
+  const sel='#wird-body .aya-t[data-tai="'+sp.ai+'"]';
+  if(!document.querySelector(sel)) return false;
+  const go=()=>{
+    const e=document.querySelector(sel); if(!e) return;
+    cvReveal(e);
+    const top=(e.getClientRects()[0]||e.getBoundingClientRect()).top+window.scrollY;
+    window.scrollTo(0, Math.max(0, Math.round(top+(sp.d||0))));
+  };
+  __progScroll=true; clearTimeout(__progScrollT);
+  go();
+  requestAnimationFrame(()=> setTimeout(go, 70));
+  setTimeout(go, 280);                       // بعد أن تستقرّ ارتفاعاتُ الصفحات المكشوفة
+  __progScrollT=setTimeout(()=>{ __progScroll=false; }, 460);
+  return true;
+}
 let __mushafRenderedRiwaya=null;
 function renderMushaf(force){
   if(!WIRD) return;
@@ -2217,7 +2241,7 @@ function renderMushaf(force){
   if(!force && body.dataset.mode==='mushaf' && __mushafRenderedRiwaya===settings.riwaya){
     updateResumeBtn();
     __lastJumpSura=-1;
-    requestAnimationFrame(()=> scrollToSura(settings.mushafSura||0, false));
+    requestAnimationFrame(()=>{ if(!restoreMushafSpot()) scrollToSura(settings.mushafSura||0, false); });
     return;
   }
   body.dataset.mode='mushaf';
@@ -2261,7 +2285,7 @@ function buildMushaf(body){
   collectSuraMarkers();
   requestAnimationFrame(()=>{
     if(__riwayaKeep){ const k=__riwayaKeep; __riwayaKeep=null; restoreRiwayaKeep(k); }
-    else scrollToSura(settings.mushafSura||0, false);
+    else if(!restoreMushafSpot()) scrollToSura(settings.mushafSura||0, false);
   });
 }
 /* وضع علامة مرئية عند الآية المحفوظة (إن وُجدت) */
@@ -4456,11 +4480,27 @@ function saveMushafScroll(){
   if(wirdMode()!=='mushaf' || !$('#s-wird').classList.contains('active')) return;
   clearTimeout(__scrollSaveT);
   __scrollSaveT=setTimeout(()=>{
-    settings.mushafPos={ sura: settings.mushafSura||0, y: Math.round(window.scrollY) };
+    /* يُحفظ الموضعُ مُرسًى على الآية نفسِها لا على البكسل وحدَه: صفحاتُ
+       المصحف لا يُقاس ارتفاعُها إلا بعد كشفها، فالبكسلُ يزيح عن موضعه
+       متى تغيّر ما قبلَه. والآيةُ ثابتةٌ لا تزيح. */
+    const ai=currentAyaFromScroll();
+    const el=(ai!=null)? document.querySelector('#wird-body .aya-t[data-tai="'+ai+'"]') : null;
+    const top=el ? ((el.getClientRects()[0]||el.getBoundingClientRect()).top+window.scrollY) : null;
+    settings.mushafPos={ sura: settings.mushafSura||0, y: Math.round(window.scrollY),
+                         ai: (top!=null? ai : null), d: (top!=null? Math.round(window.scrollY-top) : 0) };
     saveSettings();
   }, 350);
 }
+/* وِرد اليوم: بناؤه ثابتُ الارتفاع، فيكفيه حفظُ التمرير نفسِه */
+let __wirdSaveT=null;
+function saveWirdScroll(){
+  if(__progScroll || wirdMode()!=='wird') return;
+  if(!$('#s-wird') || !$('#s-wird').classList.contains('active')) return;
+  clearTimeout(__wirdSaveT);
+  __wirdSaveT=setTimeout(()=>{ settings.wirdY=Math.round(window.scrollY); saveSettings(); }, 350);
+}
 window.addEventListener('scroll', saveMushafScroll, {passive:true});
+window.addEventListener('scroll', saveWirdScroll, {passive:true});
 function applyWirdMode(){
   if(!WIRD) return;
   const daily = wirdMode()==='wird';
@@ -4469,7 +4509,14 @@ function applyWirdMode(){
   $('#mushaf-controls').style.display = daily?'none':'';
   $('#wird-done-btn').style.display = daily?'':'none';
   $('#wird-h1').textContent = daily?'وِرد اليوم':'المصحف الكريم';
-  if(daily){ renderWird(); if($('#mushaf-jump')) $('#mushaf-jump').classList.remove('show'); }
+  if(daily){
+    renderWird(); if($('#mushaf-jump')) $('#mushaf-jump').classList.remove('show');
+    const y=parseInt(settings.wirdY)||0;
+    requestAnimationFrame(()=> setTimeout(()=>{
+      __progScroll=true; window.scrollTo(0, y>60 ? y : 0);
+      setTimeout(()=>{ __progScroll=false; }, 120);
+    }, 40));
+  }
   else { buildSuraSelect(); renderMushaf(); }
   setTimeout(()=>{ try{ renderAutoReadPill(); }catch(e){} }, 400);
 }
