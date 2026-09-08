@@ -3472,10 +3472,8 @@ document.addEventListener('click', e=>{
   if(!num || wirdMode()!=='mushaf') return;
   const ai=parseInt(num.dataset.ai); if(isNaN(ai)) return;
   // أثناء تتبّع التلاوة تصير الضغطةُ ضبطًا للمزامنة؛ والعلامةُ تعود بإيقاف التتبّع
-  // أثناء التتبّع: الضغطةُ ترجع بالعرض إلى موضع القارئ، لا تضع علامةَ قراءة
-  if(__follow && audioPlaying() && qsScrollToAyaLine(ai, true)){
-    vibrate([10,30,10]); showToast('عاد العرضُ إلى هذه الآية', 1300); return;
-  }
+  // أثناء التتبّع تصير الضغطةُ ضبطًا للمزامنة؛ والعلامةُ تعود بإيقاف التتبّع
+  if(__follow && audioPlaying() && qsAnchorToAya(ai)) return;
   const wasOn=num.classList.contains('bm');
   const old=document.querySelector('#wird-body .wird-num.bm'); if(old) old.classList.remove('bm');
   clearTimeout(__scrollSaveT);
@@ -3969,7 +3967,8 @@ function currentReciterInfo(){
 }
 function playReciterSurah(info, si){
   if(!WIRD || !WIRD.sur[si]) return;
-  // تلاوةٌ جديدة: ابنِ الجدولَ من جديد
+  // تلاوةٌ جديدة: اطوِ ما تعلّمناه من السابقة وابنِ الجدولَ من جديد
+  try{ qsFoldCal(); }catch(e){}
   QSY=null; try{ qsClearYCache(); qsSetLive(null); }catch(e){}
   __audioSura=si;
   __repeatPlayed=1;
@@ -4072,7 +4071,6 @@ function qsWeight(t){
   return w;
 }
 let QSY=null;          // الجدولُ الزمنيُّ للسورة المسموعة
-let __flBase=0, __flY=0, __flLast=0;   // حالةُ التمرير المتّصل أثناء التتبّع
 /* ما يتعلّمه التطبيق عن كلّ قارئٍ ويحفظه باسمه، فينتقل معه من سورةٍ إلى سورة:
      lead — ثوانيُ ما قبل التلاوة: الصمتُ والاستعاذة.
      spu  — ثانيةٌ لكلّ حركة: إيقاعُ القارئ.
@@ -4084,6 +4082,25 @@ let __flBase=0, __flY=0, __flLast=0;   // حالةُ التمرير المتّص
    وإنّما حُفظ الإيقاعُ لأنّ القسمةَ على المدّة وحدَها تخدع: في آخر بعض
    الملفّات صمتٌ أو خاتمة، فتُحسب من التلاوة، فيتخلّف العرضُ عن القارئ
    تخلّفًا يزداد كلّما تقدّمت السورة. */
+function qsCal(){
+  const c=(settings.syncCal||{})[settings.reciter] || {};
+  return { off:(+c.off||0), rate:(c.rate>0?c.rate:1), pts:(c.pts||[]),
+           spu:(c.spu>0?c.spu:0), lead:(typeof c.lead==='number'?c.lead:null) };
+}
+function qsSaveCal(c){
+  const all=settings.syncCal||(settings.syncCal={}), prev=qsCal();
+  const spu  = (c.spu>0) ? c.spu : prev.spu;
+  const lead = (typeof c.lead==='number') ? c.lead : prev.lead;
+  const o={ off: Math.max(-60, Math.min(60, c.off||0)),
+            rate: Math.max(0.9, Math.min(1.1, c.rate||1)),
+            pts: (c.pts||[]).slice(-6) };
+  if(spu>0 && lead!=null){                       // الإيقاعُ المتعلَّم لا يُمحى بتصحيحٍ يدويّ
+    o.spu=Math.max(0.02, Math.min(3, spu));
+    o.lead=Math.max(0, Math.min(60, lead));
+  }
+  all[settings.reciter]=o;
+  saveSettings();
+}
 function qsBuild(si, dur){
   if(!WIRD || !WIRD.sur[si] || !(dur>2) || !isFinite(dur)) return null;
   const s=WIRD.sur[si], ai0=s.i;
@@ -4094,17 +4111,58 @@ function qsBuild(si, dur){
   for(let k=0;k<n;k++){ w[k]=qsWeight(WIRD.a[ai0+k].t)+QS_WAQF; sw+=w[k]; }
   // البسملةُ تُتلى قبل كلّ سورةٍ إلا الفاتحة (هي آيةٌ فيها) وبراءة (لا بسملة فيها)
   const bw = (s.s===1 || s.s===9) ? 0 : QS_BISM_W+QS_WAQF;
-  const lead=QS_LEAD, spu=Math.max(dur*0.25, dur-QS_LEAD-QS_TAIL)/Math.max(1, sw+bw);
+  const c=qsCal();
+  let spu, lead;
+  if(c.spu>0 && c.lead!=null){
+    spu=c.spu; lead=c.lead;
+    const fin=lead+(bw+sw)*spu;
+    // إن لم يسع التقديرُ المحفوظُ هذا الملفَّ فالقارئ أسرع فيه: نضغطه ليسعه
+    if(fin > dur-0.5){ const k=(dur-0.5)/fin; spu*=k; lead*=k; }
+  }else{
+    lead=QS_LEAD;
+    spu=Math.max(dur*0.25, dur-QS_LEAD-QS_TAIL)/Math.max(1, sw+bw);
+  }
   const t=new Float64Array(n+1);
   let cur=lead+bw*spu;
   for(let k=0;k<n;k++){ t[k]=cur; cur+=w[k]*spu; }
   t[n]=Math.max(cur, dur);
-  return { si, ai0, n, t, dur };
+  return { si, ai0, n, t, dur, spu, lead, rec:settings.reciter };
+}
+/* ملاءمةُ خطٍّ مستقيمٍ على نقاط الضبط: كلُّ نقطةٍ تقول «زمنُ النموذج x يقع
+   فعلًا عند الثانية cur من الملفّ». ولا نأخذ الميلَ إلا إذا تباعدت النقاطُ
+   تباعدًا كافيًا (دقيقةٌ ونصف فأكثر)، فالميلُ من نقطتين متجاورتين رجمٌ بالغيب. */
+function qsFit(pts, curRate){
+  let rate=curRate||1, off=null;
+  if(pts && pts.length>=2){
+    let mn=Infinity, mx=-Infinity, sx=0, sy=0, sxx=0, sxy=0; const m=pts.length;
+    for(const q of pts){ if(q[0]<mn) mn=q[0]; if(q[0]>mx) mx=q[0];
+      sx+=q[0]; sy+=q[1]; sxx+=q[0]*q[0]; sxy+=q[0]*q[1]; }
+    const den=m*sxx-sx*sx;
+    if(mx-mn>=90 && Math.abs(den)>1e-6){
+      const sl=(m*sxy-sx*sy)/den;
+      if(sl>0.85 && sl<1.15){ rate=Math.max(0.9, Math.min(1.1, sl)); off=(sy-rate*sx)/m; }
+    }
+  }
+  return { rate, off };
+}
+/* عند الانتقال إلى سورةٍ أخرى نطوي ما تعلّمناه في السابقة داخلَ إيقاع القارئ
+   نفسِه، فتبدأ السورةُ الجديدةُ مضبوطةً بلا حاجةٍ إلى إعادة الضبط. وطيُّه
+   مضبوطٌ لا تقريبَ فيه: الجدولُ خطٌّ في الحركات، فتصحيحُه بخطٍّ آخرَ يردّ
+   إلى إيقاعٍ وبدايةٍ جديدين لا غير. */
+function qsFoldCal(){
+  const c=qsCal();
+  if(!QSY || !(QSY.spu>0)) return;
+  // لا يُنسَب ما تعلّمناه من قارئٍ إلى غيره لو بُدّل القارئ قبل الطيّ
+  if(QSY.rec && QSY.rec!==settings.reciter) return;
+  const f=qsFit(c.pts, c.rate);
+  const rate=f.rate, off=(f.off!=null? f.off : c.off);
+  if(Math.abs(off)<0.05 && Math.abs(rate-1)<0.002) return;
+  qsSaveCal({ off:0, rate:1, pts:[], spu:QSY.spu*rate, lead: off+rate*QSY.lead });
 }
 /* الزمنُ الحاليُّ ← رقمُ الآية والكسرُ داخلها */
 function qsLocate(cur){
   if(!QSY) return null;
-  const x=cur, t=QSY.t, n=QSY.n;
+  const c=qsCal(), x=(cur-c.off)/c.rate, t=QSY.t, n=QSY.n;
   if(x<=t[0]) return { k:0, frac:0, before:true };
   let lo=0, hi=n;                       // آخرُ k حيث t[k] <= x
   while(lo<hi){ const mid=(lo+hi+1)>>1; if(t[mid]<=x) lo=mid; else hi=mid-1; }
@@ -4112,7 +4170,10 @@ function qsLocate(cur){
   const span=Math.max(0.001, t[k+1]-t[k]);
   return { k, frac: Math.min(1, Math.max(0, (x-t[k])/span)), before:false };
 }
-/* موضعُ الآية على الصفحة */
+/* موضعُ الآية على الصفحة. قياسُ الموضع يُجبر المتصفّحَ على إعادة الحساب،
+   وفي المصحف آلافُ العناصر، فلا نقيس إلا عند انتقال التلاوة إلى آيةٍ جديدة،
+   ونحتفظ بموضعِ الآية الحاليّة وتاليتِها فقط لا بجدولٍ يكبر بلا حدّ. */
+let __qsK=-1, __qsY0=null, __qsY1=null, __qsYAt=0;
 function qsAyaY(ai){
   const el=document.querySelector('#wird-body .aya-t[data-tai="'+ai+'"]');
   if(!el) return null;
@@ -4121,9 +4182,7 @@ function qsAyaY(ai){
   if(!r || (!r.top && !r.height)) return null;
   return r.top+window.scrollY;
 }
-/* تغيّرَ التخطيطُ (بناءُ المصحف أو حجمُ الخطّ أو دورانُ الشاشة) فتغيّرت
-   المواضع، وسرعةُ التتبّع مبنيّةٌ عليها، فتُعاد حسابُها. */
-function qsClearYCache(){ __flBase=0; }
+function qsClearYCache(){ __qsK=-1; __qsY0=null; __qsY1=null; __qsYAt=0; }
 window.addEventListener('resize', qsClearYCache);
 /* إبرازُ الآية المتلوَّة الآن */
 let __qsLive=null;
@@ -4135,79 +4194,74 @@ function qsSetLive(ai){
   const el=document.querySelector('#wird-body .aya-t[data-tai="'+ai+'"]');
   if(el) el.classList.add('live');
 }
-/* ---- تتبّعُ التلاوة: تمريرٌ متّصلٌ بسرعةٍ يضبطها القارئ بخطوة ‎0.1‎ ----
-   السرعةُ الأساسُ محسوبةٌ من الصوت نفسِه: ارتفاعُ السورة على الشاشة مقسومًا
-   على مدّة الملفّ، فيبدأ التتبّعُ موافقًا للتلاوة. ثمّ يضربها القارئ في
-   معامله فيُسرّع أو يُبطّئ كما يشاء بخطوة ‎0.1‎.
-   والانطلاقةُ من موضع الآية التي يقرؤها المُتلي الآن — تُعرف من الجدول
-   الزمنيّ المبنيّ على حركات الآيات — فلا يبدأ العرضُ من رأس السورة
-   والقارئُ ما زال في البسملة. */
-const FL_MIN=3, FL_MAX=30;                 // من ‎0.3‎ إلى ‎3.0‎ بخطوة ‎0.1‎
-function followLevel(){
-  const l=parseFloat(settings.followLevel);
-  if(!isFinite(l)) return 1;
-  return Math.min(FL_MAX, Math.max(FL_MIN, Math.round(l*10)))/10;
-}
-/* السرعةُ الأساس: بكسلٌ في الثانية توافق مدّةَ الملفّ */
-function followBase(){
-  if(!QSY) return 0;
-  const y0=qsAyaY(QSY.ai0), yN=qsSuraEndY(QSY.si);
-  if(y0==null || yN==null || yN<=y0) return 0;
-  return (yN-y0)/Math.max(1, QSY.dur);
-}
-function qsSuraEndY(si){
-  const next=document.getElementById('msura-'+(si+1));
-  if(next){ cvReveal(next); return next.getBoundingClientRect().top+window.scrollY; }
-  const body=$('#wird-body');
-  return body ? body.getBoundingClientRect().bottom+window.scrollY : null;
-}
-/* موضعُ الآية على خطّ القراءة */
-function qsScrollToAyaLine(ai, smooth){
-  const y=qsAyaY(ai); if(y==null) return false;
-  const target=Math.max(0, y-window.innerHeight*0.36);
-  __autoScrolling=true;
-  window.scrollTo({top:target, behavior: smooth?'smooth':'auto'});
-  __autoScrolling=false;
-  __flY=target;
-  return true;
-}
-/* الآيةُ الواقعةُ على خطّ القراءة الآن — تُبرَز فيعرف القارئُ أين هو */
-let __flMarkT=0;
-function followMarkLine(){
-  const now=Date.now(); if(now-__flMarkT<350) return; __flMarkT=now;
-  /* نجسّ عدّة نقاطٍ حول خطّ القراءة: النقطةُ الواحدة قد تقع في الفراغ بين
-     سطرين فلا تصيب آية، فيومض الإبرازُ ويختفي. وإن أخفقت كلُّها أبقينا
-     الإبرازَ على حاله. */
-  const x=Math.round(window.innerWidth/2), base=window.innerHeight*0.36;
-  for(const dy of [0, -18, 18, -36, 36, -54, 54]){
-    let el=document.elementFromPoint(x, Math.round(base+dy));
-    while(el && el!==document.body){
-      if(el.dataset && el.dataset.tai!=null){ qsSetLive(parseInt(el.dataset.tai)); return; }
-      el=el.parentElement;
-    }
-  }
-}
-function followTick(ts){
+function followTick(){
   __followRAF=null;
-  if(!__follow) return;
+  if(!__follow){ return; }
   const audio=$('#reciter-audio');
-  if(!audio || audio.paused || __audioSura==null || !mushafFollowActive()){
-    __flLast=0; __followRAF=requestAnimationFrame(followTick); return;
-  }
+  if(!audio || audio.paused || __audioSura==null || !mushafFollowActive()){ __followRAF=requestAnimationFrame(followTick); return; }
+  if(Date.now() < __followPausedUntil){ __followRAF=requestAnimationFrame(followTick); return; }
   const dur=audio.duration;
   if(!QSY || QSY.si!==__audioSura || Math.abs(QSY.dur-dur)>0.5){
-    QSY=qsBuild(__audioSura, dur); qsClearYCache(); __flBase=0;
+    if(QSY && QSY.si!==__audioSura) qsFoldCal();
+    QSY=qsBuild(__audioSura, dur); qsClearYCache();
   }
-  // أثناء تمرير القارئ بيده نتوقّف ونُزامن الموضعَ معه
-  if(Date.now() < __followPausedUntil){ __flLast=ts; __flY=window.scrollY; __followRAF=requestAnimationFrame(followTick); return; }
-  if(!__flBase && QSY){ __flBase=followBase(); }
-  if(!__flLast){ __flLast=ts; __flY=window.scrollY; }
-  const dt=Math.min(0.1, (ts-__flLast)/1000); __flLast=ts;
-  const maxY=document.documentElement.scrollHeight-window.innerHeight;
-  __flY=Math.min(maxY, __flY + __flBase*followLevel()*dt);   // مُراكِمٌ كسريٌّ لئلّا تضيع أجزاءُ البكسل
-  __autoScrolling=true; window.scrollTo(0, __flY); __autoScrolling=false;
-  followMarkLine();
+  const loc=QSY && qsLocate(audio.currentTime);
+  if(loc){
+    const ai=QSY.ai0+loc.k;
+    qsSetLive(loc.before?null:ai);
+    /* يُعاد القياسُ عند انتقال التلاوة إلى آيةٍ أخرى، وكلَّ نصف ثانيةٍ أيضًا:
+       فبعد نقلةٍ بعيدة تُكشف صفحاتٌ لم تُقَس من قبلُ فتتغيّر ارتفاعاتُها،
+       ولو قِيس مرّةً واحدةً وقتَ النقلة لبقي القياسُ على تقديرٍ خاطئ. */
+    const now=Date.now();
+    if(loc.k!==__qsK || __qsY0==null || now-__qsYAt>500){
+      __qsK=loc.k; __qsYAt=now;
+      __qsY0=qsAyaY(ai);
+      __qsY1=(loc.k+1<QSY.n)? qsAyaY(ai+1) : null;
+    }
+    const y0=__qsY0, y1=__qsY1;
+    if(y0!=null){
+      const readingLine=window.innerHeight*0.36;
+      // داخلَ الآية نُوزّع الحركة بين موضعها وموضع تاليتها، فيبقى التمرير سلسًا
+      const y=(y1!=null && y1>y0) ? y0+loc.frac*(y1-y0) : y0;
+      const target=Math.max(0, y-readingLine);
+      const currentY=window.scrollY, diff=target-currentY;
+      __autoScrolling=true;
+      if(Math.abs(diff)>window.innerHeight*1.6){
+        /* نقلةٌ بعيدة — كأن ينتقل السامعُ إلى وسط السورة. نقفز إليها، ثمّ
+           نُبطل الموضعَ المحفوظ ليُقاس من جديد بعد أن تُكشف صفحاتُها
+           وتستقرّ ارتفاعاتُها، وإلّا بقي القياسُ على تقديرٍ سابقٍ خاطئ. */
+        window.scrollTo(0, target); qsClearYCache();
+      }
+      else if(Math.abs(diff)>1.2) window.scrollTo(0, currentY + diff*0.06);
+      __autoScrolling=false;
+    }
+  }
   __followRAF=requestAnimationFrame(followTick);
+}
+/* الإزاحةُ كما يراها القارئ: موجبةٌ = العرضُ مُقدَّمٌ على النموذج.
+   داخلًا نخزّن العكسَ (off) لأنّ البحث يجري في زمن النموذج. */
+function qsShift(){ return -qsCal().off; }
+function fmtSec(v){ return fmtLevel(Math.round(Math.abs(v)*10)/10); }
+/* أدقُّ ضبطٍ ممكن: يضغط القارئُ رقمَ الآية حين يشرع فيها المُتلي، فتُعلَم
+   لحظةُ بدايتها في الملفّ يقينًا لا تقديرًا، ومنها يُصحَّح الإيقاعُ والبداية. */
+function qsAnchorToAya(ai){
+  const a=$('#reciter-audio'); if(!QSY || !a) return false;
+  const k=ai-QSY.ai0; if(k<0 || k>=QSY.n) return false;
+  const cur=a.currentTime; if(!isFinite(cur) || cur<=0) return false;
+  if(__qsBurst){ clearTimeout(__qsBurst.timer); __qsBurst=null; }
+  const c=qsCal(), xTrue=QSY.t[k];
+  const pts=c.pts.concat([[xTrue, cur]]).slice(-6);
+  const rate=qsFit(pts, c.rate).rate;
+  qsSaveCal({ off: cur-rate*xTrue, rate, pts });
+  qsClearYCache(); renderFollowPill();
+  vibrate([10,30,10]);
+  showToast('ضُبطت المزامنة على هذه الآية', 1500);
+  return true;
+}
+function qsOffsetLabel(){
+  const sh=qsShift();
+  if(Math.abs(sh)<0.05) return '';
+  return ' '+(sh>0?'+':'−')+fmtSec(sh)+'ث';
 }
 function renderFollowPill(){
   const pill=$('#follow-pill'); if(!pill) return;
@@ -4216,7 +4270,7 @@ function renderFollowPill(){
   const main=$('#follow-toggle'); if(main) main.classList.toggle('on', __follow);
   const ic=$('#follow-pill-ic'), lbl=$('#follow-pill-label');
   if(ic) ic.innerHTML = __follow ? FOLLOW_ICON_ON : FOLLOW_ICON_OFF;
-  if(lbl) lbl.textContent = __follow ? ('سرعة '+fmtLevel(followLevel())) : 'تتبّع التلاوة';
+  if(lbl) lbl.textContent = __follow ? ('التتبّع'+qsOffsetLabel()) : 'تتبّع التلاوة';
   ['#follow-slower','#follow-faster'].forEach(sel=>{
     const b=$(sel); if(b) b.style.visibility = __follow ? 'visible' : 'hidden';
   });
@@ -4224,38 +4278,64 @@ function renderFollowPill(){
 function startFollow(){
   if(!mushafFollowActive() || !audioPlaying()) { renderFollowPill(); return; }
   try{ stopAutoRead(); }catch(e){}
-  __follow=true; __followPausedUntil=0; __flLast=0; __flBase=0;
+  __follow=true; __followPausedUntil=0;
   QSY=null; qsClearYCache();
-  const audio=$('#reciter-audio');
-  // ابدأ من الآية التي يتلوها الآن لا من رأس السورة
-  if(audio && isFinite(audio.duration)){
-    QSY=qsBuild(__audioSura, audio.duration);
-    const loc=QSY && qsLocate(audio.currentTime);
-    if(loc) qsScrollToAyaLine(QSY.ai0+loc.k, true);
-    __flBase=followBase();
-  }
-  __flY=window.scrollY;
   renderFollowPill();
+  if(!settings.qsHint){ settings.qsHint=1; saveSettings();
+    setTimeout(()=> showToast('لضبط المزامنة: اضغط رقمَ الآية حين يبدؤها القارئ — مرّتين في موضعين متباعدين', 4200), 900); }
   if(!__followRAF) __followRAF=requestAnimationFrame(followTick);
-  if(!settings.qsHint2){ settings.qsHint2=1; saveSettings();
-    setTimeout(()=> showToast('اضبط السرعة بـ ‎−‎ و‎+‎، واضغط رقمَ الآية لتعود إلى موضع القارئ', 4200), 900); }
 }
 function stopFollow(){
   __follow=false;
   if(__followRAF){ cancelAnimationFrame(__followRAF); __followRAF=null; }
   qsSetLive(null);
+  // اطوِ ما تعلّمناه الآن، لئلّا يضيع بانتهاء الجلسة على سورةٍ واحدة
+  try{ if(__qsBurst){ clearTimeout(__qsBurst.timer); qsCommitAnchor(); } qsFoldCal(); QSY=null; }catch(e){}
   renderFollowPill();
 }
-/* خطوةُ السرعة ‎0.1‎ — كخطوة «تمرير للقراءة» سواءً بسواء */
-function stepFollow(dir){
-  const cur=Math.round(followLevel()*10);
-  const nx=Math.min(FL_MAX, Math.max(FL_MIN, cur+dir))/10;
-  settings.followLevel=nx; saveSettings(); vibrate(4);
-  renderFollowPill();
-  showToast('سرعة التتبّع: '+fmtLevel(nx), 1200);
+/* تصحيحٌ يدويٌّ بخطوةِ نصفِ ثانية إن سبق العرضُ القارئَ أو تأخّر عنه.
+   يُحفظ باسم القارئ نفسِه، فيصلح لكلّ سورةٍ يقرؤها بعدُ بلا إعادة ضبط. */
+let __qsBurst=null;
+/* الخطوةُ تتسارع بتتابع الضغط: نصفُ ثانيةٍ للضغطتين الأوليين ثمّ ثانيةٌ ثمّ
+   ثانيتان. فتصحيحُ فرقٍ يسيرٍ يبقى دقيقًا، وتصحيحُ فرقٍ كبيرٍ لا يُكلّف
+   عشرين ضغطة. */
+function qsStep(){
+  const k=__qsBurst? __qsBurst.hits : 0;
+  return k<2 ? 0.5 : (k<4 ? 1 : 2);
 }
-$('#follow-slower') && $('#follow-slower').addEventListener('click', e=>{ e.stopPropagation(); stepFollow(-1); });
-$('#follow-faster') && $('#follow-faster').addEventListener('click', e=>{ e.stopPropagation(); stepFollow(+1); });
+function nudgeSync(dir){
+  const d=dir*qsStep();
+  const c=qsCal(), a=$('#reciter-audio');
+  const cur=(a && isFinite(a.currentTime) && a.currentTime>0) ? a.currentTime : null;
+  /* التصحيحُ يظهر في الحال، ثمّ يُسجَّل بعد سكونِ اليد. فلو ضغط القارئ
+     أربعَ ضغطاتٍ متتابعةً حُسبت واحدةً، ولم تدخل الحسابَ أربعُ قراءاتٍ
+     متناقضةٍ في اللحظة نفسِها فتُفسِد تقديرَ الإيقاع. */
+  qsSaveCal({ off:c.off-d, rate:c.rate, pts:c.pts });
+  if(cur!=null){
+    const same = __qsBurst && Math.abs(__qsBurst.at-cur)<20;
+    if(__qsBurst) clearTimeout(__qsBurst.timer);
+    const at=same ? __qsBurst.at : cur, hits=(same? __qsBurst.hits : 0)+1;
+    __qsBurst={ at, hits, timer:setTimeout(qsCommitAnchor, 1400) };
+  }
+  __followPausedUntil=0; qsClearYCache();
+  vibrate(4); renderFollowPill();
+  const sh=qsShift();
+  showToast(Math.abs(sh)<0.05 ? 'المزامنة على أصلها'
+    : ('العرضُ '+(sh>0?'مُقدَّمٌ':'مُؤخَّرٌ')+' '+fmtSec(sh)+' ث'), 1400);
+}
+function qsCommitAnchor(){
+  const burst=__qsBurst; __qsBurst=null; if(!burst) return;
+  const c=qsCal();
+  const xTrue=(burst.at-c.off)/c.rate;          // زمنُ النموذج الذي يقع فعلًا عند تلك اللحظة
+  const pts=c.pts.concat([[xTrue, burst.at]]).slice(-6);
+  const rate=qsFit(pts, c.rate).rate;
+  /* نُثبّت الإزاحةَ على آخرِ نقطةٍ ليبقى التصحيحُ مضبوطًا في تلك اللحظة بعينها،
+     ولو خالف ذلك تقاطعَ الخطّ المحسوب — فالقارئ يرى أثرَ ضغطته في الحال. */
+  qsSaveCal({ off: burst.at-rate*xTrue, rate, pts });
+  qsClearYCache(); renderFollowPill();
+}
+$('#follow-slower') && $('#follow-slower').addEventListener('click', e=>{ e.stopPropagation(); nudgeSync(-1); });
+$('#follow-faster') && $('#follow-faster').addEventListener('click', e=>{ e.stopPropagation(); nudgeSync(+1); });
 $('#follow-toggle') && $('#follow-toggle').addEventListener('click', ()=>{ vibrate(6); __follow ? stopFollow() : startFollow(); });
 // إيقاف مؤقّت للتتبّع عند تمرير المستخدم يدويًّا (يستأنف بعد 5 ثوانٍ)
 ['touchstart','wheel'].forEach(ev=> window.addEventListener(ev, ()=>{
@@ -4466,12 +4546,15 @@ function recoverReciter(){
     } else resume();
   }, Math.min(1200*__recTry, 6000));
 }
+/* الانتقالُ في شريط الصوت — من الإشعار أو من داخل التطبيق — يُبطل الموضعَ
+   المحفوظ، فيلحق العرضُ بالقارئ حيث صار لا حيث كان. */
+$('#reciter-audio').addEventListener('seeked', ()=>{ try{ qsClearYCache(); }catch(e){} });
 $('#reciter-audio').addEventListener('error', recoverReciter);
 $('#reciter-audio').addEventListener('stalled', ()=>{ const a=$('#reciter-audio'); if(a && !a.paused) recoverReciter(); });
 $('#reciter-audio').addEventListener('playing', ()=>{ __recTry=0; if(__recTimer){ clearTimeout(__recTimer); __recTimer=null; } });
 $('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 $('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
-$('#reciter-audio').addEventListener('ended', ()=>{ try{ QSY=null; renderFollowPill(); renderAutoReadPill(); }catch(e){} });
+$('#reciter-audio').addEventListener('ended', ()=>{ try{ qsFoldCal(); QSY=null; renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 setupMediaSession();
 let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){
