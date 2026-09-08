@@ -2631,10 +2631,13 @@ const DUAT = [
     ids:['Khottab_Said-Kamli-mp3','SaidAlKamaliKhotab','al-mowataa_Mp3','sa3edelkmly'] },
   { id:'awadi',    name:'نبيل العوضي',           q:'نبيل العوضي',
     ids:['Nabil-3awadi_Mawsoa-mp3','Nabil_Al_Awadi_Mawsoaa_mp3_Up-By-MusleM','Al_Awadhi_uP_bY_mUSLEm'] },
-  /* المقطعان الأوّلان مرفوعان على درايف فيثبتان، وما بعدهما يُبحث عنه في
-     الأرشيف وقتَ الاستعمال كسائر الدعاة — وكان q معطّلًا فاقتصر على المقطعين. */
-  { id:'rushaidi', name:'سعود الرشيدي',           q:'سعود الرشيدي', ids:[],
-    must:['سعود','الرشيدي'],
+  /* الشيخ سعود الرشيدي: بحثُ الأرشيف موقوفٌ عنه عن قصد (q:null).
+     جُرّب فجاء بتسجيلاتٍ ليست له، ولم يُغنِ تشديدُ الشرط، لأنّ الأرشيف لا
+     يكاد يحفظ له مادّةً موثّقةَ النسبة، فما يعود إنّما هو لمن يُشبه اسمُه
+     اسمَه أو لباقاتٍ ذُكر فيها عرَضًا. ونسبةُ كلامٍ إلى غير قائله أشدُّ من
+     قلّة المادّة، فاقتُصر على ما نُقل بعينه ووُثّقت نسبتُه.
+     ولإضافة غيرها: ارفعها على درايف وضع معرّفها هنا. */
+  { id:'rushaidi', name:'سعود الرشيدي',           q:null, ids:[], noSearch:true,
     files:[ { name:'مقطع 1', drive:'1sXzdsR23d3my3pct0f4Lpie9-Ttbko1l' },
             { name:'مقطع 2', drive:'1EZVETLPrJPsqrP9EFfc9_7DhlD8vdL5W' } ] },
   { id:'shaarawi', name:'محمد متولّي الشعراوي',    q:'الشعراوي خواطر',
@@ -2864,7 +2867,7 @@ async function fetchDuat(d, more){
     const it=await archiveItem(id);
     if(it) out=out.concat(it.files.filter(f=>!f.q));
   }
-  const needSearch = !!d.q && (more || out.length<5);
+  const needSearch = !d.noSearch && !!d.q && (more || out.length<5);
   if(needSearch && (!__duatPool[d.id] || (more && !__duatPool[d.id].length))){
     __duatPage[d.id]=(__duatPage[d.id]||0)+1;
     __duatPool[d.id]=await archiveSearch(d.q, __duatPage[d.id]);
@@ -2892,7 +2895,8 @@ function renderDuat(){
   if(__duatLoading){ box.innerHTML='<div class="search-hint">…جارٍ البحث عن التسجيلات</div>'; return; }
   if(!__duatItems.length){
     box.innerHTML='<div class="search-hint">لم نجد في الأرشيف تسجيلًا ثابتةً نسبتُه إلى هذا الداعية الآن. ولا يُعرض إلا ما كان اسمُه في مؤلِّف المادّة أو عنوانها، لئلّا يُنسب إليه كلامُ غيره.</div>'+
-      '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>';
+      (__duatCur.noSearch ? '' :
+       '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>');
     const mb=$('#duat-more'); if(mb) mb.addEventListener('click', ()=> moreDuat());
     return;
   }
@@ -2904,8 +2908,9 @@ function renderDuat(){
       (s.vid?'<span class="st-open" data-open="'+i+'">فيديو</span>':'')+
       '<span class="st-du">'+escapeHtml(s.bad?'تعذّر':(s.dur||''))+'</span>'+
     '</button>').join('');
-  box.insertAdjacentHTML('beforeend',
-    '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>');
+  box.insertAdjacentHTML('beforeend', __duatCur.noSearch
+    ? '<div class="search-hint">هذه المقاطعُ منقولةٌ بعينها وموثّقةُ النسبة. وبحثُ الأرشيف موقوفٌ عن هذا الداعية، لأنّه كان يأتي بتسجيلاتٍ ليست له.</div>'
+    : '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>');
   box.querySelectorAll('.story-item').forEach(b=> b.addEventListener('click', e=>{
     const o=e.target.closest('.st-open');
     if(o){ e.stopPropagation();
@@ -3004,7 +3009,7 @@ async function pickDuat(id){
   await loadDuatList(d, false);
 }
 function moreDuat(){
-  if(!__duatCur || __duatLoading) return;
+  if(!__duatCur || __duatLoading || __duatCur.noSearch) return;
   vibrate(6); loadDuatList(__duatCur, true);
 }
 function openDuat(){
