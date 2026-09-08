@@ -805,6 +805,20 @@
   .aya-t{cursor:pointer; border-radius:6px; transition:background-color .2s;}
   .aya-t.tsel{background:var(--c-repeat-bg);}
 
+  .clip-body{padding:13px;}
+  .clip-body label{display:block; font-size:12.5px; font-weight:800; color:var(--text-2); margin:0 0 5px;}
+  .clip-body label + input{margin-bottom:12px;}
+  .clip-body input{width:100%; box-sizing:border-box; border:1px solid var(--line); background:var(--fill-2);
+    color:var(--text); border-radius:12px; padding:11px 12px; font:inherit; font-size:14px;}
+  .clip-body input:focus{outline:2px solid var(--accent); outline-offset:-1px;}
+  .clip-hint{font-size:12px; line-height:1.85; color:var(--text-3);}
+  .st-del{flex:0 0 auto; width:28px; height:28px; border:0; border-radius:9px; background:var(--fill-2);
+    color:var(--text-3); display:inline-flex; align-items:center; justify-content:center;}
+  .st-del svg{width:14px; height:14px;}
+  .duat-add{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:12px;
+    border:1px dashed var(--line); background:transparent; color:var(--accent); border-radius:14px;
+    padding:12px; font:inherit; font-weight:800; font-size:13.5px;}
+  .duat-add:active{transform:scale(.98);}
   /* مشغّلُ الفيديو: يُعرض داخل التطبيق بدل فتح صفحةٍ أخرى */
   .vid-overlay{position:fixed; inset:0; z-index:110; display:none; align-items:center; justify-content:center;
     background:rgba(0,0,0,.72); padding:16px;}
@@ -1116,6 +1130,21 @@
 <button class="totop-btn" id="totop-btn" aria-label="العودة إلى أعلى الصفحة" title="العودة إلى الأعلى">
   <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>
 </button>
+
+<div class="vid-overlay" id="clip-overlay">
+  <div class="vid-sheet">
+    <div class="vid-head"><span id="clip-title">أضِف مقطعًا</span>
+      <button id="clip-close" aria-label="إغلاق"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button></div>
+    <div class="clip-body">
+      <label for="clip-link">رابطُ المقطع</label>
+      <input id="clip-link" type="url" inputmode="url" dir="ltr" placeholder="https://drive.google.com/file/d/…">
+      <label for="clip-name">اسمُه (اختياريّ)</label>
+      <input id="clip-name" type="text" placeholder="خطبة الجمعة">
+      <div class="clip-hint">يُقبل رابطُ Google Drive، أو رابطٌ مباشرٌ لملفّ ‎mp3‎ أو ‎mp4‎. وإن كان من درايف فاجعل مشاركتَه «لكلّ من لديه الرابط» وإلّا لم يُشغَّل. ويُحفظ في جهازك وحدَه.</div>
+    </div>
+    <div class="vid-foot"><button class="share-btn" id="clip-save">أضِفْه إلى القائمة</button></div>
+  </div>
+</div>
 
 <div class="vid-overlay" id="vid-overlay">
   <div class="vid-sheet">
@@ -2814,6 +2843,41 @@ async function archiveSearch(q, page){
 }
 /* مرشّحو البحث محفوظون لكلّ داعية، ليُجرَّب مصدرٌ آخر عند الطلب */
 const __duatPool={}, __duatPage={};
+/* ==================== مقاطعُ يُضيفها صاحبُ الجهاز بنفسه ====================
+   نسبةُ المقطع إلى قائله لا يعرفها البحثُ الآليّ معرفةً يقينيّة، ويعرفها من
+   بيده الرابط. فمن كان عنده مقطعٌ لداعيةٍ أثبته هنا بنفسه، فيُثبَّت في أوّل
+   قائمته ولا يزول. تُحفظ في الجهاز وحدَه ولا تُرسَل إلى أحد. */
+function userClips(id){ const all=store.get('az_clips',{}); return Array.isArray(all[id])? all[id] : []; }
+function saveUserClips(id, list){
+  const all=store.get('az_clips',{});
+  all[id]=list.slice(0,60); store.set('az_clips', all);
+  delete __duatCache[id];                       // القائمةُ محفوظةٌ فتُبنى من جديد
+}
+/* يقبل رابطَ درايف بأشكاله، أو رابطًا مباشرًا لملفّ، أو معرّفَ درايف وحدَه */
+function parseClipLink(t){
+  const s=String(t||'').trim(); if(!s) return null;
+  const m = s.match(/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]{20,})/)
+         || s.match(/[?&]id=([A-Za-z0-9_-]{20,})/)
+         || s.match(/drive\.google\.com\/open\?id=([A-Za-z0-9_-]{20,})/);
+  if(m) return { drive:m[1] };
+  if(/^https?:\/\//i.test(s)) return { url:s };
+  if(/^[A-Za-z0-9_-]{20,}$/.test(s)) return { drive:s };
+  return null;
+}
+function addUserClip(id, link, name){
+  const c=parseClipLink(link);
+  if(!c){ showToast('لم أفهم الرابط — الصقْ رابطَ درايف أو رابطًا مباشرًا لملفّ صوتٍ أو فيديو', 4200); return false; }
+  const list=userClips(id);
+  const key=(c.drive||c.url);
+  if(list.some(x=>(x.drive||x.url)===key)){ showToast('هذا المقطع مُضافٌ من قبل', 2600); return false; }
+  c.k=String(Date.now());
+  c.name=String(name||'').trim() || ('مقطع '+AR(list.length+1));
+  list.push(c); saveUserClips(id, list);
+  return true;
+}
+function removeUserClip(id, k){
+  saveUserClips(id, userClips(id).filter(x=>x.k!==k));
+}
 /* ==================== التحقّقُ من نسبة التسجيل إلى صاحبه ====================
    بحثُ الأرشيف بحثٌ في النصّ كلِّه، فيُخرِج موادَّ لا تخصّ الداعية أصلًا:
    يكفي أن يُذكر اسمُه في وصفِ باقةٍ لمشايخَ شتّى، أو أن يتقارب اسمُه باسم
@@ -2860,8 +2924,12 @@ function fileNotSomeoneElse(d, fname){
 async function fetchDuat(d, more){
   if(!more && __duatCache[d.id]) return __duatCache[d.id];
   let out = (more && __duatCache[d.id]) ? __duatCache[d.id].slice() : [];
-  if(!out.length && d.files && d.files.length)
-    out = d.files.map(f=>({ name:f.name, drive:f.drive, dur:'', vid:false }));
+  if(!out.length){
+    out = (d.files||[]).map(f=>({ name:f.name, drive:f.drive, dur:'', vid:false }))
+      .concat(userClips(d.id).map(c=>({
+        name:c.name, drive:c.drive, url:c.url, dur:'', own:true, k:c.k,
+        vid:/\.(mp4|m4v|webm)(\?|$)/i.test(c.url||'') })));
+  }
   if(!more) for(const id of (d.ids||[])){
     if(out.length>=300) break;
     const it=await archiveItem(id);
@@ -2896,8 +2964,11 @@ function renderDuat(){
   if(!__duatItems.length){
     box.innerHTML='<div class="search-hint">لم نجد في الأرشيف تسجيلًا ثابتةً نسبتُه إلى هذا الداعية الآن. ولا يُعرض إلا ما كان اسمُه في مؤلِّف المادّة أو عنوانها، لئلّا يُنسب إليه كلامُ غيره.</div>'+
       (__duatCur.noSearch ? '' :
-       '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>');
+       '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>')+
+      '<button class="duat-add" id="duat-add" type="button">'+
+        '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>أضِف مقطعًا برابطه</button>';
     const mb=$('#duat-more'); if(mb) mb.addEventListener('click', ()=> moreDuat());
+    wireDuatAdd();
     return;
   }
   box.innerHTML=__duatItems.map((s,i)=>
@@ -2907,20 +2978,52 @@ function renderDuat(){
       (s.kb?'<span class="st-kb'+(s.kb>=160?' hi':'')+'"><bdi>'+AR(s.kb)+' ك.ب/ث</bdi></span>':'')+
       (s.vid?'<span class="st-open" data-open="'+i+'">فيديو</span>':'')+
       '<span class="st-du">'+escapeHtml(s.bad?'تعذّر':(s.dur||''))+'</span>'+
+      (s.own?'<span class="st-del" role="button" data-del="'+i+'" aria-label="احذف هذا المقطع">'+
+        '<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></span>':'')+
     '</button>').join('');
-  box.insertAdjacentHTML('beforeend', __duatCur.noSearch
-    ? '<div class="search-hint">هذه المقاطعُ منقولةٌ بعينها وموثّقةُ النسبة. وبحثُ الأرشيف موقوفٌ عن هذا الداعية، لأنّه كان يأتي بتسجيلاتٍ ليست له.</div>'
-    : '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>');
+  box.insertAdjacentHTML('beforeend', (__duatCur.noSearch
+    ? '<div class="search-hint">هذه المقاطعُ منقولةٌ بعينها وموثّقةُ النسبة. وبحثُ الأرشيف موقوفٌ عن هذا الداعية، لأنّه كان يأتي بتسجيلاتٍ ليست له — ولك أن تُضيف ما عندك من مقاطعه بنفسك.</div>'
+    : '<div class="fq-share"><button class="share-btn" id="duat-more">'+SHARE_IC+'جرّب مصدرًا آخر</button></div>')+
+    '<button class="duat-add" id="duat-add" type="button">'+
+      '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>أضِف مقطعًا برابطه</button>');
   box.querySelectorAll('.story-item').forEach(b=> b.addEventListener('click', e=>{
     const o=e.target.closest('.st-open');
+    const del=e.target.closest('.st-del');
+    if(del){ e.stopPropagation();
+      const it=__duatItems[parseInt(del.dataset.del)];
+      if(it && it.k && __duatCur){ removeUserClip(__duatCur.id, it.k); vibrate(20);
+        showToast('حُذف المقطع', 1800); loadDuatList(__duatCur, false); }
+      return; }
     if(o){ e.stopPropagation();
       openVideo(__duatItems[parseInt(o.dataset.open)]);
       return; }
     playDuat(parseInt(b.dataset.d));
   }));
   const mb=$('#duat-more'); if(mb) mb.addEventListener('click', ()=> moreDuat());
+  wireDuatAdd();
   markDuat();
 }
+function wireDuatAdd(){
+  const ab=$('#duat-add');
+  if(ab) ab.addEventListener('click', ()=>{ vibrate(6); openClipSheet(); });
+}
+function openClipSheet(){
+  const ov=$('#clip-overlay'); if(!ov || !__duatCur) return;
+  $('#clip-title').textContent='أضِف مقطعًا — '+__duatCur.name;
+  $('#clip-link').value=''; $('#clip-name').value='';
+  ov.classList.add('show');
+  setTimeout(()=>{ const el=$('#clip-link'); if(el) el.focus(); }, 60);
+}
+function closeClipSheet(){ const ov=$('#clip-overlay'); if(ov) ov.classList.remove('show'); }
+$('#clip-close') && $('#clip-close').addEventListener('click', closeClipSheet);
+$('#clip-overlay') && $('#clip-overlay').addEventListener('click', e=>{ if(e.target.id==='clip-overlay') closeClipSheet(); });
+$('#clip-save') && $('#clip-save').addEventListener('click', async ()=>{
+  if(!__duatCur) return;
+  if(!addUserClip(__duatCur.id, $('#clip-link').value, $('#clip-name').value)) return;
+  closeClipSheet(); vibrate([10,30,10]);
+  showToast('أُضيف المقطع', 2000);
+  await loadDuatList(__duatCur, false);
+});
 function markDuat(){
   const a=$('#reciter-audio');
   const cur=(a && !a.paused && __duatPlaying!=null) ? __duatPlaying : null;
