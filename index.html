@@ -848,6 +848,22 @@
   html[data-bg="sage"]     .aya-t.live{background:color-mix(in srgb, var(--accent) 16%, transparent);}
   html[data-bg="sagelite"] .aya-t.live{background:color-mix(in srgb, var(--accent) 14%, transparent);}
   .tafsir-body{overflow-y:auto; padding:16px 20px 22px; -webkit-overflow-scrolling:touch;}
+  /* شرحُ الأذكار: نصُّ الذكر ثمّ معناه ثمّ شرحُ كلماته */
+  .sharh-txt{font-size:17px; line-height:2.15; color:var(--accent); font-weight:700;
+    background:var(--accent-bg); border-radius:14px; padding:13px 14px; margin-bottom:14px; text-align:justify;}
+  .sh-h{font-size:12.5px; font-weight:800; color:var(--accent); margin:16px 0 8px;}
+  .sh-h:first-child{margin-top:0;}
+  .sh-k{border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .sh-ki{display:flex; gap:10px; padding:10px 13px; align-items:baseline;}
+  .sh-ki + .sh-ki{border-top:1px solid var(--sep);}
+  .sh-ki b{flex:0 0 auto; max-width:42%; font-size:14px; font-weight:800; color:var(--c-read);}
+  .sh-ki span{font-size:13.5px; line-height:1.9; color:var(--text-2);}
+  /* زرُّ الشرح في صفّ البطاقة، بجانب «شارِك» */
+  .sharh-btn{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line);
+    background:var(--fill-2); color:var(--c-read); border-radius:12px; padding:7px 11px;
+    font:inherit; font-weight:800; font-size:12.5px;}
+  .sharh-btn:active{transform:scale(.96);}
+  .sharh-btn svg{width:14px; height:14px;}
   .tafsir-body .t-aya{font-family:'AmiriQuran',serif; font-size:19px; line-height:2.1; color:var(--accent);
     padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid var(--sep); text-align:center;}
   body.riw-warsh .tafsir-body .t-aya, body.qmaghribi .tafsir-body .t-aya{font-family:'Maghribi','AmiriQuran',serif; font-size:21px;}
@@ -1163,6 +1179,16 @@
       <button id="sura-overlay-close" aria-label="إغلاق"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="sura-list" id="sura-list"></div>
+  </div>
+</div>
+
+<div class="sura-overlay" id="sharh-overlay">
+  <div class="sura-sheet">
+    <div class="sura-sheet-head">
+      <span id="sharh-title">شرح الذكر</span>
+      <button id="sharh-close" aria-label="إغلاق"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="tafsir-body" id="sharh-body"></div>
   </div>
 </div>
 
@@ -1663,6 +1689,7 @@ function renderAzkar(){
       '<div class="meta">'+
         '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span> '+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
         (AZKAR_AUDIO[pid] ? '<button class="dhikr-play" data-pid="'+pid+'" aria-label="استماع">'+ICON_PLAY+'</button>':'')+
+        '<button class="sharh-btn" aria-label="شرح الذكر">'+SHARH_IC+'الشرح</button>'+
         '<button class="share-btn" aria-label="مشاركة">'+SHARE_IC+'شارِك</button>'+
       '</div>'+
       (d.fadl||d.source ? '<div class="fadl">'+
@@ -1673,6 +1700,9 @@ function renderAzkar(){
     // الضغط على البطاقة يَعُدّ — إلا على الفضل والمصدر أو أزرار الاستماع والمشاركة
     card.addEventListener('click', e=>{
       if(e.target.closest('.dhikr-play')){ toggleDhikrAudio(pid); return; }
+      if(e.target.closest('.sharh-btn')){
+        e.stopPropagation(); vibrate(6); openSharh(currentTab, d, text, meta.title); return;
+      }
       if(e.target.closest('.share-btn')){
         e.stopPropagation();
         openShareSheet(()=> dhikrShotHTML(d), meta.title, null, 'salaty-dhikr');
@@ -2410,6 +2440,61 @@ async function openStories(){
    يُلتقط المحتوى كما هو معروضٌ بخطوطه وألوانه عبر SVG/foreignObject —
    بلا أيّ مكتبةٍ خارجيّة، فيبقى التطبيق يعمل دون إنترنت. */
 const SHARE_IC='<svg class="gh-ic" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+const SHARH_IC='<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+/* ==================== شرحُ الأذكار ====================
+   على غرار تفسير الآية في المصحف: يُعرض معنى الذكر الإجماليّ ثمّ شرحُ ما
+   قد يُشكل من كلماته، ومعهما فضلُه ومصدرُه. والملفُّ يُجلب عند أوّل طلبٍ
+   لا مع فتح التطبيق، فلا يُثقل بدءَه. */
+let __sharhLoading=null;
+function loadSharh(){
+  if(window.SHARH) return Promise.resolve(true);
+  if(__sharhLoading) return __sharhLoading;
+  __sharhLoading=new Promise(res=>{
+    const el=document.createElement('script'); el.src='sharh.js';
+    el.onload=()=>res(!!window.SHARH); el.onerror=()=>{ __sharhLoading=null; res(false); };
+    document.head.appendChild(el);
+  });
+  return __sharhLoading;
+}
+function sharhHTML(sh, d, text){
+  let h='<div class="sharh-txt">'+escapeHtml(text)+'</div>';
+  if(sh){
+    if(sh.m) h+='<div class="sh-h">المعنى</div><div class="t-txt">'+escapeHtml(sh.m)+'</div>';
+    if(sh.k && sh.k.length){
+      h+='<div class="sh-h">شرحُ الكلمات</div><div class="sh-k">'+
+        sh.k.map(x=>'<div class="sh-ki"><b>'+escapeHtml(x[0])+'</b><span>'+escapeHtml(x[1])+'</span></div>').join('')+
+      '</div>';
+    }
+  } else {
+    h+='<div class="t-note">لا يوجد شرحٌ لهذا الذكر بعدُ.</div>';
+  }
+  if(d.fadl)   h+='<div class="sh-h">الفضل</div><div class="t-txt">'+escapeHtml(d.fadl)+'</div>';
+  if(d.source) h+='<div class="t-src"><span class="lbl">المصدر</span> '+escapeHtml(d.source)+'</div>';
+  return h;
+}
+async function openSharh(cat, d, text, title){
+  const ov=$('#sharh-overlay'), body=$('#sharh-body'); if(!ov||!body) return;
+  $('#sharh-title').textContent='شرح — '+(title||'الذكر');
+  body.innerHTML='<div class="t-note">…جارٍ التحميل</div>';
+  ov.classList.add('show'); document.body.style.overflow='hidden';
+  const ok=await loadSharh();
+  const sh=ok ? (window.SHARH||{})[cat+':'+d.id] : null;
+  if(!ok){ body.innerHTML='<div class="t-note">تعذّر تحميل الشرح — أعِد المحاولة.</div>'; return; }
+  const inner=sharhHTML(sh, d, text);
+  body.innerHTML = inner +
+    '<div class="fq-share"><button class="share-btn" id="sh-share-btn">'+SHARE_IC+'شارِك الذكر وشرحَه</button></div>';
+  const sb=$('#sh-share-btn');
+  if(sb) sb.addEventListener('click', ()=>{
+    vibrate(6);
+    openShareSheet(()=> inner, title||'شرح الذكر', null, 'salaty-sharh');
+  });
+}
+function closeSharh(){
+  const ov=$('#sharh-overlay'); if(!ov) return;
+  ov.classList.remove('show'); document.body.style.overflow='';
+}
+$('#sharh-close') && $('#sharh-close').addEventListener('click', closeSharh);
+$('#sharh-overlay') && $('#sharh-overlay').addEventListener('click', e=>{ if(e.target.id==='sharh-overlay') closeSharh(); });
 let __shotCss=null, __shotKey='';
 function quranFontFile(){
   const b=document.body;

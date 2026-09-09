@@ -1,5 +1,5 @@
-/* صلاتي — service worker v191 */
-const CACHE = 'azkari-v191';
+/* صلاتي — service worker v192 */
+const CACHE = 'azkari-v192';
 const ASSETS = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ const ASSETS = [
   './fiqh.js',
   './fadl.js',
   './thabat.js',
+  './sharh.js',
   './manifest.json',
   './fonts/ui-400.woff2',
   './fonts/ui-600.woff2',
