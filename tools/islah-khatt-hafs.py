@@ -8,6 +8,7 @@ from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables import otTables as ot
 
 SRC, DST, DY = sys.argv[1], sys.argv[2], int(sys.argv[3])
+DX = int(sys.argv[4]) if len(sys.argv)>4 else 0
 PAIRS = [('uni06E2','uni06ED'), ('uni06E0','uni06EA')]
 BELOW_CLASS = 4          # صنفُ العلامات السفليّة في هذا الخطّ (كسرةٌ وتنوينُ كسر)
 
@@ -29,8 +30,9 @@ def add_to(cov, arr, src, dst, klass, dy):
     j = cov.glyphs.index(src)
     rec = copy.deepcopy(arr.MarkRecord[j])
     if klass is not None: rec.Class = klass
-    if rec.MarkAnchor is not None and dy:
-        rec.MarkAnchor.YCoordinate = rec.MarkAnchor.YCoordinate + dy
+    if rec.MarkAnchor is not None:
+        if dy: rec.MarkAnchor.YCoordinate = rec.MarkAnchor.YCoordinate + dy
+        if DX: rec.MarkAnchor.XCoordinate = rec.MarkAnchor.XCoordinate + DX
     # نُدرجه في موضعه من ترتيب المحارف حتى لا يختلّ التوازي بين التغطية والمصفوفة
     k = 0
     while k < len(cov.glyphs) and gid[cov.glyphs[k]] < gid[dst]: k += 1
