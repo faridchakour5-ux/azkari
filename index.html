@@ -994,6 +994,34 @@
     padding:3px 11px; border-radius:20px; flex:0 0 auto;}
   .sura-list button.hz-head{color:var(--accent); font-weight:800; background:var(--fill-2);}
   .sura-list button.hz-head .hz-pg{background:var(--card);}
+  /* قائمة السور: بطاقاتٌ مرتّبة — رقمُ السورة، ثمّ الاسمُ ونوعُها وعددُ آياتها، ثمّ صفحتُها */
+  .sura-search{flex:0 0 auto; padding:11px 14px 9px; border-bottom:1px solid var(--sep); display:none;}
+  .sura-search.show{display:block;}
+  .sura-search input{width:100%; box-sizing:border-box; border:1px solid var(--line); background:var(--fill-2);
+    color:var(--text); font:inherit; font-size:15px; padding:11px 14px; border-radius:14px; outline:none;
+    -webkit-appearance:none; appearance:none;}
+  .sura-search input::placeholder{color:var(--text-3);}
+  .sura-search input:focus{border-color:var(--accent); background:var(--card);}
+  .sura-list.rows{padding:10px 12px 16px;}
+  .sura-list.rows button.sr{display:flex; align-items:center; gap:12px; width:100%; text-align:right;
+    border:1px solid var(--line); border-radius:16px; background:var(--card); color:var(--text);
+    font:inherit; padding:10px 12px; margin:0 0 8px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+    transition:transform .12s ease, background-color .15s ease;}
+  .sura-list.rows button.sr:last-child{margin-bottom:0;}
+  .sura-list.rows button.sr:active{transform:scale(.985); background:var(--fill-2);}
+  .sr-no{flex:0 0 auto; width:38px; height:38px; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; background:var(--accent-soft,rgba(47,158,68,.14)); color:var(--accent);
+    font-weight:800; font-size:14px; line-height:1;}
+  .sr-mid{flex:1 1 auto; min-width:0;}
+  .sr-name{display:block; font-weight:800; font-size:16.5px; line-height:1.5;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sr-sub{display:block; font-size:12px; color:var(--text-3); margin-top:1px;}
+  .sr-pg{flex:0 0 auto; font-size:11.5px; font-weight:700; color:var(--text-3);
+    background:var(--fill-2); padding:4px 10px; border-radius:20px;}
+  .sura-list.rows button.sr.cur{border-color:var(--accent); background:var(--fill-2);}
+  .sura-list.rows button.sr.cur .sr-name{color:var(--accent);}
+  .sura-list.rows button.sr.cur .sr-no{background:var(--accent); color:#fff;}
+  .sr-empty{padding:28px 16px; text-align:center; color:var(--text-3); font-size:14.5px;}
   .wird-done{display:block; width:calc(100% - 32px); margin:6px 16px 0; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:17px; padding:15px; border-radius:16px;
     box-shadow:var(--shadow-2); transition:transform .13s ease, opacity .2s;}
   .wird-done:active{transform:scale(.98); opacity:.9;}
@@ -1177,6 +1205,10 @@
       <button id="sura-overlay-back" aria-label="رجوع" style="display:none"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
       <span>اختر السورة</span>
       <button id="sura-overlay-close" aria-label="إغلاق"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="sura-search" id="sura-search">
+      <input type="search" id="sura-q" inputmode="search" autocomplete="off"
+             placeholder="ابحث عن سورة…" aria-label="ابحث عن سورة">
     </div>
     <div class="sura-list" id="sura-list"></div>
   </div>
@@ -1567,6 +1599,7 @@ const CATS = [
   {id:'baad',     name:'بعد الصلاة',    title:'أذكار ما بعد الصلاة'},
   {id:'sleep',    name:'النوم',         title:'أذكار النوم'},
   {id:'wakeup',   name:'الاستيقاظ',     title:'أذكار الاستيقاظ'},
+  {id:'amma',     name:'أذكار عامّة',   title:'أذكار وأدعية عامّة'},
   {id:'istiqama', name:'الاستقامة',     title:'أدعية الاستقامة'},
   {id:'shidda',   name:'الامتحان',      title:'أدعية الامتحان والشدّة'},
   {id:'travel',   name:'السفر',         title:'أذكار السفر'},
@@ -2232,13 +2265,36 @@ function basmalaHtml(si){
 }
 function suraOrn(si){ return '﴾ سورة '+WIRD.sur[si].n+' ﴿'; }
 let __progScroll=false, __progScrollT=null;
-function scrollToSura(si, smooth){
-  const el=document.getElementById('msura-'+si);
+/* القفزُ إلى موضعٍ في المصحف.
+   صفحاتُ المصحف مؤجَّلةُ الرسم (content-visibility)، فارتفاعُها مقدَّرٌ حتى تُرسم.
+   والتمريرُ الناعم عبر مئاتِ الصفحات يُرغم المتصفّحَ على رسمِ كلِّ ما يمرّ عليه،
+   فيثقُل الجهازُ ويقعُ القارئُ في غيرِ ما طلب لأنّ الارتفاعاتِ تتغيّر أثناءَ التمرير.
+   فإذا بعُدَ الهدفُ قفزنا إليه دَفعةً واحدة ثمّ صحّحنا الموضعَ مرّاتٍ بعد استقرارِ التخطيط. */
+function mushafGoto(el, offset, smooth){
   if(!el) return;
+  const off = offset||0;
+  const at = ()=>{
+    cvReveal(el);
+    const r = el.getClientRects()[0] || el.getBoundingClientRect();
+    return Math.max(0, Math.round(r.top + window.scrollY + off));
+  };
   __progScroll=true; clearTimeout(__progScrollT);
-  cvReveal(el);
-  el.scrollIntoView({block:'start', behavior: smooth?'smooth':'auto'});
-  __progScrollT=setTimeout(()=>{ __progScroll=false; }, smooth?900:150);
+  const target = at();
+  const far = Math.abs(target - window.scrollY) > window.innerHeight*2.5;
+  if(smooth && !far){
+    window.scrollTo({ top:target, behavior:'smooth' });
+    __progScrollT=setTimeout(()=>{ __progScroll=false; }, 700);
+    return;
+  }
+  const go = ()=> window.scrollTo(0, at());
+  go();
+  requestAnimationFrame(()=>{ go(); setTimeout(go, 80); });
+  setTimeout(go, 260); setTimeout(go, 520);
+  __progScrollT=setTimeout(()=>{ __progScroll=false; }, 700);
+  try{ qsClearYCache(); }catch(e){}
+}
+function scrollToSura(si, smooth){
+  mushafGoto(document.getElementById('msura-'+si), 0, smooth);
 }
 /* العودةُ إلى موضع القراءة بالضبط عند الرجوع إلى الوِرد.
    كان التطبيق يرجع إلى رأس السورة، فيضيع مكانُ القارئ إن لم يضع علامة.
@@ -3683,17 +3739,63 @@ $('#totop-btn') && $('#totop-btn').addEventListener('click', ()=>{
 window.addEventListener('scroll', onScrollForJump, {passive:true});
 
 /* ---- قائمة اختيار السورة (ورقة سفلية موثوقة، تُستخدم للتنقّل وللاستماع) ---- */
+/* مكّيّةٌ أو مدنيّة لكلّ سورة على ترتيب المصحف (حرفٌ لكلّ سورة: م مكّيّة، د مدنيّة) */
+const SURA_KIND =
+  'mddddmmddm'+'mmdmmmmmmm'+'mdmdmmmmmm'+'mmdmmmmmmm'+'mmmmmmdddm'+
+  'mmmmdmdddd'+'ddddddmmmm'+'mmmmmdmmmm'+'mmmmmmmmmm'+'mmmmmmmddm'+
+  'mmmmmmmmmd'+'mmmm';
+function suraAyaCount(idx){
+  const su=WIRD.sur;
+  const end = (idx+1<su.length) ? su[idx+1].i : WIRD.a.length;
+  return end - su[idx].i;
+}
+function ayaCountLabel(n){
+  if(n===1) return 'آية واحدة';
+  if(n===2) return 'آيتان';
+  if(n<=10) return AR(n)+' آيات';
+  return AR(n)+' آية';
+}
+/* حالةُ قائمة السور: نُعيد بناءها عند البحث دون أن نفقد ما اختاره القارئ */
+let __srPick=null, __srCur=-1;
+function suraListPlain(){
+  const list=$('#sura-list'); if(list) list.classList.remove('rows');
+  const box=$('#sura-search'); if(box) box.classList.remove('show');
+  __srPick=null;
+}
+function renderSuraRows(q){
+  const list=$('#sura-list'); if(!list||!WIRD) return;
+  const nq = (q||'').trim() ? normalizeArabic(q.trim()) : '';
+  const frag=document.createDocumentFragment();
+  let shown=0;
+  WIRD.sur.forEach((s,idx)=>{
+    if(nq && normalizeArabic(s.n).indexOf(nq)<0 && String(idx+1).indexOf(nq)!==0) return;
+    shown++;
+    const b=document.createElement('button');
+    b.type='button'; b.className='sr'+(idx===__srCur?' cur':'');
+    const kind = SURA_KIND.charAt(idx)==='d' ? 'مدنيّة' : 'مكّيّة';
+    b.innerHTML =
+      '<span class="sr-no">'+AR(idx+1)+'</span>'+
+      '<span class="sr-mid"><span class="sr-name">'+escapeHtml(s.n)+'</span>'+
+      '<span class="sr-sub">'+kind+' • '+ayaCountLabel(suraAyaCount(idx))+'</span></span>'+
+      '<span class="sr-pg">ص '+AR(WIRD.a[s.i].p)+'</span>';
+    b.addEventListener('click', ()=>{ if(__srPick) __srPick(idx); });
+    frag.appendChild(b);
+  });
+  list.innerHTML='';
+  if(!shown){
+    const e=document.createElement('div'); e.className='sr-empty';
+    e.textContent='لا سورةَ بهذا الاسم'; list.appendChild(e);
+    return;
+  }
+  list.appendChild(frag);
+}
 function buildSuraList(curIdx, onPick){
   const list=$('#sura-list'); if(!list || !WIRD) return;
-  list.innerHTML='';
-  WIRD.sur.forEach((s,idx)=>{
-    const b=document.createElement('button');
-    b.type='button';
-    b.textContent=(idx+1)+'. '+s.n;
-    if(idx===curIdx) b.classList.add('cur');
-    b.addEventListener('click', ()=> onPick(idx));
-    list.appendChild(b);
-  });
+  __srPick=onPick; __srCur=curIdx;
+  list.classList.add('rows');
+  const box=$('#sura-search'); if(box) box.classList.add('show');
+  const inp=$('#sura-q'); if(inp) inp.value='';
+  renderSuraRows('');
 }
 function openSuraOverlay(curIdx, onPick, title){
   const bk=$('#sura-overlay-back'); if(bk) bk.style.display='none';
@@ -3711,7 +3813,7 @@ function centerInList(cur){
 /* ورقة سفلية عامّة بقائمة تسميات جاهزة (تُستعمل لاختيار عدد مرّات التكرار مثلًا) */
 function openLabelOverlay(items, curId, onPick, title){
   const list=$('#sura-list'); if(!list) return;
-  list.innerHTML='';
+  suraListPlain(); list.innerHTML='';
   items.forEach(it=>{
     const b=document.createElement('button');
     b.type='button'; b.textContent=it.label;
@@ -3764,19 +3866,12 @@ function restoreRiwayaKeep(k){
   const ai=start+Math.min(Math.max(k.no,1), end-start)-1;
   const sp=document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]');
   if(!sp) return scrollToSura(k.sura, false);
-  __progScroll=true; clearTimeout(__progScrollT);
-  cvReveal(sp);
-  sp.scrollIntoView({block:'start', behavior:'auto'});
-  window.scrollBy(0, -150);
-  __progScrollT=setTimeout(()=>{ __progScroll=false; }, 250);
+  mushafGoto(sp, -150, false);
 }
 function scrollToAya(ai, smooth){
   const sp=document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]');
-  if(!sp){ return; }
-  __progScroll=true; clearTimeout(__progScrollT);
-  cvReveal(sp);
-  sp.scrollIntoView({block:'center', behavior: smooth?'smooth':'auto'});
-  __progScrollT=setTimeout(()=>{ __progScroll=false; }, smooth?900:150);
+  if(!sp) return;
+  mushafGoto(sp, -Math.round(window.innerHeight*0.42), smooth);
 }
 
 /* المستوى الأول: قائمة السور ← الضغط على سورة يفتح اختيار الحزب داخلها */
@@ -3791,7 +3886,7 @@ function showHizbPicker(suraIdx){
   const surEnd=(suraIdx+1<WIRD.sur.length)? WIRD.sur[suraIdx+1].i : WIRD.a.length;
   $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = s.n;
   const bk=$('#sura-overlay-back'); if(bk) bk.style.display='';
-  list.innerHTML='';
+  suraListPlain(); list.innerHTML='';
   const mkBtn=(cls, label, page, ai)=>{
     const b=document.createElement('button'); b.type='button'; b.className=cls;
     b.innerHTML='<span>'+label+'</span><span class="hz-pg">ص '+page+'</span>';
@@ -3818,6 +3913,7 @@ function commitMushafJump(suraIdx, ai){
   vibrate(6);
 }
 $('#mushaf-jump').addEventListener('click', ()=>{ vibrate(6); openMushafPicker(); });
+$('#sura-q') && $('#sura-q').addEventListener('input', e=>{ renderSuraRows(e.target.value); $('#sura-list').scrollTop=0; });
 $('#sura-overlay-back').addEventListener('click', ()=>{ openMushafPicker(); });
 $('#sura-overlay-close').addEventListener('click', closeSuraOverlay);
 $('#sura-overlay').addEventListener('click', e=>{ if(e.target.id==='sura-overlay') closeSuraOverlay(); });
