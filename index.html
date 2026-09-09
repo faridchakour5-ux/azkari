@@ -1559,8 +1559,8 @@ function applyRiwaya(){
 function saveSettings(){ store.set('az_settings', settings); }
 
 /* ---------- AZKAR screen ---------- */
+/* «لا تترك الصلاة» انتقلت إلى صفحة الفقه، فهي بابُ حكمٍ لا بابُ ذِكر */
 const CATS = [
-  {id:'thabat',   name:'لا تترك الصلاة', title:'لا تترك الصلاة'},
   {id:'fadl',     name:'فضل الذكر',      title:'فضل الذكر'},
   {id:'morning',  name:'الصباح',        title:'أذكار الصباح'},
   {id:'evening',  name:'المساء',        title:'أذكار المساء'},
@@ -1573,7 +1573,7 @@ const CATS = [
   {id:'riding',   name:'الركوب',        title:'أذكار الركوب'},
 ];
 const catMeta = id => CATS.find(c=>c.id===id) || CATS[0];
-let currentTab = 'thabat';   // الصفحة الأولى عند الفتح: لا تترك الصلاة
+let currentTab = 'fadl';     // الصفحة الأولى عند الفتح: فضل الذكر
 
 function buildCats(){
   const seg=$('#time-seg'); seg.innerHTML='';
@@ -1617,7 +1617,6 @@ function azkarList(cat){
 /* ---------- صفحاتُ العرض بخطاطات داخل تبويب الأذكار ---------- */
 const ARTICLES = {
   fadl:   {src:'fadl.js',   g:'FADL',   sub:'وأثرُه في حياتك اليوميّة',            file:'salaty-fadl'},
-  thabat: {src:'thabat.js', g:'THABAT', sub:'ولو كنتَ على معصية — ماذا يقول أهلُ العلم؟', file:'salaty-thabat'},
 };
 const __artLoading={};
 function loadArticle(id){
@@ -3335,14 +3334,31 @@ function qzResult(){
 /* تبديل صفحة المسبحة بين العدّاد والاختبار */
 /* ==================== الفقه العملي ==================== */
 let __fqLoading=null, __fqCur=0;
-function loadFiqh(){
-  if(window.FIQH) return Promise.resolve(true);
-  if(__fqLoading) return __fqLoading;
-  __fqLoading=new Promise(res=>{
-    const s=document.createElement('script'); s.src='fiqh.js';
+/* بابُ «لا تترك الصلاة» في ملفٍّ مستقلّ (thabat.js)، وكُتَلُه من نوع كُتَل
+   الفقه نفسِها، فيُدرَج بابًا أوّلَ في الصلاة عند تحميل الفقه. */
+const THABAT_CH = {
+  id:'thabat', cat:'salat',
+  t:'لا تترك الصلاة',
+  sub:'ولو كنتَ على معصية — ماذا يقول أهلُ العلم؟',
+  ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>'
+};
+function loadScriptOnce(src){
+  return new Promise(res=>{
+    const s=document.createElement('script'); s.src=src;
     s.onload=()=>res(true); s.onerror=()=>res(false);
     document.head.appendChild(s);
   });
+}
+function loadFiqh(){
+  if(window.FIQH) return Promise.resolve(true);
+  if(__fqLoading) return __fqLoading;
+  __fqLoading=(async()=>{
+    const [okF, okT] = await Promise.all([loadScriptOnce('fiqh.js'), loadScriptOnce('thabat.js')]);
+    if(!okF) return false;
+    if(okT && window.THABAT && !window.FIQH.some(c=>c.id==='thabat'))
+      window.FIQH.unshift(Object.assign({}, THABAT_CH, {blocks: window.THABAT}));
+    return true;
+  })();
   return __fqLoading;
 }
 const FQ_DOWN='<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>';
