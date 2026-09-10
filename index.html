@@ -236,6 +236,72 @@
   .card.done .rem{background:var(--text-3);}
   .card .tick{position:absolute; top:14px; left:14px; color:var(--c-read); font-size:20px; opacity:0; transition:opacity .25s; font-weight:800;}
   .card.done .tick{opacity:1;}
+  /* ============ الأذكار صفحةً صفحة ============
+     ذكرٌ واحدٌ يملأ الشاشة، ويُنتقل بينها بسَحبةٍ أو بالسهمين، فلا تمريرَ
+     ولا تشتُّت. ويُقاس النصُّ ليملأ الصفحةَ بلا قصٍّ ولا فراغٍ زائد. */
+  .az-view{border:1px solid var(--line); background:var(--card); color:var(--text-2);
+    font:inherit; font-size:11.5px; font-weight:800; border-radius:20px; padding:4px 11px;
+    display:inline-flex; align-items:center; gap:5px; line-height:1.5;
+    transition:transform .12s ease;}
+  .az-view:active{transform:scale(.94);}
+  .az-view .gh-ic{width:13px; height:13px;}
+  /* صفحةٌ نظيفة: لا عنوانَ ولا تبويباتٍ ولا شريطَ مصدرٍ فوق الذكر —
+     يبقى الذكرُ وفضلُه ومصدرُه، وشريطٌ رقيقٌ فيه اسمُ البابِ للتنقّل. */
+  body.az-pages #s-azkar > .head, body.az-pages #s-azkar #qp-open,
+  body.az-pages #s-azkar #inst-row, body.az-pages #s-azkar #loc-btn,
+  body.az-pages #s-azkar #time-seg,
+  body.az-pages #s-azkar #az-scope, body.az-pages #s-azkar .progressbar,
+  body.az-pages #s-azkar .progresslabel{display:none !important;}
+  .az-top{display:flex; align-items:center; gap:8px; padding:14px 0 11px;}
+  .az-cat{flex:1 1 auto; min-width:0; display:flex; align-items:center; gap:7px; border:0;
+    background:transparent; color:var(--text); font:inherit; font-size:18px; font-weight:800;
+    padding:0; text-align:right;}
+  .az-cat span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .az-cat .gh-ic{width:15px; height:15px; color:var(--text-3);}
+  .az-cat:active{opacity:.6;}
+  .az-tb{flex:0 0 auto; border:1px solid var(--line); background:var(--card); color:var(--text-2);
+    font:inherit; font-size:11.5px; font-weight:800; border-radius:20px; padding:5px 11px;
+    display:inline-flex; align-items:center; gap:5px; line-height:1.5; transition:transform .12s ease;}
+  .az-tb:active{transform:scale(.94);}
+  .az-tb .gh-ic{width:13px; height:13px;}
+  .list.pages{padding:0 16px 0;}
+  .az-deck{position:relative; overflow:hidden; margin:0 -16px; height:420px;
+    touch-action:pan-y;}
+  .az-slide{position:absolute; inset:0; padding:0 16px 8px; box-sizing:border-box;
+    transform:translateX(-100%); pointer-events:none;
+    transition:transform .42s cubic-bezier(.25,.85,.3,1);}
+  .az-slide.on{transform:translateX(0); pointer-events:auto;}
+  .az-slide.pv{transform:translateX(100%);}
+  .az-slide.nx{transform:translateX(-100%);}
+  .az-deck.drag .az-slide{transition:none;}
+  /* ظلُّ الصفحة المجاورة كان يَنِزُّ من حرف الشاشة، فيُخفى حتى تُسحب */
+  .az-slide:not(.on) .pgcard{box-shadow:none;}
+  .az-deck.drag .az-slide .pgcard{box-shadow:var(--shadow-2);}
+  .pgcard{height:100%; margin:0; box-sizing:border-box; display:flex; flex-direction:column;
+    padding:18px 16px 12px; border-radius:22px; box-shadow:var(--shadow-2);}
+  .pgcard:active{transform:none;}
+  .pgcard.done{opacity:1;}
+  .pgcard.done .txt{color:inherit;}
+  .pgcard .pg-body{flex:1 1 auto; min-height:0; display:flex; align-items:center;
+    justify-content:center; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .pgcard .pg-body .txt{width:100%; text-align:center; padding:2px 0; text-wrap:balance;}
+  .pgcard .meta{flex:0 0 auto; margin-top:10px; padding-top:11px;}
+  .pgcard .tick{top:12px; left:12px;}
+  .pgcard .fadl{flex:0 0 auto; max-height:34%; overflow-y:auto; font-size:12.5px; line-height:1.8;
+    -webkit-overflow-scrolling:touch;}
+  .az-nav{display:flex; align-items:center; gap:12px; padding:11px 0 2px;}
+  .azn-b{flex:0 0 auto; width:42px; height:42px; border-radius:50%; border:1px solid var(--line);
+    background:var(--card); color:var(--accent); display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--shadow-1); transition:transform .12s ease, opacity .2s ease;}
+  .azn-b:active{transform:scale(.9);}
+  .azn-b:disabled{opacity:.3; color:var(--text-3); box-shadow:none;}
+  .azn-b .gh-ic{width:20px; height:20px;}
+  .azn-mid{flex:1 1 auto; min-width:0; text-align:center;}
+  .azn-c{font-size:12.5px; font-weight:800; color:var(--text-2); margin-bottom:7px;}
+  .azn-track{height:4px; border-radius:4px; background:var(--fill-2); overflow:hidden;}
+  .azn-track i{display:block; height:100%; width:0; border-radius:4px; background:var(--accent);
+    transition:width .34s cubic-bezier(.25,.85,.3,1);}
+
   /* الفضل والمصدر: ظاهران دائمًا تحت الذكر، بلا زرٍّ يُضغط */
   .fadl{margin-top:11px; padding-top:10px; border-top:1px solid var(--sep);
     font-size:13.5px; line-height:1.85; color:var(--text-2);}
@@ -1060,7 +1126,7 @@
     <button data-scope="all">جميع الأذكار</button>
   </div>
   <div class="progressbar"><i id="pg-fill"></i></div>
-  <div class="progresslabel"><span id="pg-text">0 من 0</span><span id="pg-reset-day"></span></div>
+  <div class="progresslabel"><span id="pg-text">0 من 0</span><span id="pg-reset-day"></span><button class="az-view" id="az-view-btn"></button></div>
   <div class="list" id="az-list"></div>
 </section>
 
@@ -1480,7 +1546,7 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', autoReadLevel:1.6 };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', autoReadLevel:1.6, azkarView:'page' };
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
@@ -1666,6 +1732,7 @@ function loadArticle(id){
 function renderArticle(id){
   const a=ARTICLES[id], meta=catMeta(id);
   const wrap=$('#az-list'); if(!wrap) return;
+  document.body.classList.remove('az-pages'); wrap.className='list';
   $('#az-title').textContent=meta.title;
   $('#az-source').textContent=a.sub;
   $('#az-scope').style.display='none';
@@ -1690,6 +1757,68 @@ function renderArticle(id){
   });
 }
 
+/* قائمةٌ أو صفحةً صفحة */
+function azkarView(){ return settings.azkarView==='list' ? 'list' : 'page'; }
+const IC_LIST = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>';
+const IC_PAGE = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>';
+const IC_CHEV_R = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
+const IC_CHEV_L = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>';
+const IC_CHEV_D = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+
+function renderViewToggle(){
+  const b=$('#az-view-btn'); if(!b) return;
+  const page = azkarView()==='page';
+  b.innerHTML = page ? (IC_LIST+'قائمة') : (IC_PAGE+'صفحة');
+  b.setAttribute('aria-label', page ? 'اعرِض الأذكار قائمةً' : 'اعرِض الأذكار صفحةً صفحة');
+}
+
+/* بطاقةُ الذكر — واحدةٌ للعرضين: في القائمة تُصفَّف تحت أختها،
+   وفي وضع الصفحة تملأ الشاشةَ ويتوسّط نصُّها. */
+function azkarCard(d, prog, meta, page){
+  const pid = currentTab+'_'+d.id;
+  const done = prog[pid]||0;
+  const isDone = done>=d.count;
+  const text = d.quran ? qFix(settings.riwaya==='warsh'? d.warsh : d.hafs) : d.text;
+
+  const card = document.createElement('div');
+  card.className = 'card'+(d.quran?' quran':'')+(isDone?' done':'')+(page?' pgcard':'');
+  card.dataset.pid = pid;
+
+  const tickHTML = '<div class="tick"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg></div>';
+  const metaHTML =
+    '<div class="meta">'+
+      '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span> '+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
+      (AZKAR_AUDIO[pid] ? '<button class="dhikr-play" data-pid="'+pid+'" aria-label="استماع">'+ICON_PLAY+'</button>':'')+
+      '<button class="sharh-btn" aria-label="شرح الذكر">'+SHARH_IC+'الشرح</button>'+
+      '<button class="share-btn" aria-label="مشاركة">'+SHARE_IC+'شارِك</button>'+
+    '</div>';
+  const fadlHTML = (d.fadl||d.source) ? '<div class="fadl">'+
+      (d.fadl  ?'<p><span class="lbl">الفضل</span> '+escapeHtml(d.fadl)+'</p>':'')+
+      (d.source?'<p><span class="lbl">المصدر</span> '+escapeHtml(d.source)+'</p>':'')+
+    '</div>' : '';
+
+  card.innerHTML = page
+    ? tickHTML+'<div class="pg-body"><div class="txt">'+escapeHtml(text)+'</div></div>'+metaHTML+fadlHTML
+    : tickHTML+'<div class="txt">'+escapeHtml(text)+'</div>'+metaHTML+fadlHTML;
+
+  // الضغط على البطاقة يَعُدّ — إلا على الفضل والمصدر أو أزرار الاستماع والمشاركة
+  card.addEventListener('click', e=>{
+    if(e.target.closest('.dhikr-play')){ toggleDhikrAudio(pid); return; }
+    if(e.target.closest('.sharh-btn')){
+      e.stopPropagation(); vibrate(6); openSharh(currentTab, d, text, meta.title); return;
+    }
+    if(e.target.closest('.share-btn')){
+      e.stopPropagation();
+      openShareSheet(()=> dhikrShotHTML(d), meta.title, null, 'salaty-dhikr');
+      return;
+    }
+    if(e.target.closest('.fadl')) return;
+    if(__azMoved) return;            // كانت سَحبةً لتغيير الصفحة، لا عَدًّا
+    tapAzkar(card, d, pid);
+  });
+  return card;
+}
+
 function renderAzkar(){
   if(ARTICLES[currentTab]) return renderArticle(currentTab);
   $('.progressbar').style.display=''; $('.progresslabel').style.display='';
@@ -1704,49 +1833,192 @@ function renderAzkar(){
   $$('#az-scope button').forEach(b=> b.classList.toggle('on', b.dataset.scope===scope));
   $('#az-source').textContent = !isME ? '' : (scope==='all' ? 'جميع الأذكار — حصن المسلم' : 'القرآن وصحيح البخاري ومسلم');
 
-  let doneCount=0;
-  list.forEach((d,idx)=>{
-    const pid = currentTab+'_'+d.id;
-    const done = prog[pid]||0;
-    const isDone = done>=d.count;
-    if(isDone) doneCount++;
-    const text = d.quran ? qFix(settings.riwaya==='warsh'? d.warsh : d.hafs) : d.text;
+  const page = azkarView()==='page' && list.length>0;
+  document.body.classList.toggle('az-pages', page);
+  wrap.className = 'list'+(page?' pages':'');
+  renderViewToggle();
 
-    const card = document.createElement('div');
-    card.className = 'card'+(d.quran?' quran':'')+(isDone?' done':'');
-    card.dataset.pid = pid;
-    card.innerHTML =
-      '<div class="tick"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg></div>'+
-      '<div class="txt">'+escapeHtml(text)+'</div>'+
-      '<div class="meta">'+
-        '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span> '+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
-        (AZKAR_AUDIO[pid] ? '<button class="dhikr-play" data-pid="'+pid+'" aria-label="استماع">'+ICON_PLAY+'</button>':'')+
-        '<button class="sharh-btn" aria-label="شرح الذكر">'+SHARH_IC+'الشرح</button>'+
-        '<button class="share-btn" aria-label="مشاركة">'+SHARE_IC+'شارِك</button>'+
-      '</div>'+
-      (d.fadl||d.source ? '<div class="fadl">'+
-        (d.fadl  ?'<p><span class="lbl">الفضل</span> '+escapeHtml(d.fadl)+'</p>':'')+
-        (d.source?'<p><span class="lbl">المصدر</span> '+escapeHtml(d.source)+'</p>':'')+
-        '</div>':'');
-
-    // الضغط على البطاقة يَعُدّ — إلا على الفضل والمصدر أو أزرار الاستماع والمشاركة
-    card.addEventListener('click', e=>{
-      if(e.target.closest('.dhikr-play')){ toggleDhikrAudio(pid); return; }
-      if(e.target.closest('.sharh-btn')){
-        e.stopPropagation(); vibrate(6); openSharh(currentTab, d, text, meta.title); return;
-      }
-      if(e.target.closest('.share-btn')){
-        e.stopPropagation();
-        openShareSheet(()=> dhikrShotHTML(d), meta.title, null, 'salaty-dhikr');
-        return;
-      }
-      if(e.target.closest('.fadl')) return;
-      tapAzkar(card, d, pid);
-    });
-    wrap.appendChild(card);
-  });
+  const doneCount = list.filter(x=> (prog[currentTab+'_'+x.id]||0) >= x.count).length;
+  if(page) buildAzkarDeck(list, prog, meta);
+  else list.forEach(d=> wrap.appendChild(azkarCard(d, prog, meta, false)));
   updateProgressBar(doneCount, list.length);
 }
+
+/* ---------- وضعُ الصفحة: بناءُ الصفحات وتقليبُها ---------- */
+let __azIdx=0, __azN=0, __azMoved=false;
+function buildAzkarDeck(list, prog, meta){
+  const wrap=$('#az-list');
+  /* الشريطُ الرقيق: اسمُ البابِ يُفتح به المنتقي، ونطاقُ الصباح/المساء، والعودةُ للقائمة */
+  const isME=(currentTab==='morning'||currentTab==='evening');
+  const scope=settings.azkarScope||'sahih';
+  const top=document.createElement('div'); top.className='az-top';
+  top.innerHTML =
+    '<button class="az-cat" id="az-cat-btn" aria-label="اختر بابَ الأذكار"><span>'+escapeHtml(meta.title)+'</span>'+IC_CHEV_D+'</button>'+
+    (isME ? '<button class="az-tb" id="az-scope-btn">'+(scope==='all'?'الصحيحان':'جميعُ الأذكار')+'</button>' : '')+
+    '<button class="az-tb az-view" aria-label="اعرِض الأذكار قائمةً">'+IC_LIST+'قائمة</button>';
+  wrap.appendChild(top);
+  $('#az-cat-btn').addEventListener('click', ()=>{
+    vibrate(6);
+    openLabelOverlay(CATS.map(c=>({id:c.id, label:c.title})), currentTab, id=>{
+      closeSuraOverlay();
+      if(id===currentTab) return;
+      currentTab=id; window.__userPickedTime=true;
+      $$('#time-seg button').forEach(b=> b.classList.toggle('on', b.dataset.t===id));
+      window.scrollTo(0,0); renderAzkar(); vibrate(6);
+    }, 'اختر الأذكار');
+  });
+  const sb=$('#az-scope-btn');
+  if(sb) sb.addEventListener('click', ()=>{
+    settings.azkarScope = (scope==='all') ? 'sahih' : 'all';
+    saveSettings(); vibrate(6); renderAzkar();
+  });
+  const deck=document.createElement('div'); deck.className='az-deck'; deck.id='az-deck';
+  list.forEach((d,i)=>{
+    const sl=document.createElement('div'); sl.className='az-slide'; sl.dataset.i=i;
+    sl.appendChild(azkarCard(d, prog, meta, true));
+    deck.appendChild(sl);
+  });
+  wrap.appendChild(deck);
+  const nav=document.createElement('div'); nav.className='az-nav'; nav.id='az-nav';
+  nav.innerHTML =
+    '<button class="azn-b" id="azn-prev" aria-label="الذكر السابق">'+IC_CHEV_R+'</button>'+
+    '<div class="azn-mid"><div class="azn-c" id="azn-c"></div><div class="azn-track"><i id="azn-fill"></i></div></div>'+
+    '<button class="azn-b" id="azn-next" aria-label="الذكر التالي">'+IC_CHEV_L+'</button>';
+  wrap.appendChild(nav);
+  $('#azn-prev').addEventListener('click', ()=>{ vibrate(5); azGo(__azIdx-1); });
+  $('#azn-next').addEventListener('click', ()=>{ vibrate(5); azGo(__azIdx+1); });
+  __azN=list.length;
+  /* نفتح على أوّل ذكرٍ لم يُتَمّ، فيُكمل القارئُ من حيث وقف */
+  let start=list.findIndex(d=> (prog[currentTab+'_'+d.id]||0) < d.count);
+  if(start<0) start=0;
+  azFitDeck();
+  azGo(start, true);
+  azBindDeck(deck);
+}
+/* ارتفاعُ الصفحة = ما بقي من الشاشة بعد الرأس والشريط السفليّ */
+function azFitDeck(){
+  const deck=$('#az-deck'); if(!deck) return;
+  const nav=$('#az-nav');
+  const navH=nav ? nav.offsetHeight : 56;
+  const bar=document.querySelector('.tabbar');
+  const barH=bar ? bar.offsetHeight : 66;
+  /* موضعُ الصفحة من أعلى المستند لا من أعلى النافذة، فلا يتأثّر القياسُ بالتمرير */
+  const docTop=deck.getBoundingClientRect().top + window.scrollY;
+  const h=Math.round(window.innerHeight - docTop - navH - barH - 28);
+  deck.style.height=Math.max(300, h)+'px';
+}
+function azGo(i, instant){
+  const deck=$('#az-deck'); if(!deck || !__azN) return;
+  i=Math.max(0, Math.min(__azN-1, i));
+  __azIdx=i;
+  const sls=deck.children;
+  if(instant) deck.classList.add('drag');
+  for(let k=0;k<sls.length;k++){
+    const sl=sls[k];
+    sl.style.transform='';
+    sl.classList.toggle('on', k===i);
+    sl.classList.toggle('pv', k<i);
+    sl.classList.toggle('nx', k>i);
+    sl.setAttribute('aria-hidden', k===i?'false':'true');
+  }
+  if(instant) requestAnimationFrame(()=>{ deck.classList.remove('drag'); });
+  const c=$('#azn-c');
+  if(c) c.textContent = 'الذكر '+AR(i+1)+' من '+AR(__azN);
+  const f=$('#azn-fill');
+  if(f) f.style.width = (__azN>1 ? ((i+1)/__azN*100) : 100)+'%';
+  const pv=$('#azn-prev'), nx=$('#azn-next');
+  if(pv) pv.disabled = (i<=0);
+  if(nx) nx.disabled = (i>=__azN-1);
+  [i-1, i, i+1].forEach(k=>{ if(sls[k]) azFitText(sls[k]); });
+}
+/* يُقاس النصُّ ليملأ الصفحة: يُصغَّر إن فاض، ويُكبَّر إن قصُر — بحدَّين
+   لا يَضخُم عندهما فيَبشَع، ولا يَدِقّ فيَشُقّ على العين. ويُقاس ارتفاعُ
+   النصِّ نفسِه لا ارتفاعُ وعائه، فوعاءُ الـ‎flex‎ لا ينقُص عن ارتفاعه أبدًا. */
+function azFitText(sl){
+  const box=sl.querySelector('.pg-body'); if(!box) return;
+  const t=box.querySelector('.txt'); if(!t) return;
+  const H=box.clientHeight; if(!H) return;
+  t.style.fontSize='';
+  const base=parseFloat(getComputedStyle(t).fontSize); if(!base) return;
+  const MAXPX=34, MINPX=15, PAD=8;
+  let k=1;
+  if(t.scrollHeight > H-PAD){
+    while(k>0.5 && base*k>MINPX && t.scrollHeight > H-PAD){
+      k=+(k-0.05).toFixed(2); t.style.fontSize=(base*k).toFixed(2)+'px';
+    }
+  } else {
+    for(;;){
+      const nk=+(k+0.05).toFixed(2);
+      if(base*nk > MAXPX) break;
+      t.style.fontSize=(base*nk).toFixed(2)+'px';
+      if(t.scrollHeight > H-PAD) break;      // تجاوز، فنرجع إلى آخرِ قياسٍ سالم
+      k=nk;
+    }
+    t.style.fontSize = (k===1) ? '' : (base*k).toFixed(2)+'px';
+  }
+}
+function azFitCurrent(){
+  const deck=$('#az-deck'); if(!deck) return;
+  const sl=deck.children[__azIdx]; if(sl) azFitText(sl);
+}
+/* السَّحبُ يقلّب الصفحة: الذكرُ التالي عن يسار الحاليّ كما في الكتاب العربيّ،
+   فيُدفع الحاليُّ يمينًا ليظهرَ ما بعده. والصفحةُ تتبع الإصبعَ ثمّ تستقرّ. */
+function azBindDeck(deck){
+  let x0=0, y0=0, dx=0, lock=null, t0=0, w=1;
+  deck.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    x0=e.touches[0].clientX; y0=e.touches[0].clientY;
+    dx=0; lock=null; t0=Date.now(); w=deck.clientWidth||1;
+  }, {passive:true});
+  deck.addEventListener('touchmove', e=>{
+    if(e.touches.length!==1) return;
+    const ax=e.touches[0].clientX-x0, ay=e.touches[0].clientY-y0;
+    if(lock===null){
+      if(Math.abs(ax)<7 && Math.abs(ay)<7) return;
+      lock = (Math.abs(ax) > Math.abs(ay)*1.3) ? 'x' : 'y';
+      if(lock==='x'){ deck.classList.add('drag'); __azMoved=true; }
+    }
+    if(lock!=='x') return;
+    if(e.cancelable) e.preventDefault();
+    const nb = ax>0 ? __azIdx+1 : __azIdx-1;
+    const cur=deck.children[__azIdx], nbe=deck.children[nb];
+    dx = nbe ? ax : ax*0.3;                       // مقاومةٌ عند الطرفين
+    if(cur) cur.style.transform='translateX('+dx+'px)';
+    if(nbe) nbe.style.transform='translateX('+(dx + (dx>0? -w : w))+'px)';
+  }, {passive:false});
+  const end=()=>{
+    if(lock!=='x'){ lock=null; return; }
+    deck.classList.remove('drag');
+    const v=Math.abs(dx)/Math.max(1, Date.now()-t0);
+    const nb = dx>0 ? __azIdx+1 : __azIdx-1;
+    const cur=deck.children[__azIdx], nbe=deck.children[nb];
+    if(cur) cur.style.transform='';
+    if(nbe) nbe.style.transform='';
+    if(nbe && (Math.abs(dx) > w*0.2 || v>0.5)){ azGo(nb); vibrate(5); }
+    lock=null; dx=0;
+    setTimeout(()=>{ __azMoved=false; }, 80);
+  };
+  deck.addEventListener('touchend', end);
+  deck.addEventListener('touchcancel', end);
+}
+window.addEventListener('resize', ()=>{
+  if(!$('#az-deck')) return;
+  clearTimeout(window.__azRz);
+  window.__azRz=setTimeout(()=>{ azFitDeck(); azGo(__azIdx, true); }, 120);
+});
+document.addEventListener('keydown', e=>{
+  if(!$('#az-deck') || !$('#s-azkar').classList.contains('active')) return;
+  if(e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if(e.key==='ArrowLeft'){ azGo(__azIdx+1); }
+  else if(e.key==='ArrowRight'){ azGo(__azIdx-1); }
+});
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ try{ azFitCurrent(); }catch(e){} });
+document.addEventListener('click', e=>{
+  if(!e.target.closest || !e.target.closest('.az-view')) return;
+  settings.azkarView = (azkarView()==='page') ? 'list' : 'page';
+  saveSettings(); vibrate(6); window.scrollTo(0,0); renderAzkar();
+  showToast(azkarView()==='page' ? 'العرض: صفحةً صفحة' : 'العرض: قائمة', 1200);
+});
 
 function tapAzkar(card, d, pid){
   const prog = progressState();
@@ -1762,6 +2034,9 @@ function tapAzkar(card, d, pid){
     const doneCount = list.filter(x=> (prog[currentTab+'_'+x.id]||0)>=x.count).length;
     updateProgressBar(doneCount, list.length);
     if(doneCount>=list.length && (currentTab==='morning'||currentTab==='evening')) markDoneToday();
+    /* في وضع الصفحة: تُقلَّب الصفحةُ وحدَها بعد تمام الذكر، فلا يقطع القارئُ ذكرَه بحركةٍ */
+    if(card.classList.contains('pgcard') && __azIdx < __azN-1)
+      setTimeout(()=>{ if($('#az-deck') && __azIdx<__azN-1) azGo(__azIdx+1); }, 640);
   }
 }
 
