@@ -249,7 +249,7 @@
      يبقى الذكرُ وفضلُه ومصدرُه، وشريطٌ رقيقٌ فيه اسمُ البابِ للتنقّل. */
   body.az-pages #s-azkar > .head, body.az-pages #s-azkar #qp-open,
   body.az-pages #s-azkar #inst-row, body.az-pages #s-azkar #loc-btn,
-  body.az-pages #s-azkar #time-seg,
+  body.az-pages #s-azkar #prayer-bar, body.az-pages #s-azkar #time-seg,
   body.az-pages #s-azkar #az-scope, body.az-pages #s-azkar .progressbar,
   body.az-pages #s-azkar .progresslabel{display:none !important;}
   .az-top{display:flex; align-items:center; gap:8px; padding:14px 0 11px;}
@@ -1940,7 +1940,7 @@ function azFitText(sl){
   const H=box.clientHeight; if(!H) return;
   t.style.fontSize='';
   const base=parseFloat(getComputedStyle(t).fontSize); if(!base) return;
-  const MAXPX=34, MINPX=15, PAD=8;
+  const MAXPX=42, MINPX=17, PAD=8;
   let k=1;
   if(t.scrollHeight > H-PAD){
     while(k>0.5 && base*k>MINPX && t.scrollHeight > H-PAD){
