@@ -130,31 +130,35 @@
     -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     overscroll-behavior-y:none;
   }
-  .screen{display:none; padding:0 0 calc(92px + env(safe-area-inset-bottom)); min-height:100%;}
+  .screen{display:none; padding:0 0 calc(108px + env(safe-area-inset-bottom)); min-height:100%;}
   .screen.active{display:block; animation:fade .25s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
   /* Large nav title */
-  .head{padding:calc(env(safe-area-inset-top) + 10px) 16px 6px; position:relative;}
+  .head{padding:calc(env(safe-area-inset-top) + 12px) 16px 14px; position:relative;}
   .riwaya-quick{position:absolute; top:calc(env(safe-area-inset-top) + 12px); left:20px;
     display:flex; background:var(--fill-2); border-radius:9px; padding:2px; z-index:2;}
   .riwaya-quick button{border:0; background:transparent; color:var(--text-2); font:inherit;
     font-size:13px; font-weight:700; padding:5px 12px; border-radius:7px;}
   .riwaya-quick button.on{background:var(--accent); color:#fff;}
   .head h1{margin:0; font-size:calc(34px * var(--scale)); font-weight:800; letter-spacing:-.5px;}
-  .head .sub{color:var(--text-2); font-size:15px; margin-top:2px;}
-  .az-source{color:var(--accent); font-weight:700; font-size:13px; margin-top:4px;}
+  .head .sub{color:var(--text-2); font-size:15px; margin-top:5px;}
+  .az-source{color:var(--accent); font-weight:700; font-size:13px; margin-top:7px;}
   .az-source:empty{display:none;}
-  .az-scope{display:flex; gap:8px; justify-content:center; margin:10px 16px 0;}
-  .az-scope button{flex:1; max-width:200px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--text);
-    font:inherit; font-weight:700; font-size:14px; padding:9px 10px; box-shadow:var(--shadow-1);}
+  .az-scope{display:flex; gap:10px; justify-content:center; margin:14px 16px 0;}
+  .az-scope button{flex:1; max-width:210px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--text);
+    font:inherit; font-weight:700; font-size:13.5px; padding:10px 10px; box-shadow:var(--shadow-1);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .az-scope button.on{border-color:transparent;}
   .az-scope button.on{background:var(--accent); color:#fff;}
-  .az-scope .scope-l1{font-size:16px; font-weight:800; line-height:1.5;}
-  .az-scope .scope-l2{font-size:12.5px; font-weight:600; opacity:.92; line-height:1.5;}
+  /* كان النطاقُ سطرَين فيأخذ من الشاشة قدرَ بطاقةٍ صغيرة، فجُمِع في سطر */
+  .az-scope br{display:none;}
+  .az-scope .scope-l1{font-size:13.5px; font-weight:800;}
+  .az-scope .scope-l1::after{content:'\00a0';}
+  .az-scope .scope-l2{font-size:13.5px; font-weight:700; opacity:.95;}
 
   /* Segmented control */
-  .seg{display:flex; background:var(--fill-2); border-radius:11px; padding:2px; margin:14px 16px 6px; position:relative;
+  .seg{display:flex; background:var(--fill-2); border-radius:11px; padding:3px; margin:20px 16px 8px; position:relative;
     overflow-x:auto; gap:2px; scrollbar-width:none;}
   .seg::-webkit-scrollbar{display:none;}
   .seg button{flex:1 0 auto; white-space:nowrap; border:0; background:transparent; color:var(--text); font:inherit;
@@ -189,13 +193,13 @@
   /* ثنائي هادئ أنيق: أخضر مريمية للورد، أزرق رمادي ناعم للمصحف الكامل */
   /* لون الزرّين مطابق للون التطبيق (الأخضر) */
 
-  .progressbar{margin:10px 16px 0; height:6px; border-radius:3px; background:var(--fill); overflow:hidden;}
+  .progressbar{margin:18px 16px 0; height:6px; border-radius:3px; background:var(--fill); overflow:hidden;}
   .progressbar i{display:block; height:100%; width:0; background:var(--c-repeat); border-radius:3px; transition:width .4s ease;}
-  .progresslabel{margin:8px 16px 0; color:var(--text-2); font-size:13px; display:flex; justify-content:space-between;}
+  .progresslabel{margin:10px 16px 0; color:var(--text-2); font-size:13px; display:flex; justify-content:space-between;}
 
   /* Cards list */
-  .list{padding:8px 16px 0;}
-  .card{background:var(--card); border-radius:18px; padding:18px 18px 14px; margin:12px 0;
+  .list{padding:12px 16px 0;}
+  .card{background:var(--card); border-radius:20px; padding:22px 19px 16px; margin:16px 0;
     position:relative; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow-1);
     transition:transform .12s ease, opacity .3s;}
   .card:active{transform:scale(.985);}
@@ -221,8 +225,8 @@
     font:inherit; font-size:16px; font-weight:600; padding:4px 22px 4px 6px; text-align:left; direction:rtl;}
   .selectwrap::after{content:'⌄'; position:absolute; left:4px; top:42%; transform:translateY(-50%); color:var(--text-3); font-size:18px; pointer-events:none;}
   #font-preview{padding:16px; font-size:calc(20px * var(--scale)); line-height:2; text-align:center; color:var(--text);}
-  .card .meta{display:flex; align-items:center; justify-content:space-between; margin-top:14px;
-    padding-top:12px; border-top:1px solid var(--sep);}
+  .card .meta{display:flex; align-items:center; justify-content:space-between; margin-top:18px;
+    padding-top:14px; border-top:1px solid var(--sep);}
   .badge{display:inline-flex; align-items:center; gap:6px; color:var(--accent); font-weight:700; font-size:15px;}
   .badge .rem{min-width:34px; height:34px; padding:0 6px; border-radius:17px; background:var(--accent);
     color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:800;}
@@ -237,9 +241,9 @@
   .card .tick{position:absolute; top:14px; left:14px; color:var(--c-read); font-size:20px; opacity:0; transition:opacity .25s; font-weight:800;}
   .card.done .tick{opacity:1;}
   /* الفضل والمصدر: ظاهران دائمًا تحت الذكر، بلا زرٍّ يُضغط */
-  .fadl{margin-top:11px; padding-top:10px; border-top:1px solid var(--sep);
-    font-size:13.5px; line-height:1.85; color:var(--text-2);}
-  .fadl p{margin:0 0 6px;}
+  .fadl{margin-top:14px; padding-top:12px; border-top:1px solid var(--sep);
+    font-size:13.5px; line-height:1.95; color:var(--text-2);}
+  .fadl p{margin:0 0 9px;}
   .fadl p:last-child{margin-bottom:0;}
   .fadl .lbl{color:var(--accent); font-weight:800; font-size:12.5px;}
 
@@ -272,13 +276,13 @@
   .tapzone{position:absolute; inset:0; cursor:pointer; border-radius:50%;}
 
   /* Settings (grouped list) */
-  .group{background:var(--card); border-radius:14px; margin:14px 16px; overflow:hidden;
+  .group{background:var(--card); border-radius:16px; margin:12px 16px 20px; overflow:hidden;
     border:1px solid var(--line); box-shadow:var(--shadow-1);}
-  .row{display:flex; align-items:center; justify-content:space-between; padding:13px 16px; min-height:48px; border-top:1px solid var(--sep);}
+  .row{display:flex; align-items:center; justify-content:space-between; padding:15px 16px; min-height:52px; border-top:1px solid var(--sep);}
   .row:first-child{border-top:0;}
   .row .k{font-size:16px;}
   .row .v{color:var(--text-2); font-size:15px;}
-  .gtitle{color:var(--text-2); font-size:13px; font-weight:600; margin:22px 16px 0; text-transform:uppercase; letter-spacing:.4px;}
+  .gtitle{color:var(--text-2); font-size:13px; font-weight:600; margin:26px 16px 0; text-transform:uppercase; letter-spacing:.4px;}
   .gnote{color:var(--text-2); font-size:13px; line-height:1.6; margin:8px 16px 0;}
   .miniseg{display:flex; background:var(--fill-2); border-radius:9px; padding:2px;}
   .miniseg button{border:0; background:transparent; color:var(--text); font:inherit; font-size:14px; font-weight:600; padding:5px 12px; border-radius:7px;}
@@ -336,7 +340,7 @@
   .hint{margin:14px 16px; padding:12px 14px; background:var(--fill-2); border-radius:12px; color:var(--text-2); font-size:13px; line-height:1.6;}
 
   /* prayer bar */
-  .prayerbar{margin:6px 16px 0; background:var(--card); border-radius:16px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+  .prayerbar{margin:14px 16px 0; background:var(--card); border-radius:16px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
     border:1px solid var(--line); box-shadow:var(--shadow-1);}
   .prayerbar .next{display:flex; flex-direction:column; gap:2px;}
   .prayerbar .geo-refresh{border:0; background:var(--fill-2); color:var(--c-read); padding:5px; margin-top:6px;
@@ -353,7 +357,7 @@
   .prayerbar .t .vl{font-size:13px; font-weight:700; color:var(--text-2);}
   .prayerbar .t.next-p .nm{color:var(--c-read); font-weight:800;}
   .prayerbar .t.next-p .vl{color:var(--c-repeat); font-weight:800;}
-  .locbtn{display:block; margin:6px 16px 0; border:0; background:var(--card); color:var(--accent); font:inherit; font-weight:600; font-size:14px; padding:11px; border-radius:14px; width:calc(100% - 32px);}
+  .locbtn{display:block; margin:14px 16px 0; border:0; background:var(--card); color:var(--accent); font:inherit; font-weight:600; font-size:14px; padding:11px; border-radius:14px; width:calc(100% - 32px);}
 
   .week{display:flex; gap:6px;}
   .week .d{width:24px; height:24px; border-radius:50%; background:var(--fill); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--text-2);}
@@ -421,10 +425,10 @@
 
   /* قائمة السور في صفحة الاستماع */
   #s-listen .reciter-box{position:sticky; top:0; z-index:5; background:var(--bg); padding-bottom:8px;}
-  .listen-list{display:flex; flex-direction:column; gap:8px; margin:12px 16px 0;}
-  .listen-sura{display:flex; align-items:center; gap:12px; width:100%; text-align:start;
+  .listen-list{display:flex; flex-direction:column; gap:12px; margin:16px 16px 0;}
+  .listen-sura{display:flex; align-items:center; gap:13px; width:100%; text-align:start;
     border:1px solid var(--line); background:var(--card); color:var(--text); box-shadow:var(--shadow-1);
-    border-radius:14px; padding:12px 14px; font:inherit; transition:transform .13s ease, border-color .2s;}
+    border-radius:14px; padding:14px 15px; font:inherit; transition:transform .13s ease, border-color .2s;}
   .listen-sura:active{transform:scale(.98);}
   .listen-sura .ls-num{flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:var(--fill-2);
     color:var(--accent); font-weight:800; font-size:12.5px; display:flex; align-items:center; justify-content:center;}
@@ -454,7 +458,7 @@
   .fq-nav button .gh-ic{width:1.1em; height:1.1em;}
   .fq-nav button.on{background:var(--accent); color:#fff;}
   .fq-card.az-fadl{margin:4px 0 0;}
-  .fq-card{margin:12px 16px 0; background:var(--card); border-radius:18px; padding:16px 15px; box-shadow:var(--shadow);}
+  .fq-card{margin:16px 16px 0; background:var(--card); border-radius:20px; padding:20px 17px; box-shadow:var(--shadow);}
   .fq-h{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
   .fq-h .gh-ic{color:var(--accent); width:1.5em; height:1.5em;}
   .fq-h b{font-size:19px; font-weight:800;}
@@ -611,7 +615,7 @@
   .upd-bar .ub-t small{display:block; font-size:12px; font-weight:600; opacity:.9; margin-top:2px;}
   .upd-bar .ub-go{font-size:12.5px; font-weight:800; color:var(--c-read); background:#fff;
     padding:6px 13px; border-radius:999px; white-space:nowrap;}
-  .inst-row{display:none; align-items:center; gap:10px; margin:10px 16px 0; padding:12px 14px;
+  .inst-row{display:none; align-items:center; gap:11px; margin:14px 16px 0; padding:14px 15px;
     background:var(--accent); color:#fff; border-radius:15px; font-size:14.5px; font-weight:800;
     box-shadow:0 2px 10px rgba(47,158,68,.3);}
   .inst-row.show{display:flex;}
@@ -621,7 +625,7 @@
   .inst-row .ir-go{font-size:12.5px; font-weight:800; color:var(--accent); background:#fff;
     padding:6px 13px; border-radius:999px; white-space:nowrap;}
   /* زرّ إعادة فتح نافذة التذكير */
-  .qp-open{display:flex; align-items:center; gap:10px; margin:12px 16px 0; padding:12px 14px;
+  .qp-open{display:flex; align-items:center; gap:11px; margin:14px 16px 0; padding:14px 15px;
     background:var(--card); border-radius:15px; box-shadow:var(--shadow); font-size:14.5px; font-weight:700;}
   .qp-open .gh-ic{color:var(--accent); width:1.3em; height:1.3em; flex:0 0 auto;}
   .qp-open .qo-t{flex:1 1 auto;}
@@ -1002,10 +1006,10 @@
     -webkit-appearance:none; appearance:none;}
   .sura-search input::placeholder{color:var(--text-3);}
   .sura-search input:focus{border-color:var(--accent); background:var(--card);}
-  .sura-list.rows{padding:10px 12px 16px;}
+  .sura-list.rows{padding:12px 12px 18px;}
   .sura-list.rows button.sr{display:flex; align-items:center; gap:12px; width:100%; text-align:right;
     border:1px solid var(--line); border-radius:16px; background:var(--card); color:var(--text);
-    font:inherit; padding:10px 12px; margin:0 0 8px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+    font:inherit; padding:12px 13px; margin:0 0 10px; box-shadow:0 1px 2px rgba(0,0,0,.04);
     transition:transform .12s ease, background-color .15s ease;}
   .sura-list.rows button.sr:last-child{margin-bottom:0;}
   .sura-list.rows button.sr:active{transform:scale(.985); background:var(--fill-2);}
@@ -1021,6 +1025,11 @@
   .sura-list.rows button.sr.cur{border-color:var(--accent); background:var(--fill-2);}
   .sura-list.rows button.sr.cur .sr-name{color:var(--accent);}
   .sura-list.rows button.sr.cur .sr-no{background:var(--accent); color:#fff;}
+  .sura-list.rows .sr-hz{display:none;}
+  .sura-list.rows.hz-on .sr-hz{flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+    width:30px; height:30px; margin-inline-start:-2px; border-radius:50%;
+    color:var(--text-3); background:var(--fill-2);}
+  .sura-list.rows.hz-on .sr-hz .gh-ic{width:15px; height:15px;}
   .sr-empty{padding:28px 16px; text-align:center; color:var(--text-3); font-size:14.5px;}
   .wird-done{display:block; width:calc(100% - 32px); margin:6px 16px 0; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:17px; padding:15px; border-radius:16px;
     box-shadow:var(--shadow-2); transition:transform .13s ease, opacity .2s;}
@@ -2286,11 +2295,19 @@ function mushafGoto(el, offset, smooth){
     __progScrollT=setTimeout(()=>{ __progScroll=false; }, 700);
     return;
   }
-  const go = ()=> window.scrollTo(0, at());
-  go();
-  requestAnimationFrame(()=>{ go(); setTimeout(go, 80); });
-  setTimeout(go, 260); setTimeout(go, 520);
-  __progScrollT=setTimeout(()=>{ __progScroll=false; }, 700);
+  /* كلُّ تصحيحٍ يُرغم المتصفّحَ على حسابِ تخطيطِ مستندٍ طولُه مليونٌ وَنِصف
+     بكسل، فلا نُكرّره إلّا ما دام الموضعُ يتزحزح، ونقف عند استقراره. */
+  let last=-1, tries=0;
+  const done = ()=>{ clearTimeout(__progScrollT); __progScrollT=setTimeout(()=>{ __progScroll=false; }, 140); };
+  const go = ()=>{
+    const y=at();
+    if(Math.abs(y-last)<2){ done(); return; }               // استقرّ الموضع
+    last=y; window.scrollTo(0, y);
+    if(++tries<4) setTimeout(go, tries===1? 60 : 180);
+    else done();
+  };
+  requestAnimationFrame(go);
+  __progScrollT=setTimeout(()=>{ __progScroll=false; }, 900);
   try{ qsClearYCache(); }catch(e){}
 }
 function scrollToSura(si, smooth){
@@ -3703,7 +3720,7 @@ function currentSuraFromScroll(){
   }
   return cur;
 }
-let __lastJumpSura=-1, __jumpTicking=false, __lastScrollY=0, __scrollDir='up';
+let __lastJumpSura=-1, __jumpTicking=false, __lastScrollY=0, __scrollDir='up', __lastJumpAt=0;
 function updateMushafJump(){
   const jump=$('#mushaf-jump'); if(!jump) return;
   const inMushaf = wirdMode()==='mushaf' && $('#s-wird').classList.contains('active');
@@ -3711,7 +3728,13 @@ function updateMushafJump(){
   jump.classList.toggle('show', show);
   const zf=$('#q-zoom-float'); if(zf) zf.classList.toggle('show', show);
   const rf=$('#riwaya-float'); if(rf) rf.classList.toggle('show', show);
-  if(!inMushaf || !WIRD) return;
+  /* اسمُ السورة في الزرّ يُعرَف بالتنقيبِ عن العنصرِ تحت نقطةٍ من الشاشة،
+     وذلك يُرغم المتصفّحَ على حسابِ التخطيط. فلا نسألُ عنه إلّا والزرُّ ظاهرٌ،
+     ولا أكثرَ من مرّةٍ في ثلاثةِ أعشار الثانية، فيخفُّ التمريرُ في المصحف. */
+  if(!inMushaf || !WIRD || !show) return;
+  const now=Date.now();
+  if(now-__lastJumpAt<300) return;
+  __lastJumpAt=now;
   const si=currentSuraFromScroll();
   if(si===__lastJumpSura) return;
   __lastJumpSura=si;
@@ -3758,49 +3781,65 @@ function ayaCountLabel(n){
 /* حالةُ قائمة السور: نُعيد بناءها عند البحث دون أن نفقد ما اختاره القارئ */
 let __srPick=null, __srCur=-1;
 function suraListPlain(){
-  const list=$('#sura-list'); if(list) list.classList.remove('rows');
+  const list=$('#sura-list'); if(list){ list.classList.remove('rows'); list.__srKey=null; }
   const box=$('#sura-search'); if(box) box.classList.remove('show');
   __srPick=null;
 }
+/* تُبنى المئةُ وأربعةَ عشرَ صفًّا بنصٍّ واحدٍ ومستمعٍ واحدٍ بالتفويض،
+   فكان بناؤها عنصرًا عنصرًا ومستمعًا لكلٍّ يُثقل فتحَ القائمة. */
 function renderSuraRows(q){
   const list=$('#sura-list'); if(!list||!WIRD) return;
   const nq = (q||'').trim() ? normalizeArabic(q.trim()) : '';
-  const frag=document.createDocumentFragment();
-  let shown=0;
-  WIRD.sur.forEach((s,idx)=>{
-    if(nq && normalizeArabic(s.n).indexOf(nq)<0 && String(idx+1).indexOf(nq)!==0) return;
-    shown++;
-    const b=document.createElement('button');
-    b.type='button'; b.className='sr'+(idx===__srCur?' cur':'');
+  const out=[]; 
+  for(let idx=0; idx<WIRD.sur.length; idx++){
+    const s=WIRD.sur[idx];
+    if(nq && normalizeArabic(s.n).indexOf(nq)<0 && String(idx+1).indexOf(nq)!==0) continue;
     const kind = SURA_KIND.charAt(idx)==='d' ? 'مدنيّة' : 'مكّيّة';
-    b.innerHTML =
-      '<span class="sr-no">'+AR(idx+1)+'</span>'+
-      '<span class="sr-mid"><span class="sr-name">'+escapeHtml(s.n)+'</span>'+
-      '<span class="sr-sub">'+kind+' • '+ayaCountLabel(suraAyaCount(idx))+'</span></span>'+
-      '<span class="sr-pg">ص '+AR(WIRD.a[s.i].p)+'</span>';
-    b.addEventListener('click', ()=>{ if(__srPick) __srPick(idx); });
-    frag.appendChild(b);
-  });
-  list.innerHTML='';
-  if(!shown){
-    const e=document.createElement('div'); e.className='sr-empty';
-    e.textContent='لا سورةَ بهذا الاسم'; list.appendChild(e);
-    return;
+    out.push(
+      '<button type="button" class="sr'+(idx===__srCur?' cur':'')+'" data-si="'+idx+'">'+
+        '<span class="sr-no">'+AR(idx+1)+'</span>'+
+        '<span class="sr-mid"><span class="sr-name">'+escapeHtml(s.n)+'</span>'+
+        '<span class="sr-sub">'+kind+' • '+ayaCountLabel(suraAyaCount(idx))+'</span></span>'+
+        '<span class="sr-pg">ص '+AR(WIRD.a[s.i].p)+'</span>'+
+        '<span class="sr-hz" role="button" aria-label="أحزاب السورة">'+
+          '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></span>'+
+      '</button>');
   }
-  list.appendChild(frag);
+  list.innerHTML = out.length ? out.join('') : '<div class="sr-empty">لا سورةَ بهذا الاسم</div>';
+  list.__srKey = nq ? null : srKey();       // المبنيُّ كاملًا يُعاد استعمالُه
 }
-function buildSuraList(curIdx, onPick){
+/* مفتاحُ القائمة: تتغيّر أرقامُ الصفحات وعددُ الآيات بتغيُّر الرواية */
+function srKey(){ return (settings.riwaya||'')+'|'+(WIRD? WIRD.sur.length:0); }
+function buildSuraList(curIdx, onPick, withHizb){
   const list=$('#sura-list'); if(!list || !WIRD) return;
   __srPick=onPick; __srCur=curIdx;
+  list.classList.toggle('hz-on', !!withHizb);
+  if(!list.__srBound){
+    list.__srBound=1;
+    list.addEventListener('click', e=>{
+      const b=e.target.closest && e.target.closest('button.sr');
+      if(!b || !__srPick) return;
+      const idx=parseInt(b.dataset.si);
+      if(!isFinite(idx)) return;
+      __srPick(idx, !!(e.target.closest('.sr-hz')));
+    });
+  }
   list.classList.add('rows');
   const box=$('#sura-search'); if(box) box.classList.add('show');
   const inp=$('#sura-q'); if(inp) inp.value='';
-  renderSuraRows('');
+  /* إن كانت القائمةُ مبنيّةً من قبلُ لم نُعِد بناءَها، وإنّما نُحوّل
+     علامةَ «الحاليّة» — وبناءُ مئةٍ وأربعةَ عشرَ صفًّا في كلّ فتحةٍ ثِقَل. */
+  if(list.__srKey===srKey() && list.querySelector('button.sr')){
+    const was=list.querySelector('button.sr.cur'); if(was) was.classList.remove('cur');
+    const now=list.querySelector('button.sr[data-si="'+curIdx+'"]'); if(now) now.classList.add('cur');
+  } else {
+    renderSuraRows('');
+  }
 }
-function openSuraOverlay(curIdx, onPick, title){
+function openSuraOverlay(curIdx, onPick, title, withHizb){
   const bk=$('#sura-overlay-back'); if(bk) bk.style.display='none';
   $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = title || 'اختر السورة';
-  buildSuraList(curIdx, onPick);
+  buildSuraList(curIdx, onPick, withHizb);
   $('#sura-overlay').classList.add('show');
   centerInList($('#sura-list button.cur'));
 }
@@ -3832,9 +3871,19 @@ function closeSuraOverlay(){ $('#sura-overlay').classList.remove('show'); const 
    ترقيم الآيات يختلف بين الروايتين في بعض السور، فنثبّت رقم الآية داخل السورة ونقصّه عند اللزوم. */
 let __riwayaKeep=null;
 /* يكشف صفحة العنصر ليُحسب موضعها بدقّة (لأنّ الصفحات البعيدة غير محسوبة) */
+const __cvKeep=[];
 function cvReveal(el){
   const pg = el && el.closest ? el.closest('.mushaf-pg') : null;
-  if(pg) pg.classList.add('cv-on');
+  if(pg && !pg.classList.contains('cv-on')){
+    pg.classList.add('cv-on');
+    __cvKeep.push(pg);
+    /* كلُّ صفحةٍ تُكشف تبقى مرسومةً ما دام التطبيقُ مفتوحًا، فتتراكم
+       فيثقُل كلُّ شيء. نُبقي الجوارَ القريبَ ونُعيد الباقيَ إلى التأجيل. */
+    while(__cvKeep.length>8){
+      const old=__cvKeep.shift();
+      if(old && old!==pg) old.classList.remove('cv-on');
+    }
+  }
   return el;
 }
 /* الآية عند أعلى الشاشة — عبر نقطة واحدة بدل قياس آلاف العناصر */
@@ -3876,7 +3925,12 @@ function scrollToAya(ai, smooth){
 
 /* المستوى الأول: قائمة السور ← الضغط على سورة يفتح اختيار الحزب داخلها */
 function openMushafPicker(){
-  openSuraOverlay(currentSuraFromScroll(), idx=> showHizbPicker(idx));
+  /* النقرةُ على السورة تنتقل إليها من فورها — كان يلزم نقرتان: السورةُ ثمّ
+     «من بداية السورة». ومن أراد حزبًا بعينِه ضغط السهمَ الصغير في حرف الصفّ. */
+  openSuraOverlay(currentSuraFromScroll(), (idx, wantHizb)=>{
+    if(wantHizb) showHizbPicker(idx);
+    else commitMushafJump(idx, WIRD.sur[idx].i);
+  }, 'اختر السورة', true);
 }
 /* المستوى الثاني: الأحزاب التي تبدأ داخل السورة + خيار «بداية السورة» */
 function showHizbPicker(suraIdx){
@@ -3908,9 +3962,12 @@ function showHizbPicker(suraIdx){
 function commitMushafJump(suraIdx, ai){
   settings.mushafSura=suraIdx; saveSettings();
   const sel=$('#sura-select'); if(sel) sel.value=suraIdx;
-  closeSuraOverlay();
-  if(ai===WIRD.sur[suraIdx].i) scrollToSura(suraIdx, true); else scrollToAya(ai, true);
-  vibrate(6);
+  closeSuraOverlay(); vibrate(6);
+  /* تُطوى الورقةُ أوّلًا ثمّ نُمرِّر في الإطار التالي، فلا يتزامن ثِقلُ
+     التمرير مع حركةِ الورقة فيظهر التقطيع. */
+  requestAnimationFrame(()=>{
+    if(ai===WIRD.sur[suraIdx].i) scrollToSura(suraIdx, false); else scrollToAya(ai, false);
+  });
 }
 $('#mushaf-jump').addEventListener('click', ()=>{ vibrate(6); openMushafPicker(); });
 $('#sura-q') && $('#sura-q').addEventListener('input', e=>{ renderSuraRows(e.target.value); $('#sura-list').scrollTop=0; });
