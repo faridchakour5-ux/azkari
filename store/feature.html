@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:'Maghribi'; src:url('../fonts/maghribi.woff2') format('woff2');}
+  @font-face{font-family:'PlexAr'; src:url('../fonts/ui-700.woff2') format('woff2'); font-weight:700;}
+  @font-face{font-family:'PlexAr'; src:url('../fonts/ui-600.woff2') format('woff2'); font-weight:600;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1024px;height:500px;overflow:hidden;}
+  .wrap{width:1024px;height:500px;position:relative;
+    background:radial-gradient(120% 140% at 82% 30%, #F3EBD8 0%, #EAE0C9 55%, #E2D6BC 100%);
+    display:flex;align-items:center;justify-content:center;}
+  /* motif discret */
+  .wrap::before{content:'';position:absolute;inset:0;opacity:.06;
+    background-image:radial-gradient(circle at 50% 50%, #2F9E44 2px, transparent 2px);
+    background-size:34px 34px;}
+  .card{position:relative;display:flex;flex-direction:column;align-items:center;gap:18px;padding:0 60px;text-align:center;}
+  .name{font-family:'Maghribi',serif;font-size:150px;line-height:1;color:#2F9E44;
+    text-shadow:0 3px 14px rgba(47,158,68,.18);}
+  .tag{font-family:'PlexAr',sans-serif;font-weight:700;font-size:34px;color:#3A352E;letter-spacing:.5px;}
+  .sub{font-family:'PlexAr',sans-serif;font-weight:600;font-size:22px;color:#7c7060;}
+  .dots{display:flex;gap:14px;margin-top:2px;}
+  .dots i{width:9px;height:9px;border-radius:50%;background:#2F9E44;display:block;opacity:.9;}
+  .crescent{position:absolute;top:54px;right:70px;width:70px;height:70px;}
+  .glow{position:absolute;width:520px;height:520px;border-radius:50%;
+    background:radial-gradient(circle,#2F9E44 0%,transparent 70%);opacity:.10;left:-120px;bottom:-200px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="glow"></div>
+    <svg class="crescent" viewBox="0 0 100 100" fill="none">
+      <path d="M74 50c0 18-14 33-32 33-4 0-8-1-12-2 12-2 21-13 21-27S42 21 30 19c4-1 8-2 12-2 18 0 32 15 32 33z" fill="#2F9E44" opacity=".85"/>
+      <circle cx="72" cy="30" r="5" fill="#C79A3A"/>
+    </svg>
+    <div class="card">
+      <div class="name">صلاتي</div>
+      <div class="tag">أذكار الصباح والمساء · المصحف كامل · المسبحة</div>
+      <div class="sub">برواية حفص وورش — يعمل دون إنترنت</div>
+      <div class="dots"><i></i><i></i><i></i></div>
+    </div>
+  </div>
+</body>
+</html>
