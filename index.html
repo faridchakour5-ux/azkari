@@ -200,7 +200,8 @@
   /* Cards list */
   .list{padding:12px 16px 0;}
   .card{background:var(--card); border-radius:20px; padding:22px 19px 16px; margin:16px 0;
-    position:relative; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow-1);
+    position:relative; overflow:hidden; border:1px solid var(--line);
+    border-inline-start:4px solid var(--accent); box-shadow:var(--shadow-1);
     transition:transform .12s ease, opacity .3s;}
   .card:active{transform:scale(.985);}
   .card .txt{font-size:calc(21.5px * var(--scale)); line-height:2.05; font-weight:500; white-space:pre-wrap; word-spacing:1px;}
@@ -236,7 +237,7 @@
     border-radius:17px; display:inline-flex; align-items:center; justify-content:center; margin-inline-end:6px;}
   .dhikr-play:active{transform:scale(.94);}
   .dhikr-play .gh-ic{width:16px; height:16px;}
-  .card.done{opacity:.5;}
+  .card.done{opacity:.5; border-inline-start-color:var(--text-3);}
   .card.done .rem{background:var(--text-3);}
   .card .tick{position:absolute; top:14px; left:14px; color:var(--c-read); font-size:20px; opacity:0; transition:opacity .25s; font-weight:800;}
   .card.done .tick{opacity:1;}
@@ -276,14 +277,19 @@
   .tapzone{position:absolute; inset:0; cursor:pointer; border-radius:50%;}
 
   /* Settings (grouped list) */
-  .group{background:var(--card); border-radius:16px; margin:12px 16px 20px; overflow:hidden;
-    border:1px solid var(--line); box-shadow:var(--shadow-1);}
+  .group{background:var(--card); border-radius:18px; margin:12px 16px 20px; overflow:hidden;
+    border:1px solid var(--line); border-inline-start:4px solid var(--accent);
+    box-shadow:var(--shadow-1);}
   .row{display:flex; align-items:center; justify-content:space-between; padding:15px 16px; min-height:52px; border-top:1px solid var(--sep);}
   .row:first-child{border-top:0;}
   .row .k{font-size:16px;}
   .row .v{color:var(--text-2); font-size:15px;}
-  .gtitle{color:var(--text-2); font-size:13px; font-weight:600; margin:26px 16px 0; text-transform:uppercase; letter-spacing:.4px;}
-  .gnote{color:var(--text-2); font-size:13px; line-height:1.6; margin:8px 16px 0;}
+  .gtitle{display:flex; align-items:center; gap:8px; color:var(--accent); font-size:14.5px;
+    font-weight:800; margin:26px 16px 0; letter-spacing:0;}
+  .gtitle::before{content:''; flex:0 0 auto; width:4px; height:16px; border-radius:2px; background:var(--accent);}
+  .gnote{color:var(--text-2); font-size:14px; line-height:1.9; margin:10px 16px 0;
+    background:var(--fill-2); border-radius:18px; padding:13px 15px;
+    border-inline-start:4px solid var(--text-3);}
   .miniseg{display:flex; background:var(--fill-2); border-radius:9px; padding:2px;}
   .miniseg button{border:0; background:transparent; color:var(--text); font:inherit; font-size:14px; font-weight:600; padding:5px 12px; border-radius:7px;}
   .miniseg button.on{background:var(--accent); color:#fff;}
@@ -517,15 +523,16 @@
   .fq-bt::before{content:''; width:4px; height:17px; border-radius:2px; background:var(--accent); flex:0 0 auto;}
 
   /* قائمة */
-  .fq-ul{margin:0; padding:0; list-style:none;}
-  .fq-ul li{position:relative; padding:8px 21px 8px 0; font-size:16.5px; line-height:1.95;}
-  .fq-ul li::before{content:''; position:absolute; right:6px; top:19px; width:6px; height:6px;
+  .fq-ul{margin:0; padding:12px 16px; list-style:none;}
+  .fq-ul li{position:relative; padding:7px 20px 7px 0; font-size:16.5px; line-height:1.95;}
+  .fq-ul li::before{content:''; position:absolute; right:5px; top:18px; width:6px; height:6px;
     border-radius:50%; background:var(--accent);}
+  .fq-ul.warn{border-inline-start-color:var(--c-repeat);}
   .fq-ul.warn li::before{background:var(--c-repeat);}
 
   /* خطوات مرقّمة */
-  .fq-steps{margin:0; padding:0; list-style:none;}
-  .fq-step{display:flex; gap:11px; padding:10px 0;}
+  .fq-steps{margin:0; padding:6px 16px; list-style:none;}
+  .fq-step{display:flex; gap:11px; padding:11px 0;}
   .fq-step + .fq-step{border-top:1px solid var(--sep);}
   .fq-step .n{flex:0 0 26px; width:26px; height:26px; border-radius:50%; background:var(--fill-2);
     color:var(--text-2); font-size:12.5px; font-weight:800; display:inline-flex;
@@ -543,7 +550,7 @@
   /* خطاطة تسلسل */
   .fq-flow{display:flex; flex-direction:column; gap:0;}
   .fq-fn{display:flex; align-items:flex-start; gap:11px; background:var(--fill-2);
-    border-radius:13px; padding:11px 13px;}
+    border-radius:18px; padding:13px 15px; border-inline-start:4px solid var(--accent);}
   .fq-fn .k{flex:0 0 26px; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff;
     font-size:12.5px; font-weight:800; display:inline-flex; align-items:center; justify-content:center;}
   .fq-fn .v b{display:block; font-size:16.5px; font-weight:800; line-height:1.65;}
@@ -554,7 +561,7 @@
 
   /* شجرة القرار */
   .fq-tree{display:flex; flex-direction:column; gap:10px;}
-  .fq-tn{background:var(--fill-2); border-radius:14px; padding:12px 13px; border-inline-start:4px solid var(--accent);}
+  .fq-tn{background:var(--fill-2); border-radius:18px; padding:14px 15px; border-inline-start:4px solid var(--accent);}
   .fq-tn .c{font-size:16.5px; font-weight:800; line-height:1.7;}
   .fq-tn .e{font-size:14px; color:var(--text-3); margin-top:3px; line-height:1.8;}
   .fq-tn .r{display:flex; align-items:flex-start; gap:7px; margin-top:10px; font-size:15.5px;
@@ -564,8 +571,9 @@
 
   /* عمودان (يفطر / لا يفطر) */
   .fq-cols{display:flex; gap:10px;}
-  .fq-col{flex:1 1 0; border-radius:14px; padding:12px 11px; background:var(--fill-2);}
-  .fq-col.bad{background:var(--c-repeat-bg);}
+  .fq-col{flex:1 1 0; border-radius:18px; padding:14px 12px; background:var(--fill-2);
+    border-inline-start:4px solid var(--accent);}
+  .fq-col.bad{background:var(--c-repeat-bg); border-inline-start-color:var(--c-repeat);}
   .fq-col.good{background:var(--accent-bg);}
   .fq-col h4{margin:0 0 9px; font-size:15.5px; font-weight:800; text-align:center;}
   .fq-col.bad h4{color:var(--c-repeat);}
@@ -575,21 +583,28 @@
   .fq-col li:first-child{border-top:0;}
 
   /* جدول */
+  .fq-tblw{overflow-x:auto; padding:4px 8px;}
   .fq-tbl{width:100%; border-collapse:collapse; font-size:15px;}
-  .fq-tbl th{background:var(--fill-2); font-weight:800; font-size:14px; padding:10px 8px; text-align:center;}
+  .fq-tbl th{background:transparent; color:var(--accent); font-weight:800; font-size:14px; padding:11px 8px; text-align:center;}
   .fq-tbl td{padding:9px 8px; text-align:center; border-top:1px solid var(--sep);}
   .fq-tbl th:first-child, .fq-tbl td:first-child{text-align:start; font-weight:700;}
 
   /* اختلاف المذاهب */
-  .fq-kh{background:var(--c-read-bg); border-radius:14px; padding:4px 13px;}
+  .fq-kh{background:var(--c-read-bg); border-radius:18px; padding:4px 15px;
+    border-inline-start:4px solid var(--c-read);}
   .fq-ki{padding:11px 0;}
   .fq-ki + .fq-ki{border-top:1px solid rgba(128,128,128,.18);}
   .fq-ki .q{font-size:15.5px; font-weight:800; color:var(--c-read); margin-bottom:4px; line-height:1.7;}
   .fq-ki .a{font-size:15px; line-height:2; color:var(--text);}
 
-  /* وصايا النبيّ ﷺ: نصُّ الحديث بكتابةٍ كبيرةٍ ظاهرة، ثمّ فائدتُه، ثمّ مصدرُه */
-  .wa-i{background:var(--fill-2); border-radius:18px; padding:18px 17px 16px; margin:16px 0 0;
+  /* ============ طرازُ «وصايا النبيّ ﷺ» ============
+     لوحٌ ليّنٌ بحرفٍ أخضرَ في جانبه، وعنوانٌ بلون التطبيق تسبقه شارة،
+     ونصٌّ فسيحُ السطر. اعتُمد طرازًا واحدًا لصفحات التطبيق كلِّها،
+     إلّا المصحفَ والاستماعَ والوِرد فلها هيئتُها. */
+  .wa-i, .fq-ul, .fq-steps, .fq-tblw{
+    background:var(--fill-2); border-radius:18px;
     border-inline-start:4px solid var(--accent);}
+  .wa-i{padding:18px 17px 16px; margin:16px 0 0;}
   .wa-t{display:flex; align-items:center; gap:8px; font-size:15px; font-weight:800;
     color:var(--accent); margin-bottom:12px;}
   .wa-t::before{content:''; flex:0 0 auto; width:4px; height:16px; border-radius:2px; background:var(--accent);}
@@ -600,15 +615,15 @@
   .wa-s .lbl{color:var(--accent); font-weight:800; font-size:13px; margin-inline-end:3px;}
 
   /* تنبيه */
-  .fq-note{border-radius:14px; padding:14px 15px; font-size:15.5px; line-height:2;}
+  .fq-note{border-radius:18px; padding:15px 16px; font-size:15.5px; line-height:2;}
   .fq-note.core{background:var(--accent-bg); color:var(--text); border-inline-start:4px solid var(--accent);}
   .fq-note.warn{background:var(--c-repeat-bg); color:var(--text); border-inline-start:4px solid var(--c-repeat);}
   .fq-note.info{background:var(--fill-2); color:var(--text-2); border-inline-start:4px solid var(--text-3);}
 
   /* بطاقةُ مصادر الباب — بألوان الصفحات المصوَّرة نفسِها: لكلّ صنفٍ لونُه،
      قرآنٌ ثمّ سنّةٌ ثمّ كتبُ الفقه ثمّ التنبيه. */
-  .fq-src{margin-top:18px; border:1px solid var(--line); border-radius:16px;
-    background:var(--card); overflow:hidden;}
+  .fq-src{margin-top:20px; border:1px solid var(--line); border-radius:18px;
+    border-inline-start:4px solid var(--accent); background:var(--card); overflow:hidden;}
   .fq-src-h{display:flex; align-items:center; gap:8px; padding:12px 14px;
     background:var(--accent-bg); color:var(--accent); font-weight:800; font-size:15px;
     border-bottom:1px solid var(--line);}
@@ -914,15 +929,18 @@
   html[data-bg="sagelite"] .aya-t.live{background:color-mix(in srgb, var(--accent) 14%, transparent);}
   .tafsir-body{overflow-y:auto; padding:16px 20px 22px; -webkit-overflow-scrolling:touch;}
   /* شرحُ الأذكار: نصُّ الذكر ثمّ معناه ثمّ شرحُ كلماته */
-  .sharh-txt{font-size:17px; line-height:2.15; color:var(--accent); font-weight:700;
-    background:var(--accent-bg); border-radius:14px; padding:13px 14px; margin-bottom:14px; text-align:justify;}
-  .sh-h{font-size:12.5px; font-weight:800; color:var(--accent); margin:16px 0 8px;}
+  .sharh-txt{font-size:18px; line-height:2.2; color:var(--accent); font-weight:700;
+    background:var(--accent-bg); border-radius:18px; padding:15px 16px; margin-bottom:15px;
+    border-inline-start:4px solid var(--accent); text-align:justify;}
+  .sh-h{display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:800;
+    color:var(--accent); margin:18px 0 9px;}
+  .sh-h::before{content:''; flex:0 0 auto; width:4px; height:15px; border-radius:2px; background:var(--accent);}
   .sh-h:first-child{margin-top:0;}
-  .sh-k{border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .sh-k{border:1px solid var(--line); border-radius:18px; overflow:hidden;}
   .sh-ki{display:flex; gap:10px; padding:10px 13px; align-items:baseline;}
   .sh-ki + .sh-ki{border-top:1px solid var(--sep);}
-  .sh-ki b{flex:0 0 auto; max-width:42%; font-size:14px; font-weight:800; color:var(--c-read);}
-  .sh-ki span{font-size:13.5px; line-height:1.9; color:var(--text-2);}
+  .sh-ki b{flex:0 0 auto; max-width:42%; font-size:15px; font-weight:800; color:var(--c-read);}
+  .sh-ki span{font-size:14.5px; line-height:1.95; color:var(--text-2);}
   /* زرُّ الشرح في صفّ البطاقة، بجانب «شارِك» */
   .sharh-btn{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line);
     background:var(--fill-2); color:var(--c-read); border-radius:12px; padding:7px 11px;
@@ -3540,7 +3558,7 @@ function fqBlock(b){
       }).join('') + '</div>';
 
     case 'table':
-      return T + '<div style="overflow-x:auto"><table class="fq-tbl"><thead><tr>'+
+      return T + '<div class="fq-tblw"><table class="fq-tbl"><thead><tr>'+
         b.v.head.map(h=>'<th>'+escapeHtml(h)+'</th>').join('')+'</tr></thead><tbody>'+
         b.v.rows.map(r=>'<tr>'+r.map(c=>'<td>'+escapeHtml(c)+'</td>').join('')+'</tr>').join('')+
         '</tbody></table></div>';
