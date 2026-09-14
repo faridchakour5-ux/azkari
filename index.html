@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <!-- سياسة أمان المحتوى: كل الموارد من نطاق التطبيق فقط، والاتصال الخارجي محصور في mp3quran -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https:; connect-src 'self' https://*.mp3quran.net https://archive.org https://*.archive.org; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<!-- التكبيرُ بالأصابع مأذونٌ فيه: مُنِع من قبلُ لئلّا يُكبَّر النصُّ سهوًا
+     أثناء التمرير، وفي ذلك حرجٌ على من ضعُف بصرُه وهو يقرأ المصحف. والنقرُ
+     المزدوج لا يُبطئ الأزرار، لأنّ فيها ‎touch-action:manipulation‎. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
 <meta name="theme-color" content="#EFE6D4">
 <meta name="description" content="صلاتي — أذكار الصباح والمساء، المصحف كامل برواية حفص وورش، المسبحة ومواقيت الصلاة. يعمل دون إنترنت.">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1584,7 +1587,10 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', autoReadLevel:1.6 };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', autoReadLevel:1.6, bgPicked:false };
+/* هل للتطبيق إعداداتٌ محفوظةٌ من قبل؟ يُسأل قبل الدمج، ويُبنى عليه في
+   ترقية ‎__d12‎: من كان يستعمل التطبيقَ لا يُغيَّر عليه لونُه. */
+const __hadSettings = store.get('az_settings', null) !== null;
 const settings = Object.assign({}, SETTINGS_DEFAULTS, store.get('az_settings', {}));
 // migration unique: ورش devient la rivaya par défaut, zoom Coran 140%
 if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quranScale || settings.quranScale==1) settings.quranScale=1.4; store.set('az_settings', settings); }
@@ -1606,6 +1612,10 @@ if(!settings.__d10){ settings.__d10=1;
 if(settings.bg==='olive'){ settings.bg='sagelite'; store.set('az_settings', settings); }
 // ترقية: سرعةُ التمرير الافتراضيّة ‎1.6‎ بخطوات ‎0.1‎ (كانت ‎1.75‎ بخطوات ‎0.25‎)
 if(!settings.__d11){ settings.__d11=1; settings.autoReadLevel=1.6; store.set('az_settings', settings); }
+/* ترقية: اللونُ يتبع وضعَ الهاتف في أوّل فتحةٍ ما لم يختر المستخدمُ لونًا.
+   ومن كان يستعمل التطبيقَ من قبلُ يُعدُّ مختارًا، فلا يُقلَب عليه لونُه
+   فجأةً — ولو كان هاتفُه ليليًّا. والاختيارُ اليدويُّ يعلو دائمًا. */
+if(!settings.__d12){ settings.__d12=1; settings.bgPicked = __hadSettings; store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', sagelite:'#E9EAD5', sage:'#E2E1CA', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
@@ -1620,6 +1630,25 @@ const BG_LIST = [
   {id:'white',  name:'أبيض',  c:'#F2F2F7'},
   {id:'dark',   name:'داكن',  c:'#121212'},
 ];
+/* لونُ الهاتف: داكنٌ إن كان وضعُه ليليًّا، وإلّا فالورقيّة */
+const __darkMQ = (window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null);
+function systemBg(){ return (__darkMQ && __darkMQ.matches) ? 'dark' : 'sepia'; }
+/* ما لم يختر المستخدمُ لونًا بنفسه، يتبع لونُ التطبيق وضعَ الهاتف — ويتبعه
+   حيًّا، فمن قلَب هاتفَه إلى الليل وهو يقرأ انقلب معه بلا إعادة فتح. */
+function syncBgWithSystem(){
+  if(settings.bgPicked) return false;
+  const want=systemBg();
+  if(settings.bg===want) return false;
+  settings.bg=want; saveSettings(); applyBg();
+  try{ renderSwatches(); }catch(e){}
+  return true;
+}
+if(__darkMQ){
+  const on = ()=>{ try{ syncBgWithSystem(); }catch(e){} };
+  if(__darkMQ.addEventListener) __darkMQ.addEventListener('change', on);
+  else if(__darkMQ.addListener) __darkMQ.addListener(on);
+}
+if(!settings.bgPicked) settings.bg = systemBg();
 function applyBg(){
   const b = settings.bg || 'sepia';
   document.documentElement.setAttribute('data-bg', b);
@@ -1937,7 +1966,8 @@ function renderSwatches(){
     const el=document.createElement('button');
     el.className='swatch'+(settings.bg===b.id?' on':'');
     el.innerHTML='<span class="dot" style="background:'+b.c+'"></span><span class="lbl">'+b.name+'</span>';
-    el.onclick=()=>{ settings.bg=b.id; saveSettings(); applyBg(); renderSwatches(); vibrate(6); };
+    /* اختيارٌ صريحٌ من صاحب الجهاز: يُثبَّت ولا يُنقض بوضع الهاتف بعدُ */
+    el.onclick=()=>{ settings.bg=b.id; settings.bgPicked=true; saveSettings(); applyBg(); renderSwatches(); vibrate(6); };
     wrap.appendChild(el);
   });
 }

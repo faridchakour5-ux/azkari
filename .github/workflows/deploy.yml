@@ -1,12 +1,9 @@
 name: Deploy to GitHub Pages
 
+# مُعطَّل: النشرُ المعتمد على نتليفاي (salatee.org). وكان هذا يبني على كلّ
+# رفعٍ فيُبقي نسخةً ثانيةً حيّةً على GitHub Pages قد تختلف عن المنشور.
+# بقي التشغيلُ اليدويّ وحدَه، فالعودةُ إليه ممكنةٌ متى شئت.
 on:
-  push:
-    branches:
-      - main
-      - master
-      - claude/loving-cerf-346jn7
-      - claude/dreamy-tesla-jorpcc
   workflow_dispatch:
 
 permissions:
