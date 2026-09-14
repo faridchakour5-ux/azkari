@@ -10,6 +10,23 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="صلاتي">
+<link rel="canonical" href="https://www.salatee.org/">
+<!-- بطاقةُ المشاركة: أكثرُ من يصل إليه الرابطُ يصله من واتساب وتيليغرام،
+     وكان يظهر عاريًا بلا عنوانٍ ولا وصفٍ ولا صورة. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="صلاتي">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:url" content="https://www.salatee.org/">
+<meta property="og:title" content="صلاتي — أذكار ومصحف">
+<meta property="og:description" content="أذكار الصباح والمساء، والمصحف كاملًا برواية حفص وورش، والمسبحة ومواقيت الصلاة. يعمل دون إنترنت، بلا إعلانات ولا تتبّع.">
+<meta property="og:image" content="https://www.salatee.org/store/feature-1024x500.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="500">
+<meta property="og:image:alt" content="صلاتي — أذكار ومصحف">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="صلاتي — أذكار ومصحف">
+<meta name="twitter:description" content="أذكار الصباح والمساء، والمصحف كاملًا برواية حفص وورش. يعمل دون إنترنت.">
+<meta name="twitter:image" content="https://www.salatee.org/store/feature-1024x500.png">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <title>صلاتي</title>
@@ -1992,6 +2009,18 @@ function fireNotification(title, lines, data){
     if(data) n.onclick=()=>{ window.focus(); applyNotifNavigation(data); n.close(); };
   }
 }
+/* اختصاراتُ الأيقونة (الضغط المطوّل) وروابطُ المشاركة تحمل وسمًا في آخر
+   الرابط: ‎#morning‎ و‎#evening‎ و‎#wird‎ و‎#tasbih‎ وسائرُ أقسام الأذكار.
+   وكانت لا تُقرأ، فيُفتح التطبيقُ على تبويبه الافتراضيّ أيًّا كان المطلوب. */
+function routeFromHash(){
+  const h=(location.hash||'').replace(/^#/,'').trim();
+  if(!h) return false;
+  const direct={ wird:{action:'wird'}, mushaf:{action:'wird'}, kahf:{action:'kahf'},
+                 tasbih:{action:'tasbih'}, listen:{action:'listen'}, settings:{action:'settings'} };
+  if(direct[h]){ applyNotifNavigation(direct[h]); return true; }
+  if(CATS.find(c=>c.id===h)){ applyNotifNavigation({action:'azkar', tab:h}); return true; }
+  return false;
+}
 /* التنقّل المباشر عند الضغط على الإشعار — نفس الصفحة المقصودة لا الشاشة الرئيسية فقط */
 function applyNotifNavigation(data){
   if(!data || !data.action) return;
@@ -2020,9 +2049,17 @@ function applyNotifNavigation(data){
       }, 900);
     } else if(data.action==='listen'){
       const t=document.querySelector('.tab[data-s="s-listen"]'); if(t) t.click();
+    } else if(data.action==='tasbih'){
+      const t=document.querySelector('.tab[data-s="s-tasbih"]'); if(t) t.click();
+    } else if(data.action==='settings'){
+      const t=document.querySelector('.tab[data-s="s-settings"]'); if(t) t.click();
     }
   }catch(e){}
 }
+/* يُقرأ الوسمُ عند الإقلاع وعند تغيّره — فمن ضغط اختصارًا والتطبيقُ مفتوحٌ
+   أصلًا لا يُعاد تحميلُ الصفحة، وإنّما يتغيّر الوسمُ وحدَه. */
+window.addEventListener('hashchange', ()=>{ try{ routeFromHash(); }catch(e){} });
+setTimeout(()=>{ try{ routeFromHash(); }catch(e){} }, 300);
 navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', e=>{
   if(e.data && e.data.type==='navigate') applyNotifNavigation(e.data.data);
 });

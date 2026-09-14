@@ -1,5 +1,5 @@
-/* صلاتي — service worker v204 */
-const CACHE = 'azkari-v204';
+/* صلاتي — service worker v205 */
+const CACHE = 'azkari-v205';
 const ASSETS = [
   './',
   './index.html',
@@ -54,8 +54,8 @@ self.addEventListener('activate', e => {
   );
 });
 
-/* network-first pour le HTML et les données JS (toujours la dernière version en ligne),
-   cache-first pour les polices/icônes. Tout reste disponible hors-ligne via le cache. */
+/* الشبكةُ أوّلًا لصفحة التطبيق وملفّات البيانات (فتصل النسخةُ الأحدث دائمًا)،
+   والمخزونُ أوّلًا للخطوط والأيقونات. وكلُّ شيءٍ يبقى عاملًا دون إنترنت. */
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = e.request.url;
@@ -65,8 +65,8 @@ self.addEventListener('fetch', e => {
   const isData = /\/(data|wird_hafs|wird_warsh|adhan\.min)\.js/.test(url);
 
   if (isNav) {
-    // HTML : réseau d'abord, mais on n'attend jamais plus de 2,5 s — sinon on sert le cache
-    // (sur un réseau lent ou instable l'appli s'ouvrait en plusieurs secondes).
+    // صفحةُ التطبيق: الشبكةُ أوّلًا، ولا يُنتظر فوقَ ثانيتين ونصف — وإلّا
+    // قُدِّم المخزون. (على شبكةٍ بطيئةٍ أو متقطّعةٍ كان يُفتح في ثوانٍ.)
     e.respondWith((async () => {
       const cached = caches.match(e.request).then(r => r || caches.match('./index.html')).then(r => r || caches.match('./'));
       try {
@@ -81,15 +81,15 @@ self.addEventListener('fetch', e => {
       } catch (err) {
         const c = await cached;
         if (c) return c;
-        return fetch(e.request);   // pas de cache : on attend le réseau
+        return fetch(e.request);   // لا مخزونَ بعدُ: يُنتظر الشبكة
       }
     })());
     return;
   }
 
   if (isData) {
-    // Données du Coran (~3 Mo) : on sert le cache immédiatement et on rafraîchit en arrière-plan.
-    // La nouvelle version s'applique à l'ouverture suivante — comme pour le reste de l'appli.
+    // بياناتُ المصحف (نحوُ ثلاثة ميغابايت): يُقدَّم المخزونُ فورًا ويُجدَّد في
+    // الخلفيّة، والنسخةُ الجديدة تعمل في الفتحة التالية — كسائر التطبيق.
     e.respondWith(
       caches.match(e.request).then(cached => {
         const net = fetch(e.request).then(res => {
@@ -105,7 +105,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // polices, icônes, manifest, scripts chargés à la demande : cache d'abord
+  // الخطوطُ والأيقوناتُ والبيانُ وما يُحمَّل عند الحاجة: المخزونُ أوّلًا
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
