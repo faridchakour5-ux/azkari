@@ -491,6 +491,11 @@
   .listen-sura.playing .ls-num{background:var(--accent); color:#fff;}
   .listen-sura.playing .ls-name{color:var(--accent);}
   .listen-sura.playing .ls-ic{background:var(--accent); color:#fff;}
+  /* سورةٌ لم تُسجَّل بصوت هذا القارئ: تبقى ظاهرةً ليعلمَ المستمعُ مكانَها، وتَبهَت */
+  .listen-sura.na{opacity:.5;}
+  .listen-sura.na .ls-name{font-weight:700;}
+  .listen-sura.na .ls-sub{color:var(--text-3);}
+  .listen-sura.na .ls-ic{color:var(--text-3); background:transparent;}
 
   /* تذكير الصلاة على النبي ﷺ (شريط داخل التطبيق) */
   /* ===== صفحة الفقه ===== */
@@ -1370,7 +1375,7 @@
     </div>
     <div class="ish-txt" id="ish-txt">يُثبَّت كتطبيق مستقلّ بأيقونته الخاصّة، يُفتح <b>بلا متصفّح</b> ويشتغل <b>دون إنترنت</b>. لا يأخذ إلا مساحة صغيرة.</div>
     <div class="ish-act">
-      <button class="ish-yes" id="ish-yes"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>Installer</button>
+      <button class="ish-yes" id="ish-yes"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>ثبِّت الآن</button>
       <button class="ish-no" id="ish-no">لاحقًا</button>
     </div>
   </div>
@@ -2914,8 +2919,10 @@ function openShareSheet(getHTML, title, sub, fname){
 const DUAT = [
   { id:'kamali',   name:'سعيد الكملي',           q:'سعيد الكملي',
     ids:['Khottab_Said-Kamli-mp3','SaidAlKamaliKhotab','al-mowataa_Mp3','sa3edelkmly'] },
+  /* حُذف ‎Nabil_Al_Awadi_Mawsoaa_mp3_Up-By-MusleM‎: مادّتُه في ملفّاتٍ مضغوطة،
+     ولا يطفو منها إلا ‎tarik.mp3‎ وحدَه مجهولَ النسبة. */
   { id:'awadi',    name:'نبيل العوضي',           q:'نبيل العوضي',
-    ids:['Nabil-3awadi_Mawsoa-mp3','Nabil_Al_Awadi_Mawsoaa_mp3_Up-By-MusleM','Al_Awadhi_uP_bY_mUSLEm'] },
+    ids:['Nabil-3awadi_Mawsoa-mp3','Al_Awadhi_uP_bY_mUSLEm'] },
   /* الشيخ سعود الرشيدي: بحثُ الأرشيف موقوفٌ عنه عن قصد (q:null).
      جُرّب فجاء بتسجيلاتٍ ليست له، ولم يُغنِ تشديدُ الشرط، لأنّ الأرشيف لا
      يكاد يحفظ له مادّةً موثّقةَ النسبة، فما يعود إنّما هو لمن يُشبه اسمُه
@@ -2929,8 +2936,11 @@ const DUAT = [
     files:[ { name:'مقطع 1',      drive:'1sXzdsR23d3my3pct0f4Lpie9-Ttbko1l' },
             { name:'مقطع 2',      drive:'1EZVETLPrJPsqrP9EFfc9_7DhlD8vdL5W' },
             { name:'صفوة الصفوة', drive:'1RZpJyS14hxbnJdLolPTNO6Uwph8plzkf' } ] },
+  /* حُذف ‎Sha3rawy_Audio_Parts‎: مادّتُه عشرةُ ملفّاتٍ مضغوطة، وليس فيها من
+     الصوت إلا ملفّانِ شاردانِ ليسا له — ‎003_Faisal_Shiddi_rwae3‎ و
+     ‎15_AMahmoud_Khaleel‎ — فكانا يُنسبان إليه وهما لغيره. */
   { id:'shaarawi', name:'محمد متولّي الشعراوي',    q:'الشعراوي خواطر',
-    ids:['Khwater.El-Sharawy.Fi.Tafsir.EL-Quran-Karim-Up-By-mUSLEm','Sha3rawy_Audio_Parts'] },
+    ids:['Khwater.El-Sharawy.Fi.Tafsir.EL-Quran-Karim-Up-By-mUSLEm'] },
   { id:'kishk',    name:'عبد الحميد كشك',         q:'عبد الحميد كشك',
     ids:['Sermon-Sheikh-Kishk-mp3','Lectures-voice-abd-hamid-Kishk-mp3_koonoz_blogspot_com','Keshik_uP_bY_mUSLEm','Abdel-Hamid_Kichk_Mawsoaa_Mp3_uP_bY_mUSLEm'] },
   { id:'hassan',   name:'محمد حسّان',             q:'محمد حسان',
@@ -2939,8 +2949,10 @@ const DUAT = [
     ids:['mp3----MAWSO3AH______497-BY-MOHAMMAD---YA3QOOB','mohamed-hussein-yaqob-825-mp3','Hesin-Yaqob_Mawsoa-mp3'] },
   { id:'huwayni',  name:'أبو إسحاق الحويني',       q:'الحويني',
     ids:['Al-Alheweny','Al_Houwaini_Mawsoaa_577-lectures_uP_bY_mUSLEm','by_hassan_alhowayni'] },
+  /* حُذف ‎Dr_Omar-Abdulkafy_uP_bY_mUSLEm‎: تسعةَ عشرَ ملفًّا مضغوطًا، ولا يطفو
+     منها إلا ‎000.mp3‎ و‎115.mp3‎ — مئتا كيلوبايت وأربعُ مئة، وليستا درسًا. */
   { id:'abdelkafi',name:'عمر عبد الكافي',         q:'عمر عبد الكافي',
-    ids:['mawsoa-mp3_Omar-abdlkafee','Mawsoa_Omar-abdlkafee_mp3','Dr_Omar-Abdulkafy_uP_bY_mUSLEm','40-khotab-selelt-alwa3d-al7aq--mp3-BY-3omar-abd-alkafi'] },
+    ids:['mawsoa-mp3_Omar-abdlkafee','Mawsoa_Omar-abdlkafee_mp3','40-khotab-selelt-alwa3d-al7aq--mp3-BY-3omar-abd-alkafi'] },
   { id:'nabulsi',  name:'محمد راتب النابلسي',      q:'راتب النابلسي',
     ids:['abdulrahman4321_gmail_1','abdulrahman4321_gmail_11','20231228_20231228_1740'] },
   { id:'arifi',    name:'محمد العريفي',           q:'محمد العريفي',
@@ -2949,12 +2961,17 @@ const DUAT = [
     ids:['Aaed-alqarni_Mawsoa-mp3','Ayed_Al-Qarni_458_Lectures_Mp3_up-by-muslem','3aedAlqrni1'] },
   { id:'rashed',   name:'خالد الراشد',            q:'خالد الراشد',
     ids:['kalrashed','khaledRashedmp3','khalid-alrashid-m','khaled-alrashed_94_Lectures_Mp3_up-by-muslem'] },
+  /* حُذف ‎Islamic_Hustory‎: لا مؤلِّفَ له ولا ذِكرَ لاسم الشيخ في عنوانٍ ولا
+     وصفٍ ولا اسمِ ملفّ، فنسبتُه إليه ظنٌّ لا يثبت. وفيه فوق ذلك ملفٌّ واحدٌ
+     حجمُه نحوُ تسعِ مئةِ ميغابايت يُعطِّل الهاتف. */
   { id:'suwaidan', name:'طارق السويدان',          q:'طارق السويدان',
-    ids:['keddo_is4','Islamic_Hustory','scrom.miui.gallery'] },
+    ids:['keddo_is4','scrom.miui.gallery'] },
   { id:'munajjid', name:'محمد صالح المنجّد',       q:'محمد صالح المنجد',
     ids:['Mohammed_saleh_munajjid_mp3','islami-689','297-mohammad-sale7-almonged--dros-khotab-droos-dars-khotba-islamic-almawso3a'] },
+  /* حُذف ‎Islamic_Tape-846_uP_bY_mUSLEm‎: واحدٌ وثمانون ملفًّا مضغوطًا، ولا
+     يطفو منها إلا ‎999.mp3‎ — نصفُ ميغابايت لا درسَ فيه. */
   { id:'uthaymin', name:'ابن عثيمين',             q:'ابن عثيمين',
-    ids:['Uthaymin-doros','Islamic_Tape-846_uP_bY_mUSLEm','Riyad_As-Salihin_al-othaymeen','thalathah_alosool_othaimeen_C_03'] },
+    ids:['Uthaymin-doros','Riyad_As-Salihin_al-othaymeen','thalathah_alosool_othaimeen_C_03'] },
   { id:'baz',      name:'ابن باز',                q:'ابن باز',
     ids:['Ibn_Baz_uP_bY_mUSLEm','Fatawa_ibn_Baz_bY_mUSLEm','056-up-by-muslem','0006_20231225'] },
   { id:'albani',   name:'الألباني',               q:'الألباني الهدى والنور',
@@ -3169,15 +3186,17 @@ function preacherOk(d, it){
   if(d.must && !d.must.every(w=> hay.includes(normAr(w)))) return false;
   return true;
 }
-/* وقد تكون المادّةُ له ثمّ يُدسّ فيها ملفٌّ باسم داعيةٍ آخر، فيُستبعد وحدَه */
+/* وقد تكون المادّةُ له ثمّ يُدسّ فيها ملفٌّ باسم داعيةٍ آخر، فيُستبعد وحدَه.
+   والمقابلةُ بالكلمات لا بالحروف: كانت بالتضمّن، فملفُّ ابنِ باز «وبالوالدين
+   إحسانًا» يتضمّن حروفَ «حسّان» فيُنزع من صاحبه ويُحسَب لغيره. */
 function fileNotSomeoneElse(d, fname){
-  const hay=normAr(fname);
+  const words=new Set(normAr(fname).split(' ').map(w=> w.replace(/^ال/,'')).filter(Boolean));
   const mine=nameTokens(d.name);
   for(const o of DUAT){
     if(o.id===d.id) continue;
     const t=nameTokens(o.name); if(!t.length) continue;
     const other=t[t.length-1];
-    if(other.length>=4 && hay.includes(other) && !mine.includes(other)) return false;
+    if(other.length>=4 && words.has(other) && !mine.includes(other)) return false;
   }
   return true;
 }
@@ -3193,7 +3212,9 @@ async function fetchDuat(d, more){
   if(!more) for(const id of (d.ids||[])){
     if(out.length>=300) break;
     const it=await archiveItem(id);
-    if(it) out=out.concat(it.files.filter(f=>!f.q));
+    /* كان المنتقى يدًا يُؤخذ كلُّه بلا امتحان، والمادّةُ الواحدةُ قد يُدسّ فيها
+       ملفٌّ باسم داعيةٍ آخر فيُنسب إلى غير قائله. يُستبعد ذلك الملفُّ وحدَه. */
+    if(it) out=out.concat(it.files.filter(f=> !f.q && fileNotSomeoneElse(d, f.name)));
   }
   const needSearch = !d.noSearch && !!d.q && (more || out.length<5);
   if(needSearch && (!__duatPool[d.id] || (more && !__duatPool[d.id].length))){
@@ -4217,6 +4238,39 @@ function pickMoshaf(moshafs, prefer){
   cands.sort((a,b)=> (parseInt(b.surah_total)||0)-(parseInt(a.surah_total)||0));
   return cands[0];
 }
+/* ليست المصاحفُ كلُّها كاملةً عند المصدر: من القرّاء من لم يُسجَّل له إلا
+   بعضُ السور. وكانت السورةُ الناقصة تُطلب فيقع الطلبُ على 404، فلا يُقال
+   للمستمع إنّها غير مسجّلة، بل يُقال «ضعفٌ في الاتّصال» ويُعاد الطلبُ بلا
+   انتهاء. والواجهةُ تُعطي قائمةَ سورِ كلِّ مصحفٍ (surah_list)، فنبني عليها. */
+function surahSet(s){
+  const a=String(s||'').split(',').map(x=>parseInt(x,10)).filter(x=>x>=1&&x<=114);
+  return a.length ? new Set(a) : null;
+}
+function suraNumOf(si){ return (WIRD && WIRD.sur && WIRD.sur[si]) ? WIRD.sur[si].s : (si+1); }
+/* هل عند هذا القارئ هذه السورة؟ وبلا قائمةٍ نُحسِن الظنّ (رابطٌ احتياطيّ) */
+function reciterHasSura(info, si){
+  if(!info || !info.list) return true;
+  return info.list.has(suraNumOf(si));
+}
+/* أقربُ سورةٍ يملكها — أمامًا ثمّ خلفًا. تُستعمل حين يُبدَّل القارئ لا حين
+   تُختار سورةٌ بعينها: من اختار سورةً أراد تلك السورةَ لا بديلًا عنها. */
+function nearestOwnedSura(info, si){
+  const N=(WIRD && WIRD.sur) ? WIRD.sur.length : 114;
+  if(reciterHasSura(info, si)) return si;
+  for(let d=1; d<N; d++){
+    if(si+d<N && reciterHasSura(info, si+d)) return si+d;
+    if(si-d>=0 && reciterHasSura(info, si-d)) return si-d;
+  }
+  return null;
+}
+function suraNameOf(si){ return (WIRD && WIRD.sur && WIRD.sur[si]) ? WIRD.sur[si].n : ''; }
+/* بيانٌ صريحٌ حين لا تكون السورةُ مسجّلةً — بدل الصمت أو دعوى ضعف الاتّصال */
+function tellSuraMissing(info, si){
+  const nm=suraNameOf(si), who=(info&&info.name)||'هذا القارئ';
+  const st=$('#reciter-status'); if(st) st.textContent='سورة '+nm+' غير مسجّلة بصوت '+who;
+  try{ showToast('سورة '+nm+' لم تُسجَّل بصوت '+who+' — اختر قارئًا آخر', 4200); }catch(e){}
+  setPlayBtn(false);
+}
 let __reciterCatalog=null, __reciterFetching=null;
 async function fetchReciterCatalog(){
   if(__reciterCatalog) return __reciterCatalog;
@@ -4232,8 +4286,8 @@ async function fetchReciterCatalog(){
         if(r.external) return;
         const found=findReciter(list, r);
         const m=found && pickMoshaf(found.moshaf, r.prefer);
-        if(m && m.server){ map[r.id]={ server:m.server, name:r.name, moshaf:m.name }; }
-        else if(r.fallback){ map[r.id]={ server:r.fallback, name:r.name, moshaf:'' }; }
+        if(m && m.server){ map[r.id]={ server:m.server, name:r.name, moshaf:m.name, list:surahSet(m.surah_list) }; }
+        else if(r.fallback){ map[r.id]={ server:r.fallback, name:r.name, moshaf:'', list:null }; }
       });
       __reciterCatalog=map;
       return map;
@@ -4363,6 +4417,17 @@ async function onReciterPick(r){
     if(!info){ status.textContent='غير متوفّر حاليًّا'; return; }
     status.textContent='';
     if(__audioSura==null) __audioSura=currentSuraFromScroll();
+    try{ renderListenList(); }catch(e){}            // علاماتُ ما ليس مسجّلًا تتبع القارئ
+    /* بُدِّل القارئُ لا السورة: فإن لم تكن عنده هذه السورةُ بدأنا بأقربِ ما
+       يملكه وأخبرناه، ولا يُترك صامتًا. */
+    if(!reciterHasSura(info, __audioSura)){
+      const alt=nearestOwnedSura(info, __audioSura);
+      if(alt==null){ tellSuraMissing(info, __audioSura); return; }
+      const was=suraNameOf(__audioSura);
+      playReciterSurah(info, alt);
+      try{ showToast('سورة '+was+' لم تُسجَّل بصوت '+r.name+' — بدأنا من سورة '+suraNameOf(alt), 4600); }catch(e){}
+      return;
+    }
     playReciterSurah(info, __audioSura);
   }catch(e){
     status.textContent='تعذّر الاتصال — تحقّق من الإنترنت';
@@ -4373,6 +4438,8 @@ function currentReciterInfo(){
 }
 function playReciterSurah(info, si){
   if(!WIRD || !WIRD.sur[si]) return;
+  /* لا يُطلب ما ليس عند القارئ: كان الطلبُ يقع على 404 فيُستأنف بلا انتهاء */
+  if(!reciterHasSura(info, si)){ __audioSura=si; tellSuraMissing(info, si); markListenActive(); return; }
   // تلاوةٌ جديدة: اطوِ ما تعلّمناه من السابقة وابنِ الجدولَ من جديد
   try{ qsFoldCal(); }catch(e){}
   QSY=null; try{ qsClearYCache(); qsSetLive(null); }catch(e){}
@@ -4386,8 +4453,22 @@ function playReciterSurah(info, si){
   updateMediaSession(info.name, WIRD.sur[si].n);
   const actions=$('#reciter-actions'); if(actions) actions.style.display='flex';
   audio.play().then(()=>{ setPlayBtn(true); }).catch(()=>{
-    $('#reciter-status').textContent='اضغط تشغيل يدويًّا';
+    /* رفضُ التشغيل له سببان لا يستويان: منعُ المتصفّح حتى يلمسَ المستخدمُ
+       الشاشة — فيُطلب منه الضغط، وهو ينفع؛ أو عطبٌ في المصدر نفسِه — فلا
+       يُغني عنه ضغطٌ، وكان يُقال له «اضغط» فيضغط ولا شيء. ونُمهل لحظةً
+       ليُسجَّل الخطأُ على العنصر قبل الحكم. */
+    setTimeout(()=>{
+      if(audio.error) reciterSrcDead();
+      else $('#reciter-status').textContent='اضغط تشغيل يدويًّا';
+    }, 80);
   });
+}
+/* عطبٌ دائمٌ في المصدر (لا ضعفُ اتّصال): يُوقَف الاستئنافُ ويُبيَّن للمستمع */
+function reciterSrcDead(){
+  const st=$('#reciter-status');
+  if(st) st.textContent='تعذّر تشغيل هذه السورة — جرّب قارئًا آخر';
+  setPlayBtn(false);
+  try{ showToast('تعذّر تشغيل هذه السورة من المصدر — جرّب قارئًا آخر', 4000); }catch(e){}
 }
 /* ---- تكرار السورة نفسها عدد مرّات مختار ---- */
 const REPEAT_OPTIONS=[
@@ -4851,17 +4932,27 @@ async function openListen(){
   }
   renderReciterChips();
   renderListenList();
+  /* فهرسُ القرّاء يُجلب في الخلفيّة: به تُعرف السورُ التي لم تُسجَّل، فتظهر
+     علاماتُها من أوّل نظرةٍ لا بعد أن يضغطها المستمعُ فلا يجد شيئًا. */
+  if(!__reciterCatalog){
+    fetchReciterCatalog().then(()=>{ try{ renderListenList(); }catch(e){} }).catch(()=>{});
+  }
 }
 function renderListenList(){
   const wrap=$('#listen-list'); if(!wrap) return;
   if(!WIRD || !WIRD.sur){ wrap.innerHTML='<div class="khatma-done">تعذّر تحميل قائمة السور — تحقّق من الاتصال ثمّ أعِد المحاولة</div>'; wrap.onclick=()=>{ wrap.onclick=null; openListen(); }; return; }
   /* نصٌّ واحدٌ ومستمعٌ واحدٌ بالتفويض — كان بناءُ ١١٤ عنصرًا ومستمعًا لكلٍّ */
+  /* مصحفُ القارئ قد يكون ناقصًا، فتُبيَّن السورُ التي لم تُسجَّل بصوته
+     قبل أن يضغطها المستمعُ فلا يجد شيئًا. */
+  const inf=currentReciterInfo();
   wrap.innerHTML = WIRD.sur.map((s,idx)=>{
     const kind = (typeof SURA_KIND==='string' && SURA_KIND.charAt(idx)==='d') ? 'مدنيّة' : 'مكّيّة';
-    return '<button type="button" class="listen-sura" data-si="'+idx+'">'+
+    const na = inf && !reciterHasSura(inf, idx);
+    const sub = na ? ('لم تُسجَّل بصوت '+escapeHtml(inf.name)) : (kind+' • '+ayaCountLabel(suraAyaCount(idx)));
+    return '<button type="button" class="listen-sura'+(na?' na':'')+'" data-si="'+idx+'">'+
       '<span class="ls-num">'+AR(idx+1)+'</span>'+
       '<span class="ls-mid"><span class="ls-name">'+escapeHtml(s.n)+'</span>'+
-      '<span class="ls-sub">'+kind+' • '+ayaCountLabel(suraAyaCount(idx))+'</span></span>'+
+      '<span class="ls-sub">'+sub+'</span></span>'+
       '<span class="ls-ic">'+ICON_PLAY+'</span>'+
     '</button>';
   }).join('');
@@ -4912,7 +5003,7 @@ $('#reciter-sura-btn').addEventListener('click', async ()=>{
   openSuraOverlay(cur, si=>{
     closeSuraOverlay();
     const inf=currentReciterInfo();
-    if(inf){ playReciterSurah(inf, si); }
+    if(inf){ playReciterSurah(inf, si); }   // وهي تُبيّن بنفسها إن لم تكن مسجّلة
     else { __audioSura=si; $('#reciter-status').textContent='تعذّر الاتصال — تحقّق من الإنترنت'; }
   }, 'اختر سورة للاستماع');
 });
@@ -4938,8 +5029,10 @@ $('#reciter-audio').addEventListener('ended', ()=>{
   }
   __repeatPlayed=1;
   const info=currentReciterInfo();
-  if(info && __audioSura!=null && __audioSura+1 < WIRD.sur.length){
-    playReciterSurah(info, __audioSura+1);
+  if(info && __audioSura!=null){
+    let nx=__audioSura+1;
+    while(nx < WIRD.sur.length && !reciterHasSura(info, nx)) nx++;   // تخطّي ما ليس مسجّلًا
+    if(nx < WIRD.sur.length) playReciterSurah(info, nx);
   }
 });
 /* استئناف تلقائي عند تعثّر الشبكة أثناء البثّ — يُكمل من نفس الموضع ولا يُعيد من البداية */
@@ -4949,6 +5042,10 @@ function recoverReciter(){
   if(!a || !a.src || a.ended || __recTimer) return;
   // إن أوقفه المستخدم أو أوقفه النظام (مكالمة واردة) دون خطأ شبكة — لا نستأنف
   if(a.paused && !a.error) return;
+  /* MEDIA_ERR_SRC_NOT_SUPPORTED: المصدرُ نفسُه لا يُقرأ (سورةٌ غيرُ مسجّلة،
+     أو صيغةٌ لا تُدعم). هذا لا تُصلحه إعادةُ المحاولة، وكان يدور بلا انتهاء
+     على «ضعف في الاتصال» وهو غيرُ صحيح. */
+  if(a.error && a.error.code===4){ reciterSrcDead(); return; }
   const pos=a.currentTime||0, src=a.currentSrc||a.src;
   __recTry=Math.min(__recTry+1, 6);
   const st=$('#reciter-status'); if(st) st.textContent='ضعف في الاتصال — إعادة المحاولة…';
