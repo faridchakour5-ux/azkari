@@ -4,10 +4,9 @@
 <meta charset="utf-8">
 <!-- سياسة أمان المحتوى: كل الموارد من نطاق التطبيق فقط، والاتصال الخارجي محصور في mp3quran -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https:; connect-src 'self' https://*.mp3quran.net https://archive.org https://*.archive.org; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<!-- التكبيرُ بالأصابع مأذونٌ فيه: مُنِع من قبلُ لئلّا يُكبَّر النصُّ سهوًا
-     أثناء التمرير، وفي ذلك حرجٌ على من ضعُف بصرُه وهو يقرأ المصحف. والنقرُ
-     المزدوج لا يُبطئ الأزرار، لأنّ فيها ‎touch-action:manipulation‎. -->
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<!-- لا تكبيرَ بالأصبعين: يُزيح الصفحةَ عن موضعها ويُفسد القراءة. وعِوَضُه
+     شريطُ «حجم الكتابة» في كلّ صفحة — تكبيرٌ وتصغيرٌ بنسبةٍ ظاهرة. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#EFE6D4">
 <meta name="description" content="صلاتي — أذكار الصباح والمساء، المصحف كامل برواية حفص وورش، المسبحة ومواقيت الصلاة. يعمل دون إنترنت.">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -820,6 +819,18 @@
     font-weight:800; font-size:18px; line-height:1; box-shadow:var(--shadow-1); transition:transform .13s ease;}
   .qzoom button:active{transform:scale(.94);}
   .qzoom .qval{min-width:54px; text-align:center; color:var(--text-2); font-size:13px; font-weight:700;}
+  /* شريطُ حجم الكتابة: في كلّ صفحةٍ بلا استثناء، على طراز شريط المصحف.
+     وحجمُه ثابتٌ لا يكبر بالنسبة، وإلّا كبر الشريطُ مع الكتابة حتى يطغى. */
+  .tzoom{display:flex; align-items:center; justify-content:center; gap:8px; margin:10px 16px 0;}
+  .tzoom .tz-lbl{color:var(--text-3); font-size:12.5px; font-weight:700; margin-inline-end:2px;}
+  .tzoom button{width:38px; height:38px; border:1px solid var(--line); border-radius:11px; background:var(--card);
+    color:var(--accent); font-weight:800; font-size:16px; line-height:1; box-shadow:var(--shadow-1);
+    transition:transform .13s ease;}
+  .tzoom button:active{transform:scale(.94);}
+  .tzoom .tz-val{min-width:50px; text-align:center; color:var(--text-2); font-size:13px; font-weight:700;}
+  /* في صفحة الإعدادات يجلس الشريطُ داخل صفٍّ، فلا هامشَ له ولا عنوان */
+  .row .tzoom{margin:0; gap:7px;}
+  .row .tzoom .tz-lbl{display:none;}
   .wird-num{display:inline-block; color:var(--accent); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;
     padding:1px 4px; border-radius:8px; cursor:pointer; transition:background-color .2s, color .2s, transform .15s;}
   .wird-num:active{transform:scale(.88);}
@@ -1155,6 +1166,7 @@
     <h1 id="az-title">أذكار الصباح</h1>
     <div class="az-source" id="az-source"></div>
   </div>
+  <div class="tzoom"><span class="tz-lbl">حجم الكتابة</span><button class="tz-minus" aria-label="تصغير الكتابة">A−</button><span class="tz-val">100%</span><button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
   <button class="locbtn b-blue" id="loc-btn"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>تفعيل مواقيت الصلاة حسب موقعك</button>
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
   <div class="qp-open" id="qp-open" role="button" tabindex="0">
@@ -1183,6 +1195,7 @@
     <h1 id="wird-h1">وِرد اليوم</h1>
     <div class="sub" id="wird-sub">وردك اليومي من القرآن الكريم</div>
   </div>
+  <div class="tzoom"><span class="tz-lbl">حجم الكتابة</span><button class="tz-minus" aria-label="تصغير الكتابة">A−</button><span class="tz-val">100%</span><button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
   <div class="seg" id="wird-mode-seg">
     <button data-m="wird" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>وِردي</button>
     <button data-m="mushaf"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>المصحف كامل</button>
@@ -1215,6 +1228,7 @@
     <h1>الاستماع</h1>
     <div class="sub" id="listen-sub">اختر القارئ ثمّ السورة للاستماع إليها</div>
   </div>
+  <div class="tzoom"><span class="tz-lbl">حجم الكتابة</span><button class="tz-minus" aria-label="تصغير الكتابة">A−</button><span class="tz-val">100%</span><button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
   <div class="seg" id="listen-mode-seg">
     <button data-l="quran" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>القرآن</button>
     <button data-l="duat"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>الدعاة</button>
@@ -1408,6 +1422,7 @@
 <!-- ===== المسبحة ===== -->
 <section id="s-tasbih" class="screen">
   <div class="head"><h1 id="tasbih-title">الفقه العملي</h1><div class="sub" id="tasbih-sub">كيف أتوضّأ · أصلّي · أغتسل · أصوم</div></div>
+  <div class="tzoom"><span class="tz-lbl">حجم الكتابة</span><button class="tz-minus" aria-label="تصغير الكتابة">A−</button><span class="tz-val">100%</span><button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
   <div class="seg" id="tasbih-mode-seg">
     <button data-t="fiqh" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/><path d="M8 16h4"/></svg>الفقه</button>
     <button data-t="tasbih"><svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="3.2" r="1.6"/><circle cx="12" cy="20.8" r="1.6"/><circle cx="3.2" cy="12" r="1.6"/><circle cx="20.8" cy="12" r="1.6"/></svg>المسبحة</button>
@@ -1444,6 +1459,8 @@
 <!-- ===== الإعدادات ===== -->
 <section id="s-settings" class="screen">
   <div class="head"><h1>الإعدادات</h1></div>
+  <!-- لا شريطَ في أعلى هذه الصفحة: شريطُها في موضعه تحت «المظهر»، وشريطان
+       في شاشةٍ واحدةٍ تكرارٌ لا فائدةَ فيه. -->
 
   <div class="gtitle">رواية القرآن</div>
   <div class="group">
@@ -1479,12 +1496,10 @@
 
   <div class="gtitle">المظهر</div>
   <div class="group">
-    <div class="row"><span class="k">حجم الخط</span>
-      <div class="miniseg" id="font-seg">
-        <button data-f="0.9">صغير</button>
-        <button data-f="1" class="on">متوسط</button>
-        <button data-f="1.15">كبير</button>
-      </div>
+    <div class="row"><span class="k">حجم الكتابة</span>
+      <div class="tzoom"><button class="tz-minus" aria-label="تصغير الكتابة">A−</button>
+        <span class="tz-val">100%</span>
+        <button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
     </div>
   </div>
 
@@ -1654,7 +1669,29 @@ function applyBg(){
   document.documentElement.setAttribute('data-bg', b);
   const mc = $('meta[name=theme-color]'); if(mc) mc.setAttribute('content', BG_COLORS[b]||'#EFE6D4');
 }
-function applyFont(){ document.documentElement.style.setProperty('--scale', settings.font); }
+const T_MIN=0.8, T_MAX=1.6, T_STEP=0.05;
+function applyFont(){
+  let t=parseFloat(settings.font)||1; t=Math.min(T_MAX,Math.max(T_MIN,t));
+  document.documentElement.style.setProperty('--scale', t);
+  const pct=Math.round(t*100)+'%';
+  /* الأشرطةُ كلُّها تعرض النسبةَ نفسَها، فأيُّها ضُغط تبِعه سائرُها */
+  document.querySelectorAll('.tzoom .tz-val').forEach(v=> v.textContent=pct);
+  document.querySelectorAll('.tzoom .tz-minus').forEach(b=> b.disabled = t<=T_MIN+1e-9);
+  document.querySelectorAll('.tzoom .tz-plus').forEach(b=> b.disabled = t>=T_MAX-1e-9);
+  try{ qsClearYCache(); }catch(e){}   // تغيّرَ الحجمُ فتغيّرت مواضعُ الآيات
+}
+function bumpTextScale(delta){
+  let t=parseFloat(settings.font)||1;
+  t=Math.round((Math.min(T_MAX,Math.max(T_MIN,t+delta)))*100)/100;
+  if(t===(parseFloat(settings.font)||1)) return;      // بلغ الطرفَ فلا شيء
+  settings.font=t; saveSettings(); applyFont(); vibrate(6);
+}
+/* مستمعٌ واحدٌ للأشرطة كلِّها بالتفويض — ولو كثرت الصفحات */
+document.addEventListener('click', e=>{
+  const b = e.target.closest && e.target.closest('.tzoom button'); if(!b) return;
+  if(b.classList.contains('tz-plus'))  bumpTextScale( T_STEP);
+  if(b.classList.contains('tz-minus')) bumpTextScale(-T_STEP);
+});
 let __lastMaghribi=null;
 function applyHafsFont(){
   const mag = (settings.hafsFont||'maghribi')==='maghribi';
@@ -1971,7 +2008,8 @@ function renderSwatches(){
     wrap.appendChild(el);
   });
 }
-bindSeg('#font-seg','font', applyFont);
+/* كان ‎#font-seg‎ ثلاثَ درجاتٍ (صغير/متوسط/كبير) في الإعدادات وحدَها، وحلّ
+   محلَّه شريطُ ‎.tzoom‎ في كلّ صفحة، ويعمل بالتفويض فلا ربطَ له هنا. */
 
 const fontSelect = $('#font-select');
 fontSelect.value = settings.duaFont || 'plex';
