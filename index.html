@@ -50,6 +50,10 @@
 
   :root{
     --scale:1;
+    /* ‎--scale‎ للواجهة ولا يُمَسّ. و‎--tscale‎ لما يُقرأ وحدَه: الذكرُ والحديثُ
+       والفضلُ والشرحُ والفقهُ والوصايا — لا العناوينُ ولا الأزرارُ ولا التبويب،
+       فتكبيرُ الترويسة يأكل الشاشةَ ولا يُعين على القراءة. */
+    --tscale:1;
     /* default palette: sepia (ورقية) */
     --bg:#EFE6D4; --group:#EFE6D4; --card:#F6EDDB; --card-2:#F6EDDB;
     --text:#3A352E; --text-2:rgba(58,53,46,.58); --text-3:rgba(58,53,46,.3);
@@ -223,11 +227,11 @@
     border-inline-start:4px solid var(--accent); box-shadow:var(--shadow-1);
     transition:transform .12s ease, opacity .3s;}
   .card:active{transform:scale(.985);}
-  .card .txt{font-size:calc(21.5px * var(--scale)); line-height:2.05; font-weight:500; white-space:pre-wrap; word-spacing:1px;}
-  .card.quran .txt{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale)); line-height:2.25;}
-  body.riw-warsh .card.quran .txt{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale)); line-height:2.7;}
+  .card .txt{font-size:calc(21.5px * var(--tscale)); line-height:2.05; font-weight:500; white-space:pre-wrap; word-spacing:1px;}
+  .card.quran .txt{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--tscale)); line-height:2.25;}
+  body.riw-warsh .card.quran .txt{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--tscale)); line-height:2.7;}
   /* خط حفص بالمغربي: نفس شكل الحروف، والرموز الحفصية تُستكمل من الخط الاحتياطي */
-  body.qmaghribi .card.quran .txt{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale)); line-height:2.7;}
+  body.qmaghribi .card.quran .txt{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--tscale)); line-height:2.7;}
 
   /* selectable writing style for non-Qur'anic dhikr text */
   body.dfont-plex   .card:not(.quran) .txt, body.dfont-plex   #font-preview{font-family:'PlexAr',sans-serif;}
@@ -244,7 +248,7 @@
   .selectwrap select{appearance:none; -webkit-appearance:none; border:0; background:transparent; color:var(--accent);
     font:inherit; font-size:16px; font-weight:600; padding:4px 22px 4px 6px; text-align:left; direction:rtl;}
   .selectwrap::after{content:'⌄'; position:absolute; left:4px; top:42%; transform:translateY(-50%); color:var(--text-3); font-size:18px; pointer-events:none;}
-  #font-preview{padding:16px; font-size:calc(20px * var(--scale)); line-height:2; text-align:center; color:var(--text);}
+  #font-preview{padding:16px; font-size:calc(20px * var(--tscale)); line-height:2; text-align:center; color:var(--text);}
   .card .meta{display:flex; align-items:center; justify-content:space-between; margin-top:18px;
     padding-top:14px; border-top:1px solid var(--sep);}
   .badge{display:inline-flex; align-items:center; gap:6px; color:var(--accent); font-weight:700; font-size:15px;}
@@ -262,10 +266,10 @@
   .card.done .tick{opacity:1;}
   /* الفضل والمصدر: ظاهران دائمًا تحت الذكر، بلا زرٍّ يُضغط */
   .fadl{margin-top:14px; padding-top:12px; border-top:1px solid var(--sep);
-    font-size:15px; line-height:2; color:var(--text-2);}
+    font-size:calc(15px * var(--tscale)); line-height:2; color:var(--text-2);}
   .fadl p{margin:0 0 9px;}
   .fadl p:last-child{margin-bottom:0;}
-  .fadl .lbl{color:var(--accent); font-weight:800; font-size:13.5px;}
+  .fadl .lbl{color:var(--accent); font-weight:800; font-size:calc(13.5px * var(--tscale));}
 
   /* Tasbih */
   .tasbih-wrap{padding:14px 20px 0; text-align:center;}
@@ -540,15 +544,15 @@
   .fq-card{margin:16px 16px 0; background:var(--card); border-radius:20px; padding:20px 17px; box-shadow:var(--shadow);}
   .fq-h{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
   .fq-h .gh-ic{color:var(--accent); width:1.5em; height:1.5em;}
-  .fq-h b{font-size:21px; font-weight:800;}
-  .fq-sub{font-size:14.5px; color:var(--text-2); margin-bottom:8px; line-height:1.7;}
-  .fq-bt{font-size:16.5px; font-weight:800; color:var(--accent); margin:20px 0 10px;
+  .fq-h b{font-size:calc(21px * var(--tscale)); font-weight:800;}
+  .fq-sub{font-size:calc(14.5px * var(--tscale)); color:var(--text-2); margin-bottom:8px; line-height:1.7;}
+  .fq-bt{font-size:calc(16.5px * var(--tscale)); font-weight:800; color:var(--accent); margin:20px 0 10px;
     display:flex; align-items:center; gap:7px;}
   .fq-bt::before{content:''; width:4px; height:17px; border-radius:2px; background:var(--accent); flex:0 0 auto;}
 
   /* قائمة */
   .fq-ul{margin:0; padding:12px 16px; list-style:none;}
-  .fq-ul li{position:relative; padding:7px 20px 7px 0; font-size:16.5px; line-height:1.95;}
+  .fq-ul li{position:relative; padding:7px 20px 7px 0; font-size:calc(16.5px * var(--tscale)); line-height:1.95;}
   .fq-ul li::before{content:''; position:absolute; right:5px; top:18px; width:6px; height:6px;
     border-radius:50%; background:var(--accent);}
   .fq-ul.warn{border-inline-start-color:var(--c-repeat);}
@@ -562,8 +566,8 @@
     color:var(--text-2); font-size:12.5px; font-weight:800; display:inline-flex;
     align-items:center; justify-content:center; margin-top:2px;}
   .fq-step .b{flex:1 1 auto;}
-  .fq-step .b i{display:block; font-style:normal; font-size:14.5px; color:var(--text-2); line-height:1.85; margin-top:3px;}
-  .fq-step .s{font-size:16.5px; font-weight:700; line-height:1.7;}
+  .fq-step .b i{display:block; font-style:normal; font-size:calc(14.5px * var(--tscale)); color:var(--text-2); line-height:1.85; margin-top:3px;}
+  .fq-step .s{font-size:calc(16.5px * var(--tscale)); font-weight:700; line-height:1.7;}
   /* الوسمُ داخل «‎.fq-step .s‎»، وتلك القاعدةُ أقوى، فكان الوسمُ يُرسَم بحجم ١٥ بدل ١١.
      يُذكر الانتقاءان معًا ليتساويا في القوّة. */
   .fq-tag, .fq-step .fq-tag{font-size:11px; font-weight:800; padding:3px 8px; border-radius:999px;
@@ -577,8 +581,8 @@
     border-radius:18px; padding:13px 15px; border-inline-start:4px solid var(--accent);}
   .fq-fn .k{flex:0 0 26px; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff;
     font-size:12.5px; font-weight:800; display:inline-flex; align-items:center; justify-content:center;}
-  .fq-fn .v b{display:block; font-size:16.5px; font-weight:800; line-height:1.65;}
-  .fq-fn .v span{display:block; font-size:14px; color:var(--text-2); line-height:1.85; margin-top:3px;}
+  .fq-fn .v b{display:block; font-size:calc(16.5px * var(--tscale)); font-weight:800; line-height:1.65;}
+  .fq-fn .v span{display:block; font-size:calc(14px * var(--tscale)); color:var(--text-2); line-height:1.85; margin-top:3px;}
   .fq-arrow{display:flex; justify-content:center; padding:3px 0;}
   .fq-arrow svg{width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:2.2;
     stroke-linecap:round; stroke-linejoin:round; opacity:.55;}
@@ -586,9 +590,9 @@
   /* شجرة القرار */
   .fq-tree{display:flex; flex-direction:column; gap:10px;}
   .fq-tn{background:var(--fill-2); border-radius:18px; padding:14px 15px; border-inline-start:4px solid var(--accent);}
-  .fq-tn .c{font-size:16.5px; font-weight:800; line-height:1.7;}
-  .fq-tn .e{font-size:14px; color:var(--text-3); margin-top:3px; line-height:1.8;}
-  .fq-tn .r{display:flex; align-items:flex-start; gap:7px; margin-top:10px; font-size:15.5px;
+  .fq-tn .c{font-size:calc(16.5px * var(--tscale)); font-weight:800; line-height:1.7;}
+  .fq-tn .e{font-size:calc(14px * var(--tscale)); color:var(--text-3); margin-top:3px; line-height:1.8;}
+  .fq-tn .r{display:flex; align-items:flex-start; gap:7px; margin-top:10px; font-size:calc(15.5px * var(--tscale));
     font-weight:700; color:var(--accent); line-height:1.85;}
   .fq-tn .r svg{width:15px; height:15px; flex:0 0 auto; margin-top:4px; stroke:currentColor;
     fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round;}
@@ -599,17 +603,17 @@
     border-inline-start:4px solid var(--accent);}
   .fq-col.bad{background:var(--c-repeat-bg); border-inline-start-color:var(--c-repeat);}
   .fq-col.good{background:var(--accent-bg);}
-  .fq-col h4{margin:0 0 9px; font-size:15.5px; font-weight:800; text-align:center;}
+  .fq-col h4{margin:0 0 9px; font-size:calc(15.5px * var(--tscale)); font-weight:800; text-align:center;}
   .fq-col.bad h4{color:var(--c-repeat);}
   .fq-col.good h4{color:var(--accent);}
   .fq-col ul{margin:0; padding:0; list-style:none;}
-  .fq-col li{font-size:14.5px; line-height:1.9; padding:6px 0; border-top:1px solid var(--sep);}
+  .fq-col li{font-size:calc(14.5px * var(--tscale)); line-height:1.9; padding:6px 0; border-top:1px solid var(--sep);}
   .fq-col li:first-child{border-top:0;}
 
   /* جدول */
   .fq-tblw{overflow-x:auto; padding:4px 8px;}
-  .fq-tbl{width:100%; border-collapse:collapse; font-size:15px;}
-  .fq-tbl th{background:transparent; color:var(--accent); font-weight:800; font-size:14px; padding:11px 8px; text-align:center;}
+  .fq-tbl{width:100%; border-collapse:collapse; font-size:calc(15px * var(--tscale));}
+  .fq-tbl th{background:transparent; color:var(--accent); font-weight:800; font-size:calc(14px * var(--tscale)); padding:11px 8px; text-align:center;}
   .fq-tbl td{padding:9px 8px; text-align:center; border-top:1px solid var(--sep);}
   .fq-tbl th:first-child, .fq-tbl td:first-child{text-align:start; font-weight:700;}
 
@@ -618,8 +622,8 @@
     border-inline-start:4px solid var(--c-read);}
   .fq-ki{padding:11px 0;}
   .fq-ki + .fq-ki{border-top:1px solid rgba(128,128,128,.18);}
-  .fq-ki .q{font-size:15.5px; font-weight:800; color:var(--c-read); margin-bottom:4px; line-height:1.7;}
-  .fq-ki .a{font-size:15px; line-height:2; color:var(--text);}
+  .fq-ki .q{font-size:calc(15.5px * var(--tscale)); font-weight:800; color:var(--c-read); margin-bottom:4px; line-height:1.7;}
+  .fq-ki .a{font-size:calc(15px * var(--tscale)); line-height:2; color:var(--text);}
 
   /* ============ طرازُ «وصايا النبيّ ﷺ» ============
      لوحٌ ليّنٌ بحرفٍ أخضرَ في جانبه، وعنوانٌ بلون التطبيق تسبقه شارة،
@@ -629,17 +633,17 @@
     background:var(--fill-2); border-radius:18px;
     border-inline-start:4px solid var(--accent);}
   .wa-i{padding:18px 17px 16px; margin:16px 0 0;}
-  .wa-t{display:flex; align-items:center; gap:8px; font-size:15px; font-weight:800;
+  .wa-t{display:flex; align-items:center; gap:8px; font-size:calc(15px * var(--tscale)); font-weight:800;
     color:var(--accent); margin-bottom:12px;}
   .wa-t::before{content:''; flex:0 0 auto; width:4px; height:16px; border-radius:2px; background:var(--accent);}
-  .wa-v{font-size:20.5px; line-height:2.15; font-weight:600; color:var(--text);}
+  .wa-v{font-size:calc(20.5px * var(--tscale)); line-height:2.15; font-weight:600; color:var(--text);}
   .wa-d{margin-top:14px; padding-top:12px; border-top:1px solid var(--sep);
-    font-size:15.5px; line-height:2.05; color:var(--text-2); text-align:justify;}
-  .wa-s{margin-top:10px; font-size:14px; line-height:1.9; color:var(--text-2);}
-  .wa-s .lbl{color:var(--accent); font-weight:800; font-size:13px; margin-inline-end:3px;}
+    font-size:calc(15.5px * var(--tscale)); line-height:2.05; color:var(--text-2); text-align:justify;}
+  .wa-s{margin-top:10px; font-size:calc(14px * var(--tscale)); line-height:1.9; color:var(--text-2);}
+  .wa-s .lbl{color:var(--accent); font-weight:800; font-size:calc(13px * var(--tscale)); margin-inline-end:3px;}
 
   /* تنبيه */
-  .fq-note{border-radius:18px; padding:15px 16px; font-size:15.5px; line-height:2;}
+  .fq-note{border-radius:18px; padding:15px 16px; font-size:calc(15.5px * var(--tscale)); line-height:2;}
   .fq-note.core{background:var(--accent-bg); color:var(--text); border-inline-start:4px solid var(--accent);}
   .fq-note.warn{background:var(--c-repeat-bg); color:var(--text); border-inline-start:4px solid var(--c-repeat);}
   .fq-note.info{background:var(--fill-2); color:var(--text-2); border-inline-start:4px solid var(--text-3);}
@@ -649,7 +653,7 @@
   .fq-src{margin-top:20px; border:1px solid var(--line); border-radius:18px;
     border-inline-start:4px solid var(--accent); background:var(--card); overflow:hidden;}
   .fq-src-h{display:flex; align-items:center; gap:8px; padding:12px 14px;
-    background:var(--accent-bg); color:var(--accent); font-weight:800; font-size:15px;
+    background:var(--accent-bg); color:var(--accent); font-weight:800; font-size:calc(15px * var(--tscale));
     border-bottom:1px solid var(--line);}
   .fq-src-h svg{width:16px; height:16px; flex:0 0 auto;}
   .fq-si{display:flex; gap:9px; align-items:flex-start; padding:11px 13px;}
@@ -661,10 +665,10 @@
   .fq-si .tag.f{background:var(--c-repeat-bg); color:var(--c-repeat);}
   .fq-si .tag.n{background:var(--fill-2);      color:var(--text-3);}
   .fq-si .b{min-width:0;}
-  .fq-si .b b{display:block; font-size:15px; font-weight:800; color:var(--text); line-height:1.75;}
-  .fq-si .b i{display:block; font-style:normal; font-size:14px; color:var(--text-2); line-height:1.9; margin-top:3px;}
+  .fq-si .b b{display:block; font-size:calc(15px * var(--tscale)); font-weight:800; color:var(--text); line-height:1.75;}
+  .fq-si .b i{display:block; font-style:normal; font-size:calc(14px * var(--tscale)); color:var(--text-2); line-height:1.9; margin-top:3px;}
   .fq-src-f{padding:11px 14px; background:var(--fill-2); color:var(--text-3);
-    font-size:13px; line-height:1.9; border-top:1px solid var(--sep);}
+    font-size:calc(13px * var(--tscale)); line-height:1.9; border-top:1px solid var(--sep);}
   /* ===== نافذة التذكير السريع ===== */
   .quick-pop{position:fixed; inset:0; z-index:130; display:none; align-items:center; justify-content:center;
     background:rgba(0,0,0,.5); opacity:0; transition:opacity .3s ease; padding:16px;}
@@ -965,7 +969,7 @@
   html[data-bg="sagelite"] .aya-t.live{background:color-mix(in srgb, var(--accent) 14%, transparent);}
   .tafsir-body{overflow-y:auto; padding:16px 20px 22px; -webkit-overflow-scrolling:touch;}
   /* شرحُ الأذكار: نصُّ الذكر ثمّ معناه ثمّ شرحُ كلماته */
-  .sharh-txt{font-size:18px; line-height:2.2; color:var(--accent); font-weight:700;
+  .sharh-txt{font-size:calc(18px * var(--tscale)); line-height:2.2; color:var(--accent); font-weight:700;
     background:var(--accent-bg); border-radius:18px; padding:15px 16px; margin-bottom:15px;
     border-inline-start:4px solid var(--accent); text-align:justify;}
   .sh-h{display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:800;
@@ -975,8 +979,8 @@
   .sh-k{border:1px solid var(--line); border-radius:18px; overflow:hidden;}
   .sh-ki{display:flex; gap:10px; padding:10px 13px; align-items:baseline;}
   .sh-ki + .sh-ki{border-top:1px solid var(--sep);}
-  .sh-ki b{flex:0 0 auto; max-width:42%; font-size:15px; font-weight:800; color:var(--c-read);}
-  .sh-ki span{font-size:14.5px; line-height:1.95; color:var(--text-2);}
+  .sh-ki b{flex:0 0 auto; max-width:42%; font-size:calc(15px * var(--tscale)); font-weight:800; color:var(--c-read);}
+  .sh-ki span{font-size:calc(14.5px * var(--tscale)); line-height:1.95; color:var(--text-2);}
   /* زرُّ الشرح في صفّ البطاقة، بجانب «شارِك» */
   .sharh-btn{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line);
     background:var(--fill-2); color:var(--c-read); border-radius:12px; padding:7px 11px;
@@ -1064,7 +1068,7 @@
   .quiz-body{padding:14px 18px 26px;}
   /* عنوان الاختبار أطول من بقية العناوين: نصغّره ونحجز مساحة أزرار الرواية */
   #tasbih-title.long{font-size:calc(24px * var(--scale)); padding-inline-end:104px; line-height:1.35;}
-  .qz-intro{text-align:center; color:var(--text-2); font-size:14.5px; line-height:1.9; margin-bottom:14px;}
+  .qz-intro{text-align:center; color:var(--text-2); font-size:calc(14.5px * var(--tscale)); line-height:1.9; margin-bottom:14px;}
   .qz-cats{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px;}
   .qz-cats button{border:1px solid var(--line); background:var(--fill-2); color:var(--text); font:inherit; font-weight:700;
     font-size:13.5px; padding:9px 15px; border-radius:20px;}
@@ -1076,10 +1080,10 @@
   .qz-bar{height:6px; border-radius:3px; background:var(--fill); overflow:hidden; margin-bottom:6px;}
   .qz-bar i{display:block; height:100%; background:var(--accent); border-radius:3px; transition:width .3s ease;}
   .qz-meta{display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-3); margin-bottom:16px; font-weight:700;}
-  .qz-q{font-size:18px; font-weight:800; line-height:1.9; margin-bottom:16px; text-align:center;}
+  .qz-q{font-size:calc(18px * var(--tscale)); font-weight:800; line-height:1.9; margin-bottom:16px; text-align:center;}
   .qz-opts{display:flex; flex-direction:column; gap:9px;}
   .qz-opts button{border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; font-weight:600;
-    font-size:15.5px; padding:14px 16px; border-radius:14px; text-align:right; transition:background-color .2s, color .2s;}
+    font-size:calc(15.5px * var(--tscale)); padding:14px 16px; border-radius:14px; text-align:right; transition:background-color .2s, color .2s;}
   .qz-opts button:active{transform:scale(.99);}
   .qz-opts button.ok{background:var(--accent); color:#fff; border-color:transparent;}
   .qz-opts button.no{background:#C0392B; color:#fff; border-color:transparent;}
@@ -1088,7 +1092,7 @@
   .qz-res{text-align:center; padding:10px 0;}
   .qz-res .score{font-size:44px; font-weight:800; color:var(--accent); line-height:1.2;}
   .qz-res .of{font-size:14px; color:var(--text-3); margin-bottom:10px;}
-  .qz-res .msg{font-size:16px; font-weight:700; line-height:1.9; margin-bottom:18px;}
+  .qz-res .msg{font-size:calc(16px * var(--tscale)); font-weight:700; line-height:1.9; margin-bottom:18px;}
   .search-box{padding:4px 16px 10px; border-bottom:1px solid var(--sep);}
   .search-box input{width:100%; border:1px solid var(--line); background:var(--fill-2); color:var(--text);
     font:inherit; font-size:15px; padding:11px 14px; border-radius:12px; direction:rtl;}
@@ -1195,7 +1199,7 @@
     <h1 id="wird-h1">وِرد اليوم</h1>
     <div class="sub" id="wird-sub">وردك اليومي من القرآن الكريم</div>
   </div>
-  <div class="tzoom"><span class="tz-lbl">حجم الكتابة</span><button class="tz-minus" aria-label="تصغير الكتابة">A−</button><span class="tz-val">100%</span><button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
+  <!-- لا شريطَ هنا: لهذه الصفحة شريطُها الخاصُّ بخطّ القرآن أسفلَه -->
   <div class="seg" id="wird-mode-seg">
     <button data-m="wird" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>وِردي</button>
     <button data-m="mushaf"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>المصحف كامل</button>
@@ -1228,7 +1232,7 @@
     <h1>الاستماع</h1>
     <div class="sub" id="listen-sub">اختر القارئ ثمّ السورة للاستماع إليها</div>
   </div>
-  <div class="tzoom"><span class="tz-lbl">حجم الكتابة</span><button class="tz-minus" aria-label="تصغير الكتابة">A−</button><span class="tz-val">100%</span><button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
+  <!-- لا شريطَ هنا: صفحةُ استماعٍ لا قراءة، وخطُّ القرآن يُضبط في المصحف -->
   <div class="seg" id="listen-mode-seg">
     <button data-l="quran" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>القرآن</button>
     <button data-l="duat"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>الدعاة</button>
@@ -1669,10 +1673,12 @@ function applyBg(){
   document.documentElement.setAttribute('data-bg', b);
   const mc = $('meta[name=theme-color]'); if(mc) mc.setAttribute('content', BG_COLORS[b]||'#EFE6D4');
 }
-const T_MIN=0.8, T_MAX=1.6, T_STEP=0.05;
+/* المدى أوسعُ من ذي قبل: لمّا صار التكبيرُ للنصّ المقروء وحدَه — لا
+   للعناوين والأزرار — أمكن أن يبلغ الضِّعفَ ونصفًا بلا أن تنكسر الشاشة. */
+const T_MIN=0.8, T_MAX=2.5, T_STEP=0.1;
 function applyFont(){
   let t=parseFloat(settings.font)||1; t=Math.min(T_MAX,Math.max(T_MIN,t));
-  document.documentElement.style.setProperty('--scale', t);
+  document.documentElement.style.setProperty('--tscale', t);
   const pct=Math.round(t*100)+'%';
   /* الأشرطةُ كلُّها تعرض النسبةَ نفسَها، فأيُّها ضُغط تبِعه سائرُها */
   document.querySelectorAll('.tzoom .tz-val').forEach(v=> v.textContent=pct);
