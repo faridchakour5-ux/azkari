@@ -228,10 +228,12 @@
     transition:transform .12s ease, opacity .3s;}
   .card:active{transform:scale(.985);}
   .card .txt{font-size:calc(21.5px * var(--tscale)); line-height:2.05; font-weight:500; white-space:pre-wrap; word-spacing:1px;}
-  .card.quran .txt{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--tscale)); line-height:2.25;}
+  /* الاستعاذةُ سطرٌ قائمٌ بنفسه في وسط البطاقة، لا في يمينها */
+  .card .txt .istiadha{display:block; text-align:center; text-align-last:center; margin-bottom:4px;}
+  /* نصُّ القرآن يُسوَّى كما في المصحف، فتَعمُر الأسطرُ ولا تبقى فيها فُرَج */
+  .card.quran .txt{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--tscale)); line-height:2.25;
+    text-align:justify; text-align-last:center; word-spacing:normal;}
   body.riw-warsh .card.quran .txt{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--tscale)); line-height:2.7;}
-  /* خط حفص بالمغربي: نفس شكل الحروف، والرموز الحفصية تُستكمل من الخط الاحتياطي */
-  body.qmaghribi .card.quran .txt{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--tscale)); line-height:2.7;}
 
   /* selectable writing style for non-Qur'anic dhikr text */
   body.dfont-plex   .card:not(.quran) .txt, body.dfont-plex   #font-preview{font-family:'PlexAr',sans-serif;}
@@ -776,7 +778,6 @@
   .wird-basmala{font-family:'AmiriQuran',serif; text-align:center; color:var(--accent);
     font-size:calc(20px * var(--scale) * var(--qscale,1)); line-height:2; margin:2px 0 10px;}
   body.riw-warsh .wird-basmala{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(22px * var(--scale) * var(--qscale,1));}
-  body.qmaghribi .wird-basmala{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(22px * var(--scale) * var(--qscale,1));}
   /* أداء: تُحسب مواضع كل صفحة عند اقترابها من الشاشة فقط (بدل حساب المصحف كاملاً دفعةً واحدة) */
   .mushaf-pg{content-visibility:auto; contain-intrinsic-size:auto 2600px;}
   .mushaf-pg.cv-on{content-visibility:visible;}
@@ -785,7 +786,6 @@
   .mushaf-page::before,.mushaf-page::after{content:''; flex:1; height:1px; background:var(--sep);}
   .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.3; text-align:justify;}
   body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
-  body.qmaghribi .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
   /* لون خطّ القرآن (اختياري لورش وحفص) — أربع درجات */
   /* اللون يشمل كل بطاقات الأذكار (ذكر/حديث/قرآن) + نص المصحف */
   body.qc-blue  .wird-text, body.qc-blue  .wird-basmala, body.qc-blue  .card .txt{ color:var(--qc-blue); }
@@ -799,12 +799,12 @@
      مُتوسِّطُ سُمك الحرف في المغربيّ ٤٫٠٦ نقطة، ويبلغه حفصٌ عند ‎.014em‎
      بالضبط. ولا يُطبَّق على المغربيّ لأنّه ثخينٌ أصلًا. */
   :root{ --qink:.014em; }
-  body:not(.riw-warsh):not(.qmaghribi) .wird-text,
-  body:not(.riw-warsh):not(.qmaghribi) .wird-basmala,
-  body:not(.riw-warsh):not(.qmaghribi) .card.quran .txt,
-  body:not(.riw-warsh):not(.qmaghribi) .tafsir-body .t-aya,
-  body:not(.riw-warsh):not(.qmaghribi) .search-result .sr-txt,
-  body:not(.riw-warsh):not(.qmaghribi) .qp-qtext{
+  body:not(.riw-warsh) .wird-text,
+  body:not(.riw-warsh) .wird-basmala,
+  body:not(.riw-warsh) .card.quran .txt,
+  body:not(.riw-warsh) .tafsir-body .t-aya,
+  body:not(.riw-warsh) .search-result .sr-txt,
+  body:not(.riw-warsh) .qp-qtext{
     -webkit-text-stroke:var(--qink) currentColor;}
 
   body.qtashkeel .wird-text, body.qtashkeel .wird-basmala, body.qtashkeel .card.quran .txt{
@@ -872,11 +872,11 @@
     padding:6px 8px; opacity:0; transition:opacity .2s ease, transform .2s ease;}
   .autoread-pill.show{display:flex; opacity:1; transform:translateX(-50%) translateY(0);}
   .autoread-pill .ar-spd{width:34px; height:34px; border:1px solid var(--line); border-radius:11px;
-    background:var(--fill-2); color:var(--c-read); font-weight:800; font-size:19px; line-height:1;}
+    background:var(--fill-2); color:var(--accent); font-weight:800; font-size:19px; line-height:1;}
   .autoread-pill .ar-spd:active{transform:scale(.9);}
   .autoread-pill .ar-main{display:inline-flex; align-items:center; gap:7px; border:0; background:transparent;
     color:var(--text-2); font:inherit; font-weight:800; font-size:13.5px; padding:0 6px; min-width:104px; justify-content:center;}
-  .autoread-pill .ar-main.on{color:var(--c-read);}
+  .autoread-pill .ar-main.on{color:var(--accent);}
   .autoread-pill .ar-ic{width:16px; height:16px; display:inline-flex;}
 
   /* تكبير/تصغير خطّ القرآن العائم — يظهر أثناء القراءة عند الرجوع للأعلى، كزرّ السورة */
@@ -989,7 +989,7 @@
   .sharh-btn svg{width:14px; height:14px;}
   .tafsir-body .t-aya{font-family:'AmiriQuran',serif; font-size:19px; line-height:2.1; color:var(--accent);
     padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid var(--sep); text-align:center;}
-  body.riw-warsh .tafsir-body .t-aya, body.qmaghribi .tafsir-body .t-aya{font-family:'Maghribi','AmiriQuran',serif; font-size:21px;}
+  body.riw-warsh .tafsir-body .t-aya{font-family:'Maghribi','AmiriQuran',serif; font-size:21px;}
   body.qtashkeel .tafsir-body .t-aya{font-family:'NotoNaskhTashkeel','AmiriQuran',serif; font-palette:--hafsTashkeel;}
   html[data-bg="dark"] body.qtashkeel .tafsir-body .t-aya{font-palette:--hafsTashkeelDark;}
   .tafsir-body .t-txt{font-size:16px; line-height:2.05; color:var(--text); text-align:justify; white-space:pre-wrap;}
@@ -1104,7 +1104,7 @@
   .search-result .sr-sura{color:var(--c-read); font-weight:800; font-size:13px; margin-bottom:3px; display:block;}
   .search-result .sr-txt{font-family:'AmiriQuran',serif; font-size:19px; line-height:2;}
   /* نتائج البحث تتبع نفس خط المصحف الحالي */
-  body.riw-warsh .search-result .sr-txt, body.qmaghribi .search-result .sr-txt{font-family:'Maghribi','AmiriQuran',serif; font-size:21px; line-height:2.3;}
+  body.riw-warsh .search-result .sr-txt{font-family:'Maghribi','AmiriQuran',serif; font-size:21px; line-height:2.3;}
   body.qtashkeel .search-result .sr-txt{font-family:'NotoNaskhTashkeel','AmiriQuran',serif; font-palette:--hafsTashkeel;}
   html[data-bg="dark"] body.qtashkeel .search-result .sr-txt{font-palette:--hafsTashkeelDark;}
   .search-result .sr-txt mark{background:var(--c-repeat-bg); color:var(--c-repeat); border-radius:4px; padding:0 2px;}
@@ -1474,12 +1474,6 @@
         <button data-r="hafs">حفص</button>
       </div>
     </div>
-    <div class="row"><span class="k">خط حفص</span>
-      <div class="miniseg" id="hafsfont-seg">
-        <button data-r="maghribi">مغربي</button>
-        <button data-r="naskh" class="on">نسخ</button>
-      </div>
-    </div>
     <div class="row"><span class="k">لون خطّ القرآن</span>
       <div class="qcolor-swatches" id="qcolor-seg">
         <button data-r="normal" title="عادي"><i style="background:var(--text)"></i></button>
@@ -1606,7 +1600,10 @@ const store = {
 };
 
 /* ---------- settings ---------- */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, hafsFont:'naskh', reciter:'shur', quranColor:'blue2', autoReadLevel:1.6, bgPicked:false };
+/* الخطُّ المغربيُّ لورشٍ وحدَها: هو خطُّها الأصيل. وحفصٌ بخطّ مصحف الملك
+   فهد وحدَه — إذ لا يرسم المغربيُّ رموزَ حفص كما هي: الفاءُ نقطتُها تحتها،
+   والقافُ نقطةٌ واحدة، وسكونُ حفص (رأسُ الخاء) لا مِحرفَ له فيه أصلًا. */
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1.2', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, reciter:'shur', quranColor:'blue2', autoReadLevel:1.6, bgPicked:false };
 /* هل للتطبيق إعداداتٌ محفوظةٌ من قبل؟ يُسأل قبل الدمج، ويُبنى عليه في
    ترقية ‎__d12‎: من كان يستعمل التطبيقَ لا يُغيَّر عليه لونُه. */
 const __hadSettings = store.get('az_settings', null) !== null;
@@ -1616,7 +1613,7 @@ if(!settings.__d2){ settings.__d2=1; settings.riwaya='warsh'; if(!settings.quran
 // ترقية: اللون الأزرق الغامق افتراضيًّا لخطّ القرآن
 if(!settings.__d3){ settings.__d3=1; settings.quranColor='navy'; store.set('az_settings', settings); }
 // ترقية: خطّ النسخ افتراضيًّا لرواية حفص (بدل المغربي)
-if(!settings.__d4){ settings.__d4=1; settings.hafsFont='naskh'; store.set('az_settings', settings); }
+if(!settings.__d4){ settings.__d4=1; store.set('az_settings', settings); }
 // ترقية: تفعيل تذكير الأذكار والصلاة على النبي ﷺ افتراضيًّا
 if(!settings.__d5){ settings.__d5=1; settings.notif=true; settings.salat=true; store.set('az_settings', settings); }
 // ترقية: الأزرق المتوسّط (بين الفاتح والغامق) افتراضيًّا لخطّ القرآن
@@ -1635,6 +1632,11 @@ if(!settings.__d11){ settings.__d11=1; settings.autoReadLevel=1.6; store.set('az
    ومن كان يستعمل التطبيقَ من قبلُ يُعدُّ مختارًا، فلا يُقلَب عليه لونُه
    فجأةً — ولو كان هاتفُه ليليًّا. والاختيارُ اليدويُّ يعلو دائمًا. */
 if(!settings.__d12){ settings.__d12=1; settings.bgPicked = __hadSettings; store.set('az_settings', settings); }
+/* ترقية: حجمُ الكتابة ١٢٠٪ افتراضًا (كان ١٠٠٪). ومن كان على القياس القديم
+   نُقل إليه، ومن اختار حجمًا غيرَه تُرك على اختياره. */
+if(!settings.__d13){ settings.__d13=1;
+  if(String(settings.font)==='1') settings.font='1.2';
+  store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', sagelite:'#E9EAD5', sage:'#E2E1CA', white:'#F2F2F7', dark:'#121212' };
 const BG_LIST = [
@@ -1699,9 +1701,9 @@ document.addEventListener('click', e=>{
   if(b.classList.contains('tz-minus')) bumpTextScale(-T_STEP);
 });
 let __lastMaghribi=null;
+/* لكلِّ روايةٍ خطُّها لا يُبدَّل: ورشٌ بالمغربيّ، وحفصٌ بخطّ مصحف الملك فهد. */
 function applyHafsFont(){
-  const mag = (settings.hafsFont||'maghribi')==='maghribi';
-  // تغيّر الخطّ ⇒ تغيّر شكل التنوين المطلوب ⇒ يلزم إعادة بناء المصحف
+  // تغيّرت الرواية ⇒ تغيّر الخطُّ ⇒ يلزم إعادة بناء المصحف
   try{
     const now = qIsMaghribi();
     if(__lastMaghribi!==null && __lastMaghribi!==now){
@@ -1712,16 +1714,12 @@ function applyHafsFont(){
     }
     __lastMaghribi=now;
   }catch(e){}
-  document.body.classList.toggle('qmaghribi', mag);
-  // حفص + نسخ ⇐ خط «نسخ نوتو» بتشكيل أخضر
-  document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh' && !mag);
-  // mettre à jour les libellés sans recharger le mushaf
+  document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh');
   const src=$('#quran-src');
-  if(src && settings.riwaya!=='warsh') src.textContent = mag ? 'حفص — الخط المغربي' : 'حفص — خط النسخ';
+  if(src && settings.riwaya!=='warsh') src.textContent = 'حفص — مصحف الملك فهد';
   const note=$('#riwaya-note');
-  if(note && settings.riwaya!=='warsh') note.textContent = mag
-    ? 'رواية حفص عن عاصم بحروف الخط المغربي — وتُستكمل رموز حفص الخاصة من خط النسخ.'
-    : 'رواية حفص عن عاصم بخط النسخ — المعتمدة في أغلب العالم الإسلامي.';
+  if(note && settings.riwaya!=='warsh')
+    note.textContent = 'رواية حفص عن عاصم — عن مصحف الملك فهد، بخطّه ورموزِه.';
 }
 function applyQuranColor(){
   const c = settings.quranColor||'normal';
@@ -1752,17 +1750,14 @@ function applyDuaFont(){
 function applyRiwaya(){
   document.body.classList.toggle('riw-warsh', settings.riwaya==='warsh');
   document.body.classList.toggle('riw-hafs', settings.riwaya==='hafs');
-  const hafsMag = (settings.hafsFont||'maghribi')==='maghribi';
-  $('#quran-src').textContent = settings.riwaya==='warsh' ? 'ورش — الخط المغربي' : (hafsMag ? 'حفص — الخط المغربي' : 'حفص — خط النسخ');
+  $('#quran-src').textContent = settings.riwaya==='warsh' ? 'ورش — الخط المغربي' : 'حفص — مصحف الملك فهد';
   $('#riwaya-note').textContent = settings.riwaya==='warsh'
     ? 'رواية ورش عن نافع — عن المصحف المحمدي، بالخطّ المغربي. الأدعية موحَّدة في الروايتين.'
-    : (hafsMag
-        ? 'رواية حفص عن عاصم — عن مصحف الملك فهد، بحروف الخطّ المغربي.'
-        : 'رواية حفص عن عاصم — عن مصحف الملك فهد، بخطّ النسخ.');
+    : 'رواية حفص عن عاصم — عن مصحف الملك فهد، بخطّه ورموزِه.';
   if(currentTab==='evening'||currentTab==='morning') renderAzkar();
   if(window.__wirdReady){ WIRD=null; if($('#s-wird').classList.contains('active')) openWird(); }
   if(typeof syncRiwayaPills==='function') syncRiwayaPills();
-  document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh' && (settings.hafsFont||'maghribi')!=='maghribi');
+  document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh');
 }
 function saveSettings(){ store.set('az_settings', settings); }
 
@@ -1895,7 +1890,7 @@ function renderAzkar(){
     card.dataset.pid = pid;
     card.innerHTML =
       '<div class="tick"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg></div>'+
-      '<div class="txt">'+escapeHtml(text)+'</div>'+
+      '<div class="txt">'+dhikrHtml(text)+'</div>'+
       '<div class="meta">'+
         '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span> '+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
         (AZKAR_AUDIO[pid] ? '<button class="dhikr-play" data-pid="'+pid+'" aria-label="استماع">'+ICON_PLAY+'</button>':'')+
@@ -1950,6 +1945,15 @@ function updateProgressBar(done,total){
 }
 
 function escapeHtml(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+/* الاستعاذةُ قبل الآية ليست منها، فتُفرَد في سطرٍ متوسّطٍ لا يُخلَط بالتلاوة.
+   وكانت تُترك في يمين السطر الأوّل فتبدو كأنّها أوّلُ الآية. */
+const RE_ISTIADHA = /^(أَعُوذُ بِ[^\n]{0,60}?ٱ?لرَّجِيمِ)\n/;
+function dhikrHtml(t){
+  const x = String(t==null?'':t);
+  const m = x.match(RE_ISTIADHA);
+  if(!m) return escapeHtml(x);
+  return '<span class="istiadha">'+escapeHtml(m[1])+'</span>'+escapeHtml(x.slice(m[0].length));
+}
 
 buildCats();
 $$('#az-scope button').forEach(b=> b.addEventListener('click', ()=>{
@@ -2001,7 +2005,6 @@ function bindSeg(sel, key, after){
 function syncSeg(sel,key){ $$(sel+' button').forEach(b=> b.classList.toggle('on',(b.dataset.r||b.dataset.th||b.dataset.f)===settings[key])); }
 
 bindSeg('#riwaya-seg','riwaya', applyRiwaya);
-bindSeg('#hafsfont-seg','hafsFont', applyHafsFont);
 bindSeg('#qcolor-seg','quranColor', applyQuranColor);
 function renderSwatches(){
   const wrap=$('#bg-swatches'); if(!wrap) return; wrap.innerHTML='';
@@ -2433,9 +2436,8 @@ function buildSuraSelect(){
    لذلك نستبدلها — عند العرض بالخطّ المغربي فقط — بأشكال التنوين القياسية.
    والاستبدال حرفٌ بحرف فلا يتغيّر طول النصّ، ولا تُمَسّ بيانات المصحف إطلاقًا. */
 const QTNW = { '\u0656':'\u064D', '\u0657':'\u064B', '\u065E':'\u064C' };
-function qIsMaghribi(){
-  return settings.riwaya==='warsh' || (settings.hafsFont||'maghribi')==='maghribi';
-}
+/* المغربيُّ لورشٍ وحدَها بعد اليوم */
+function qIsMaghribi(){ return settings.riwaya==='warsh'; }
 /* موضعٌ واحد سقطت منه علامةٌ في ملفّ ورش، قُوبل بالمصحف المحمدي فثبت:
    المجادلة 10 — «وعَلَى» بواوٍ بلا حركة، وفي المصحف المحمدي فتحةٌ على الواو.
    يُصحَّح عند العرض فقط، فيبقى الملفّ على القرص كما ورد من مصدره. */
@@ -2762,7 +2764,7 @@ let __shotCss=null, __shotKey='';
 function quranFontFile(){
   const b=document.body;
   if(b.classList.contains('qtashkeel')) return { f:'NotoNaskhTashkeel', u:'fonts/naskh-tashkeel.woff2' };
-  if(b.classList.contains('qmaghribi') || settings.riwaya==='warsh') return { f:'Maghribi', u:'fonts/maghribi.woff2' };
+  if(settings.riwaya==='warsh') return { f:'Maghribi', u:'fonts/maghribi.woff2' };
   return { f:'AmiriQuran', u:'fonts/amiri-quran.woff2' };
 }
 async function fontDataUrl(u){
@@ -3002,7 +3004,7 @@ function cardShotHTML(sel){
 function dhikrShotHTML(d){
   const text = d.quran ? qFix(settings.riwaya==='warsh'? d.warsh : d.hafs) : d.text;
   return '<div class="card'+(d.quran?' quran':'')+'">'+
-      '<div class="txt">'+escapeHtml(text)+'</div>'+
+      '<div class="txt">'+dhikrHtml(text)+'</div>'+
       '<div class="meta"><span class="badge">'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span></div>'+
       (d.fadl  ?'<div class="ss-note"><b>الفضل</b> '+escapeHtml(d.fadl)+'</div>':'')+
       (d.source?'<div class="ss-note"><b>المصدر</b> '+escapeHtml(d.source)+'</div>':'')+
@@ -5485,7 +5487,7 @@ function cssVar(n, fb){
 function quranFontFamily(){
   const b=document.body;
   if(b.classList.contains('qtashkeel')) return "'NotoNaskhTashkeel','AmiriQuran',serif";
-  if(b.classList.contains('qmaghribi') || settings.riwaya==='warsh') return "'Maghribi','AmiriQuran',serif";
+  if(settings.riwaya==='warsh') return "'Maghribi','AmiriQuran',serif";
   return "'AmiriQuran',serif";
 }
 function wrapAr(ctx, text, maxW){
@@ -5886,7 +5888,7 @@ $('#loc-btn').addEventListener('click', ()=>{
 
 
 applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
-syncSeg('#riwaya-seg','riwaya'); syncSeg('#hafsfont-seg','hafsFont'); syncSeg('#qcolor-seg','quranColor'); syncSeg('#font-seg','font'); renderSwatches();
+syncSeg('#riwaya-seg','riwaya'); syncSeg('#qcolor-seg','quranColor'); renderSwatches();
 applyHafsFont(); applyQuranColor();
 /* رقم الإصدار الفعليّ من عامل الخدمة — ليُعرف أيّ نسخة تعمل على الجهاز */
 (function(){
