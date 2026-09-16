@@ -521,6 +521,25 @@
   .listen-sura.na .ls-name{font-weight:700;}
   .listen-sura.na .ls-sub{color:var(--text-3);}
   .listen-sura.na .ls-ic{color:var(--text-3); background:transparent;}
+  /* زرُّ التنزيل في صفّ السورة */
+  .listen-sura .ls-dl{flex:0 0 auto; width:34px; height:34px; border-radius:11px; border:1px solid var(--line);
+    background:var(--fill-2); color:var(--text-3); display:inline-flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:800; transition:color .15s, background-color .15s, transform .12s;}
+  .listen-sura .ls-dl .gh-ic{width:15px; height:15px;}
+  .listen-sura .ls-dl:active{transform:scale(.9);}
+  .listen-sura .ls-dl.on{color:var(--accent); border-color:var(--accent); background:var(--accent-bg);}
+  .listen-sura .ls-dl.busy{color:var(--accent); border-color:var(--accent);}
+  .listen-sura.na .ls-dl{visibility:hidden;}
+  /* شريطُ المُنزَّل أعلى القائمة */
+  .qdl-bar{display:flex; align-items:center; gap:9px; margin:10px 16px 0; padding:10px 13px;
+    border:1px solid var(--line); border-radius:15px; background:var(--card); box-shadow:var(--shadow-1);}
+  .qdl-bar .qb-ic{flex:0 0 auto; color:var(--accent); display:inline-flex;}
+  .qdl-bar .qb-ic .gh-ic{width:17px; height:17px;}
+  .qdl-bar .qb-t{flex:1 1 auto; min-width:0; font-size:13px; font-weight:700; color:var(--text-2); line-height:1.5;}
+  .qdl-bar .qb-t small{display:block; font-size:11.5px; font-weight:600; color:var(--text-3);}
+  .qdl-bar .qb-del{flex:0 0 auto; border:1px solid var(--line); background:var(--fill-2); color:var(--c-repeat);
+    border-radius:11px; padding:7px 11px; font:inherit; font-size:12px; font-weight:800;}
+  .qdl-bar .qb-del:active{transform:scale(.94);}
 
   /* تذكير الصلاة على النبي ﷺ (شريط داخل التطبيق) */
   /* ===== صفحة الفقه ===== */
@@ -1259,6 +1278,11 @@
       <button id="reciter-read" class="reciter-action-btn" aria-label="اقرأ نفس السورة"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>اقرأ نفس السورة</button>
     </div>
     <audio id="reciter-audio" preload="none"></audio>
+  </div>
+  <div class="qdl-bar" id="qdl-bar" style="display:none">
+    <span class="qb-ic"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg></span>
+    <span class="qb-t" id="qdl-txt"></span>
+    <button class="qb-del" id="qdl-clear" type="button">احذف الكلّ</button>
   </div>
   <div class="listen-list" id="listen-list"></div>
   <div class="stories-box" id="duat-box" style="display:none">
@@ -4417,6 +4441,102 @@ async function fetchReciterCatalog(){
   return __reciterFetching;
 }
 function pad3(n){ return String(n).padStart(3,'0'); }
+
+/* ==================== تنزيلُ التلاوات على الجهاز ====================
+   التلاوةُ تُبَثُّ من الشبكة في كلّ مرّة، فمن كان في سفرٍ أو بلا اتّصالٍ
+   انقطع عنه القرآن، ومن كان على بياناتٍ محدودةٍ أنفقها في المكرّر. فمن
+   نزّل سورةً صارت على جهازه: تُفتح دون إنترنت ولا تُحمَّل ثانيةً أبدًا.
+
+   والمخزنُ ‎azkari-qdl‎ منفصلٌ عن مخزون التطبيق، والعاملُ الخدميُّ يُقدّم
+   منه ويستثنيه من المحو عند الترقية. وخوادمُ mp3quran تُتيح ‎CORS‎ فيمكن
+   قراءةُ الملفّ وحفظُه (لا يجوز حفظُ ردٍّ مُعتِم). */
+const QDL_CACHE='azkari-qdl';
+let __qdlSet=null;                 /* مجموعةُ الروابط المُنزَّلة — تُقرأ مرّةً */
+const __qdlBusy=new Map();         /* الجاري تنزيلُه: رابط ⇐ {pct, abort} */
+
+async function qdlCache(){ return caches.open(QDL_CACHE); }
+async function qdlRefresh(){
+  try{
+    const c=await qdlCache();
+    __qdlSet=new Set((await c.keys()).map(r=>r.url));
+  }catch(e){ __qdlSet=new Set(); }
+  return __qdlSet;
+}
+async function qdlReady(){ return __qdlSet || await qdlRefresh(); }
+function qdlHas(url){ return !!(__qdlSet && __qdlSet.has(url)); }
+/* رابطُ السورة عند القارئ الحاليّ — هو مفتاحُ المخزن، فلكلّ قارئٍ نسختُه */
+function qdlUrl(info, si){
+  if(!info || !info.server) return null;
+  if(!reciterHasSura(info, si)) return null;
+  return info.server + pad3(suraNumOf(si)) + '.mp3';
+}
+/* العددُ على وجهه في العربيّة: المثنّى لا يسبقه عدد، والقلّةُ جمعُها
+   «تلاوات»، وما جاوز العشرَ يُفرَد تمييزُه. */
+function qdlCountLabel(k){
+  if(k===1) return 'تلاوةٌ واحدة';
+  if(k===2) return 'تلاوتان';
+  if(k<=10) return AR(k)+' تلاوات';
+  return AR(k)+' تلاوة';
+}
+function qdlFmt(b){
+  if(!b) return '—';
+  return b>=1048576 ? (b/1048576).toFixed(1)+' م.ب' : Math.max(1,Math.round(b/1024))+' ك.ب';
+}
+/* التنزيلُ بالتدفّق ليُعرَض التقدّمُ رقمًا، ويُمكنَ إيقافُه في منتصفه */
+async function qdlDownload(url, onPct){
+  if(qdlHas(url) || __qdlBusy.has(url)) return false;
+  const ctl=new AbortController();
+  __qdlBusy.set(url, { pct:0, abort:()=>ctl.abort() });
+  try{
+    const res=await fetch(url, { mode:'cors', signal:ctl.signal });
+    if(!res.ok) throw new Error('http '+res.status);
+    const total=+(res.headers.get('content-length')||0);
+    let got=0; const parts=[];
+    const rd=res.body && res.body.getReader ? res.body.getReader() : null;
+    if(rd){
+      for(;;){
+        const {done,value}=await rd.read();
+        if(done) break;
+        parts.push(value); got+=value.length;
+        const pct= total ? Math.min(99, Math.round(got*100/total)) : 0;
+        const st=__qdlBusy.get(url); if(st) st.pct=pct;
+        if(onPct) onPct(pct, got, total);
+      }
+    } else { parts.push(new Uint8Array(await res.arrayBuffer())); }
+    const blob=new Blob(parts, { type: res.headers.get('content-type')||'audio/mpeg' });
+    const store=new Response(blob, { headers:{
+      'Content-Type': blob.type, 'Content-Length': String(blob.size), 'Accept-Ranges':'bytes' } });
+    const c=await qdlCache(); await c.put(url, store);
+    (await qdlReady()).add(url);
+    if(onPct) onPct(100, blob.size, blob.size);
+    return true;
+  }catch(e){
+    if(e && e.name==='AbortError') return false;
+    throw e;
+  }finally{ __qdlBusy.delete(url); }
+}
+async function qdlRemove(url){
+  const c=await qdlCache(); await c.delete(url);
+  if(__qdlSet) __qdlSet.delete(url);
+}
+/* حجمُ ما نُزّل فعلًا — يُقرأ من المخزن لا يُقدَّر تقديرًا */
+async function qdlStats(){
+  try{
+    const c=await qdlCache(); const ks=await c.keys();
+    let bytes=0;
+    for(const r of ks){
+      const m=await c.match(r);
+      const n=m ? +(m.headers.get('content-length')||0) : 0;
+      if(n) bytes+=n; else if(m){ try{ bytes+=(await m.clone().blob()).size; }catch(e){} }
+    }
+    return { count:ks.length, bytes };
+  }catch(e){ return { count:0, bytes:0 }; }
+}
+async function qdlFree(){
+  try{ const e=await navigator.storage.estimate();
+       return { quota:e.quota||0, usage:e.usage||0, free:Math.max(0,(e.quota||0)-(e.usage||0)) };
+  }catch(e){ return null; }
+}
 /* أيقونات SVG بأسلوب GitHub تُدرَج ديناميكيًّا */
 const ICON_PLAY  = '<svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M7 4v16l13-8z"/></svg>';
 const ICON_PAUSE = '<svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
@@ -4560,6 +4680,14 @@ function playReciterSurah(info, si){
   if(!WIRD || !WIRD.sur[si]) return;
   /* لا يُطلب ما ليس عند القارئ: كان الطلبُ يقع على 404 فيُستأنف بلا انتهاء */
   if(!reciterHasSura(info, si)){ __audioSura=si; tellSuraMissing(info, si); markListenActive(); return; }
+  /* بلا اتّصالٍ لا يُسمَع إلّا ما نُزّل، فيُقال السببُ لا «تعذّر التشغيل» */
+  if(!navigator.onLine && !qdlHas(qdlUrl(info, si))){
+    __audioSura=si; markListenActive(); setPlayBtn(false);
+    const st=$('#reciter-status');
+    if(st) st.textContent='لا اتّصال — نزِّل السورة لتُسمَع دون إنترنت';
+    try{ showToast('سورة '+suraNameOf(si)+' غيرُ مُنزَّلة، ولا اتّصالَ الآن — نزِّلها وأنت متّصلٌ لتُسمَع دائمًا', 4600); }catch(e){}
+    return;
+  }
   // تلاوةٌ جديدة: اطوِ ما تعلّمناه من السابقة وابنِ الجدولَ من جديد
   try{ qsFoldCal(); }catch(e){}
   QSY=null; try{ qsClearYCache(); qsSetLive(null); }catch(e){}
@@ -5051,6 +5179,8 @@ async function openListen(){
     try{ if(!wirdGlobal()) await loadScript(wirdFile()); WIRD=wirdGlobal(); if(WIRD) WIRD.__riwaya=settings.riwaya; }catch(e){}
   }
   renderReciterChips();
+  /* ما نُزّل على الجهاز يُقرأ أوّلًا، فتظهر علاماتُه مع الصفّ لا بعده */
+  try{ await qdlReady(); }catch(e){}
   renderListenList();
   /* فهرسُ القرّاء يُجلب في الخلفيّة: به تُعرف السورُ التي لم تُسجَّل، فتظهر
      علاماتُها من أوّل نظرةٍ لا بعد أن يضغطها المستمعُ فلا يجد شيئًا. */
@@ -5069,22 +5199,87 @@ function renderListenList(){
     const kind = (typeof SURA_KIND==='string' && SURA_KIND.charAt(idx)==='d') ? 'مدنيّة' : 'مكّيّة';
     const na = inf && !reciterHasSura(inf, idx);
     const sub = na ? ('لم تُسجَّل بصوت '+escapeHtml(inf.name)) : (kind+' • '+ayaCountLabel(suraAyaCount(idx)));
+    const u = inf ? qdlUrl(inf, idx) : null;
+    const dl = u && qdlHas(u);
     return '<button type="button" class="listen-sura'+(na?' na':'')+'" data-si="'+idx+'">'+
       '<span class="ls-num">'+AR(idx+1)+'</span>'+
       '<span class="ls-mid"><span class="ls-name">'+escapeHtml(s.n)+'</span>'+
       '<span class="ls-sub">'+sub+'</span></span>'+
+      '<span class="ls-dl'+(dl?' on':'')+'" role="button" data-dl="'+idx+'" aria-label="'+
+        (dl?'احذف التلاوة من الجهاز':'نزّل التلاوة على الجهاز')+'">'+(dl?QDL_OK:QDL_DOWN)+'</span>'+
       '<span class="ls-ic">'+ICON_PLAY+'</span>'+
     '</button>';
   }).join('');
   if(!wrap.__lsBound){
     wrap.__lsBound=1;
     wrap.addEventListener('click', e=>{
+      const d=e.target.closest && e.target.closest('[data-dl]');
+      if(d){ e.stopPropagation(); qdlToggle(parseInt(d.dataset.dl)); return; }
       const b=e.target.closest && e.target.closest('button[data-si]'); if(!b) return;
       playListenSura(parseInt(b.dataset.si));
     });
   }
   markListenActive();
+  renderQdlBar();
 }
+const QDL_DOWN='<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>';
+const QDL_OK  ='<svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
+/* ضغطةٌ على الزرّ: تُنزّل، أو تُوقف الجاري، أو تحذف المُنزَّل */
+async function qdlToggle(si){
+  const inf=currentReciterInfo();
+  if(!inf){ showToast('لم يُحمَّل القارئُ بعدُ — جرّب بعد لحظة', 3000); return; }
+  const url=qdlUrl(inf, si); if(!url) return;
+  const nm=suraNameOf(si);
+  vibrate(8);
+  const busy=__qdlBusy.get(url);
+  if(busy){ busy.abort(); qdlPaint(si, 'idle'); showToast('أُوقف تنزيل سورة '+nm, 2200); return; }
+  if(qdlHas(url)){
+    await qdlRemove(url); qdlPaint(si, 'idle'); renderQdlBar();
+    showToast('حُذفت سورة '+nm+' من الجهاز', 2400); return;
+  }
+  const free=await qdlFree();
+  if(free && free.free && free.free < 12*1048576){
+    showToast('مساحةُ الجهاز ضاقت — احذف بعضَ المُنزَّل أوّلًا', 4200); return;
+  }
+  qdlPaint(si, 'busy', 0);
+  try{
+    const ok=await qdlDownload(url, pct=> qdlPaint(si, 'busy', pct));
+    if(ok){ qdlPaint(si, 'on'); renderQdlBar(); showToast('نُزّلت سورة '+nm+' — تُسمَع الآن دون إنترنت', 3200); }
+    else qdlPaint(si, 'idle');
+  }catch(e){
+    qdlPaint(si, 'idle');
+    showToast(navigator.onLine ? ('تعذّر تنزيل سورة '+nm+' — جرّب ثانيةً')
+                               : 'لا اتّصال — التنزيل يحتاج إنترنت', 4000);
+  }
+}
+/* حالةُ الزرّ وحدَه، فلا تُبنى القائمةُ كلُّها في كلّ نبضةِ تقدّم */
+function qdlPaint(si, state, pct){
+  const el=document.querySelector('#listen-list [data-dl="'+si+'"]'); if(!el) return;
+  el.classList.toggle('on',   state==='on');
+  el.classList.toggle('busy', state==='busy');
+  if(state==='busy'){ el.textContent = (pct||0)+'٪'; el.setAttribute('aria-label','جارٍ التنزيل — اضغط للإيقاف'); }
+  else if(state==='on'){ el.innerHTML = QDL_OK; el.setAttribute('aria-label','احذف التلاوة من الجهاز'); }
+  else { el.innerHTML = QDL_DOWN; el.setAttribute('aria-label','نزّل التلاوة على الجهاز'); }
+}
+/* شريطُ المُنزَّل: لا يظهر إلّا إذا كان على الجهاز شيء */
+async function renderQdlBar(){
+  const bar=$('#qdl-bar'), txt=$('#qdl-txt'); if(!bar||!txt) return;
+  const st=await qdlStats();
+  if(!st.count){ bar.style.display='none'; return; }
+  const free=await qdlFree();
+  txt.innerHTML='على جهازك '+qdlCountLabel(st.count)+' · '+qdlFmt(st.bytes)+
+    '<small>تُسمَع دون إنترنت'+(free&&free.free?(' · في الجهاز متّسعٌ لنحوِ '+qdlFmt(free.free)):'')+'</small>';
+  bar.style.display='flex';
+}
+$('#qdl-clear') && $('#qdl-clear').addEventListener('click', async ()=>{
+  vibrate(10);
+  const st=await qdlStats();
+  if(!st.count) return;
+  if(!confirm('حذفُ '+qdlCountLabel(st.count)+' ('+qdlFmt(st.bytes)+') من الجهاز؟')) return;
+  await caches.delete(QDL_CACHE); __qdlSet=new Set();
+  renderListenList(); renderQdlBar();
+  showToast('حُذف المُنزَّلُ كلُّه', 2600);
+});
 function markListenActive(){
   const wrap=$('#listen-list'); if(!wrap) return;
   const playing=audioPlaying();
