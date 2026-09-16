@@ -18,6 +18,26 @@ Réparations (script déjà appliqué — conservé pour référence):
    U+06D2 ے → ى (ya sans points, liaison complète)
    U+06DF ۟ et U+06E1 ۡ → cercle du soukoun maghribi
    U+00A0 → espace
+4. (16 sept. 2026) U+065E — تنوين الضمّ المتراكب.
+   La cmap le faisait pointer vers «alefmhdofwamed», un ALIF: «عَظِيمٞ»
+   s'affichait «عَظِيمآ» dans 1 815 positions. Or la police CONTIENT déjà
+   le bon glyphe, dessiné par son auteur — «bidammatan» (deux dammas
+   superposées, 2 contours, hauteur 628, classe GDEF 3 = mark, ancré dans
+   GPOS: MarkBasePos, MarkLigPos, MarkMarkPos) — mais il n'était relié
+   qu'à U+0658. Correction: U+065E → bidammatan dans les 3 sous-tables
+   cmap. Aucun contour ajouté ni modifié; U+0658 conserve son lien.
+   Conséquence: la substitution QTNW de qFix (index.html) devient inutile
+   et a été supprimée — les trois tanwins superposés (U+0656/0657/065E,
+   6 666 positions) arrivent désormais intacts à l'écran.
+
+    # le patch appliqué en 4:
+    from fontTools.ttLib import TTFont
+    f = TTFont('fonts/maghribi.woff2')
+    for t in f['cmap'].tables:
+        t.cmap[0x065E] = 'bidammatan'
+    f.flavor = 'woff2'
+    f.save('fonts/maghribi.woff2')
+
 Vérification: uharfbuzz (shaping) + captures Chromium sur les versets
 contenant chaque signe. Zéro caractère non couvert sur les 3 sources.
 """
