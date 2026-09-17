@@ -6014,7 +6014,16 @@ async function scheduleNativeNotifs(){
        ولا نَجمع بينهما البتّةَ وإلّا ارتفع أذانان معًا. */
     const ADHAN_SVC = adhanPlugin();
     const adhanTimes = [];
-    for(let day=0; day<8; day++){ // 8 أيام لضمان تغطية جمعة قادمة كاملة دائمًا
+    /* أفُقان مختلفان عن قصد:
+       - الإشعاراتُ ثمانيةُ أيّام: كلُّ واحدٍ منها منبّهٌ في النظام، وأندرويد
+         يَخنق كثرتَها، وثمانيةٌ تَضمن تغطيةَ جمعةٍ قادمةٍ كاملةً دائمًا.
+       - والأذانُ ستّون يومًا: هذه أرقامٌ في مخزنِ التطبيق لا منبّهاتٌ في
+         النظام، والمُسلَّحُ منها واحدٌ فقط في كلّ حين. ولو بَقيَت ثمانيةً
+         لصمَت الأذانُ عمّن لم يَفتح التطبيقَ أسبوعًا — وهو أحوجُ الناسِ
+         إليه. */
+    const DAYS_NOTIF = 8;
+    const DAYS = ADHAN_SVC ? 60 : DAYS_NOTIF;
+    for(let day=0; day<DAYS; day++){
       const d=new Date(); d.setDate(d.getDate()+day);
       const pt=computePrayers(g.lat,g.lng,d); if(!pt) continue;
       prayers.forEach(([k,nm])=>{
@@ -6033,7 +6042,7 @@ async function scheduleNativeNotifs(){
           }
         }
         // تذكير قبل الأذان بـ10 دقائق
-        if(settings.notif){
+        if(settings.notif && day < DAYS_NOTIF){
           const rem=new Date(at.getTime()-10*60000);
           if(rem.getTime() > nowMs+60000){
             notifs.push({ id:id++, channelId:'reminders', title:'اقترب وقت صلاة '+nm, body:'تبقّى 10 دقائق على '+nm,
@@ -6043,6 +6052,7 @@ async function scheduleNativeNotifs(){
       });
       // خاصّ بيوم الجمعة: الإكثار من الصلاة على النبي ﷺ (10 مرّات) + تذكير سورة الكهف
       const isFri = d.getDay()===5;
+      if(day >= DAYS_NOTIF) continue;   // ما بعدَ أفُقِ الإشعارات: الأذانُ وحدَه
       if(settings.salat){
         (isFri ? SALAT_HOURS_FRIDAY : SALAT_HOURS).forEach(hh=>{
           const at=new Date(d); at.setHours(hh,0,0,0);
