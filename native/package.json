@@ -5,7 +5,8 @@
   "description": "غلاف Capacitor الأصلي لتطبيق صلاتي — أذان الصلوات على مستوى النظام",
   "scripts": {
     "copy:web": "node copy-web.js",
-    "sync": "npm run copy:web && npx cap sync android",
+    "apply:android": "node apply-android.js",
+    "sync": "npm run copy:web && npx cap sync android && npm run apply:android",
     "open": "npx cap open android"
   },
   "dependencies": {

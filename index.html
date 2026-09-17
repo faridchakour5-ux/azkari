@@ -1564,7 +1564,9 @@
     <div class="row native-only" style="display:none"><span class="k">الأذان عند دخول الوقت</span>
       <label class="sw"><input type="checkbox" id="adhan-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
-    <div class="gnote native-only" style="display:none">يُرفع الأذانُ بصوت المؤذّن عند دخول وقت كلّ صلاة، والتطبيقُ مغلقٌ وبلا إنترنت. ويحتاج تفعيلَ «مواقيت الصلاة حسب موقعك».</div>
+    <div class="gnote native-only" id="adhan-note" style="display:none"></div>
+    <div class="gnote" id="adhan-exact" style="display:none">تنبيه: لم يُؤذَن للتطبيق بالمنبّهات الدقيقة، فقد يتأخّر الأذانُ دقائق عن وقته. <b id="adhan-exact-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">اسمح بها الآن</b></div>
+    <div class="btn-row b-blue svc-only" id="adhan-try" style="display:none">تجربة الأذان الآن</div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
   </div>
 
@@ -6007,6 +6009,11 @@ async function scheduleNativeNotifs(){
     const g = geoStore(); if(!g) return;
     const prayers=[['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
     const notifs=[]; let id=1000; const nowMs=Date.now();
+    /* إن وُجد ملحقُ الأذان الأصليّ (خدمةٌ أماميّةٌ ترفع الأذانَ كاملًا) فهو
+       أولى من نغمةِ القناة: النغمةُ يَقصُرها أندرويد إلى نحوِ ثلاثين ثانية.
+       ولا نَجمع بينهما البتّةَ وإلّا ارتفع أذانان معًا. */
+    const ADHAN_SVC = adhanPlugin();
+    const adhanTimes = [];
     for(let day=0; day<8; day++){ // 8 أيام لضمان تغطية جمعة قادمة كاملة دائمًا
       const d=new Date(); d.setDate(d.getDate()+day);
       const pt=computePrayers(g.lat,g.lng,d); if(!pt) continue;
@@ -6016,10 +6023,14 @@ async function scheduleNativeNotifs(){
         /* الأذانُ عند دخول الوقت نفسِه — وهو المقصودُ الأوّل من التطبيق
            الأصليّ: يُرفع والتطبيقُ مغلقٌ والهاتفُ نائمٌ وبلا إنترنت. */
         if(settings.adhan!==false){
-          notifs.push({ id:id++, channelId:'adhan_wadee', sound:'adhan_wadee',
-            title:'حان وقتُ صلاة '+nm,
-            body:(k==='fajr' ? 'الصلاةُ خيرٌ من النوم' : 'حيَّ على الصلاة · حيَّ على الفلاح'),
-            schedule:{ at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+          if(ADHAN_SVC){
+            adhanTimes.push({ at:at.getTime(), name:nm, fajr:k==='fajr' });
+          } else {
+            notifs.push({ id:id++, channelId:'adhan_wadee', sound:'adhan_wadee',
+              title:'حان وقتُ صلاة '+nm,
+              body:(k==='fajr' ? 'الصلاةُ خيرٌ من النوم' : 'حيَّ على الصلاة · حيَّ على الفلاح'),
+              schedule:{ at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+          }
         }
         // تذكير قبل الأذان بـ10 دقائق
         if(settings.notif){
@@ -6053,8 +6064,39 @@ async function scheduleNativeNotifs(){
       }
     }
     if(notifs.length) await LN.schedule({ notifications: notifs });
+    if(ADHAN_SVC){
+      /* المواقيتُ تُحسَب هنا بـ adhan.min.js — مصدرٌ واحدٌ لا يَختلف عمّا يَراه
+         المستخدمُ في شريط المواقيت — وتُسلَّم إلى النظام أرقامًا مطلقة. */
+      try{
+        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false });
+        paintAdhanNote();
+      }catch(e){}
+    }
   }catch(e){}
 }
+/* ملحقُ الأذان الأصليّ، أو null في الويب وفي نسخةٍ أصليّةٍ لم تُزرَع فيها الطبقة */
+function adhanPlugin(){
+  try{ return (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Adhan) || null; }catch(e){ return null; }
+}
+let __adhanState = null;
+/* أندرويد ١٢ فما فوق يَشترط إذنًا خاصًّا للمنبّهات الدقيقة. فإن لم يُمنَح، عَمِل
+   الأذانُ لكن قد يتأخّر دقائق — فنقول ذلك صراحةً ونَفتح له الشاشة، ولا نَعِدُه
+   بدقّةٍ لا نَملكها. */
+function paintAdhanNote(){
+  const el = $('#adhan-exact'); if(!el) return;
+  const bad = __adhanState && __adhanState.exact === false && settings.adhan!==false;
+  el.style.display = bad ? '' : 'none';
+}
+$('#adhan-exact-btn') && $('#adhan-exact-btn').addEventListener('click', async ()=>{
+  const P = adhanPlugin(); if(!P) return;
+  vibrate(6);
+  try{ await P.openExactAlarmSettings(); }catch(e){}
+});
+$('#adhan-try') && $('#adhan-try').addEventListener('click', async ()=>{
+  const P = adhanPlugin(); if(!P) return;
+  vibrate(6);
+  try{ await P.preview({ name:'' }); showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200); }catch(e){}
+});
 function renderPrayers(){
   const g=geoStore(); const bar=$('#prayer-bar'); const btn=$('#loc-btn');
   if(!g){ bar.style.display='none'; btn.style.display='block'; return; }
@@ -6186,7 +6228,19 @@ $('#q-minus-float') && $('#q-minus-float').addEventListener('click', ()=> bumpQu
 
 try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
 /* التطبيق الأصلي (Capacitor): جدولة أذان الصلوات على مستوى النظام عند الإقلاع وعند كل فتح */
-try{ if(isNative()) document.querySelectorAll('.native-only').forEach(el=>{ el.style.display=''; }); }catch(e){}
+/* ما يَظهر في التطبيق الأصليّ وحدَه، وما لا يَظهر إلّا مع طبقةِ الأذان.
+   ونَصُّ الشرح يُكتب هنا لا في HTML: الوعدُ يختلف بين الحالتين، ولا نَعِدُ
+   بأذانٍ كاملٍ حيث لا نَملك إلّا نغمةً تُقصَّر إلى نحوِ ثلاثين ثانية. */
+try{
+  if(isNative()){
+    document.querySelectorAll('.native-only').forEach(el=>{ el.style.display=''; });
+    if(adhanPlugin()) document.querySelectorAll('.svc-only').forEach(el=>{ el.style.display=''; });
+    const nt=$('#adhan-note');
+    if(nt) nt.textContent = adhanPlugin()
+      ? 'يُرفع الأذانُ بصوت المؤذّن كاملًا عند دخول وقت كلّ صلاة، والتطبيقُ مغلقٌ والهاتفُ نائمٌ وبلا إنترنت. ويحتاج تفعيلَ «مواقيت الصلاة حسب موقعك».'
+      : 'يُنبَّه بصوت المؤذّن عند دخول وقت كلّ صلاة، والتطبيقُ مغلقٌ وبلا إنترنت. والصوتُ هنا نغمةُ إشعارٍ يَقصُرها أندرويد إلى نحوِ ثلاثين ثانية. ويحتاج تفعيلَ «مواقيت الصلاة حسب موقعك».';
+  }
+}catch(e){}
 try{ scheduleNativeNotifs(); }catch(e){}
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ try{ scheduleNativeNotifs(); }catch(e){} } });
 /* التذكيرات مفعّلة افتراضيًّا: نطلب إذن الإشعارات عند أوّل لمسة (المتصفّح يمنع الطلب بلا تفاعل) */
