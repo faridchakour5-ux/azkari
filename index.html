@@ -1561,6 +1561,10 @@
     <div class="row"><span class="k">تذكير بالصلاة على النبي ﷺ</span>
       <label class="sw"><input type="checkbox" id="salat-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
+    <div class="row native-only" style="display:none"><span class="k">الأذان عند دخول الوقت</span>
+      <label class="sw"><input type="checkbox" id="adhan-toggle"><span class="track"></span><span class="knob"></span></label>
+    </div>
+    <div class="gnote native-only" style="display:none">يُرفع الأذانُ بصوت المؤذّن عند دخول وقت كلّ صلاة، والتطبيقُ مغلقٌ وبلا إنترنت. ويحتاج تفعيلَ «مواقيت الصلاة حسب موقعك».</div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
   </div>
 
@@ -1627,7 +1631,7 @@ const store = {
 /* الخطُّ المغربيُّ لورشٍ وحدَها: هو خطُّها الأصيل. وحفصٌ بخطّ مصحف الملك
    فهد وحدَه — إذ لا يرسم المغربيُّ رموزَ حفص كما هي: الفاءُ نقطتُها تحتها،
    والقافُ نقطةٌ واحدة، وسكونُ حفص (رأسُ الخاء) لا مِحرفَ له فيه أصلًا. */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1.2', notif:true, salat:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, reciter:'shur', quranColor:'blue2', autoReadLevel:1.6, bgPicked:false };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1.2', notif:true, salat:true, adhan:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, reciter:'shur', quranColor:'blue2', autoReadLevel:1.6, bgPicked:false };
 /* هل للتطبيق إعداداتٌ محفوظةٌ من قبل؟ يُسأل قبل الدمج، ويُبنى عليه في
    ترقية ‎__d12‎: من كان يستعمل التطبيقَ لا يُغيَّر عليه لونُه. */
 const __hadSettings = store.get('az_settings', null) !== null;
@@ -2069,6 +2073,17 @@ $('#notif-test').addEventListener('click', async ()=>{
   if(perm!=='granted'){ showToast('الإشعارات غير مسموح بها — فعّلها من إعدادات الهاتف للتطبيق', 3800); return; }
   fireNotification('وقت الذكر 🤍', pickThree());
   showToast('تمّ إرسال إشعار تجريبي ✓ — قد لا يظهر ما دام التطبيق مفتوحًا؛ صغّره لتراه', 4000);
+});
+
+/* ===== الأذان على مستوى النظام — التطبيقُ الأصليّ وحدَه =====
+   في متصفّح الويب لا سبيلَ إلى رفع الأذان والتطبيقُ مغلق، فنُخفي الخيار
+   كيلا يَعِدَ التطبيقُ بما لا يفي به. وفي التطبيق الأصليّ نُظهره ونربطه. */
+const adhanToggle = $('#adhan-toggle');
+adhanToggle.checked = settings.adhan!==false;
+adhanToggle.addEventListener('change', ()=>{
+  settings.adhan = adhanToggle.checked; saveSettings(); vibrate(6);
+  try{ scheduleNativeNotifs(); }catch(e){}
+  showToast(settings.adhan ? 'سيُرفع الأذانُ عند دخول وقت كلّ صلاة ✓' : 'أُوقِف الأذان — تبقى التذكيراتُ النصّيّة', 3000);
 });
 
 const salatToggle = $('#salat-toggle');
@@ -5978,6 +5993,12 @@ async function scheduleNativeNotifs(){
     await LN.requestPermissions();
     // قناة التذكيرات
     await LN.createChannel({ id:'reminders', name:'التذكيرات', description:'تذكير الأذكار والصلاة على النبي', importance:4, visibility:1 });
+    /* قناةُ الأذان مستقلّةٌ بصوتها وأهمّيّتها: صوتُ المؤذّن لا نغمةُ الإشعار،
+       وأهمّيّةٌ قصوى ليُسمَع والهاتفُ صامتُ الإشعارات. ولأنّ أندرويد يُثبّت
+       صوتَ القناة عند إنشائها ولا يُبدّله بعدُ، فلو غُيِّر المؤذّنُ يومًا
+       لزم اسمُ قناةٍ جديد. */
+    await LN.createChannel({ id:'adhan_wadee', name:'الأذان', description:'أذان الصلوات الخمس بصوت المؤذّن',
+      importance:5, visibility:1, sound:'adhan_wadee', vibration:true });
     // إلغاء المجدوَل سابقًا لتفادي التكرار
     const pending = await LN.getPending();
     if(pending && pending.notifications && pending.notifications.length){
@@ -5992,6 +6013,14 @@ async function scheduleNativeNotifs(){
       prayers.forEach(([k,nm])=>{
         const t=pt[k]; if(!t) return; const at=new Date(t);
         if(at.getTime() < nowMs+60000) return; // تخطّي ما مضى
+        /* الأذانُ عند دخول الوقت نفسِه — وهو المقصودُ الأوّل من التطبيق
+           الأصليّ: يُرفع والتطبيقُ مغلقٌ والهاتفُ نائمٌ وبلا إنترنت. */
+        if(settings.adhan!==false){
+          notifs.push({ id:id++, channelId:'adhan_wadee', sound:'adhan_wadee',
+            title:'حان وقتُ صلاة '+nm,
+            body:(k==='fajr' ? 'الصلاةُ خيرٌ من النوم' : 'حيَّ على الصلاة · حيَّ على الفلاح'),
+            schedule:{ at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+        }
         // تذكير قبل الأذان بـ10 دقائق
         if(settings.notif){
           const rem=new Date(at.getTime()-10*60000);
@@ -6157,6 +6186,7 @@ $('#q-minus-float') && $('#q-minus-float').addEventListener('click', ()=> bumpQu
 
 try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
 /* التطبيق الأصلي (Capacitor): جدولة أذان الصلوات على مستوى النظام عند الإقلاع وعند كل فتح */
+try{ if(isNative()) document.querySelectorAll('.native-only').forEach(el=>{ el.style.display=''; }); }catch(e){}
 try{ scheduleNativeNotifs(); }catch(e){}
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ try{ scheduleNativeNotifs(); }catch(e){} } });
 /* التذكيرات مفعّلة افتراضيًّا: نطلب إذن الإشعارات عند أوّل لمسة (المتصفّح يمنع الطلب بلا تفاعل) */
@@ -6181,7 +6211,11 @@ document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
 
 /* ================= INSTALL (Add to Home Screen) ================= */
 let deferredInstall=null;
-function isStandalone(){ return matchMedia('(display-mode: standalone)').matches || navigator.standalone===true; }
+/* «مثبَّتٌ أصلًا»: نافذةُ التطبيق المستقلّة، أو أيقونةُ iOS، أو التطبيقُ
+   الأصليّ من المتجر. ووِب فيو أندرويد في Capacitor يُبلّغ display-mode
+   بـ browser لا standalone، فلولا isNative() لدعا التطبيقُ من ثبّته من
+   المتجر إلى تثبيته من جديد. */
+function isStandalone(){ return matchMedia('(display-mode: standalone)').matches || navigator.standalone===true || isNative(); }
 function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 /* متصفّحاتُ التطبيقات (واتساب وفيسبوك وإنستغرام وتيليغرام…): تفتح الرابطَ
    في نافذةٍ داخلَها لا في متصفّح الجهاز، والتثبيتُ فيها ممتنعٌ أصلًا. وأكثرُ

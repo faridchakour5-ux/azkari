@@ -9,7 +9,9 @@ const WWW  = path.resolve(__dirname, 'www');
 // ملفات ومجلدات تطبيق الويب المطلوبة داخل التطبيق الأصلي
 const ITEMS = [
   'index.html', 'data.js', 'adhan.min.js', 'wird_hafs.js', 'wird_warsh.js',
-  'manifest.json', 'privacy.html', 'fonts', 'icons', 'audio'
+  // ملفّاتٌ تُحمَّل عند الطلب من داخل index.html — بدونها تتعطّل صفحاتُها
+  'fadl.js', 'wasaya.js', 'fiqh.js', 'thabat.js', 'sharh.js', 'quiz.js', 'tafsir.js',
+  'manifest.json', 'privacy.html', 'sw.js', 'fonts', 'icons', 'audio'
 ];
 
 function rmrf(p){ if(fs.existsSync(p)) fs.rmSync(p, { recursive:true, force:true }); }

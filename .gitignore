@@ -1,0 +1,9 @@
+# غلافُ Capacitor: مُولَّدٌ بالكامل من جذر المستودع — لا يُرفَع
+native/www/
+native/node_modules/
+native/android/
+native/ios/
+
+# مفاتيحُ التوقيع: لا تُرفَع أبدًا
+*.jks
+*.keystore
