@@ -1565,6 +1565,7 @@
       <label class="sw"><input type="checkbox" id="adhan-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
     <div class="gnote native-only" id="adhan-note" style="display:none"></div>
+    <div class="gnote web-only" id="adhan-web-note">لا يَرفع المتصفّحُ أذانًا والتطبيقُ مغلقٌ تمامًا — وهو قيدٌ في المتصفّح نفسِه لا في التطبيق، ولا يَملك موقعٌ تجاوزَه.</div>
     <div class="gnote" id="adhan-exact" style="display:none">تنبيه: لم يُؤذَن للتطبيق بالمنبّهات الدقيقة، فقد يتأخّر الأذانُ دقائق عن وقته. <b id="adhan-exact-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">اسمح بها الآن</b></div>
     <div class="btn-row b-blue svc-only" id="adhan-try" style="display:none">تجربة الأذان الآن</div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
@@ -6244,6 +6245,7 @@ try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
 try{
   if(isNative()){
     document.querySelectorAll('.native-only').forEach(el=>{ el.style.display=''; });
+    document.querySelectorAll('.web-only').forEach(el=>{ el.style.display='none'; });
     if(adhanPlugin()) document.querySelectorAll('.svc-only').forEach(el=>{ el.style.display=''; });
     const nt=$('#adhan-note');
     if(nt) nt.textContent = adhanPlugin()
