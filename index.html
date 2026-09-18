@@ -631,11 +631,17 @@
   .fq-col li{font-size:calc(14.5px * var(--tscale)); line-height:1.9; padding:6px 0; border-top:1px solid var(--sep);}
   .fq-col li:first-child{border-top:0;}
 
-  /* جدول */
-  .fq-tblw{overflow-x:auto; padding:4px 8px;}
+  /* جدول
+     كان الجدولُ وحدَه من إخوته في اللوح بلا فسحة: حشوُ لوحِه 4px/8px وإخوتُه
+     12px/16px، فيَلتصق بحرفِ اللوح. وأشدُّ منه أنّ خلاياه بلا line-height،
+     فتُورَث من المتصفّح «normal» نحوَ 1.2، وسائرُ التطبيق على 1.9 و2 — فإذا
+     انكسر النصُّ في العمود الضيّق تراصَّت سطورُه. فسُوّي الأمران. */
+  .fq-tblw{overflow-x:auto; padding:8px 10px 10px;}
   .fq-tbl{width:100%; border-collapse:collapse; font-size:calc(15px * var(--tscale));}
-  .fq-tbl th{background:transparent; color:var(--accent); font-weight:800; font-size:calc(14px * var(--tscale)); padding:11px 8px; text-align:center;}
-  .fq-tbl td{padding:9px 8px; text-align:center; border-top:1px solid var(--sep);}
+  .fq-tbl th{background:transparent; color:var(--accent); font-weight:800; font-size:calc(14px * var(--tscale));
+    padding:10px 7px 12px; text-align:center; line-height:1.65; vertical-align:middle;}
+  .fq-tbl td{padding:14px 7px; text-align:center; border-top:1px solid var(--sep);
+    line-height:1.85; vertical-align:middle;}
   .fq-tbl th:first-child, .fq-tbl td:first-child{text-align:start; font-weight:700;}
 
   /* اختلاف المذاهب */
