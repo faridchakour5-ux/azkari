@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Trousse de réparation de fonts/maghribi.woff2 (police du mushaf Mohammadi).
+Trousse de réparation de la police maghribi (fonts/maghribi-<hash>.woff2,
+police du mushaf Mohammadi).
 
 Problème: la police d'origine ne couvrait pas 17 signes coraniques présents
 dans wird_warsh.js / wird_hafs.js / data.js (~24 000 occurrences). Le
@@ -37,6 +38,19 @@ Réparations (script déjà appliqué — conservé pour référence):
         t.cmap[0x065E] = 'bidammatan'
     f.flavor = 'woff2'
     f.save('fonts/maghribi.woff2')
+
+5. (24 sept. 2026) LA LEÇON DU POINT 4 — NE JAMAIS RÉÉCRIRE UNE POLICE
+   SOUS LE MÊME NOM. _headers sert /fonts/* en «immutable, 1 an»: le
+   navigateur ne redemande JAMAIS un fichier déjà vu. Le patch 4 a gardé
+   le nom «maghribi.woff2», donc tout appareil ayant ouvert l'app avant le
+   16 sept. a gardé l'ancienne police — et comme QTNW avait été supprimé,
+   les 1 824 تنوين ضمّ متراكب s'y affichaient en ALIF («آ»). Signalé par
+   l'utilisateur sur سورة الملك.
+   Règle: le nom du fichier porte les 8 premiers caractères de son SHA-1
+   (maghribi-7d058b2e.woff2). Toute modification => nouveau nom => mettre à
+   jour index.html (@font-face + quranFontFile), sw.js (ASSETS) et
+   store/feature.html. tools/fahs-khatt-warsh.py vérifie cette règle et
+   refuse une police dont le nom ne correspond pas à son contenu.
 
 Vérification: uharfbuzz (shaping) + captures Chromium sur les versets
 contenant chaque signe. Zéro caractère non couvert sur les 3 sources.

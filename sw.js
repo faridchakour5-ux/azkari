@@ -1,5 +1,5 @@
-/* صلاتي — service worker v218 */
-const CACHE = 'azkari-v218';
+/* صلاتي — service worker v219 */
+const CACHE = 'azkari-v219';
 const ASSETS = [
   './',
   './index.html',
@@ -19,7 +19,7 @@ const ASSETS = [
   './fonts/ui-600.woff2',
   './fonts/ui-700.woff2',
   './fonts/amiri-quran.woff2',
-  './fonts/maghribi.woff2',
+  './fonts/maghribi-7d058b2e.woff2',
   './fonts/naskh.woff2',
   './fonts/naskh-tashkeel.woff2',
   './fonts/kufi.woff2',
@@ -36,8 +36,11 @@ self.addEventListener('install', e => {
   e.waitUntil(
     // لا نستعمل skipWaiting: تبقى النسخة الجديدة في الانتظار حتى يُغلق المستخدم التطبيق،
     // حتى لا تُعاد الصفحة تلقائيًّا أثناء الاستماع أو القراءة.
+    /* cache:'reload' — نطلب كلَّ ملفٍّ من الخادم لا من مخزن المتصفّح. فالخطوطُ
+       مخزَّنةٌ «immutable» سنةً، ولو أخذنا منه لبقيت نسخةٌ قديمةٌ حبيسةً إلى
+       الأبد مهما تجدّد التطبيق — وهكذا بقي خطٌّ يرسم تنوينَ الضمّ ألفًا. */
     caches.open(CACHE)
-      .then(c => c.addAll(ASSETS))
+      .then(c => c.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' }))))
   );
 });
 
