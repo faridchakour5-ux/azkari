@@ -4347,6 +4347,14 @@ $('#search-overlay-close').addEventListener('click', closeSearchOverlay);
 $('#search-overlay').addEventListener('click', e=>{ if(e.target.id==='search-overlay') closeSearchOverlay(); });
 
 /* ==================== الاستماع بصوت القرّاء ==================== */
+function saadiFiles(){
+  const A='https://archive.org/download/a51208aaaaaaaaaaaaaa/', B='https://archive.org/download/jafar-al-saadi/';
+  const N=['الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف'];
+  const f={};
+  N.forEach((n,i)=>{ f[i+1]=A+encodeURIComponent(pad3(i+1)+' - '+n+'.mp3'); });
+  f[34]=B+'034.mp3'; f[75]=B+'075.mp3';
+  return f;
+}
 const RECITERS=[
   {id:'shur',       name:'سعود الشريم',      exact:'سعود الشريم',   match:['الشريم']},
   {id:'ghamdi',      name:'سعد الغامدي',      exact:'سعد الغامدي',   match:['الغامدي'],
@@ -4360,6 +4368,12 @@ const RECITERS=[
     fallback:'https://server11.mp3quran.net/qzabri/'},
   {id:'souilis',     name:'يونس اسويلص',       exact:'يونس اسويلص',   match:['اسويلص','سويلص','سويلس']},
   {id:'harraz',      name:'هشام الهراز',       exact:'هشام الهراز',   match:['الهراز','هراز']},
+  /* جعفر السعدي — ليس في mp3quran، فمصدرُه archive.org: «مصحف جعفر السعدي
+     رواية ورش، المصحف المرتل» (١–١٨ كاملة)، ومن مجموعةٍ ثانيةٍ سبأ والقيامة
+     المنصوصُ في عنوانيهما «برواية ورش عن نافع». وقِيس كلُّ ملفٍّ بسرعة القارئ
+     نفسِه (ثانيةٌ لكلّ حرف) فكانت كلُّها سورًا كاملة. واستُبعد ما سواها: الروم
+     وفصّلت مقطعان لا سورتان، وفاطر والمزّمّل لم تُذكر روايتُهما. */
+  {id:'saadi',       name:'جعفر السعدي',       files:saadiFiles(),    moshaf:'المصحف المرتّل — رواية ورش'},
   {id:'turki',       name:'بدر التركي',        exact:'بدر التركي',    match:['التركي'],
     fallback:'https://server6.mp3quran.net/turki/'},
   {id:'mhmd-lfkyh',  name:'محمد الفقيه اليمني', match:['الفقيه']},
@@ -4452,6 +4466,9 @@ async function fetchReciterCatalog(){
       const map={};
       RECITERS.forEach(r=>{
         if(r.external) return;
+        /* قارئٌ بخريطةِ ملفّاتٍ صريحة (من غير mp3quran): سورُه ما في الخريطة وحدَها */
+        if(r.files){ map[r.id]={ server:'', files:r.files, name:r.name, moshaf:r.moshaf||'',
+          list:new Set(Object.keys(r.files).map(Number)) }; return; }
         const found=findReciter(list, r);
         const m=found && pickMoshaf(found.moshaf, r.prefer);
         if(m && m.server){ map[r.id]={ server:m.server, name:r.name, moshaf:m.name, list:surahSet(m.surah_list) }; }
@@ -4489,10 +4506,15 @@ async function qdlRefresh(){
 async function qdlReady(){ return __qdlSet || await qdlRefresh(); }
 function qdlHas(url){ return !!(__qdlSet && __qdlSet.has(url)); }
 /* رابطُ السورة عند القارئ الحاليّ — هو مفتاحُ المخزن، فلكلّ قارئٍ نسختُه */
+/* رابطُ السورة عند القارئ: من خريطته إن كانت له، وإلّا على نمط mp3quran */
+function reciterSuraUrl(info, num){
+  if(info.files) return info.files[num] || null;
+  return info.server + pad3(num) + '.mp3';
+}
 function qdlUrl(info, si){
-  if(!info || !info.server) return null;
+  if(!info || !(info.server || info.files)) return null;
   if(!reciterHasSura(info, si)) return null;
-  return info.server + pad3(suraNumOf(si)) + '.mp3';
+  return reciterSuraUrl(info, suraNumOf(si));
 }
 /* العددُ على وجهه في العربيّة: المثنّى لا يسبقه عدد، والقلّةُ جمعُها
    «تلاوات»، وما جاوز العشرَ يُفرَد تمييزُه. */
@@ -4719,7 +4741,7 @@ function playReciterSurah(info, si){
   __repeatPlayed=1;
   const audio=$('#reciter-audio');
   const surahNum=WIRD.sur[si].s;
-  audio.src=info.server+pad3(surahNum)+'.mp3';
+  audio.src=reciterSuraUrl(info, surahNum);
   $('#reciter-sura').textContent='سورة '+WIRD.sur[si].n;
   markListenActive();
   updateMediaSession(info.name, WIRD.sur[si].n);
