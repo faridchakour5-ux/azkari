@@ -5414,8 +5414,8 @@ async function openListen(){
   if(!WIRD || WIRD.__riwaya!==settings.riwaya){
     try{ if(!wirdGlobal()) await loadScript(wirdFile()); WIRD=wirdGlobal(); if(WIRD) WIRD.__riwaya=settings.riwaya; }catch(e){}
   }
-  renderReciterChips();
   presetListenPlayer();
+  renderReciterChips();
   /* ما نُزّل على الجهاز يُقرأ أوّلًا، فتظهر علاماتُه مع الصفّ لا بعده */
   try{ await qdlReady(); }catch(e){}
   renderListenList();
@@ -5425,17 +5425,20 @@ async function openListen(){
     fetchReciterCatalog().then(()=>{ try{ renderListenList(); }catch(e){} }).catch(()=>{});
   }
 }
-/* أوّلُ ما يراه من فتح الاستماع: المشغّلُ جاهزٌ بالقارئ المختار (سعد الغامدي
-   افتراضًا) على سورة الحجّ — ولا يبدأ الصوتُ حتى يضغط، فالتشغيلُ المفاجئ
-   مزعجٌ ويمنعه المتصفّح أصلًا. ومن اختار سورةً أو قارئًا بقي على اختياره. */
-const LISTEN_DEFAULT_SURA=22;   // الحجّ
+/* أوّلُ ما يراه من فتح الاستماع في كلّ تشغيلٍ للتطبيق: سعد الغامدي على سورة
+   الحجّ — أيًّا كان القارئُ في المرّة السابقة، بطلب صاحب التطبيق. ولا يبدأ
+   الصوتُ حتى يضغط، فالتشغيلُ المفاجئ مزعجٌ ويمنعه المتصفّح أصلًا. ومن غيّر
+   القارئَ أو السورةَ في أثناء الاستعمال بقي على اختياره حتى يُغلق التطبيق. */
+const LISTEN_DEFAULT_SURA=22;        // الحجّ
+const LISTEN_DEFAULT_RECITER='ghamdi';
 function presetListenPlayer(){
   const a=$('#reciter-audio');
   if(!WIRD || !WIRD.sur || (a && a.src) || __audioSura!=null) return;
   const idx=WIRD.sur.findIndex(x=>x.s===LISTEN_DEFAULT_SURA);
   if(idx<0) return;
   __audioSura=idx;
-  const r=RECITERS.find(x=>x.id===settings.reciter)||RECITERS[0];
+  const r=RECITERS.find(x=>x.id===LISTEN_DEFAULT_RECITER)||RECITERS[0];
+  if(settings.reciter!==r.id){ settings.reciter=r.id; saveSettings(); }
   $('#reciter-player').style.display='flex';
   $('#reciter-name').textContent=r.name;
   $('#reciter-sura').textContent='سورة '+WIRD.sur[idx].n;
