@@ -30,6 +30,9 @@
 <meta name="twitter:description" content="أذكار الصباح والمساء، والمصحف كاملًا برواية حفص وورش. يعمل دون إنترنت عدا صفحة الاستماع.">
 <meta name="twitter:image" content="https://salatee.org/store/feature-1024x500.png">
 <link rel="manifest" href="manifest.json">
+<!-- خطّا شاشة الافتتاح يُحمَّلان أوّلًا، فلا ترتجف العبارةُ بخطٍّ بديلٍ ثمّ تتبدّل -->
+<link rel="preload" href="fonts/ruqaa.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/amiri-quran.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <title>صلاتي</title>
 <style>
@@ -187,37 +190,23 @@
   .seg button{flex:1 0 auto; white-space:nowrap; border:0; background:transparent; color:var(--text); font:inherit;
     font-size:15px; font-weight:600; padding:7px 14px; border-radius:9px; z-index:1; transition:color .2s;}
   .seg button.on{background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.18);}
-  /* التبويبات المزدوجة: الأول كهرماني والثاني أزرق — كأزرار «بلا تكرار» و«اقرأ نفس السورة» */
   #wird-mode-seg, #listen-mode-seg, #tasbih-mode-seg{background:transparent; padding:0; gap:10px;}
   #wird-mode-seg button, #listen-mode-seg button, #tasbih-mode-seg button{
     flex:1 1 0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px;
     padding:11px 12px; font-weight:800;}
   #wird-mode-seg button .gh-ic, #listen-mode-seg button .gh-ic, #tasbih-mode-seg button .gh-ic{margin:0;}
-  /* غير المفعَّل: خلفية محايدة ولونٌ كاملُ الوضوح — الشفافية كانت تُذيب النصّ في الخلفية */
-  #wird-mode-seg button:first-child, #listen-mode-seg button:first-child, #tasbih-mode-seg button:first-child{
-    background:var(--fill-2); color:var(--c-repeat); opacity:1;}
-  #wird-mode-seg button:last-child, #listen-mode-seg button:last-child, #tasbih-mode-seg button:last-child{
-    background:var(--fill-2); color:var(--c-read); opacity:1;}
-  #listen-mode-seg button:nth-child(2):not(:last-child),
-  #tasbih-mode-seg button:nth-child(2):not(:last-child){
-    background:var(--fill-2); color:var(--accent-txt); opacity:1;}
-  /* المفعَّل: خلفية بلونه + ظلّ */
-  #wird-mode-seg button:first-child.on, #listen-mode-seg button:first-child.on, #tasbih-mode-seg button:first-child.on{
-    background:var(--c-repeat-bg);}
-  #wird-mode-seg button:last-child.on, #listen-mode-seg button:last-child.on, #tasbih-mode-seg button:last-child.on{
-    background:var(--c-read-bg);}
-  #listen-mode-seg button:nth-child(2):not(:last-child).on,
-  #tasbih-mode-seg button:nth-child(2):not(:last-child).on{
-    background:var(--accent-bg); color:var(--accent);}
+  /* أزرارُ الأقسام بلونٍ واحد: كان الأوّلُ كهرمانيًّا والثاني أخضرَ والثالثُ أزرق،
+     فيتنافس في رأس الصفحة ثلاثةُ ألوان. الخاملُ محايدٌ واضح، والمختارُ بأخضر التطبيق. */
+  #wird-mode-seg button, #listen-mode-seg button, #tasbih-mode-seg button{
+    background:var(--card); color:var(--text-2); border:1px solid var(--line); opacity:1; box-shadow:none;}
+  #wird-mode-seg button.on, #listen-mode-seg button.on, #tasbih-mode-seg button.on{
+    background:var(--accent-bg); color:var(--accent-txt); border-color:transparent;
+    box-shadow:inset 0 0 0 1.5px var(--accent);}
   #listen-mode-seg button, #tasbih-mode-seg button{font-size:14px; padding:11px 6px; gap:5px;}
   #listen-mode-seg button .gh-ic, #tasbih-mode-seg button .gh-ic{width:1em; height:1em;}
-  #wird-mode-seg button.on, #listen-mode-seg button.on, #tasbih-mode-seg button.on{
-    opacity:1; box-shadow:0 1px 5px rgba(0,0,0,.12);}
-  /* ثنائي هادئ أنيق: أخضر مريمية للورد، أزرق رمادي ناعم للمصحف الكامل */
-  /* لون الزرّين مطابق للون التطبيق (الأخضر) */
 
   .progressbar{margin:18px 16px 0; height:6px; border-radius:3px; background:var(--fill); overflow:hidden;}
-  .progressbar i{display:block; height:100%; width:0; background:var(--c-repeat); border-radius:3px; transition:width .4s ease;}
+  .progressbar i{display:block; height:100%; width:0; background:var(--accent); border-radius:3px; transition:width .4s ease;}
   .progresslabel{margin:10px 16px 0; color:var(--text-2); font-size:13px; display:flex; justify-content:space-between;}
 
   /* Cards list */
@@ -329,16 +318,45 @@
   .swatch.on .lbl{color:var(--accent); font-weight:700;}
 
   /* splash screen — auto-hides via CSS so it can never get stuck */
-  #splash{position:fixed; inset:0; z-index:9999; background:var(--bg); display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:18px; opacity:1; pointer-events:none;
-    animation:splashAuto 2.5s ease forwards;}
-  @keyframes splashAuto{ 0%,76%{opacity:1; visibility:visible;} 100%{opacity:0; visibility:hidden;} }
-  #splash .crescent{width:84px; height:84px;}
-  #splash .salat{font-family:'Maghribi','AmiriQuran',serif; font-size:38px; font-weight:700; color:var(--text);
-    opacity:0; animation:splashIn .7s .15s ease forwards; text-align:center; line-height:1.9;}
-  #splash .salat .pbuh{color:var(--accent);}
-  #splash .sub{font-size:15px; color:var(--text-2); opacity:0; animation:splashIn .7s .45s ease forwards;}
-  @keyframes splashIn{ from{opacity:0; transform:translateY(10px) scale(.96);} to{opacity:1; transform:none;} }
+  /* ════ شاشةُ الافتتاح: «صَلِّ على الحبيب ﷺ» ════
+     نجمةٌ ثُمانيّةٌ تُرسَم ثمّ تدور، والعبارةُ تنكشف من اليمين كأنّها تُكتب
+     بخطّ الرقعة، ثمّ ﷺ بتوهّجٍ هادئ، فالصلاةُ الإبراهيميّة، ثمّ تتلاشى
+     الشاشة (نحو ٤ ثوانٍ). لمسةٌ تُغلقها، وتقليلُ الحركة يُكتفى معه بالتلاشي. */
+  #splash{position:fixed; inset:0; z-index:9999; background:var(--bg); display:flex;
+    align-items:center; justify-content:center; opacity:1; overflow:hidden;
+    animation:splashAuto 3.9s ease forwards;}
+  @keyframes splashAuto{ 0%,86%{opacity:1; visibility:visible;} 100%{opacity:0; visibility:hidden;} }
+  #splash.gone{animation:splashOut .35s ease forwards;}
+  @keyframes splashOut{ to{opacity:0; visibility:hidden;} }
+  #splash .sp-glow{position:absolute; width:120vmin; height:120vmin; border-radius:50%;
+    background:radial-gradient(circle, var(--accent-bg) 0%, transparent 62%); opacity:0;
+    animation:spGlow 2.4s .2s ease forwards;}
+  @keyframes spGlow{ 0%{opacity:0; transform:scale(.7);} 60%{opacity:1;} 100%{opacity:.75; transform:scale(1);} }
+  #splash .sp-star{position:absolute; width:min(78vmin,420px); height:min(78vmin,420px); opacity:.55;
+    animation:spSpin 26s linear infinite;}
+  #splash .sp-star rect, #splash .sp-star circle{stroke:var(--accent); stroke-width:1.1;
+    stroke-dasharray:480; stroke-dashoffset:480; animation:spDraw 1.6s cubic-bezier(.6,.05,.3,1) forwards;}
+  #splash .sp-star .b{animation-delay:.25s;}
+  #splash .sp-star .sp-ring{stroke-width:.7; stroke-dasharray:580; stroke-dashoffset:580; opacity:.7; animation-delay:.5s;}
+  @keyframes spDraw{ to{stroke-dashoffset:0;} }
+  @keyframes spSpin{ to{transform:rotate(360deg);} }
+  #splash .sp-body{position:relative; display:flex; flex-direction:column; align-items:center; gap:14px; padding:0 24px;}
+  #splash .salat{display:flex; align-items:center; gap:12px; color:var(--text); line-height:1.6; white-space:nowrap;}
+  #splash .sp-w{font-family:'fRuqaa','AmiriQuran',serif; font-size:clamp(38px,11vw,54px);
+    clip-path:inset(0 0 0 100%); animation:spWrite 1.25s .35s cubic-bezier(.65,0,.35,1) forwards;}
+  @keyframes spWrite{ to{clip-path:inset(0 0 0 0);} }
+  #splash .pbuh{font-family:'AmiriQuran',serif; font-size:clamp(40px,11.5vw,58px); color:var(--accent);
+    opacity:0; transform:scale(.6); animation:spPbuh .7s 1.45s cubic-bezier(.2,1.4,.4,1) forwards;}
+  @keyframes spPbuh{ 0%{opacity:0; transform:scale(.6); text-shadow:none;}
+    60%{opacity:1; text-shadow:0 0 22px var(--accent-bg);} 100%{opacity:1; transform:scale(1); text-shadow:0 0 12px var(--accent-bg);} }
+  #splash .sub{font-size:15px; font-weight:600; color:var(--text-2); letter-spacing:.2px; opacity:0;
+    animation:splashIn .8s 1.85s ease forwards;}
+  @keyframes splashIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){
+    #splash .sp-star, #splash .sp-star *{animation:none; stroke-dashoffset:0;}
+    #splash .sp-w{clip-path:none; animation:none;}
+    #splash .pbuh, #splash .sub, #splash .sp-glow{animation:none; opacity:1; transform:none;}
+  }
   /* iOS switch */
   .sw{position:relative; width:51px; height:31px; flex:0 0 auto;}
   .sw input{opacity:0; width:100%; height:100%; margin:0;}
@@ -812,10 +830,13 @@
   .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.3; text-align:justify;}
   body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
   /* لون خطّ القرآن (اختياري لورش وحفص) — أربع درجات */
-  /* اللون يشمل كل بطاقات الأذكار (ذكر/حديث/قرآن) + نص المصحف */
-  body.qc-blue  .wird-text, body.qc-blue  .wird-basmala, body.qc-blue  .card .txt{ color:var(--qc-blue); }
-  body.qc-blue2 .wird-text, body.qc-blue2 .wird-basmala, body.qc-blue2 .card .txt{ color:var(--qc-blue2); }
-  body.qc-navy  .wird-text, body.qc-navy  .wird-basmala, body.qc-navy  .card .txt{ color:var(--qc-navy); }
+  /* لونُ «خطّ القرآن» للقرآن وحده — المصحف وآياتُ الأذكار — كما يقول اسمُه.
+     وكان يشمل كلَّ بطاقة ذكر، فتصير أدعيةُ النبيّ ﷺ والأحاديثُ زرقاءَ بلون
+     المصحف، ويتجاور في الصفحة الواحدة أزرقُ النصّ وأخضرُ العناوين ورماديُّ
+     الفضل. والأدعيةُ الآن بحبر النصّ الدافئ، فيتميّز القرآنُ بلونه وحده. */
+  body.qc-blue  .wird-text, body.qc-blue  .wird-basmala, body.qc-blue  .card.quran .txt{ color:var(--qc-blue); }
+  body.qc-blue2 .wird-text, body.qc-blue2 .wird-basmala, body.qc-blue2 .card.quran .txt{ color:var(--qc-blue2); }
+  body.qc-navy  .wird-text, body.qc-navy  .wird-basmala, body.qc-navy  .card.quran .txt{ color:var(--qc-navy); }
   /* حفص + نسخ نوتو: التشكيل أخضر دائمًا (من لوحة ألوان الخط)، ولون الحروف يتبع اختيار «لون خط القرآن» */
   /* سُمكُ خطّ المصحف: خطُّ حفص (الملك فهد) وخطُّ أميري رفيعان بجانب الخطّ
      المغربيّ، فيبدو نصُّ حفص باهتًا بجانب ورش. لا وزنَ ثقيلًا في الملفَّين
@@ -859,6 +880,13 @@
   .tzoom .tz-val{min-width:50px; text-align:center; color:var(--text-2); font-size:13px; font-weight:700;}
   /* في صفحة الإعدادات يجلس الشريطُ داخل صفٍّ، فلا هامشَ له ولا عنوان */
   .row .tzoom{margin:0; gap:7px;}
+  .tzoom .tz-val-q{min-width:50px; text-align:center; color:var(--text-2); font-size:13px; font-weight:700;}
+  .tzoom button:disabled{opacity:.35;}
+  /* معاينةُ خطّ القرآن تحت مِقياسه: يرى القارئُ الحجمَ قبل أن يفتح المصحف */
+  .q-preview{padding:4px 18px 18px; text-align:center; line-height:2.1; color:var(--qink, var(--text));
+    font-family:'AmiriQuran',serif; font-size:calc(22px * var(--qscale,1));}
+  body.riw-warsh .q-preview{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--qscale,1)); line-height:2.5;}
+  body.qc-blue .q-preview{color:var(--qc-blue);} body.qc-blue2 .q-preview{color:var(--qc-blue2);} body.qc-navy .q-preview{color:var(--qc-navy);}
   .row .tzoom .tz-lbl{display:none;}
   .wird-num{display:inline-block; color:var(--accent); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;
     padding:1px 4px; border-radius:8px; cursor:pointer; transition:background-color .2s, color .2s, transform .15s;}
@@ -1180,22 +1208,85 @@
   .wird-done:active{transform:scale(.98); opacity:.9;}
   .wird-meta{margin:10px 16px 0; color:var(--text-2); font-size:13px; display:flex; justify-content:space-between;}
   .khatma-done{text-align:center; color:var(--accent); font-weight:700; padding:10px;}
+
+  /* ════════════════ نظامُ التصميم الموحَّد ════════════════
+     لونٌ واحدٌ للتفاعل والتمييز: أخضرُ التطبيق. وما سواه تدرّجاتٌ دافئةٌ
+     محايدة من عائلة الورق. وذهبيٌّ خافتٌ من العائلة نفسِها للتنبيه وحدَه.
+     ولونُ خطّ القرآن يبقى على اختيار صاحب الجهاز في الإعدادات.
+     كان الأزرقُ (‎--c-read‎) والكهرمانيُّ (‎--c-repeat‎) يُلوِّنان عشرات
+     العناصر — زرُّ المواقيت، وأسئلةُ الخلاف، والمشاركة، والتكرار، وأزرارُ
+     الأقسام — فيتجاور في الشاشة الواحدة أربعةُ ألوانٍ لا يجمعها شيء. */
+  :root:not([data-bg]), :root[data-bg]{
+    --c-read:var(--accent-txt); --c-read-bg:var(--accent-bg);
+    --c-repeat:#8A6A2F; --c-repeat-bg:rgba(138,106,47,.10);
+  }
+  :root[data-bg="dark"]{ --c-repeat:#D2B37A; --c-repeat-bg:rgba(210,179,122,.12); }
+
+  /* العنوانُ الكبير أهدأ وزنًا، والعنوانُ الفرعيُّ بلون الحبر الثانويّ لا بالأخضر */
+  .head h1{font-weight:800; letter-spacing:-.3px;}
+  .head .sub{color:var(--text-2); font-weight:500;}
+
+  /* التنبيهُ والخلاف: لوحٌ هادئٌ بحرفٍ ملوَّنٍ رفيع، والنصُّ بحبر القراءة */
+  .fq-note.warn{background:var(--c-repeat-bg); border-inline-start-width:3px; color:var(--text);}
+  .fq-note.core{border-inline-start-width:3px;}
+  .fq-note.info{border-inline-start-width:3px;}
+  .fq-kh{background:var(--fill-2); border-inline-start:3px solid var(--accent);}
+  .fq-ki .q{color:var(--accent-txt);}
+
+  /* بطاقاتُ الأذكار: الحرفُ الأخضر أرقُّ، والظلُّ أنعم */
+  .card{border-inline-start-width:3px;}
+  .fadl .lbl{color:var(--accent-txt);}
+
+  /* المصدرُ تحت العنوان بحبرٍ ثانويّ: الأخضرُ للتفاعل لا للنصّ */
+  .az-source{color:var(--text-2); font-weight:600;}
+  /* دعوةُ التثبيت: لوحٌ هادئٌ بزرٍّ أخضر — كانت كتلةً خضراءَ صارخةً أعلى كلّ صفحة */
+  .inst-row{background:var(--card); color:var(--text); border:1px solid var(--line); box-shadow:var(--shadow-1);}
+  .inst-row .gh-ic{color:var(--accent);}
+  .inst-row .ir-t small{color:var(--text-2); opacity:1;}
+  .inst-row .ir-go{background:var(--accent); color:#fff;}
+
+  /* تنبيهُ الفقه: نصُّه بحبر القراءة، والذهبيُّ في حرفه وحدَه */
+  .fq-disc{color:var(--text-2); font-weight:600; border-inline-start:3px solid var(--c-repeat);}
+  .fq-disc b{color:var(--text);}
+
+  /* ═══ قائمةُ أقسام الاستماع المنسدلة ═══ */
+  .listen-cat{display:flex; align-items:center; gap:12px; width:calc(100% - 32px); margin:4px 16px 6px;
+    padding:12px 16px; border:1px solid var(--line); border-radius:16px; background:var(--card);
+    box-shadow:var(--shadow-1); font:inherit; color:var(--text); text-align:start; cursor:pointer;}
+  .listen-cat:active{transform:scale(.985);}
+  .listen-cat .lc-ic{flex:0 0 auto; width:40px; height:40px; border-radius:12px; display:flex; align-items:center;
+    justify-content:center; background:var(--accent-bg); color:var(--accent-txt);}
+  .listen-cat .lc-ic .gh-ic{width:20px; height:20px; margin:0;}
+  .listen-cat .lc-tx{flex:1; display:flex; flex-direction:column; gap:1px; min-width:0;}
+  .listen-cat .lc-lbl{font-size:12px; font-weight:700; color:var(--text-3);}
+  .listen-cat .lc-nm{font-size:17px; font-weight:800; color:var(--text);}
+  .listen-cat .chev{color:var(--accent); font-size:18px; line-height:1; margin-top:-6px;}
 </style>
 </head>
 <body>
 
-<div id="splash">
-  <div class="salat">صَلِّ عَلَى الحَبِيبِ <span class="pbuh">ﷺ</span></div>
-  <div class="sub">اللهم صلِّ وسلّم على سيّدنا محمد</div>
+<div id="splash" role="presentation">
+  <!-- نجمةُ الحزب الثُّمانيّة: تُرسَم خطًّا خطًّا ثمّ تدور على مهل -->
+  <svg class="sp-star" viewBox="0 0 200 200" aria-hidden="true">
+    <g fill="none" stroke-linejoin="round">
+      <rect class="sp-sq a" x="45" y="45" width="110" height="110" rx="3"/>
+      <rect class="sp-sq b" x="45" y="45" width="110" height="110" rx="3" transform="rotate(45 100 100)"/>
+      <circle class="sp-ring" cx="100" cy="100" r="92"/>
+    </g>
+  </svg>
+  <div class="sp-glow" aria-hidden="true"></div>
+  <div class="sp-body">
+    <div class="salat"><span class="sp-w">صَلِّ عَلَى الحَبِيبِ</span><span class="pbuh">ﷺ</span></div>
+    <div class="sub">اللّهمّ صلِّ وسلِّم وبارِك على سيّدِنا محمّد</div>
+  </div>
 </div>
 
 <!-- ===== الأذكار ===== -->
-<section id="s-azkar" class="screen active">
+<section id="s-azkar" class="screen">
   <div class="head">
     <h1 id="az-title">أذكار الصباح</h1>
     <div class="az-source" id="az-source"></div>
   </div>
-  <div class="tzoom"><span class="tz-lbl">حجم الكتابة</span><button class="tz-minus" aria-label="تصغير الكتابة">A−</button><span class="tz-val">100%</span><button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
   <button class="locbtn b-blue" id="loc-btn"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>تفعيل مواقيت الصلاة حسب موقعك</button>
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
   <div class="qp-open" id="qp-open" role="button" tabindex="0">
@@ -1219,7 +1310,7 @@
 </section>
 
 <!-- ===== الوِرد ===== -->
-<section id="s-wird" class="screen">
+<section id="s-wird" class="screen active">
   <div class="head">
     <h1 id="wird-h1">وِرد اليوم</h1>
     <div class="sub" id="wird-sub">وردك اليومي من القرآن الكريم</div>
@@ -1241,11 +1332,6 @@
     <button class="mushaf-resume b-amber" id="mushaf-resume" style="display:none">↩︎ تابِع القراءة من حيث وصلت</button>
     <button class="mushaf-resume b-blue" id="quran-search-btn"><svg class="gh-ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>البحث في القرآن — سورة أو كلمة</button>
   </div>
-  <div class="qzoom" id="q-zoom" title="تكبير خط القرآن">
-    <button id="q-minus" aria-label="تصغير الخط">A−</button>
-    <span class="qval" id="q-zoom-val">100%</span>
-    <button id="q-plus" aria-label="تكبير الخط">A+</button>
-  </div>
   <div id="wird-body"></div>
   <button class="wird-done" id="wird-done-btn">تمّ — الوِرد التالي</button>
   <div style="height:20px"></div>
@@ -1258,11 +1344,12 @@
     <div class="sub" id="listen-sub">اختر القارئ ثمّ السورة للاستماع إليها</div>
   </div>
   <!-- لا شريطَ هنا: صفحةُ استماعٍ لا قراءة، وخطُّ القرآن يُضبط في المصحف -->
-  <div class="seg" id="listen-mode-seg">
-    <button data-l="quran" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>القرآن</button>
-    <button data-l="duat"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>الدعاة</button>
-    <button data-l="stories"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h4"/><path d="M15 7h4"/><circle cx="12" cy="12" r="9"/></svg>قصص الأنبياء</button>
-  </div>
+  <!-- قائمةٌ منسدلة بدل الأزرار: خمسةُ أقسامٍ لا تسعها أزرارٌ متجاورة، والقرآنُ أوّلُها وافتراضيُّها -->
+  <button class="listen-cat" id="listen-cat" type="button" aria-haspopup="listbox">
+    <span class="lc-ic" id="listen-cat-ic"></span>
+    <span class="lc-tx"><span class="lc-lbl">القسم</span><span class="lc-nm" id="listen-cat-name">القرآن الكريم</span></span>
+    <span class="chev">&#8964;</span>
+  </button>
   <div class="reciter-box" id="reciter-box">
     <div class="reciter-chips" id="reciter-chips"></div>
     <div class="reciter-player" id="reciter-player" style="display:none">
@@ -1316,11 +1403,6 @@
   <span id="mushaf-jump-name">الفاتحة</span><span class="chev">⌄</span>
 </button>
 
-<div class="qzoom-float" id="q-zoom-float" title="تكبير خط القرآن">
-  <button id="q-minus-float" aria-label="تصغير الخط">A−</button>
-  <span class="qval" id="q-zoom-val-float">100%</span>
-  <button id="q-plus-float" aria-label="تكبير الخط">A+</button>
-</div>
 
 <div class="riwaya-quick riwaya-float" id="riwaya-float" title="تبديل الرواية">
   <button data-r="warsh">ورش</button><button data-r="hafs">حفص</button>
@@ -1456,7 +1538,6 @@
 <!-- ===== المسبحة ===== -->
 <section id="s-tasbih" class="screen">
   <div class="head"><h1 id="tasbih-title">الفقه العملي</h1><div class="sub" id="tasbih-sub">كيف أتوضّأ · أصلّي · أغتسل · أصوم</div></div>
-  <div class="tzoom"><span class="tz-lbl">حجم الكتابة</span><button class="tz-minus" aria-label="تصغير الكتابة">A−</button><span class="tz-val">100%</span><button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
   <div class="seg" id="tasbih-mode-seg">
     <button data-t="fiqh" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/><path d="M8 16h4"/></svg>الفقه</button>
     <button data-t="tasbih"><svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="3.2" r="1.6"/><circle cx="12" cy="20.8" r="1.6"/><circle cx="3.2" cy="12" r="1.6"/><circle cx="20.8" cy="12" r="1.6"/></svg>المسبحة</button>
@@ -1524,11 +1605,18 @@
 
   <div class="gtitle">المظهر</div>
   <div class="group">
-    <div class="row"><span class="k">حجم الكتابة</span>
+    <!-- التكبيرُ هنا وحدَه: كانت أشرطتُه في كلّ صفحة فتُزاحم ما يُقرأ -->
+    <div class="row"><span class="k">حجم كتابة الأذكار والفقه</span>
       <div class="tzoom"><button class="tz-minus" aria-label="تصغير الكتابة">A−</button>
         <span class="tz-val">100%</span>
         <button class="tz-plus" aria-label="تكبير الكتابة">A+</button></div>
     </div>
+    <div class="row"><span class="k">حجم خطّ القرآن</span>
+      <div class="tzoom"><button id="q-minus" aria-label="تصغير خطّ القرآن">A−</button>
+        <span class="tz-val-q" id="q-zoom-val">100%</span>
+        <button id="q-plus" aria-label="تكبير خطّ القرآن">A+</button></div>
+    </div>
+    <div class="q-preview" id="q-preview"></div>
   </div>
 
   <div class="gtitle">نمط الكتابة</div>
@@ -1599,17 +1687,18 @@
   <span class="ub-go">حدِّث</span>
 </div>
 <nav class="tabbar">
-  <button class="tab on" data-s="s-azkar">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>
-    <span>الأذكار</span>
-  </button>
-  <button class="tab" data-s="s-wird">
+  <!-- الترتيب: الوِرد (البداية)، ثمّ الاستماع، ثمّ الأذكار، ثمّ الفقه -->
+  <button class="tab on" data-s="s-wird">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><line x1="9" y1="7" x2="15" y2="7"/></svg>
     <span>الوِرد</span>
   </button>
   <button class="tab" data-s="s-listen">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2z"/><path d="M20 14a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2z"/></svg>
     <span>الاستماع</span>
+  </button>
+  <button class="tab" data-s="s-azkar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>
+    <span>الأذكار</span>
   </button>
   <button class="tab" data-s="s-tasbih">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/><path d="M8 16h4"/></svg>
@@ -1640,7 +1729,7 @@ const store = {
 /* الخطُّ المغربيُّ لورشٍ وحدَها: هو خطُّها الأصيل. وحفصٌ بخطّ مصحف الملك
    فهد وحدَه — إذ لا يرسم المغربيُّ رموزَ حفص كما هي: الفاءُ نقطتُها تحتها،
    والقافُ نقطةٌ واحدة، وسكونُ حفص (رأسُ الخاء) لا مِحرفَ له فيه أصلًا. */
-const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1.2', notif:true, salat:true, adhan:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, reciter:'shur', quranColor:'blue2', autoReadLevel:1.6, bgPicked:false };
+const SETTINGS_DEFAULTS = { riwaya:'warsh', bg:'sepia', font:'1.2', notif:true, salat:true, adhan:true, duaFont:'plex', wirdAmount:'lines4', quranScale:1.4, reciter:'ghamdi', quranColor:'blue2', autoReadLevel:1.6, bgPicked:false };
 /* هل للتطبيق إعداداتٌ محفوظةٌ من قبل؟ يُسأل قبل الدمج، ويُبنى عليه في
    ترقية ‎__d12‎: من كان يستعمل التطبيقَ لا يُغيَّر عليه لونُه. */
 const __hadSettings = store.get('az_settings', null) !== null;
@@ -1673,6 +1762,11 @@ if(!settings.__d12){ settings.__d12=1; settings.bgPicked = __hadSettings; store.
    نُقل إليه، ومن اختار حجمًا غيرَه تُرك على اختياره. */
 if(!settings.__d13){ settings.__d13=1;
   if(String(settings.font)==='1') settings.font='1.2';
+  store.set('az_settings', settings); }
+/* ترقية: القارئُ الافتراضيُّ سعد الغامدي (كان سعود الشريم). من كان على
+   الافتراضيّ القديم نُقل إليه، ومن اختار غيرَه تُرك على اختياره. */
+if(!settings.__d14){ settings.__d14=1;
+  if(settings.reciter==='shur') settings.reciter='ghamdi';
   store.set('az_settings', settings); }
 
 const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', sagelite:'#E9EAD5', sage:'#E2E1CA', white:'#F2F2F7', dark:'#121212' };
@@ -1771,8 +1865,21 @@ function applyQuranScale(){
   document.documentElement.style.setProperty('--qscale', q);
   const pct=Math.round(q*100)+'%';
   const v=$('#q-zoom-val'); if(v) v.textContent=pct;
-  const vf=$('#q-zoom-val-float'); if(vf) vf.textContent=pct;
+  const qm=$('#q-minus'), qp=$('#q-plus');
+  if(qm) qm.disabled = q<=Q_MIN+1e-9; if(qp) qp.disabled = q>=Q_MAX-1e-9;
+  paintQPreview();
   try{ qsClearYCache(); }catch(e){}   // تغيّرَ الحجمُ فتغيّرت مواضعُ الآيات
+}
+/* معاينةُ خطّ القرآن في الإعدادات: من نصّ التطبيق نفسِه وبالرواية المختارة
+   (آيةُ الكرسيّ من أذكار ما بعد الصلاة) — لا نصٌّ يُكتب باليد، فالخطُّ
+   المغربيُّ لا يرسم ترميزَ حفص، وخطُّ حفص لا يرسم ترميزَ ورش. */
+function paintQPreview(){
+  const el=$('#q-preview'); if(!el) return;
+  try{
+    const z=(window.AZKAR && AZKAR.baad || []).find(x=>x.quran && x.hafs && x.warsh); if(!z) return;
+    const raw=(settings.riwaya==='warsh' ? z.warsh : z.hafs).split('\n').pop().replace(/[﴿﴾]/g,'');
+    el.textContent=qFix(raw.split(/\s+/).slice(0,6).join(' '));
+  }catch(e){}
 }
 function bumpQuranScale(delta){
   let q=parseFloat(settings.quranScale)||1;
@@ -1785,6 +1892,7 @@ function applyDuaFont(){
   document.body.classList.add('dfont-'+(settings.duaFont||'plex'));
 }
 function applyRiwaya(){
+  try{ paintQPreview(); }catch(e){}
   document.body.classList.toggle('riw-warsh', settings.riwaya==='warsh');
   document.body.classList.toggle('riw-hafs', settings.riwaya==='hafs');
   $('#quran-src').textContent = settings.riwaya==='warsh' ? 'ورش — الخط المغربي' : 'حفص — مصحف الملك فهد';
@@ -2184,6 +2292,8 @@ function applyNotifNavigation(data){
 /* يُقرأ الوسمُ عند الإقلاع وعند تغيّره — فمن ضغط اختصارًا والتطبيقُ مفتوحٌ
    أصلًا لا يُعاد تحميلُ الصفحة، وإنّما يتغيّر الوسمُ وحدَه. */
 window.addEventListener('hashchange', ()=>{ try{ routeFromHash(); }catch(e){} });
+/* الصفحةُ الأولى هي الوِرد: تُبنى عند الإقلاع كما لو ضُغط تبويبُها */
+setTimeout(()=>{ try{ const t=document.querySelector('.tab.on'); if(t && t.dataset.s==='s-wird') openWird(); }catch(e){} }, 0);
 setTimeout(()=>{ try{ routeFromHash(); }catch(e){} }, 300);
 navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', e=>{
   if(e.data && e.data.type==='navigate') applyNotifNavigation(e.data.data);
@@ -2309,11 +2419,11 @@ $('#salat-toast') && $('#salat-toast').addEventListener('click', ()=> $('#salat-
     if(tf && tf.classList.contains('show')){
       closeTafsir(); history.pushState({az:1},''); return;
     }
-    // 3) لست في تبويب الأذكار → ارجع إليه
+    // 3) لست في الصفحة الرئيسيّة (الوِرد) → ارجع إليها
     const active=document.querySelector('.tab.on');
-    if(active && active.dataset.s!=='s-azkar'){
-      const azkarTab=document.querySelector('.tab[data-s="s-azkar"]');
-      if(azkarTab) azkarTab.click();
+    if(active && active.dataset.s!=='s-wird'){
+      const homeTab=document.querySelector('.tab[data-s="s-wird"]');
+      if(homeTab) homeTab.click();
       history.pushState({az:1},''); return;
     }
     // 4) في الصفحة الرئيسية → اضغط رجوع مرّتين للخروج
@@ -2346,6 +2456,9 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
 }));
 
 let __splashTimer=null;
+/* لمسةٌ واحدةٌ تُغلق شاشةَ الافتتاح — لا يُنتظر من استعجل */
+(function(){ const s=document.getElementById('splash'); if(!s) return;
+  s.addEventListener('click', ()=>{ s.classList.add('gone'); }, {once:true}); })();
 function flashSalat(){
   const s=$('#splash'); if(!s) return;
   s.style.animation='none';
@@ -2664,6 +2777,39 @@ const QISAS = [
   { id:'ahsan',  name:'أحسن القصص — مجموعة',
     ids:['beststories'] }
 ];
+/* ==================== السيرة النبوية ====================
+   سلاسلُ دروسٍ كاملةٍ منسوبةٍ إلى أصحابها في عناوينها، فُحص أوّلُ ملفٍّ من كلٍّ منها. */
+const SEERA = [
+  { id:'s-awadi',    name:'السيرة النبوية — نبيل العوضي',        ids:['seera_nabawiya_al3awadi','Seera_sheikhNabilAl3awadhy'], sort:true },
+  { id:'s-hajj',     name:'السيرة النبوية — محمد سيد حاج',       ids:['Sira__Nabawiya','Hajj-sirah'], sort:true },
+  { id:'s-suwaidan', name:'السيرة النبوية — طارق السويدان',      ids:['scrom.miui.gallery'], sort:true },
+  { id:'s-sarjani',  name:'في ظلال السيرة: العهد المدني — راغب السرجاني', ids:['Fi_Dilal_Seera_RagheB_SarjanI_Al_Ahd-madani_uP_bY_mUSLEm'], sort:true },
+  { id:'s-huwayni',  name:'صحيح السيرة النبوية — أبو إسحاق الحويني', ids:['saheeh_assera'], sort:true, ep:'الدرس' }
+];
+/* ==================== الأحاديث الصحيحة ====================
+   قراءةٌ صوتيّةٌ لكتب الصحيح وحدها — الصحيحان وما اتّفقا عليه — فكلُّ حديثٍ
+   فيها صحيحٌ ومصدرُه اسمُ الكتاب. ولم تُدخَل الأربعون النوويّة ولا رياض
+   الصالحين: فيهما أحاديثُ ضعّفها بعضُ أهل العلم، فلا تُعرض تحت «الصحيحة». */
+const HADITH = [
+  { id:'h-bukhari', name:'صحيح البخاري — قراءة صوتية',  src:'صحيح البخاري', ids:['Bokharee_up_by_ayoub-islam','bokhari_audio'], sort:true },
+  { id:'h-muslim',  name:'صحيح مسلم — قراءة صوتية',     src:'صحيح مسلم',   ids:['saheh-muslim-mp3'], sort:true },
+  { id:'h-lulu',    name:'اللؤلؤ والمرجان فيما اتّفق عليه الشيخان', src:'متّفقٌ عليه: البخاري ومسلم', ids:['0001Ar01Lo2lo2WaMarjanAB'], sort:true },
+  { id:'h-mukhtasar', name:'مختصر صحيح مسلم',          src:'صحيح مسلم',   ids:['Mokhtassar_moslim_by_www.Morocco-Islamic.com'], sort:true, ep:'الجزء' }
+];
+/* الأقسامُ التي تُعرض سلاسلَ حلقات: لكلٍّ قائمتُه وعنوانُه ومفتاحُ حفظِ آخر اختيار */
+const SERIES = {
+  stories:{ list:QISAS,  pick:'اختر السلسلة', title:'قصص الأنبياء',     key:'az_qisas'  },
+  seera:  { list:SEERA,  pick:'اختر السلسلة', title:'السيرة النبوية',   key:'az_seera'  },
+  hadith: { list:HADITH, pick:'اختر الكتاب',  title:'الأحاديث الصحيحة', key:'az_hadith' }
+};
+let __seriesKind='stories';
+const seriesOf = () => SERIES[__seriesKind] || SERIES.stories;
+function seriesFind(id){ for(const k in SERIES){ const q=SERIES[k].list.find(x=>x.id===id); if(q) return q; } return null; }
+/* رقمُ الحلقة من اسم ملفّها — للترتيب، ولتسميةِ ما لا عنوانَ له */
+function epNum(u){
+  const f=decodeURIComponent(String(u||'').split('/').pop()||''); const m=f.match(/\d+/);
+  return m ? parseInt(m[0],10) : Infinity;
+}
 let __stories=null, __storyLoading=false, __storyPlaying=null, __qisasCur=null;
 const __qisasCache={};
 function fmtDur(sec){
@@ -2679,6 +2825,23 @@ async function fetchQisas(q){
     if(!it || !it.files.length) continue;
     if(!best || it.files.length>best.length) best=it.files;
     if(it.files.length>=3) break;          // سلسلةٌ معتبرة، يكفي
+  }
+  /* عناوينُ أنظف: «السنة المقروءة (كتاب الإيمان)_2» ← «كتاب الإيمان»، ويُحذف ما
+     يتكرّر في كلّ حلقة (اسمُ القسم، و«قراءة من كتاب…»). والأصلُ لا يُمسّ. */
+  if(best && (SEERA.includes(q) || HADITH.includes(q))){
+    best=best.map(f=>{
+      let n=String(f.name||'');
+      n=n.replace(/\s*[-–]\s*قراءة من كتاب[^]*$/,'')
+         .replace(/^السنة المقروءة\s*\(([^)]*)\)\s*_?\d*\s*$/,'$1')
+         .replace(/_\d+\s*$/,'')
+         .replace(/^السيرة النبوية\s*[-–]\s*/,'')
+         .replace(/\s*[-–]\s*www\.[\w.-]+\s*$/i,'').trim();
+      return n && n!==f.name ? Object.assign({}, f, {name:n}) : f;
+    });
+  }
+  if(best && q.sort){
+    best=best.slice().sort((x,y)=> epNum(x.url)-epNum(y.url));
+    if(q.ep) best=best.map(f=>{ const n=epNum(f.url); return Object.assign({}, f, { name: isFinite(n) ? (q.ep+' '+AR(n)) : f.name }); });
   }
   if(best) __qisasCache[q.id]=best;
   return best;
@@ -2726,21 +2889,23 @@ function playStory(i){
   vibrate(6);
   if('mediaSession' in navigator){
     try{ navigator.mediaSession.metadata=new MediaMetadata({
-      title:c.name, artist:(__qisasCur?__qisasCur.name:'قصص الأنبياء'), album:'قصص الأنبياء' }); }catch(e){}
+      title:c.name, artist:(__qisasCur?__qisasCur.name:seriesOf().title), album:seriesOf().title }); }catch(e){}
   }
   markStory();
 }
 ['play','pause','ended'].forEach(ev=> $('#reciter-audio') && $('#reciter-audio').addEventListener(ev, ()=>{ try{ markStory(); }catch(e){} }));
 function openQisasPicker(){
-  openLabelOverlay(QISAS.map(q=>({id:q.id,label:q.name})), __qisasCur?__qisasCur.id:null,
-    id=>{ closeSuraOverlay(); pickQisas(id); }, 'اختر السلسلة');
+  const S=seriesOf();
+  openLabelOverlay(S.list.map(q=>({id:q.id,label:q.name})), __qisasCur?__qisasCur.id:null,
+    id=>{ closeSuraOverlay(); pickQisas(id); }, S.pick);
 }
 async function pickQisas(id){
-  const q=QISAS.find(x=>x.id===id); if(!q) return;
+  const q=seriesOf().list.find(x=>x.id===id); if(!q) return;
   __qisasCur=q; __storyPlaying=null; __stories=null;
   const nm=$('#stories-name'); if(nm) nm.textContent=q.name;
-  const nt=$('#stories-note'); if(nt) nt.textContent=q.name+' · تُشغَّل من أرشيف الإنترنت';
-  try{ store.set('az_qisas', id); }catch(e){}
+  const nt=$('#stories-note');
+  if(nt) nt.textContent=(q.src ? ('المصدر: '+q.src+' · ') : '')+'تُشغَّل من أرشيف الإنترنت';
+  try{ store.set(seriesOf().key, id); }catch(e){}
   const box=$('#stories-list');
   if(box) box.innerHTML='<div class="search-hint">…جارٍ تحميل الحلقات</div>';
   __storyLoading=true;
@@ -2752,9 +2917,11 @@ async function pickQisas(id){
 async function openStories(){
   const btn=$('#stories-pick');
   if(btn && !btn.__wired){ btn.__wired=true; btn.addEventListener('click', ()=>{ vibrate(6); openQisasPicker(); }); }
-  if(__qisasCur) return renderStories(__stories);
-  const saved=store.get('az_qisas', null);
-  return pickQisas((saved && QISAS.find(q=>q.id===saved)) ? saved : QISAS[0].id);
+  const S=seriesOf();
+  if(__qisasCur && S.list.includes(__qisasCur)) return renderStories(__stories);
+  __qisasCur=null; __stories=null;
+  const saved=store.get(S.key, null);
+  return pickQisas((saved && S.list.find(q=>q.id===saved)) ? saved : S.list[0].id);
 }
 /* ==================== المشاركة: صورة أو PDF لأيّ شيء ====================
    يُلتقط المحتوى كما هو معروضٌ بخطوطه وألوانه عبر SVG/foreignObject —
@@ -3575,22 +3742,45 @@ function openDuat(){
   renderDuat();
 }
 
+/* أقسامُ الاستماع — القرآنُ أوّلُها وهو المفتوحُ افتراضًا */
+const IC_BOOK='<svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>';
+const LISTEN_CATS=[
+  { id:'quran',   name:'القرآن الكريم',     sub:'اختر القارئ ثمّ السورة للاستماع إليها', ic:IC_BOOK },
+  { id:'duat',    name:'الدعاة',            sub:'اختر الداعية ثمّ التسجيل',
+    ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>' },
+  { id:'stories', name:'قصص الأنبياء',       sub:'سلاسلُ قصص الأنبياء عليهم السلام',
+    ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h4"/><path d="M15 7h4"/><circle cx="12" cy="12" r="9"/></svg>' },
+  { id:'seera',   name:'السيرة النبوية',     sub:'سيرةُ النبيّ ﷺ في سلاسلَ كاملة',
+    ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>' },
+  { id:'hadith',  name:'الأحاديث الصحيحة',   sub:'من الصحيحين — والمصدرُ مذكورٌ مع كلّ كتاب', ic:IC_BOOK }
+];
+let __listenCat='quran';
 function applyListenMode(mode){
-  const stories = mode==='stories';
-  const duat    = mode==='duat';
-  const quran   = !stories && !duat;
+  const cat=LISTEN_CATS.find(c=>c.id===mode) || LISTEN_CATS[0];
+  __listenCat=cat.id;
+  const series = !!SERIES[cat.id];
+  const duat   = cat.id==='duat';
+  const quran  = cat.id==='quran';
   $('#reciter-box').style.display  = quran ? '' : 'none';
   $('#listen-list').style.display  = quran ? '' : 'none';
-  $('#stories-box').style.display  = stories ? '' : 'none';
+  $('#stories-box').style.display  = series ? '' : 'none';
   $('#duat-box').style.display     = duat ? '' : 'none';
-  $('#listen-sub').textContent = stories ? 'سلسلة قصص الأنبياء للشيخ نبيل العوضي'
-                               : duat    ? 'اختر الداعية ثمّ التسجيل'
-                               : 'اختر القارئ ثمّ السورة للاستماع إليها';
-  $$('#listen-mode-seg button').forEach(b=> b.classList.toggle('on', b.dataset.l===mode));
-  if(stories) openStories();
+  $('#listen-sub').textContent = cat.sub;
+  $('#listen-cat-name').textContent = cat.name;
+  $('#listen-cat-ic').innerHTML = cat.ic;
+  if(series){
+    __seriesKind=cat.id;
+    const nm=$('#stories-name'); if(nm && !(__qisasCur && seriesOf().list.includes(__qisasCur))) nm.textContent=seriesOf().pick;
+    openStories();
+  }
   if(duat) openDuat();
 }
-$$('#listen-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{ vibrate(6); applyListenMode(b.dataset.l); }));
+$('#listen-cat') && $('#listen-cat').addEventListener('click', ()=>{
+  vibrate(6);
+  openLabelOverlay(LISTEN_CATS.map(c=>({id:c.id, label:c.name})), __listenCat,
+    id=>{ closeSuraOverlay(); applyListenMode(id); }, 'ماذا تريد أن تسمع؟');
+});
+applyListenMode('quran');
 
 /* ==================== اختبار الثقافة الإسلامية ==================== */
 const QZ_LEN=10;
@@ -4356,9 +4546,9 @@ function saadiFiles(){
   return f;
 }
 const RECITERS=[
-  {id:'shur',       name:'سعود الشريم',      exact:'سعود الشريم',   match:['الشريم']},
   {id:'ghamdi',      name:'سعد الغامدي',      exact:'سعد الغامدي',   match:['الغامدي'],
     fallback:'https://server9.mp3quran.net/s_gmd/'},
+  {id:'shur',       name:'سعود الشريم',      exact:'سعود الشريم',   match:['الشريم']},
   {id:'minshawi',    name:'محمد المنشاوي',     exact:'محمد صديق المنشاوي', match:['المنشاوي']},
   {id:'minshawi-mjwd', name:'المنشاوي (مجوّد)', exact:'محمد صديق المنشاوي', match:['المنشاوي'],
     prefer:/مجود/, fallback:'https://server10.mp3quran.net/minsh_mjwd/'},
@@ -5225,6 +5415,7 @@ async function openListen(){
     try{ if(!wirdGlobal()) await loadScript(wirdFile()); WIRD=wirdGlobal(); if(WIRD) WIRD.__riwaya=settings.riwaya; }catch(e){}
   }
   renderReciterChips();
+  presetListenPlayer();
   /* ما نُزّل على الجهاز يُقرأ أوّلًا، فتظهر علاماتُه مع الصفّ لا بعده */
   try{ await qdlReady(); }catch(e){}
   renderListenList();
@@ -5233,6 +5424,23 @@ async function openListen(){
   if(!__reciterCatalog){
     fetchReciterCatalog().then(()=>{ try{ renderListenList(); }catch(e){} }).catch(()=>{});
   }
+}
+/* أوّلُ ما يراه من فتح الاستماع: المشغّلُ جاهزٌ بالقارئ المختار (سعد الغامدي
+   افتراضًا) على سورة الحجّ — ولا يبدأ الصوتُ حتى يضغط، فالتشغيلُ المفاجئ
+   مزعجٌ ويمنعه المتصفّح أصلًا. ومن اختار سورةً أو قارئًا بقي على اختياره. */
+const LISTEN_DEFAULT_SURA=22;   // الحجّ
+function presetListenPlayer(){
+  const a=$('#reciter-audio');
+  if(!WIRD || !WIRD.sur || (a && a.src) || __audioSura!=null) return;
+  const idx=WIRD.sur.findIndex(x=>x.s===LISTEN_DEFAULT_SURA);
+  if(idx<0) return;
+  __audioSura=idx;
+  const r=RECITERS.find(x=>x.id===settings.reciter)||RECITERS[0];
+  $('#reciter-player').style.display='flex';
+  $('#reciter-name').textContent=r.name;
+  $('#reciter-sura').textContent='سورة '+WIRD.sur[idx].n;
+  $('#reciter-status').textContent='';
+  try{ markListenActive(); }catch(e){}
 }
 function renderListenList(){
   const wrap=$('#listen-list'); if(!wrap) return;
@@ -6262,8 +6470,6 @@ try{ renderBackupStatus(); }catch(e){}
 applyQuranScale();
 $('#q-plus')  && $('#q-plus').addEventListener('click', ()=> bumpQuranScale(0.1));
 $('#q-minus') && $('#q-minus').addEventListener('click', ()=> bumpQuranScale(-0.1));
-$('#q-plus-float')  && $('#q-plus-float').addEventListener('click', ()=> bumpQuranScale(0.1));
-$('#q-minus-float') && $('#q-minus-float').addEventListener('click', ()=> bumpQuranScale(-0.1));
 
 try{ if(settings.notif || settings.salat) scheduleChecks(); }catch(e){}
 /* التطبيق الأصلي (Capacitor): جدولة أذان الصلوات على مستوى النظام عند الإقلاع وعند كل فتح */
