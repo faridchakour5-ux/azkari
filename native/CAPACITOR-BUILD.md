@@ -25,9 +25,9 @@
 
 ## المتطلّبات (على حاسوبك)
 
-- **Node.js 18+** و **npm**
+- **Node.js 22 فما فوق** و **npm** (يطلبه Capacitor 8)
 - **Android Studio** (أحدث نسخة) + Android SDK
-- **JDK 17**
+- **JDK 21** لـ Gradle: يأتي مع Android Studio أو يُنزَّل من داخله (انظر الخطوة ٣)
 - ملف التوقيع (keystore) نفسه المستعمَل سابقًا — ضروري ليُقبَل التحديث في
   Play Store. احتفظ به وبكلمة مروره **خارج المستودع** (مدير كلمات مرور أو
   تخزين آمن)، ولا تكتبهما في أي ملف يُرفع إلى GitHub.
@@ -57,6 +57,13 @@ npm run apply:android     # يزرع طبقة الأذان + الأذونات + 
 `res/ (نقر يمين) → New → Image Asset → Notification Icons`، وسمِّها
 `ic_stat_icon`. (إن تركتها، يستعمل التطبيقُ أيقونةَ منبّهٍ افتراضيّة.)
 
+## لماذا Capacitor 8 لا 6؟
+
+منذ **٣١ أغسطس ٢٠٢٦** ترفض Play كلَّ تطبيقٍ جديد أو **تحديثٍ** لا يستهدف
+**Android 16 (API 36)**. وCapacitor 6 يستهدف API 34، فكان الملفُّ سيُرفض عند
+الرفع. Capacitor 8 يستهدف API 36 (`targetSdkVersion = 36`)، وقد جُرِّب توليدُ
+المشروع به وترجمةُ طبقة الأذان على `android.jar` الحقيقيّ لـ API 36.
+
 ## 3) المزامنة والفتح في Android Studio
 
 ```bash
@@ -64,14 +71,28 @@ npm run sync              # نسخُ الويب + cap sync + زرعُ طبقة �
 npx cap open android
 ```
 
+**اختيارُ JDK في Android Studio (مرّةً واحدة):** إن ظهر خطأٌ عن إصدار جافا، افتح
+*File ← Settings ← Build, Execution, Deployment ← Build Tools ← Gradle*
+واختر في **Gradle JDK** إصدارًا رقمُه **21**؛ فإن لم يوجد فاضغط
+**Download JDK…** واختر الإصدار 21. (الإصدارُ 25 أحدثُ مما يقبله Gradle 8.14،
+والإصدارُ 17 أقدمُ مما يطلبه Capacitor 8.)
+
 > **مهمّ:** شغّل `npm run sync` (لا `npx cap sync` وحدَه) بعد كلّ تعديل.
 > `cap sync` قد يُعيد كتابة `AndroidManifest.xml` و`MainActivity.java`،
 > و`apply:android` هو الذي يُعيد زرعَ الطبقة بعده.
 
 ## 4) رقم الإصدار (versionCode)
 
-في `android/app/build.gradle` ارفع `versionCode` إلى رقم **أكبر** من آخر
-نسخة رفعتها إلى Play Store (مثلًا `3`)، وحدّث `versionName` (مثلًا `"2.0"`).
+يُكتب رقمُ الإصدار في **`native/android-version.json`**، و`apply:android` يضعه
+في `build.gradle` تلقائيًّا. **لا تعدّله داخل `build.gradle` يدويًّا**: مجلّدُ
+`android/` مُولَّدٌ ويُعاد توليدُه، فيضيع ما كُتب فيه ويُرفض الرفعُ.
+
+```json
+{ "versionCode": 100, "versionName": "2.0" }
+```
+
+ارفع `versionCode` مع كلّ إصدارٍ تُرسله إلى Play، فيجب أن يكون **أكبر** من
+آخر رقمٍ رُفع. (`versionName` هو ما يراه المستخدم.)
 
 ## 5) البناء والتوقيع (AAB للمتجر)
 

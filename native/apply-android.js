@@ -105,4 +105,21 @@ m = m.replace('</manifest>', PERMS + '</manifest>');
 
 fs.writeFileSync(MAN, m, 'utf8');
 console.log('✓ حُدّث AndroidManifest.xml (خدمةٌ + مُستقبِلان + ٧ أذونات)');
+
+/* 4) رقمُ الإصدار: يُقرأ من android-version.json لا من تحريرٍ يدويٍّ في build.gradle —
+      فمجلّدُ android/ مُولَّدٌ ويُعاد توليدُه، وما يُكتب فيه باليد يضيع، ثمّ يُرفض
+      الرفعُ في Play لأنّ الرقمَ لم يعلُ ما قبلَه. زِد الرقمَ هناك مع كلّ إصدار. */
+const VER = path.join(HERE, 'android-version.json');
+const GRADLE = path.join(APP, '..', '..', 'build.gradle');
+if (fs.existsSync(VER) && fs.existsSync(GRADLE)) {
+  const v = JSON.parse(fs.readFileSync(VER, 'utf8'));
+  if (!Number.isInteger(v.versionCode) || v.versionCode < 1) die('versionCode في android-version.json يجب أن يكون عددًا صحيحًا موجبًا');
+  if (typeof v.versionName !== 'string' || !v.versionName) die('versionName في android-version.json مفقود');
+  let g = fs.readFileSync(GRADLE, 'utf8');
+  const a = g.replace(/versionCode\s+\d+/, 'versionCode ' + v.versionCode)
+             .replace(/versionName\s+"[^"]*"/, 'versionName "' + v.versionName + '"');
+  if (a === g && !/versionCode\s+\d+/.test(g)) die('لم أجد versionCode في ' + GRADLE);
+  fs.writeFileSync(GRADLE, a, 'utf8');
+  console.log('✓ رقمُ الإصدار: versionCode ' + v.versionCode + ' · versionName "' + v.versionName + '"');
+}
 console.log('\nتمّت زراعةُ طبقةِ الأذان ✓  — افتح الآن:  npx cap open android\n');
