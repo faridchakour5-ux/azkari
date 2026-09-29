@@ -1261,6 +1261,22 @@
   .listen-cat .lc-lbl{font-size:12px; font-weight:700; color:var(--text-3);}
   .listen-cat .lc-nm{font-size:17px; font-weight:800; color:var(--text);}
   .listen-cat .chev{color:var(--accent); font-size:18px; line-height:1; margin-top:-6px;}
+
+  /* ════ الشاشاتُ العريضة: لوحٌ واحدٌ في الوسط ════
+     كان التطبيقُ يتمدّد على عرض الشاشة كلِّه، فيبلغ السطرُ الواحد ألفًا ومئتي
+     بكسلٍ على حاسوبٍ أو لوح — والعينُ لا تتتبّع سطرًا أعرضَ من نحو ستّين حرفًا.
+     فيُحصر العرضُ في ٧٢٠px وسطَ الشاشة بخلفيّة التطبيق نفسِها، ويبقى الهاتفُ
+     كما هو تمامًا (القاعدةُ لا تسري دون ٧٦٠px). والشريطُ السفليّ يبقى بعرض
+     الشاشة وتتوسّطه الأيقوناتُ، والعناصرُ الطافيةُ تتبع اللوحَ لا حافّةَ الشاشة. */
+  @media (min-width:760px){
+    .screen{max-width:720px; margin-inline:auto;}
+    .tabbar{justify-content:center;}
+    .tab{flex:0 1 150px;}
+    .totop-btn{left:max(16px, calc(50% - 360px + 16px));}
+    .riwaya-float{left:max(16px, calc(50% - 360px + 16px));}
+    .upd-bar{max-width:520px; margin-inline:auto;}
+  }
+  .upd-bar{box-shadow:0 4px 16px rgba(47,158,68,.32);}
 </style>
 </head>
 <body>
@@ -6694,6 +6710,14 @@ if('serviceWorker' in navigator){
           if(w.state==='installed' && navigator.serviceWorker.controller) showUpdBar(w);
         });
       });
+      /* فحصُ التحديث في الخلفية مرّةً في اليوم (إن سمح المتصفّحُ، وللمثبَّت وحدَه) */
+      try{
+        if(reg.periodicSync && navigator.permissions){
+          navigator.permissions.query({name:'periodic-background-sync'}).then(st=>{
+            if(st.state==='granted') reg.periodicSync.register('salatee-update', { minInterval: 24*60*60*1000 }).catch(()=>{});
+          }).catch(()=>{});
+        }
+      }catch(e){}
       // تحقّق فوري من وجود نسخة أحدث، ثمّ كل 30 دقيقة، وكلّما عاد المستخدم للتطبيق
       reg.update().catch(()=>{});
       setInterval(()=> reg.update().catch(()=>{}), 30*60*1000);

@@ -13,7 +13,8 @@
   "theme_color": "#EFE6D4",
   "categories": [
     "lifestyle",
-    "education"
+    "education",
+    "books"
   ],
   "icons": [
     {
@@ -37,32 +38,32 @@
   ],
   "screenshots": [
     {
-      "src": "store/screenshots/01-adhkar.png",
-      "sizes": "824x1784",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "الأذكار"
-    },
-    {
-      "src": "store/screenshots/02-wird.png",
+      "src": "store/screenshots/01-wird.png",
       "sizes": "824x1784",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "الوِرد"
     },
     {
-      "src": "store/screenshots/03-mushaf.png",
+      "src": "store/screenshots/02-listen.png",
       "sizes": "824x1784",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "المصحف"
+      "label": "الاستماع"
     },
     {
-      "src": "store/screenshots/04-tasbih.png",
+      "src": "store/screenshots/03-adhkar.png",
       "sizes": "824x1784",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "المسبحة"
+      "label": "الأذكار"
+    },
+    {
+      "src": "store/screenshots/04-fiqh.png",
+      "sizes": "824x1784",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "الفقه"
     },
     {
       "src": "store/screenshots/05-settings.png",
@@ -70,6 +71,34 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "الإعدادات"
+    },
+    {
+      "src": "store/screenshots/wide/01-wird.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "الوِرد"
+    },
+    {
+      "src": "store/screenshots/wide/02-listen.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "الاستماع"
+    },
+    {
+      "src": "store/screenshots/wide/03-adhkar.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "الأذكار"
+    },
+    {
+      "src": "store/screenshots/wide/04-fiqh.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "الفقه"
     }
   ],
   "shortcuts": [
@@ -96,6 +125,17 @@
       ]
     },
     {
+      "name": "الاستماع",
+      "short_name": "الاستماع",
+      "url": "./index.html#listen",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "المصحف",
       "short_name": "المصحف",
       "url": "./index.html#wird",
@@ -107,8 +147,8 @@
       ]
     },
     {
-      "name": "المسبحة",
-      "short_name": "المسبحة",
+      "name": "الفقه والمسبحة",
+      "short_name": "الفقه",
       "url": "./index.html#tasbih",
       "icons": [
         {
@@ -117,5 +157,20 @@
         }
       ]
     }
-  ]
+  ],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
+  },
+  "handle_links": "preferred",
+  "edge_side_panel": {
+    "preferred_width": 480
+  }
 }

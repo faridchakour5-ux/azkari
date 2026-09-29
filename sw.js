@@ -1,5 +1,5 @@
-/* صلاتي — service worker v222 */
-const CACHE = 'azkari-v222';
+/* صلاتي — service worker v223 */
+const CACHE = 'azkari-v223';
 const ASSETS = [
   './',
   './index.html',
@@ -164,6 +164,15 @@ self.addEventListener('fetch', e => {
       });
     })
   );
+});
+
+/* مزامنةٌ دوريّةٌ في الخلفية — لغرضٍ واحد: فحصُ وجود نسخةٍ أحدث من التطبيق.
+   فمن لم يفتح التطبيقَ أيّامًا تكون النسخةُ الجديدةُ قد نُزّلت وجاهزةً حين يفتحه،
+   فيظهر له شريطُ التحديث فورًا ويعمل التطبيقُ دون إنترنت بأحدث ما فيه. ولا
+   تُرسَل بها أيُّ بياناتٍ ولا يُقرأ بها موقعٌ ولا تُنبَّه بها أحدًا. والمتصفّحُ
+   وحدَه يقرّر متى تُطلَق (للتطبيقات المثبَّتة وبإذنٍ تلقائيّ). */
+self.addEventListener('periodicsync', e => {
+  if (e.tag === 'salatee-update') e.waitUntil(self.registration.update());
 });
 
 self.addEventListener('notificationclick', e => {

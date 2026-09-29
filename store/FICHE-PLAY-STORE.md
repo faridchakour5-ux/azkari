@@ -55,7 +55,7 @@
 |---|---|---|
 | Icône 512×512 | `icons/icon-512.png` | Fiche principale → Icône de l'appli |
 | Bandeau 1024×500 | `store/feature-1024x500.png` | Fiche principale → Image de présentation |
-| Captures téléphone (×5) | `store/screenshots/*.png` | Fiche principale → Captures d'écran (téléphone) |
+| Captures téléphone (×5) | `store/screenshots/0*.png` (les tablettes/ordinateur: `store/screenshots/wide/`) | Fiche principale → Captures d'écran (téléphone) |
 
 > Minimum requis par Google : icône + bandeau + **au moins 2** captures téléphone. Nous en avons 5.
 
