@@ -1,5 +1,5 @@
-/* صلاتي — service worker v223 */
-const CACHE = 'azkari-v223';
+/* صلاتي — service worker v224 */
+const CACHE = 'azkari-v224';
 const ASSETS = [
   './',
   './index.html',
@@ -173,6 +173,21 @@ self.addEventListener('fetch', e => {
    وحدَه يقرّر متى تُطلَق (للتطبيقات المثبَّتة وبإذنٍ تلقائيّ). */
 self.addEventListener('periodicsync', e => {
   if (e.tag === 'salatee-update') e.waitUntil(self.registration.update());
+});
+
+/* إشعاراتٌ يُرسلها خادمُنا (Web Push) والتطبيقُ مغلق. يجب أن تُعرَض كلُّ رسالةٍ
+   عند وصولها: المتصفّحُ يُلغي اشتراكَ موقعٍ يتلقّى رسائلَ ولا يُظهر بها شيئًا.
+   والنصُّ كلُّه يأتي جاهزًا من الخادم، فلا يُحسب هنا شيءٌ. */
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) { d = {}; }
+  e.waitUntil(self.registration.showNotification(d.title || 'وقت الذكر 🤍', {
+    body: d.body || '',
+    dir: 'rtl', lang: 'ar',
+    icon: 'icons/icon-192.png', badge: 'icons/icon-192.png',
+    tag: d.tag || 'azkar-push', renotify: true, vibrate: [40, 60, 40],
+    data: d.data || null
+  }));
 });
 
 self.addEventListener('notificationclick', e => {

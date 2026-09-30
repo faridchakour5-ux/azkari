@@ -7,3 +7,7 @@ native/ios/
 # مفاتيحُ التوقيع: لا تُرفَع أبدًا
 *.jks
 *.keystore
+
+# دوالّ Netlify: الحزمُ تُثبَّت عند البناء (package-lock.json يُرفَع ليثبُت إصدارُها)
+netlify/functions/node_modules/
+.netlify/

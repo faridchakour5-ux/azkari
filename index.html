@@ -1675,7 +1675,14 @@
       <label class="sw"><input type="checkbox" id="adhan-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
     <div class="gnote native-only" id="adhan-note" style="display:none"></div>
-    <div class="gnote web-only" id="adhan-web-note">لا يَرفع المتصفّحُ أذانًا والتطبيقُ مغلقٌ تمامًا — وهو قيدٌ في المتصفّح نفسِه لا في التطبيق، ولا يَملك موقعٌ تجاوزَه.</div>
+    <div class="gnote web-only" id="adhan-web-note">الأذانُ بصوته كاملًا لا يرفعه المتصفّحُ والتطبيقُ مغلقٌ — وهو قيدٌ في المتصفّح نفسِه لا في التطبيق. وبإمكانك أن يصلك إشعارٌ نصّيٌّ عند دخول كلّ وقتٍ بالخيار أدناه.</div>
+    <div class="row web-only" id="push-row"><span class="k">تصلني التذكيرات والتطبيق مغلق</span>
+      <label class="sw"><input type="checkbox" id="push-toggle"><span class="track"></span><span class="knob"></span></label>
+    </div>
+    <div class="row web-only" id="push-prayer-row" style="display:none"><span class="k">إشعارٌ عند دخول وقت كلّ صلاة</span>
+      <label class="sw"><input type="checkbox" id="push-prayer-toggle"><span class="track"></span><span class="knob"></span></label>
+    </div>
+    <div class="gnote web-only" id="push-note"></div>
     <div class="gnote" id="adhan-exact" style="display:none">تنبيه: لم يُؤذَن للتطبيق بالمنبّهات الدقيقة، فقد يتأخّر الأذانُ دقائق عن وقته. <b id="adhan-exact-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">اسمح بها الآن</b></div>
     <div class="btn-row b-blue svc-only" id="adhan-try" style="display:none">تجربة الأذان الآن</div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
@@ -1920,7 +1927,7 @@ function applyRiwaya(){
   if(typeof syncRiwayaPills==='function') syncRiwayaPills();
   document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh');
 }
-function saveSettings(){ store.set('az_settings', settings); }
+function saveSettings(){ store.set('az_settings', settings); try{ pushSyncSoon(); }catch(e){} }
 
 /* ---------- AZKAR screen ---------- */
 /* «لا تترك الصلاة» انتقلت إلى صفحة الفقه، فهي بابُ حكمٍ لا بابُ ذِكر */
@@ -2208,6 +2215,167 @@ $('#notif-test').addEventListener('click', async ()=>{
   showToast('تمّ إرسال إشعار تجريبي ✓ — قد لا يظهر ما دام التطبيق مفتوحًا؛ صغّره لتراه', 4000);
 });
 
+/* ===== إشعاراتٌ تصل والتطبيقُ مغلق (Web Push / VAPID) — المتصفّحُ والـPWA وحدَهما =====
+   المتصفّحُ لا يُطلق شيئًا والتطبيقُ مغلق، فيُرسل خادمُنا (Netlify) رسالةً عبر خدمة
+   الدفع التابعة للمتصفّح في وقتها. ولا يحفظ الخادمُ إلا ما يلزم لذلك: عنوانَ
+   الإشعارات، وموقعًا مقرَّبًا إلى نحو ١١ كم، ومنطقتَك الزمنيّة، واختياراتِك.
+   وفي التطبيق الأصليّ لا حاجةَ إليها: التنبيهاتُ تُجدوَل فيه على الجهاز نفسِه. */
+const PUSH_KEY = 'BBy3V-07bl4nCJQQ24joNaM-5UzFKpv2RQC2BnyBpK7b2x29BBtLHpCF-SJ_Qq5AeS-5r51ZEXW2pWjInExaXds';
+const PUSH_API = '/api/push/';
+function pushSupported(){ return !isNative() && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
+/* الآيفون لا يقبل الـPush إلا لتطبيقٍ أُضيف إلى الشاشة الرئيسيّة */
+function pushNeedsInstall(){ return isIOS() && !isStandalone(); }
+/* هل الخادمُ هو الذي يُرسل الآن؟ فيسكتُ المُجدوِلُ المحلّيُّ كيلا يصل الإشعارُ مرّتين */
+function pushActive(){ try{ return !!settings.push && pushSupported() && Notification.permission==='granted'; }catch(e){ return false; } }
+function b64ToU8(s){
+  const b=atob((s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'));
+  return Uint8Array.from(b, c=>c.charCodeAt(0));
+}
+function sameKey(sub){
+  try{
+    const a=new Uint8Array(sub.options.applicationServerKey), b=b64ToU8(PUSH_KEY);
+    return a.length===b.length && a.every((x,i)=>x===b[i]);
+  }catch(e){ return true; }
+}
+async function pushSubGet(){ try{ return await (await navigator.serviceWorker.ready).pushManager.getSubscription(); }catch(e){ return null; } }
+function pushBody(sub){
+  const g=geoStore();
+  return {
+    subscription: sub.toJSON(),
+    lat: g ? g.lat : null, lng: g ? g.lng : null,
+    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    prefs: { prayer: settings.pushPrayer!==false, pre: !!settings.notif, azkar: !!settings.notif, salat: !!settings.salat, kahf: !!settings.notif }
+  };
+}
+async function pushPost(path, body){
+  const r=await fetch(PUSH_API+path, { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(body) });
+  if(!r.ok) throw new Error('push '+path+' '+r.status);
+}
+async function pushSync(){
+  if(!pushActive()) return;
+  const sub=await pushSubGet(); if(!sub) return;
+  await pushPost('subscribe', pushBody(sub));
+}
+/* تغيّرُ الموقع أو الاختيارات: يُرسَل مرّةً واحدةً بعد سكون ثانيتين */
+function pushSyncSoon(){
+  if(!settings.push) return;
+  clearTimeout(window.__pushT);
+  window.__pushT=setTimeout(()=>{ pushSync().catch(()=>{}); }, 2000);
+}
+/* العاملُ الخدميّ القديم (قبل v224) لا يعرف رسائل push: لو اشتُرك المستخدمُ
+   وهو النشِط، لَوصلت الرسائلُ ولم يعرضها أحد. والنسخةُ الجديدة تبقى «منتظِرة»
+   حتى يُغلق المستخدمُ كلَّ النوافذ، فنُفعّلها هنا قبل الاشتراك — دون إعادة تحميل. */
+async function pushEnsureFreshSW(reg){
+  try{ await reg.update(); }catch(e){}
+  const w = reg.installing;
+  if(w && w.state==='installing'){
+    await new Promise(res=>{ const f=()=>{ if(w.state!=='installing'){ w.removeEventListener('statechange',f); res(); } };
+      w.addEventListener('statechange',f); setTimeout(res, 8000); });
+  }
+  if(reg.waiting){
+    await new Promise(res=>{
+      navigator.serviceWorker.addEventListener('controllerchange', res, { once:true });
+      reg.waiting.postMessage({ type:'skipWaiting' });
+      setTimeout(res, 4000);
+    });
+  }
+}
+async function pushEnable(){
+  if(!pushSupported()) throw 'unsupported';
+  if(pushNeedsInstall()) throw 'ios-install';
+  const perm = Notification.permission==='granted' ? 'granted' : await Notification.requestPermission();
+  if(perm!=='granted') throw 'denied';
+  const reg=await navigator.serviceWorker.ready;
+  await pushEnsureFreshSW(reg);
+  let sub=await reg.pushManager.getSubscription();
+  if(sub && !sameKey(sub)){ await sub.unsubscribe(); sub=null; }
+  if(!sub) sub=await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64ToU8(PUSH_KEY) });
+  try{ await pushPost('subscribe', pushBody(sub)); }
+  catch(e){ try{ await sub.unsubscribe(); }catch(_){} throw e; }   // لا اشتراكَ محلّيًّا بلا سجلٍّ في الخادم
+  settings.push=true; store.set('az_settings', settings);
+}
+async function pushDisable(){
+  const sub=await pushSubGet();
+  settings.push=false; store.set('az_settings', settings);
+  if(!sub) return;
+  try{ await pushPost('unsubscribe', { endpoint: sub.endpoint }); }catch(e){}   // إن تعذّر، يمحوه الخادمُ حين يُجيب الدفعُ بانتهائه
+  try{ await sub.unsubscribe(); }catch(e){}
+}
+function pushRender(msg){
+  const tg=$('#push-toggle'), row=$('#push-row'), prow=$('#push-prayer-row'), note=$('#push-note');
+  if(!tg||!note) return;
+  if(!pushSupported()){
+    row.style.display='none'; prow.style.display='none';
+    note.style.display = pushNeedsInstall() ? '' : 'none';
+    if(isNative()) return;
+    note.textContent = (isIOS() && 'serviceWorker' in navigator)
+      ? 'على الآيفون: أضِف التطبيق إلى الشاشة الرئيسيّة (زرّ المشاركة ثم «إضافة إلى الشاشة الرئيسيّة») ثم افتح صفحة الإعدادات هذه منه لتفعيل التذكيرات.'
+      : '';
+    note.style.display = note.textContent ? '' : 'none';
+    return;
+  }
+  const on = pushActive();
+  tg.checked = on;
+  prow.style.display = on ? '' : 'none';
+  $('#push-prayer-toggle').checked = settings.pushPrayer!==false;
+  note.style.display='';
+  if(msg){ note.textContent=msg; return; }
+  if(pushNeedsInstall()){
+    row.style.display='none';
+    note.textContent='على الآيفون: أضِف التطبيق إلى الشاشة الرئيسيّة أوّلًا (زرّ المشاركة ثم «إضافة إلى الشاشة الرئيسيّة») ثم فعِّل هذا الخيار منه.';
+  } else if(!on){
+    note.textContent='عند التفعيل يحفظ خادمُنا ما يلزم لإرسال التذكير وحدَه: موقعَك مقرَّبًا إلى نحو ١١ كم، ومنطقتَك الزمنيّة، واختياراتِك، وعنوانَ الإشعارات. لا اسمَ ولا حسابَ ولا تتبّع، ويُمحى كلُّه بإطفاء الخيار. تفاصيلُ أكثر في سياسة الخصوصيّة.';
+  } else if(!geoStore()){
+    note.textContent='مفعَّل: تصلك أذكارُ الصباح والمساء والصلاةُ على النبيّ ﷺ والتطبيقُ مغلق. ولإشعار أوقات الصلاة فعِّل الموقع من صفحة الأذكار.';
+  } else {
+    note.textContent='مفعَّل: تصلك التذكيراتُ وإشعارُ كلّ صلاةٍ حتى والتطبيقُ مغلق.';
+  }
+}
+const pushToggle = $('#push-toggle');
+if(pushToggle){
+  pushToggle.addEventListener('change', async ()=>{
+    vibrate(6);
+    const want = pushToggle.checked;
+    pushToggle.disabled = true;
+    try{
+      if(want){
+        await pushEnable();
+        showToast('تمّ التفعيل ✓ — ستصلك التذكيراتُ والتطبيقُ مغلق', 4000);
+        if(!geoStore()) refreshGeo(true, ()=>{ pushSyncSoon(); pushRender(); });
+        pushRender();
+      } else { await pushDisable(); pushRender(); }
+    }catch(e){
+      pushToggle.checked = !want;
+      pushRender(
+        e==='denied' ? 'الإشعاراتُ محظورةٌ لهذا الموقع — فعِّلها من إعدادات المتصفّح (أو إعدادات الهاتف) ثم أعد المحاولة.'
+        : e==='ios-install' ? null
+        : e==='unsupported' ? 'متصفّحُك لا يدعم هذه الميزة.'
+        : 'تعذّر التفعيل — تأكّد من اتّصالك بالإنترنت ثم أعد المحاولة.');
+    }
+    pushToggle.disabled = false;
+  });
+  $('#push-prayer-toggle').addEventListener('change', e=>{
+    settings.pushPrayer = e.target.checked; saveSettings(); vibrate(6);
+  });
+  pushRender();
+}
+/* عند الفتح: لو زال الاشتراكُ من المتصفّح (مسحَ المستخدمُ بياناته، أو انتهى) أُعيد بصمتٍ
+   إن كان الإذنُ قائمًا، وإلّا فيُطفأ الخيارُ ويعود التذكيرُ المحلّيُّ كما كان. */
+async function pushInit(){
+  try{
+    if(!settings.push || !pushSupported()) return;
+    if(Notification.permission!=='granted'){ settings.push=false; store.set('az_settings', settings); pushRender(); return; }
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(sub && !sameKey(sub)){ await sub.unsubscribe(); sub=null; }
+    if(!sub) sub=await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64ToU8(PUSH_KEY) });
+    await pushPost('subscribe', pushBody(sub));
+    pushRender();
+  }catch(e){ /* بلا شبكة: نُعيد المحاولة في الفتحة التالية */ }
+}
+setTimeout(pushInit, 3000);
+
 /* ===== الأذان على مستوى النظام — التطبيقُ الأصليّ وحدَه =====
    في متصفّح الويب لا سبيلَ إلى رفع الأذان والتطبيقُ مغلق، فنُخفي الخيار
    كيلا يَعِدَ التطبيقُ بما لا يفي به. وفي التطبيق الأصليّ نُظهره ونربطه. */
@@ -2355,7 +2523,8 @@ function scheduleChecks(){
   if(window.__azTimer) return;
   const check=()=>{
     const now=new Date(), h=now.getHours(), m=now.getMinutes();
-    if(settings.notif && m<10){
+    const srv=pushActive();   // الخادمُ يُرسل: لا نُكرّر الإشعار (وتبقى التنبيهاتُ داخل التطبيق)
+    if(settings.notif && m<10 && !srv){
       const slot = AZKAR_SLOTS.find(s=>s.h===h);
       if(slot){
         const fired = store.get('az_fired_'+todayKey(), {});
@@ -2367,7 +2536,7 @@ function scheduleChecks(){
       const sf = store.get('az_salatfired_'+todayKey(), {});
       if(!sf[h]){ sf[h]=1; store.set('az_salatfired_'+todayKey(), sf);
         const fri = now.getDay()===5;
-        fireNotification(fri?'يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ':'صَلِّ على الحبيب ﷺ',
+        if(!srv) fireNotification(fri?'يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ':'صَلِّ على الحبيب ﷺ',
           ['اللهم صلِّ وسلّم على سيّدنا محمد ﷺ']);
         showSalatToast(); }
     }
@@ -2375,7 +2544,7 @@ function scheduleChecks(){
     if(settings.notif && now.getDay()===5 && h===KAHF_HOUR && m<10){
       const kf = store.get('az_kahffired_'+todayKey(), {});
       if(!kf.done){ kf.done=1; store.set('az_kahffired_'+todayKey(), kf);
-        fireNotification('اليوم الجمعة — سورة الكهف 📖',
+        if(!srv) fireNotification('اليوم الجمعة — سورة الكهف 📖',
           ['من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين'], {action:'kahf'}); }
     }
     if(settings.notif && m<10 && !qreadToday()){
@@ -2386,7 +2555,7 @@ function scheduleChecks(){
           fireNotification(qslot.title, qslot.body, qslot.data); }
       }
     }
-    if(settings.notif) checkPrayerReminder(now);
+    if(settings.notif && !srv) checkPrayerReminder(now);
   };
   check();
   window.__azTimer = setInterval(check, 60*1000);
@@ -6218,7 +6387,7 @@ function refreshGeo(force, cb){
     const nw={lat:pos.coords.latitude, lng:pos.coords.longitude, t:Date.now()};
     const moved = !g || geoKm(g,nw) > 4;      // انتقال يزيد على 4 كم
     store.set('az_geo', nw);
-    if(moved || force){ renderPrayers(); try{ scheduleNativeNotifs(); }catch(e){} }
+    if(moved || force){ renderPrayers(); try{ scheduleNativeNotifs(); }catch(e){} try{ pushSyncSoon(); }catch(e){} }
     cb && cb(moved);
   }, ()=>{ __geoBusy=false; cb && cb(false); },
      {enableHighAccuracy:false, timeout:12000, maximumAge:0});
@@ -6524,7 +6693,7 @@ document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ try{ s
 /* refresh on day change / resume */
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
   try{ renderAzkar(); }catch(e){}
-    try{ const now=new Date(); if(settings.notif) checkPrayerReminder(now); }catch(e){}
+    try{ const now=new Date(); if(settings.notif && !pushActive()) checkPrayerReminder(now); }catch(e){}
   try{ refreshGeo(false); }catch(e){}
 } });
 

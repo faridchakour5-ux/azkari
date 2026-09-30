@@ -1,0 +1,12 @@
+{
+  "name": "salatee-push",
+  "private": true,
+  "type": "module",
+  "description": "دوالّ الإشعارات (Web Push / VAPID) لموقع صلاتي على Netlify",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.2",
+    "@netlify/functions": "^6.0.1",
+    "adhan": "^4.4.3",
+    "web-push": "^3.6.7"
+  }
+}
