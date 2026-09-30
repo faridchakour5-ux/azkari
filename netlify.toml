@@ -1,0 +1,7 @@
+# دوالُّ الإشعارات (netlify/functions) تعتمد على حزمٍ: web-push وadhan وblobs.
+# لا يُثبّت Netlify حزمَ مجلّد الدوالّ من تلقاء نفسه حين لا يكون في الجذر
+# package.json، فكانت الدوالُّ تُنشر ثم تفشل عند التشغيل بـ
+# «Cannot find package 'adhan'» (502). فنُثبّتها هنا قبل تجميع الدوالّ.
+# الموقعُ نفسُه ملفّاتٌ ثابتة: لا بناءَ له، وهذا الأمرُ لا يمسّه.
+[build]
+  command = "npm --prefix netlify/functions ci --omit=dev --no-audit --no-fund"
