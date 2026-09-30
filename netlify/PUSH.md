@@ -25,6 +25,13 @@
 - `VAPID_PUBLIC_KEY` — عامٌّ، وهو نفسُه `PUSH_KEY` في `index.html`.
 - `VAPID_PRIVATE_KEY` — سرٌّ.
 
+ضبطُهما: لوحةُ Netlify ← Project configuration ← Environment variables. المفتاحُ الخاصّ يُضبط
+**سرًّا** (Contains secret values) بنطاق **Functions** وحدَه — النطاقُ Runtime لا يُقبل للأسرار
+(رُفض بصمت حين جُرّب). وأيُّ تغييرٍ في المتغيّرات لا يسري إلا على **نشرٍ جديد**.
+
+فحصُ الصحّة بعد كلّ نشر: `curl https://salatee.org/api/push/subscribe` ⇒ يجب أن يُرجع `{"configured":true}`.
+وإن أرجع 502 ففي سجلّ الدوالّ (Logs ← Functions) السببُ — وأشيعُه حزمةٌ لم تُثبَّت: الأمرُ في `netlify.toml`.
+
 **تغييرُ المفاتيح** يُبطل كلَّ الاشتراكات القائمة (تُرفض بمفتاحٍ غير مطابق؛ والصفحةُ تُعيد الاشتراك عند الفتح بصمت).
 لتوليد زوجٍ جديد: `node -e "console.log(require('web-push').generateVAPIDKeys())"` داخل `netlify/functions`.
 
