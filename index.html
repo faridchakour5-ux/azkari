@@ -1683,6 +1683,7 @@
       <label class="sw"><input type="checkbox" id="push-prayer-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
     <div class="gnote web-only" id="push-note"></div>
+    <div class="btn-row b-blue web-only" id="push-test" style="display:none">تجربة الإشعار من الخادم الآن</div>
     <div class="gnote" id="adhan-exact" style="display:none">تنبيه: لم يُؤذَن للتطبيق بالمنبّهات الدقيقة، فقد يتأخّر الأذانُ دقائق عن وقته. <b id="adhan-exact-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">اسمح بها الآن</b></div>
     <div class="btn-row b-blue svc-only" id="adhan-try" style="display:none">تجربة الأذان الآن</div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
@@ -2306,7 +2307,7 @@ function pushRender(msg){
   const tg=$('#push-toggle'), row=$('#push-row'), prow=$('#push-prayer-row'), note=$('#push-note');
   if(!tg||!note) return;
   if(!pushSupported()){
-    row.style.display='none'; prow.style.display='none';
+    row.style.display='none'; prow.style.display='none'; $('#push-test').style.display='none';
     note.style.display = pushNeedsInstall() ? '' : 'none';
     if(isNative()) return;
     note.textContent = (isIOS() && 'serviceWorker' in navigator)
@@ -2318,6 +2319,7 @@ function pushRender(msg){
   const on = pushActive();
   tg.checked = on;
   prow.style.display = on ? '' : 'none';
+  $('#push-test').style.display = on ? '' : 'none';
   $('#push-prayer-toggle').checked = settings.pushPrayer!==false;
   note.style.display='';
   if(msg){ note.textContent=msg; return; }
@@ -2354,6 +2356,21 @@ if(pushToggle){
         : 'تعذّر التفعيل — تأكّد من اتّصالك بالإنترنت ثم أعد المحاولة.');
     }
     pushToggle.disabled = false;
+  });
+  /* اختبارٌ فوريّ للسلسلة كلِّها: الخادمُ يُرسل إليك رسالةً الآن */
+  $('#push-test').addEventListener('click', async ()=>{
+    vibrate(6);
+    const btn=$('#push-test'); if(btn.dataset.busy) return; btn.dataset.busy='1';
+    try{
+      const sub=await pushSubGet();
+      if(!sub){ showToast('لا اشتراكَ في هذا الجهاز — أطفئ الخيارَ وأعد تفعيله', 4500); return; }
+      const r=await fetch(PUSH_API+'test', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ endpoint: sub.endpoint }) });
+      if(r.ok) showToast('أُرسل إليك إشعارٌ من الخادم الآن ✓ — إن لم يظهر خلال ثوانٍ فأخبرنا', 5000);
+      else if(r.status===429) showToast('انتظر نحو نصف دقيقة ثم أعد التجربة', 3500);
+      else if(r.status===404 || r.status===410) showToast('انتهى اشتراكُك عند الخادم — أطفئ الخيارَ وأعد تفعيله', 4500);
+      else showToast('تعذّر الإرسال من الخادم الآن ('+r.status+') — أعد المحاولة لاحقًا', 4500);
+    }catch(e){ showToast('تعذّر الاتّصال بالخادم — تحقّق من الإنترنت', 3500); }
+    finally{ delete btn.dataset.busy; }
   });
   $('#push-prayer-toggle').addEventListener('change', e=>{
     settings.pushPrayer = e.target.checked; saveSettings(); vibrate(6);

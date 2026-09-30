@@ -13,6 +13,7 @@
 |---|---|
 | `functions/push-subscribe.mts` | `POST` تسجيلُ/تحديثُ اشتراك؛ `GET` فحصُ صحّةٍ (`{configured}` فقط) |
 | `functions/push-unsubscribe.mts` | `POST` حذفُ السجلّ كلِّه |
+| `functions/push-test.mts` | `POST` زرُّ «تجربة الإشعار من الخادم»: رسالةٌ فوريّةٌ إلى اشتراك صاحب الطلب وحدَه، مرّةً كلَّ 30 ثانية |
 | `functions/push-cron.mts` | الجدولةُ كلَّ دقيقة (تصلُ بـweb-push) |
 | `functions/_lib/push-core.mts` | حسابُ ما استحقّ إرسالَه + التحقّقُ من المدخلات (خالصٌ بلا شبكة) |
 | `functions/_lib/cron-run.mts` | حلقةُ الإرسال وقواعدُ الحذف والتكرار (تُختبَر بمخزنٍ مُحاكى) |
