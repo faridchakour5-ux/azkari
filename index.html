@@ -162,6 +162,11 @@
 
   /* Large nav title */
   .head{padding:calc(env(safe-area-inset-top) + 12px) 16px 14px; position:relative;}
+  /* قراءةٌ خالصة: في صفحة المصحف لا يظهر إلا القرآن. أزرارُ الرواية والسورة والتمرير
+     والعودة للأعلى والشريطُ السفليّ تظهر بلمسةٍ على الصفحة، وتختفي بعد ثوانٍ أو بالتمرير. */
+  body.qr-wird:not(.qr-ui) :is(#mushaf-jump,#riwaya-float,#q-zoom-float,#autoread-pill,#follow-pill,#totop-btn,.tabbar){
+    opacity:0 !important; pointer-events:none !important; transition:opacity .25s;}
+  body.qr-wird.qr-ui :is(#mushaf-jump,#riwaya-float,#q-zoom-float,#autoread-pill,#follow-pill,#totop-btn,.tabbar){opacity:1; transition:opacity .25s;}
   .riwaya-quick{position:absolute; top:calc(env(safe-area-inset-top) + 12px); left:20px;
     display:flex; background:var(--fill-2); border-radius:9px; padding:2px; z-index:2;}
   .riwaya-quick button{border:0; background:transparent; color:var(--text-2); font:inherit;
@@ -4294,6 +4299,8 @@ async function openTafsir(ai){
 }
 document.addEventListener('click', e=>{
   const t=e.target.closest('.aya-t'); if(!t) return;
+  /* قراءةٌ خالصة: اللمسةُ الأولى تُظهر الأدوات فقط، والتفسيرُ بلمسةٍ والأدواتُ ظاهرة */
+  if(document.body.classList.contains('qr-wird') && !document.body.classList.contains('qr-ui')) return;
   const ai=parseInt(t.dataset.tai); if(isNaN(ai)) return;
   const old=document.querySelector('.aya-t.tsel'); if(old) old.classList.remove('tsel');
   t.classList.add('tsel');
@@ -4422,6 +4429,23 @@ $('#totop-btn') && $('#totop-btn').addEventListener('click', ()=>{
   $('#totop-btn').classList.remove('show'); vibrate(6);
 });
 window.addEventListener('scroll', onScrollForJump, {passive:true});
+/* ===== قراءةٌ خالصة: لمسةٌ على الصفحة تُظهر الأدوات ثمّ تُخفيها ===== */
+(function qrClean(){
+  let t=null;
+  const wirdOn=()=>{ const w=$('#s-wird'); document.body.classList.toggle('qr-wird', !!(w && w.classList.contains('active'))); };
+  const hide=()=>{ document.body.classList.remove('qr-ui'); clearTimeout(t); };
+  const show=()=>{ document.body.classList.add('qr-ui'); clearTimeout(t); t=setTimeout(hide, 5000); };
+  new MutationObserver(wirdOn).observe($('#s-wird'), {attributes:true, attributeFilter:['class']}); wirdOn();
+  document.addEventListener('click', e=>{
+    if(!document.body.classList.contains('qr-wird')) return;
+    if(e.target.closest('button,a,select,input,.tabbar,#mushaf-jump,#riwaya-float,#q-zoom-float,#autoread-pill,#follow-pill,#totop-btn,.mushaf-pick,.mushaf-resume')) { if(document.body.classList.contains('qr-ui')) show(); return; }
+    document.body.classList.contains('qr-ui') ? hide() : show();
+  });
+  document.addEventListener('click', e=>{ if(document.body.classList.contains('qr-wird') && !document.body.classList.contains('qr-ui') && e.target.closest('.aya-t')){ e.stopPropagation(); show(); } }, true);
+  let y0=window.scrollY;
+  window.addEventListener('scroll', ()=>{ if(Math.abs(window.scrollY-y0)>40){ y0=window.scrollY; if(document.body.classList.contains('qr-ui')) hide(); } }, {passive:true});
+})();
+
 
 /* ---- قائمة اختيار السورة (ورقة سفلية موثوقة، تُستخدم للتنقّل وللاستماع) ---- */
 /* مكّيّةٌ أو مدنيّة لكلّ سورة على ترتيب المصحف (حرفٌ لكلّ سورة: م مكّيّة، د مدنيّة) */
