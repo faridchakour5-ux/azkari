@@ -2214,19 +2214,19 @@ const notifToggle = $('#notif-toggle');
 notifToggle.checked = settings.notif;
 notifToggle.addEventListener('change', async ()=>{
   if(notifToggle.checked){
-    const p = await Notification.requestPermission();
+    const p = await askNotifPerm();
     if(p!=='granted'){ notifToggle.checked=false; settings.notif=false; saveSettings();
       alert('لتفعيل التذكير، اسمح بالإشعارات من إعدادات المتصفح.'); return; }
-    settings.notif=true; saveSettings(); scheduleChecks();
+    settings.notif=true; saveSettings(); scheduleChecks(); try{ scheduleNativeNotifs(); }catch(e){}
     fireNotification('تم تفعيل التذكير ✓', ['ستصلك تذكيرات بأذكار الصباح والمساء والنوم','في مواعيدها كل يوم']);
   } else { settings.notif=false; saveSettings(); }
 });
 $('#notif-test').addEventListener('click', async ()=>{
   vibrate(6);
-  let perm = ('Notification' in window) ? Notification.permission : 'denied';
-  if(perm==='default'){ try{ perm = await Notification.requestPermission(); }catch(e){} }
+  let perm = isNative() ? await askNotifPerm() : (('Notification' in window) ? Notification.permission : 'denied');
+  if(perm==='default'){ perm = await askNotifPerm(); }
   if(perm!=='granted'){ showToast('الإشعارات غير مسموح بها — فعّلها من إعدادات الهاتف للتطبيق', 3800); return; }
-  fireNotification('وقت الذكر 🤍', pickThree());
+  fireNotification('وقت الذكر 🤍', pickThree(), null, true);
   showToast('تمّ إرسال إشعار تجريبي ✓ — قد لا يظهر ما دام التطبيق مفتوحًا؛ صغّره لتراه', 4000);
 });
 
@@ -2424,8 +2424,8 @@ salatToggle.addEventListener('change', async ()=>{
   if(salatToggle.checked){
     settings.salat=true; saveSettings(); scheduleChecks();
     // تذكير داخل التطبيق يعمل دائمًا؛ وإشعارات النظام إن سُمح بها
-    try{ const p = await Notification.requestPermission();
-      if(p==='granted') fireNotification('صَلِّ على الحبيب ﷺ', ['اللهم صلِّ وسلّم على سيّدنا محمد ﷺ']);
+    try{ const p = await askNotifPerm();
+      if(p==='granted') fireNotification('صَلِّ على الحبيب ﷺ', ['اللهم صلِّ وسلّم على سيّدنا محمد ﷺ'], null, true);
     }catch(e){}
     showSalatToast();
   } else { settings.salat=false; saveSettings(); }
@@ -2444,7 +2444,9 @@ function pickThree(){
   for(let i=0;i<3 && a.length;i++){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); }
   return out;
 }
-function fireNotification(title, lines, data){
+function fireNotification(title, lines, data, force){
+  /* الأصليّ: التذكيراتُ الدوريّة مجدوَلةٌ على النظام (scheduleNativeNotifs)؛ فلا نُكرّرها هنا، وإنّما التجارب فقط */
+  if(isNative()){ if(force) nativeTestNotif(title, lines); return; }
   const body = lines.join('\n');
   if(!('Notification' in window) || Notification.permission!=='granted') return;
   if(navigator.serviceWorker && navigator.serviceWorker.controller){
@@ -3281,6 +3283,7 @@ async function shotToCanvas(innerHTML, title, sub){
   return cv;
 }
 function saveFile(file, name){
+  if(isNative()){ nativeShareBlob(file, name||file.name); return true; }
   try{
     const url=URL.createObjectURL(file);
     const a=document.createElement('a'); a.href=url; a.download=name||file.name;
@@ -6332,6 +6335,7 @@ function qpShareTextFallback(){
   catch(e){ location.href=url; }
 }
 function qpSaveImage(file){
+  if(isNative()){ nativeShareBlob(file, 'salaty-tazkir.png'); return true; }
   try{
     const url=URL.createObjectURL(file);
     const a=document.createElement('a'); a.href=url; a.download='salaty-tazkir.png';
@@ -6462,6 +6466,34 @@ function computePrayers(lat,lng,date){
 /* ===== جدولة الأذان على مستوى النظام (تطبيق Capacitor الأصلي) =====
    تعمل حتى والتطبيق مغلق تمامًا وبلا إنترنت، عبر إشعارات مجدوَلة محليًّا */
 function isNative(){ return !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()); }
+/* في التطبيق الأصليّ: <a download> لا يعمل داخل الـWebView، ولا Notification API. فنكتب الملفَّ
+   في مخزن التطبيق المؤقّت ونفتح له ورقةَ المشاركة (حفظ في الملفات/درايف، أو إرسال). */
+async function nativeShareBlob(blob, name){
+  try{
+    const P=Capacitor.Plugins||{}; const FS=P.Filesystem, SH=P.Share; if(!FS||!SH) return false;
+    const b64=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); });
+    const w=await FS.writeFile({ path:name, data:b64, directory:'CACHE' });
+    await SH.share({ title:name, files:[w.uri], dialogTitle:'حفظ أو مشاركة' });
+    return true;
+  }catch(e){ return false; }
+}
+/* إذنُ الإشعارات: في الأصليّ عبر LocalNotifications، وفي المتصفّح عبر Notification */
+async function askNotifPerm(){
+  if(isNative()){
+    try{ const r=await Capacitor.Plugins.LocalNotifications.requestPermissions(); return r && r.display==='granted' ? 'granted' : 'denied'; }
+    catch(e){ return 'denied'; }
+  }
+  if(!('Notification' in window)) return 'denied';
+  try{ return await Notification.requestPermission(); }catch(e){ return 'denied'; }
+}
+/* إشعارٌ فوريّ للتجربة في التطبيق الأصليّ */
+async function nativeTestNotif(title, lines){
+  try{
+    await Capacitor.Plugins.LocalNotifications.schedule({ notifications:[{ id:900001, title, body:lines.join('\n'), channelId:'reminders',
+      schedule:{ at:new Date(Date.now()+700) }, smallIcon:'ic_stat_icon' }] });
+    return true;
+  }catch(e){ return false; }
+}
 async function scheduleNativeNotifs(){
   if(!isNative()) return;
   const LN = Capacitor.Plugins && Capacitor.Plugins.LocalNotifications;
@@ -6684,8 +6716,10 @@ function exportBackup(){
   const data={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); data[k]=localStorage.getItem(k); }
   const payload={ _app:'azkari', _v:1, _date:new Date().toISOString(), data };
   const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  const fname='azkari-backup-'+todayKey()+'.json';
+  if(isNative()){ nativeShareBlob(blob, fname).then(ok=>{ if(!ok) showToast('تعذّر حفظ الملف', 3500); }); vibrate(10); return; }
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='azkari-backup-'+todayKey()+'.json';
+  const a=document.createElement('a'); a.href=url; a.download=fname;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
   vibrate(10);
 }
