@@ -88,6 +88,12 @@ const PERMS = `
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
+    <!-- الموقعُ لحساب مواقيت الصلاة. بدونهما يَرفض أندرويد كلَّ طلبٍ للموقع في
+         الـWebView فيظهر «تعذّر تحديد الموقع» ولا تُجدوَل الأذانات. Capacitor يطلب
+         الإذنَ وقتَ التشغيل من تلقاء نفسه متى كان مُعلَنًا هنا. تقريبيٌّ يكفي. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <!-- المنبّهاتُ الدقيقة. SCHEDULE_EXACT_ALARM يَطلبه المستخدمُ من الإعدادات
          (والتطبيقُ يَفتح له الشاشةَ بنفسه عبر openExactAlarmSettings).
          USE_EXACT_ALARM يُمنَح تلقائيًّا بلا سؤال، لكنّ سياسةَ Play تَقصُره على
