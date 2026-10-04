@@ -93,11 +93,15 @@ public final class AdhanScheduler {
     PendingIntent p = pending(c, bestName, bestFajr);
     try {
       if (canExact(c)) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-          am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, bestAt, p);
-        } else {
-          am.setExact(AlarmManager.RTC_WAKEUP, bestAt, p);
-        }
+        /* setAlarmClock أقوى منبّهٍ في أندرويد: يوقظ الهاتفَ من الخمول العميق، ولا تُؤخّره
+           قيودُ البطارية ولا «التطبيقاتُ النائمة» عند سامسونغ وشاومي وغيرهما، وهو ما يعتمد
+           عليه المنبّهُ الحقيقيّ. ثمنُه أيقونةُ منبّهٍ صغيرةٌ في شريط الحالة حتّى الأذان القادم.
+           و showIntent يَفتح التطبيقَ إن لمس المستخدمُ الأيقونة. */
+        Intent open = new Intent(c, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        int sf = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) sf |= PendingIntent.FLAG_IMMUTABLE;
+        PendingIntent show = PendingIntent.getActivity(c, REQ + 1, open, sf);
+        am.setAlarmClock(new AlarmManager.AlarmClockInfo(bestAt, show), p);
       } else {
         /* لا إذنَ للمنبّهات الدقيقة: يبقى المنبّهُ عاملًا في وضع الخمول لكنّه
            قد يتأخّر دقائق. نُبلّغ الواجهةَ بذلك عبر canExact() لتَعرِض للمستخدم

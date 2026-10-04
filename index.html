@@ -1688,6 +1688,7 @@
     <div class="gnote web-only" id="push-note"></div>
     <div class="btn-row b-blue web-only" id="push-test" style="display:none">تجربة الإشعار من الخادم الآن</div>
     <div class="gnote" id="adhan-exact" style="display:none">تنبيه: لم يُؤذَن للتطبيق بالمنبّهات الدقيقة، فقد يتأخّر الأذانُ دقائق عن وقته. <b id="adhan-exact-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">اسمح بها الآن</b></div>
+    <div class="gnote" id="adhan-batt" style="display:none">لأعلى موثوقيّةٍ للأذان: اختر «عدم التحسين» للتطبيق في إعدادات البطارية، وتأكّد ألّا يكون في «التطبيقات النائمة» (سامسونغ) أو «حماية التطبيقات» (شاومي/هواوي). <b id="adhan-batt-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">افتح إعداد البطارية</b></div>
     <div class="btn-row b-blue svc-only" id="adhan-try" style="display:none">تجربة الأذان الآن</div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
   </div>
@@ -6603,7 +6604,14 @@ function paintAdhanNote(){
   const el = $('#adhan-exact'); if(!el) return;
   const bad = __adhanState && __adhanState.exact === false && settings.adhan!==false;
   el.style.display = bad ? '' : 'none';
+  const b = $('#adhan-batt');
+  if(b) b.style.display = (__adhanState && __adhanState.battery === false && settings.adhan!==false) ? '' : 'none';
 }
+$('#adhan-batt-btn') && $('#adhan-batt-btn').addEventListener('click', async ()=>{
+  const P = adhanPlugin(); if(!P) return;
+  vibrate(6);
+  try{ await P.openBatterySettings(); }catch(e){}
+});
 $('#adhan-exact-btn') && $('#adhan-exact-btn').addEventListener('click', async ()=>{
   const P = adhanPlugin(); if(!P) return;
   vibrate(6);

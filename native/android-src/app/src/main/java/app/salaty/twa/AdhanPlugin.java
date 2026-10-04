@@ -3,6 +3,7 @@ package app.salaty.twa;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.provider.Settings;
 
 import com.getcapacitor.JSArray;
@@ -106,12 +107,34 @@ public class AdhanPlugin extends Plugin {
     }
   }
 
+  /** هل التطبيقُ مستثنًى من تحسين البطارية؟ (يزيد موثوقيّةَ الأذان على بعض الهواتف) */
+  private boolean ignoringBattery() {
+    try {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
+      PowerManager pm = (PowerManager) getContext().getSystemService(android.content.Context.POWER_SERVICE);
+      return pm != null && pm.isIgnoringBatteryOptimizations(getContext().getPackageName());
+    } catch (Exception e) { return true; }
+  }
+
+  /** يَفتح قائمةَ «تحسين البطارية» ليختار المستخدمُ «عدم التحسين» للتطبيق. لا يحتاج إذنًا خاصًّا. */
+  @PluginMethod
+  public void openBatterySettings(PluginCall call) {
+    try {
+      Intent i = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      getContext().startActivity(i);
+      call.resolve();
+    } catch (Exception e) {
+      call.reject(e.getMessage() == null ? "cannot open settings" : e.getMessage(), e);
+    }
+  }
+
   private JSObject status() {
     JSObject r = new JSObject();
     r.put("enabled", AdhanScheduler.enabled(getContext()));
     r.put("count", AdhanScheduler.times(getContext()).length());
     r.put("nextAt", AdhanScheduler.nextAt(getContext()));
     r.put("exact", AdhanScheduler.canExact(getContext()));
+    r.put("battery", ignoringBattery());
     return r;
   }
 }
