@@ -1821,9 +1821,9 @@ const BG_LIST = [
   {id:'white',  name:'أبيض',  c:'#F2F2F7'},
   {id:'dark',   name:'داكن',  c:'#121212'},
 ];
-/* لونُ الهاتف: داكنٌ إن كان وضعُه ليليًّا، وإلّا فالورقيّة */
+/* الافتراضيُّ لكلّ من يُثبّت التطبيق: الورقيّة، أيًّا كان وضعُ هاتفه (ليليًّا أو نهاريًّا). والداكنُ باختيار المستخدم وحدَه. */
 const __darkMQ = (window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null);
-function systemBg(){ return (__darkMQ && __darkMQ.matches) ? 'dark' : 'sepia'; }
+function systemBg(){ return 'sepia'; }
 /* ما لم يختر المستخدمُ لونًا بنفسه، يتبع لونُ التطبيق وضعَ الهاتف — ويتبعه
    حيًّا، فمن قلَب هاتفَه إلى الليل وهو يقرأ انقلب معه بلا إعادة فتح. */
 function syncBgWithSystem(){
@@ -4315,7 +4315,7 @@ async function openTafsir(ai){
 document.addEventListener('click', e=>{
   const t=e.target.closest('.aya-t'); if(!t) return;
   /* قراءةٌ خالصة: اللمسةُ الأولى تُظهر الأدوات فقط، والتفسيرُ بلمسةٍ والأدواتُ ظاهرة */
-  if(document.body.classList.contains('qr-auto') && !document.body.classList.contains('qr-ui')) return;
+  if(document.body.classList.contains('qr-auto') && !window.__qrHad) return;   // اللمسةُ الأولى تُظهر الأدوات فقط
   const ai=parseInt(t.dataset.tai); if(isNaN(ai)) return;
   const old=document.querySelector('.aya-t.tsel'); if(old) old.classList.remove('tsel');
   t.classList.add('tsel');
@@ -4444,21 +4444,20 @@ $('#totop-btn') && $('#totop-btn').addEventListener('click', ()=>{
   $('#totop-btn').classList.remove('show'); vibrate(6);
 });
 window.addEventListener('scroll', onScrollForJump, {passive:true});
-/* ===== قراءةٌ خالصة: لمسةٌ على الصفحة تُظهر الأدوات ثمّ تُخفيها ===== */
+/* ===== قراءةٌ خالصة: أثناء «تمرير للقراءة» وحدَه تختفي الأدوات، وتظهر عند أيّ لمسةٍ كيفما كانت (نقرًا أو سحبًا) ثمّ تختفي بعد ثوانٍ ===== */
 (function qrClean(){
   let t=null;
-  const wirdOn=()=>{ const w=$('#s-wird'); document.body.classList.toggle('qr-wird', !!(w && w.classList.contains('active'))); };
-  const hide=()=>{ document.body.classList.remove('qr-ui'); clearTimeout(t); };
-  const show=()=>{ document.body.classList.add('qr-ui'); clearTimeout(t); t=setTimeout(hide, 5000); };
+  const B=document.body;
+  const wirdOn=()=>{ const w=$('#s-wird'); B.classList.toggle('qr-wird', !!(w && w.classList.contains('active'))); };
+  const hide=()=>{ B.classList.remove('qr-ui'); clearTimeout(t); };
+  const show=()=>{ B.classList.add('qr-ui'); clearTimeout(t); t=setTimeout(hide, 5000); };
   new MutationObserver(wirdOn).observe($('#s-wird'), {attributes:true, attributeFilter:['class']}); wirdOn();
-  document.addEventListener('click', e=>{
-    if(!document.body.classList.contains('qr-auto')) return;
-    if(e.target.closest('button,a,select,input,.tabbar,#mushaf-jump,#riwaya-float,#q-zoom-float,#autoread-pill,#follow-pill,#totop-btn,.mushaf-pick,.mushaf-resume')) { if(document.body.classList.contains('qr-ui')) show(); return; }
-    document.body.classList.contains('qr-ui') ? hide() : show();
-  });
-  document.addEventListener('click', e=>{ if(document.body.classList.contains('qr-auto') && !document.body.classList.contains('qr-ui') && e.target.closest('.aya-t')){ e.stopPropagation(); show(); } }, true);
-  let y0=window.scrollY;
-  window.addEventListener('scroll', ()=>{ if(Math.abs(window.scrollY-y0)>40){ y0=window.scrollY; if(document.body.classList.contains('qr-ui')) hide(); } }, {passive:true});
+  window.__qrHad=false;
+  document.addEventListener('pointerdown', ()=>{
+    if(!B.classList.contains('qr-auto')) return;
+    window.__qrHad = B.classList.contains('qr-ui');   // هل كانت الأدوات ظاهرةً قبل هذه اللمسة؟
+    show();
+  }, true);
 })();
 
 
