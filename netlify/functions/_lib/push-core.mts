@@ -169,7 +169,7 @@ export function validEndpoint(ep: unknown): ep is string {
 
 const B64URL = /^[A-Za-z0-9_-]+={0,2}$/;
 
-/* الموقعُ يُقرَّب إلى منزلةٍ عشريّةٍ واحدة (نحو ١١ كم): يكفي للمواقيت بفارقٍ
+/* الموقعُ يُقرَّب إلى منزلةٍ عشريّةٍ واحدة (نحو 11 كم): يكفي للمواقيت بفارقٍ
    لا يتجاوز نصفَ دقيقة، ولا يدلّ على بيتٍ ولا شارع. */
 export function coarse(x: number): number { return Math.round(x * 10) / 10; }
 

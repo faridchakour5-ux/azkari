@@ -116,7 +116,6 @@ def AYA(title, refs, note=None):
         else: groups.append([s, k, k])
     ref = ' · '.join(('سورة %s، الآية %d' % (SURA_NAMES[s - 1].replace('َ', '').replace('ِ', ''), a)) if a == b
                      else ('سورة %s، الآيات %d–%d' % (SURA_NAMES[s - 1].replace('َ', '').replace('ِ', ''), a, b)) for s, a, b in groups)
-    ref = ref.translate(str.maketrans('0123456789', '٠١٢٣٤٥٦٧٨٩'))
     blk = {'k': 'aya', 't': title, 'v': ' '.join(ayat(refs)), 's': ref}
     if note: blk['d'] = note
     return blk

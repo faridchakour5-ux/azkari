@@ -52,7 +52,7 @@ m = m.replace(between, '').replace(/\n{3,}/g, '\n\n');
 
 const COMPONENTS = `
     ${OPEN}
-    <!-- الخدمةُ الأماميّة: ترفع الأذانَ كاملًا، والنغمةُ العاديّة تُقصَّر إلى ~٣٠ ثانية -->
+    <!-- الخدمةُ الأماميّة: ترفع الأذانَ كاملًا، والنغمةُ العاديّة تُقصَّر إلى ~30 ثانية -->
     <service
         android:name=".AdhanService"
         android:enabled="true"
@@ -110,7 +110,7 @@ if (m.indexOf('</manifest>') < 0) die('لم أجد </manifest> في البيان
 m = m.replace('</manifest>', PERMS + '</manifest>');
 
 fs.writeFileSync(MAN, m, 'utf8');
-console.log('✓ حُدّث AndroidManifest.xml (خدمةٌ + مُستقبِلان + ٧ أذونات)');
+console.log('✓ حُدّث AndroidManifest.xml (خدمةٌ + مُستقبِلان + 7 أذونات)');
 
 /* 4) رقمُ الإصدار: يُقرأ من android-version.json لا من تحريرٍ يدويٍّ في build.gradle —
       فمجلّدُ android/ مُولَّدٌ ويُعاد توليدُه، وما يُكتب فيه باليد يضيع، ثمّ يُرفض
