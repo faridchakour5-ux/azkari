@@ -1256,6 +1256,14 @@
   .fq-disc{color:var(--text-2); font-weight:600; border-inline-start:3px solid var(--c-repeat);}
   .fq-disc b{color:var(--text);}
 
+
+  /* ═══ آيةٌ داخل الفقه/السيرة ═══ */
+  .fq-aya{margin:14px 0; padding:14px 16px; border-radius:16px; background:var(--accent-bg); border:1px solid var(--line);}
+  .fq-aya-t{font-size:13px; font-weight:800; color:var(--accent-txt); margin-bottom:6px;}
+  .fq-aya-v{font-family:'AmiriQuran',serif; font-size:23px; line-height:2.1; color:var(--text); text-align:center;}
+  .fq-aya-s{font-size:12.5px; font-weight:700; color:var(--text-3); text-align:center; margin-top:4px;}
+  .fq-si .tag.s{background:var(--c-repeat-bg); color:var(--c-repeat);}
+
   /* ═══ قائمةُ أقسام الاستماع المنسدلة ═══ */
   .listen-cat{display:flex; align-items:center; gap:12px; width:calc(100% - 32px); margin:4px 16px 6px;
     padding:12px 16px; border:1px solid var(--line); border-radius:16px; background:var(--card);
@@ -1557,7 +1565,12 @@
 <!-- ===== المسبحة ===== -->
 <section id="s-tasbih" class="screen">
   <div class="head"><h1 id="tasbih-title">الفقه العملي</h1><div class="sub" id="tasbih-sub">كيف أتوضّأ · أصلّي · أغتسل · أصوم</div></div>
-  <div class="seg" id="tasbih-mode-seg">
+  <button class="listen-cat" id="tasbih-mode-btn" type="button" aria-haspopup="listbox">
+    <span class="lc-ic" id="tasbih-mode-ic"></span>
+    <span class="lc-tx"><span class="lc-lbl">ماذا تريد؟</span><span class="lc-nm" id="tasbih-mode-name">الفقه</span></span>
+    <span class="chev">▾</span>
+  </button>
+  <div class="seg" id="tasbih-mode-seg" hidden style="display:none">
     <button data-t="fiqh" class="on"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/><path d="M8 16h4"/></svg>الفقه</button>
     <button data-t="tasbih"><svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="3.2" r="1.6"/><circle cx="12" cy="20.8" r="1.6"/><circle cx="3.2" cy="12" r="1.6"/><circle cx="20.8" cy="12" r="1.6"/></svg>المسبحة</button>
     <button data-t="quiz"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5"/><path d="M12 17.5h.01"/><circle cx="12" cy="12" r="9"/></svg>الثقافة</button>
@@ -4100,10 +4113,16 @@ function loadFiqh(){
   if(window.FIQH) return Promise.resolve(true);
   if(__fqLoading) return __fqLoading;
   __fqLoading=(async()=>{
-    const [okF, okT] = await Promise.all([loadScriptOnce('fiqh.js'), loadScriptOnce('thabat.js')]);
+    const [okF, okT, okS] = await Promise.all([loadScriptOnce('fiqh.js'), loadScriptOnce('thabat.js'), loadScriptOnce('sunna.js')]);
     if(!okF) return false;
     if(okT && window.THABAT && !window.FIQH.some(c=>c.id==='thabat'))
       window.FIQH.unshift(Object.assign({}, THABAT_CH, {blocks: window.THABAT}));
+    /* السيرةُ والأحاديثُ الصحيحة: ملفٌّ مستقلّ؛ فإن تعذّر تحميلُه بقي الفقهُ كاملًا */
+    if(okS && window.FIQH_EXTRA && !window.FIQH.some(c=>c.cat==='sira')){
+      window.FIQH_EXTRA.forEach(e=>window.FIQH.push(e));
+      (window.FIQH_CATS_EXTRA||[]).forEach(c=>window.FIQH_CATS.push(c));
+    }
+    window.FIQH_CATS = window.FIQH_CATS.filter(c=>c.id!=='all');
     return true;
   })();
   return __fqLoading;
@@ -4167,6 +4186,14 @@ function fqBlock(b){
         '<div class="fq-ki"><div class="q">'+escapeHtml(x.q)+'</div><div class="a">'+escapeHtml(x.a)+'</div></div>'
         ).join('') + '</div>';
 
+    case 'aya':
+      return '<div class="fq-aya">'+
+        (b.t ? '<div class="fq-aya-t">'+escapeHtml(b.t)+'</div>' : '')+
+        '<div class="fq-aya-v">﴿ '+escapeHtml(b.v)+' ﴾</div>'+
+        '<div class="fq-aya-s">'+escapeHtml(b.s||'')+'</div>'+
+        (b.d ? '<div class="wa-d">'+escapeHtml(b.d)+'</div>' : '')+
+      '</div>';
+
     case 'note':
       return '<div class="fq-note '+(b.tone||'info')+'">'+escapeHtml(b.v)+'</div>';
   }
@@ -4176,48 +4203,59 @@ function fqBlock(b){
 const FQ_BOOK='<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
 /* مصادرُ الباب: من أين أُخذ ما فيه — قرآنٌ وسنّةٌ وكتبُ الفقه المعتمدة.
    وهي معروضةٌ دائمًا في آخر الباب لا تُخفى خلف علامة. */
-function fqSrcBlock(id){
+function fqSrcBlock(id, cat){
   const v=(window.FIQH_SRC||{})[id];
   if(!v || !v.length) return '';
-  const TAG={ q:'قرآن', h:'سنّة', f:'فقه', n:'تنبيه' };
+  const TAG={ q:'قرآن', h:'سنّة', f:'فقه', s:'سيرة', n:'تنبيه' };
   return '<div class="fq-src"><div class="fq-src-h">'+FQ_BOOK+'مصادر هذا الباب</div>'+
     v.map(x=>'<div class="fq-si"><span class="tag '+(x.k||'n')+'">'+(TAG[x.k]||TAG.n)+'</span>'+
       '<span class="b"><b>'+escapeHtml(x.t)+'</b>'+(x.d?'<i>'+escapeHtml(x.d)+'</i>':'')+'</span></div>').join('')+
-    '<div class="fq-src-f">المذاهبُ الأربعة تُذكر بأسمائها عند الخلاف. وما لم يُنسب إلى مذهبٍ بعينه فهو المتّفق عليه بينها.</div>'+
+    ((cat==='sira'||cat==='hadith') ? '' : '<div class="fq-src-f">المذاهبُ الأربعة تُذكر بأسمائها عند الخلاف. وما لم يُنسب إلى مذهبٍ بعينه فهو المتّفق عليه بينها.</div>')+
   '</div>';
 }
-let __fqCat='all';
+let __fqCat='tahara';
+function fqCatsList(){ return (window.FIQH_CATS||[]).filter(c=>c.id!=='all' && window.FIQH.some(x=>x.cat===c.id)); }
 function renderFiqh(){
   const box=$('#fiqh-body'); if(!box) return;
   if(!window.FIQH){ box.innerHTML='<div class="search-hint">تعذّر تحميل صفحة الفقه — أعِد المحاولة.</div>'; return; }
-  const F=window.FIQH;
-  const CATS=window.FIQH_CATS||[{id:'all',name:'الكلّ'}];
-  // الأبواب المعروضة حسب التصنيف المختار
-  const list = (__fqCat==='all') ? F.map((x,i)=>({x,i})) : F.map((x,i)=>({x,i})).filter(o=>o.x.cat===__fqCat);
-  if(!list.length){ __fqCat='all'; return renderFiqh(); }
-  if(!list.some(o=>o.i===__fqCur)) __fqCur=list[0].i;   // الباب الحالي خارج التصنيف
+  const F=window.FIQH, CATS=fqCatsList();
+  if(!CATS.some(c=>c.id===__fqCat)) __fqCat=CATS[0].id;
+  const catObj=CATS.find(c=>c.id===__fqCat);
+  // الأبواب المعروضة حسب القسم المختار
+  const list=F.map((x,i)=>({x,i})).filter(o=>o.x.cat===__fqCat);
+  if(!list.some(o=>o.i===__fqCur)) __fqCur=list[0].i;   // الباب الحالي خارج القسم
   const cur=F[__fqCur];
+  const sunna=(__fqCat==='sira'||__fqCat==='hadith');
+  qzSub(sunna ? 'سيرة النبيّ ﷺ وأحاديثه الصحيحة' : 'كيف أتوضّأ · أصلّي · أغتسل · أصوم');
+  const dd=(id,lbl,nm,ic)=>'<button class="listen-cat" id="'+id+'" type="button" aria-haspopup="listbox">'+
+    '<span class="lc-ic">'+ic+'</span><span class="lc-tx"><span class="lc-lbl">'+lbl+'</span>'+
+    '<span class="lc-nm">'+escapeHtml(nm)+'</span></span><span class="chev">▾</span></button>';
   box.innerHTML =
-    '<div class="fq-disc">هذه الصفحة عرضٌ تعليميّ مبسّط: يُذكر فيها <b>المتّفق عليه</b> بين الأئمّة الأربعة، ويُنبَّه على <b>مواضع الخلاف</b> صراحةً. وهي لا تُغني عن سؤال أهل العلم فيما أشكل عليك.</div>'+
-    '<div class="fq-cats">'+ CATS.map(c=>
-      '<button data-c="'+c.id+'"'+(c.id===__fqCat?' class="on"':'')+'>'+escapeHtml(c.name)+'</button>').join('') +'</div>'+
-    '<div class="fq-count">'+AR(list.length)+' '+(list.length===1?'باب':'أبواب')+'</div>'+
-    '<div class="fq-nav">'+ list.map(o=>
-      '<button data-i="'+o.i+'"'+(o.i===__fqCur?' class="on"':'')+'> '+o.x.ic+' '+escapeHtml(o.x.t)+'</button>').join('') +'</div>'+
+    (sunna ? '' :
+    '<div class="fq-disc">هذه الصفحة عرضٌ تعليميّ مبسّط: يُذكر فيها <b>المتّفق عليه</b> بين الأئمّة الأربعة، ويُنبَّه على <b>مواضع الخلاف</b> صراحةً. وهي لا تُغني عن سؤال أهل العلم.</div>')+
+    dd('fq-cat-btn','التصنيف',catObj.name,list[0].x.ic)+
+    dd('fq-top-btn','الباب ('+AR(list.length)+')',cur.t,cur.ic)+
     '<div class="fq-card">'+
       '<div class="fq-h">'+cur.ic+' <b>'+escapeHtml(cur.t)+'</b></div>'+
       '<div class="fq-sub">'+escapeHtml(cur.sub||'')+'</div>'+
       cur.blocks.map(fqBlock).join('')+
-      fqSrcBlock(cur.id)+
+      fqSrcBlock(cur.id, cur.cat)+
       '<div class="fq-share"><button class="share-btn" id="fq-share-btn">'+SHARE_IC+'شارِك هذا الباب</button></div>'+
     '</div>';
-  box.querySelectorAll('.fq-cats button').forEach(btn=> btn.addEventListener('click', ()=>{
-    __fqCat=btn.dataset.c; vibrate(6); renderFiqh();
-  }));
-  box.querySelectorAll('.fq-nav button').forEach(btn=> btn.addEventListener('click', ()=>{
-    __fqCur=parseInt(btn.dataset.i); vibrate(6); renderFiqh();
-    const t=$('#s-tasbih'); if(t) window.scrollTo({top:0, behavior:'smooth'});
-  }));
+  $('#fq-cat-btn').addEventListener('click', ()=>{
+    vibrate(6);
+    openLabelOverlay(CATS.map(c=>({id:c.id,label:c.name})), __fqCat, id=>{
+      closeSuraOverlay(); __fqCat=id; __fqCur=F.findIndex(x=>x.cat===id); renderFiqh();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }, 'اختر القسم');
+  });
+  $('#fq-top-btn').addEventListener('click', ()=>{
+    vibrate(6);
+    openLabelOverlay(list.map(o=>({id:String(o.i),label:o.x.t})), String(__fqCur), id=>{
+      closeSuraOverlay(); __fqCur=parseInt(id); renderFiqh();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }, 'اختر الباب — '+catObj.name);
+  });
   const sb=$('#fq-share-btn');
   if(sb) sb.addEventListener('click', ()=>{
     vibrate(6);
@@ -4246,10 +4284,22 @@ function applyTasbihMode(mode){
   if(tas)  qzSub('اضغط في أي مكان للعدّ');
   if(fiqh) qzSub('كيف أتوضّأ · أصلّي · أغتسل · أصوم');
   $$('#tasbih-mode-seg button').forEach(b=> b.classList.toggle('on', b.dataset.t===mode));
+  const mb=$$('#tasbih-mode-seg button').find(b=>b.dataset.t===mode);
+  if(mb){
+    $('#tasbih-mode-name').textContent=mb.textContent.trim();
+    $('#tasbih-mode-ic').innerHTML=mb.querySelector('svg').outerHTML;
+  }
   if(quiz) qzHome();
   if(fiqh) openFiqh();
 }
 $$('#tasbih-mode-seg button').forEach(b=> b.addEventListener('click', ()=>{ vibrate(6); applyTasbihMode(b.dataset.t); }));
+$('#tasbih-mode-btn').addEventListener('click', ()=>{
+  vibrate(6);
+  openLabelOverlay($$('#tasbih-mode-seg button').map(b=>({id:b.dataset.t,label:b.textContent.trim()})),
+    $$('#tasbih-mode-seg button').find(b=>b.classList.contains('on'))?.dataset.t,
+    id=>{ closeSuraOverlay(); applyTasbihMode(id); }, 'ماذا تريد؟');
+});
+(function(){ const b=$('#tasbih-mode-seg button.on'); if(b){ $('#tasbih-mode-name').textContent=b.textContent.trim(); $('#tasbih-mode-ic').innerHTML=b.querySelector('svg').outerHTML; } })();
 
 /* ==================== تفسير الآية (التفسير الميسّر — حفص) ==================== */
 let __tafsirLoading=null;
