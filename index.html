@@ -901,7 +901,7 @@
   body.riw-warsh .q-preview{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--qscale,1)); line-height:2.5;}
   body.qc-blue .q-preview{color:var(--qc-blue);} body.qc-blue2 .q-preview{color:var(--qc-blue2);} body.qc-navy .q-preview{color:var(--qc-navy);} body.qc-g1 .q-preview{color:var(--qc-g1);} body.qc-g2 .q-preview{color:var(--qc-g2);} body.qc-g3 .q-preview{color:var(--qc-g3);} body.qc-g4 .q-preview{color:var(--qc-g4);}
   .row .tzoom .tz-lbl{display:none;}
-  .wird-num{display:inline-block; color:var(--accent); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;
+  .wird-num{display:inline-block; color:var(--qnum, var(--accent)); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;
     padding:1px 4px; border-radius:8px; cursor:pointer; transition:background-color .2s, color .2s, transform .15s;}
   .wird-num:active{transform:scale(.88);}
   .wird-num.bm{background:var(--accent); color:#fff; box-shadow:0 0 0 3px var(--tab-on-bg, rgba(199,21,133,.12));}
@@ -1319,6 +1319,12 @@
   .fq-step .n, .fq-tag.s{background:transparent; border:1px solid var(--line);}
   .fq-aya{border-inline-start:3px solid var(--accent);}
   .fq-si .tag.q, .fq-si .tag.h, .fq-si .tag.f, .fq-si .tag.s, .fq-si .tag.n{background:transparent; border:1px solid var(--line);}
+
+  /* رقمُ الآية بلونٍ يخالف لونَ الخطّ ويلائمه: ذهبيٌّ دافئ مع الأزرق والأخضر، وزمرّديٌّ مع الأسود */
+  body.qc-blue, body.qc-blue2, body.qc-navy, body.qc-g1, body.qc-g2, body.qc-g3, body.qc-g4{ --qnum:#A8741A; }
+  body.qc-blue, body.qc-blue2, body.qc-navy{ --qnum:#B07A1C; }
+  :root[data-bg="dark"] body.qc-blue, :root[data-bg="dark"] body.qc-blue2, :root[data-bg="dark"] body.qc-navy,
+  :root[data-bg="dark"] body.qc-g1, :root[data-bg="dark"] body.qc-g2, :root[data-bg="dark"] body.qc-g3, :root[data-bg="dark"] body.qc-g4{ --qnum:#E3B25A; }
 </style>
 </head>
 <body>
