@@ -1292,6 +1292,27 @@
     .upd-bar{max-width:520px; margin-inline:auto;}
   }
   .upd-bar{box-shadow:0 4px 16px rgba(47,158,68,.32);}
+
+  /* ═══ لونُ بطاقةٍ واحد — كالتطبيقات الراقية ═══
+     كانت داخل كلّ بطاقةٍ لوحاتٌ بألوانٍ أخرى (أخضر فاتح، بنيّ، رماديّ)، فتجاور في الشاشة
+     لونان أو ثلاثةٌ للسطح. الآن: سطحٌ واحدٌ هو لونُ البطاقة، وتُميَّز الكتلُ داخلها
+     بخطٍّ رفيعٍ وحرفٍ ملوَّنٍ فقط. والأخضرُ أعمق (زمرّديّ) في كلّ الخلفيّات الفاتحة. */
+  :root[data-bg]:not([data-bg="dark"]){
+    --accent:#0F6B52; --accent-2:#0B5742; --accent-bg:rgba(15,107,82,.10); --accent-txt:#0B5742;
+  }
+  .wa-i, .fq-ul, .fq-steps, .fq-tblw, .fq-src-h, .lc-ic{background:transparent; box-shadow:none;}
+  .wa-i, .fq-ul, .fq-steps, .fq-tblw{border:1px solid var(--line); border-inline-start:3px solid var(--accent);}
+  .fq-src-h{border-bottom:1px solid var(--line); border-radius:0;}
+  .listen-cat .lc-ic, .locbtn.b-blue, .locbtn{background:transparent; border:1px solid var(--line);}
+  .fq-disc, .fq-note, .fq-note.core, .fq-note.warn, .fq-note.info, .fq-kh, .fq-fn, .fq-tn, .fq-col,
+  .fq-col.bad, .fq-col.good, .fq-aya, .fq-src-f, .inst-row, .locbtn, .fq-share .share-btn{
+    background:transparent; box-shadow:none; border:1px solid var(--line);}
+  .fq-note.core, .fq-note.warn, .fq-note.info, .fq-kh, .fq-tn{border-inline-start:3px solid var(--accent);}
+  .fq-note.warn, .fq-col.bad{border-inline-start-color:var(--c-repeat);}
+  .fq-disc{border-inline-start:3px solid var(--c-repeat);}
+  .fq-step .n, .fq-tag.s{background:transparent; border:1px solid var(--line);}
+  .fq-aya{border-inline-start:3px solid var(--accent);}
+  .fq-si .tag.q, .fq-si .tag.h, .fq-si .tag.f, .fq-si .tag.s, .fq-si .tag.n{background:transparent; border:1px solid var(--line);}
 </style>
 </head>
 <body>
