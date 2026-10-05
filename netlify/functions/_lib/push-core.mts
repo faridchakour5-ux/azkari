@@ -56,10 +56,18 @@ export function validTz(tz: unknown): tz is string {
   try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); return true; } catch { return false; }
 }
 
+/* عاد المغربُ إلى توقيت غرينيتش (GMT) ثابتًا يومَ 20 سبتمبر 2026 (المرسوم 2.26.530). وقاعدةُ المناطق
+   الزمنيّة في بيئة التشغيل قد تكون أقدمَ من ذلك فتحسب GMT+1، فتصل تذكيراتُ الساعة (أذكار الصباح
+   وغيرها) قبل وقتها بساعة. فنُعامل المغربَ بعد هذا التاريخ كـUTC صراحةً، سواءٌ حُدّثت القاعدةُ أم لا. */
+const MA_GMT_FROM = Date.UTC(2026, 8, 20, 1, 0);
+export function effectiveTz(tz: string, now: Date): string {
+  return (tz === "Africa/Casablanca" || tz === "Africa/El_Aaiun") && now.getTime() >= MA_GMT_FROM ? "UTC" : tz;
+}
+
 /* تاريخُ المستخدم وساعتُه ودقيقتُه ويومُ أسبوعه في منطقته، لا في منطقة الخادم */
 export function localParts(now: Date, tz: string) {
   const f = new Intl.DateTimeFormat("en-CA", {
-    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+    timeZone: effectiveTz(tz, now), year: "numeric", month: "2-digit", day: "2-digit",
     hour: "2-digit", minute: "2-digit", weekday: "short", hourCycle: "h23",
   });
   const p: Record<string, string> = {};

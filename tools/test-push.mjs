@@ -8,7 +8,7 @@
    (٤) رفضُ كلِّ عنوانٍ ليس خدمةَ دفعٍ معروفة (SSRF)، (٥) الموقعُ يُقرَّب. */
 import { createRequire } from "node:module";
 import crypto from "node:crypto";
-import { dueEvents, markSent, prayerTimes, localParts, parseSubscribe, validEndpoint, coarse }
+import { dueEvents, markSent, prayerTimes, localParts, effectiveTz, parseSubscribe, validEndpoint, coarse }
   from "../netlify/functions/_lib/push-core.mts";
 import { runCron, GIVE_UP_AFTER_FAILS } from "../netlify/functions/_lib/cron-run.mts";
 const fnRequire = createRequire(new URL("../netlify/functions/package.json", import.meta.url));
@@ -49,21 +49,21 @@ eq(r2.sent, {}, "سجلُّ «ما أُرسل» يُقتصّ: لا يبقى من
 
 console.log("— الأذكار والصلاة على النبي ﷺ (بتوقيت المستخدم لا الخادم)");
 // الدار البيضاء توقيتُها UTC+1 في هذه الأيّام: 07:05 عندهم = 06:05 UTC
-const morning = Date.UTC(2026, 9, 4, 6, 3);
+const morning = Date.UTC(2026, 9, 4, 7, 3);
 eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), morning), ["a-7", "s-7"], "07:03 محلّيًّا: أذكار الصباح + الصلاة على النبي");
-eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 4, 6, 8)), ["a-7"], "07:08: أذكار الصباح (نافذةُ 10 دقائق) دون الصلاة على النبي (نافذةُ 5)");
-eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 4, 6, 12)), [], "07:12: انتهت النافذتان");
-eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 4, 7, 3)), [], "08:03 محلّيًّا: لا شيء يوم الأحد (8 ليست من ساعات الأيّام العاديّة)");
+eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 4, 7, 8)), ["a-7"], "07:08: أذكار الصباح (نافذةُ 10 دقائق) دون الصلاة على النبي (نافذةُ 5)");
+eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 4, 7, 12)), [], "07:12: انتهت النافذتان");
+eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 4, 8, 3)), [], "08:03 محلّيًّا: لا شيء يوم الأحد (8 ليست من ساعات الأيّام العاديّة)");
 eq(ids(rec({ tz: "Asia/Riyadh", lat: 24.7, lng: 46.7, prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 4, 4, 3)), ["a-7", "s-7"], "الرياض (UTC+3): 07:03 عندهم = 04:03 UTC");
 eq(ids(rec({ prefs: { prayer: false, pre: false, azkar: false, salat: true, kahf: false } }), morning), ["s-7"], "إن أُطفئت الأذكارُ بقيت الصلاةُ على النبي وحدَها");
 eq(ids(rec({ prefs: { prayer: false, pre: false, azkar: false, salat: false, kahf: false } }), morning), [], "كلُّ التفضيلات مُطفأة: لا شيء إطلاقًا");
 
 console.log("— الجمعة");
-const fri = Date.UTC(2026, 9, 2, 7, 3);      // الجمعة 2026-10-02، 08:03 محلّيًّا
+const fri = Date.UTC(2026, 9, 2, 8, 3);      // الجمعة 2026-10-02، 08:03 محلّيًّا
 eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), fri), ["s-8"], "الجمعة 08:03: صلاةٌ على النبي (ساعاتُ الجمعة أكثر)");
 eq(dueEvents(rec({ prefs: { ...ALL, prayer: false, pre: false } }), new Date(fri))[0].payload.title, "يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ", "عنوانُ الجمعة الخاصّ");
-eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 2, 8, 3)), ["k-9"], "الجمعة 09:03: سورة الكهف (9 ليست من ساعات الصلاة على النبي)");
-eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 4, 8, 3)), [], "الأحد 09:03: لا كهف");
+eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 2, 9, 3)), ["k-9"], "الجمعة 09:03: سورة الكهف (9 ليست من ساعات الصلاة على النبي)");
+eq(ids(rec({ prefs: { ...ALL, prayer: false, pre: false } }), Date.UTC(2026, 9, 4, 9, 3)), [], "الأحد 09:03: لا كهف");
 
 console.log("— دون موقع");
 const nogeo = parseSubscribe({ subscription: { endpoint: "https://fcm.googleapis.com/fcm/send/abc", keys: { p256dh: "AAAA", auth: "BBBB" } }, tz: "Africa/Casablanca", prefs: { prayer: true, pre: true, azkar: true, salat: true, kahf: true } });
@@ -97,7 +97,13 @@ eq(parseSubscribe(null).ok, false, "جسمٌ فارغ: مرفوض");
 eq(coarse(-0.04) === 0, true, "تقريبٌ قرب الصفر لا يكسر شيئًا");
 
 console.log("— توقيتاتٌ محلّيّة");
-eq(localParts(new Date(Date.UTC(2026, 9, 4, 23, 30)), "Africa/Casablanca").key, "2026-10-05", "23:30 UTC = بعد منتصف الليل في الدار البيضاء ⇒ اليومُ التالي");
+eq(localParts(new Date(Date.UTC(2026, 9, 4, 23, 30)), "Africa/Casablanca").key, "2026-10-04", "المغرب GMT منذ 20 سبتمبر 2026: 23:30 UTC ما زالت في اليوم نفسه");
+eq(localParts(new Date(Date.UTC(2026, 9, 5, 0, 30)), "Africa/Casablanca").key, "2026-10-05", "00:30 UTC = بعد منتصف الليل في الدار البيضاء ⇒ اليومُ التالي");
+eq(localParts(new Date(Date.UTC(2026, 9, 4, 7, 3)), "Africa/Casablanca").h, 7, "المغرب بعد 20 سبتمبر 2026: الساعةُ المحلّيّة = UTC (حتى لو كانت قاعدةُ الخادم قديمة)");
+eq(effectiveTz("Africa/Casablanca", new Date(Date.UTC(2026, 8, 1, 12))), "Africa/Casablanca", "قبل 20 سبتمبر 2026 تبقى قاعدةُ المنطقة كما هي (GMT+1)");
+eq(effectiveTz("Africa/Casablanca", new Date(Date.UTC(2026, 9, 5, 12))), "UTC", "بعد التاريخ: المغربُ UTC");
+eq(effectiveTz("Africa/El_Aaiun", new Date(Date.UTC(2026, 9, 5, 12))), "UTC", "العيون أيضًا");
+eq(effectiveTz("Europe/Paris", new Date(Date.UTC(2026, 9, 5, 12))), "Europe/Paris", "غيرُ المغرب لا يُمَسّ");
 eq(localParts(new Date(Date.UTC(2026, 9, 4, 23, 30)), "America/New_York").key, "2026-10-04", "ونيويورك ما زالت في اليوم نفسه");
 
 console.log("— الجدولةُ: مسارات الإرسال (مخزنٌ ومُرسِلٌ مُحاكَيان)");
@@ -109,7 +115,7 @@ const mkStore = (recs) => {
     async setJSON(k, v) { m.set(k, structuredClone(v)); },
     async delete(k) { m.delete(k); } };
 };
-const NOW = new Date(Date.UTC(2026, 9, 4, 6, 3));            // 07:03 الدار البيضاء الأحد: أذكارٌ + صلاةٌ على النبي
+const NOW = new Date(Date.UTC(2026, 9, 4, 7, 3));            // 07:03 الدار البيضاء الأحد: أذكارٌ + صلاةٌ على النبي
 const base = (o = {}) => rec({ updated: NOW.getTime(), prefs: { prayer: false, pre: false, azkar: true, salat: true, kahf: false }, ...o });
 const err = (code) => Object.assign(new Error("push " + code), { statusCode: code });
 

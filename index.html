@@ -2589,7 +2589,21 @@ const AZKAR_SLOTS=[
 ];
 const SALAT_HOURS=[7,10,13,16,19,22]; // 6 مرّات متفرّقة في الأيام العادية
 const SALAT_HOURS_FRIDAY=[6,8,10,11,12,14,16,18,20,22]; // 10 مرّات يوم الجمعة (الإكثار من الصلاة على النبي ﷺ)
-function isFridayNow(){ return new Date().getDay()===5; }
+/* الجهازُ (أو متصفّحُه) قد يحمل قاعدةَ توقيتٍ قديمةً: عاد المغربُ إلى توقيت غرينيتش (GMT) ثابتًا
+   يومَ 20 سبتمبر 2026 (المرسوم 2.26.530)، ومن لم تُحدَّث قاعدتُه ما زال يحسب GMT+1، فتظهر المواقيتُ
+   المعروضةُ بساعةٍ زائدة (والأذانُ الفعليّ صحيحٌ لأنّه يُجدوَل بلحظةٍ مطلقة).
+   TZ_SKEW = ما زاد في حساب الجهاز عن الحقيقة بالدقائق (60 للجهاز القديم، 0 لغيره). يُصحَّح به العرضُ
+   وساعاتُ التذكير فقط، ولا يمسّ حسابَ المواقيت ولا لحظةَ الأذان. */
+const TZ_SKEW=(function(){
+  try{
+    const tz=Intl.DateTimeFormat().resolvedOptions().timeZone, now=new Date();
+    if(/^Africa\/(Casablanca|El_Aaiun)$/.test(tz) && now.getTime()>=Date.UTC(2026,8,20,1,0)) return -now.getTimezoneOffset();
+  }catch(e){}
+  return 0;
+})();
+const lclShift=d=>TZ_SKEW ? new Date(d.getTime()-TZ_SKEW*60000) : d;    // حقولُ الساعة واليوم فيه صحيحة
+const lclAt=d=>TZ_SKEW ? new Date(d.getTime()+TZ_SKEW*60000) : d;       // لحظةٌ بُنيت بـsetHours المحلّيّ فتُصحَّح
+function isFridayNow(){ return lclShift(new Date()).getDay()===5; }
 function salatHoursToday(){ return isFridayNow() ? SALAT_HOURS_FRIDAY : SALAT_HOURS; }
 // تذكير قراءة سورة الكهف يوم الجمعة
 const KAHF_HOUR=9;
@@ -2607,7 +2621,7 @@ function scheduleChecks(){
   }
   if(window.__azTimer) return;
   const check=()=>{
-    const now=new Date(), h=now.getHours(), m=now.getMinutes();
+    const now=lclShift(new Date()), h=now.getHours(), m=now.getMinutes();
     const srv=pushActive();   // الخادمُ يُرسل: لا نُكرّر الإشعار (وتبقى التنبيهاتُ داخل التطبيق)
     if(settings.notif && m<10 && !srv){
       const slot = AZKAR_SLOTS.find(s=>s.h===h);
@@ -6543,6 +6557,7 @@ function refreshGeo(force, cb){
      {enableHighAccuracy:false, timeout:12000, maximumAge:0});
 }
 function fmtTime(d){
+  d=lclShift(d);
   // 'u-nu-latn' يفرض الأرقام اللاتينية مهما كانت إعدادات الجهاز
   try{ return d.toLocaleTimeString('ar-MA-u-nu-latn',{hour:'2-digit',minute:'2-digit',hour12:true}); }
   catch(e){ return d.toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit',hour12:true}); }
@@ -6658,7 +6673,7 @@ async function scheduleNativeNotifs(){
       if(day >= DAYS_NOTIF) continue;   // ما بعدَ أفُقِ الإشعارات: الأذانُ وحدَه
       if(settings.salat){
         (isFri ? SALAT_HOURS_FRIDAY : SALAT_HOURS).forEach(hh=>{
-          const at=new Date(d); at.setHours(hh,0,0,0);
+          const at=new Date(d); at.setHours(hh,0,0,0); at.setTime(lclAt(at).getTime());
           if(at.getTime() > nowMs+60000){
             notifs.push({ id:id++, channelId:'reminders',
               title:isFri?'يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ':'صَلِّ على الحبيب ﷺ',
@@ -6668,7 +6683,7 @@ async function scheduleNativeNotifs(){
         });
       }
       if(settings.notif && isFri){
-        const at=new Date(d); at.setHours(KAHF_HOUR,0,0,0);
+        const at=new Date(d); at.setHours(KAHF_HOUR,0,0,0); at.setTime(lclAt(at).getTime());
         if(at.getTime() > nowMs+60000){
           notifs.push({ id:id++, channelId:'reminders', title:'اليوم الجمعة — سورة الكهف 📖',
             body:'من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين',
