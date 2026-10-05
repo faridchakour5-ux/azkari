@@ -5671,6 +5671,9 @@ function autoReadTick(ts){
   __autoReadRAF=null;
   if(!__autoRead) return;
   if(!wirdScreenActive()){ __autoReadRAF=requestAnimationFrame(autoReadTick); return; }
+  /* ورقةُ التفسير/الترجمة مفتوحة: تقف الصفحةُ في موضعها تمامًا، وتُكمل من الموضع نفسه حين تُغلَق */
+  const tfo=$('#tafsir-overlay');
+  if(tfo && tfo.classList.contains('show')){ __autoReadLast=ts; __autoReadY=window.scrollY; __autoReadRAF=requestAnimationFrame(autoReadTick); return; }
   // أثناء تمرير المستخدم اليدوي: نتوقّف ونزامن الموضع معه
   if(Date.now() < __autoReadPausedUntil){ __autoReadLast=ts; __autoReadY=window.scrollY; __autoReadRAF=requestAnimationFrame(autoReadTick); return; }
   if(!__autoReadLast){ __autoReadLast=ts; __autoReadY=window.scrollY; }
