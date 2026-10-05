@@ -1374,6 +1374,10 @@
      المتغيّراتُ تُعرَّف على الشاشتين فتنسحب على كلّ ما فيهما، وللخلفيّة الداكنة حبرُها الفاتح كما هو. */
   :root[data-bg]:not([data-bg="dark"]) :is(#s-azkar, #s-tasbih){
     --text:#063D30; --text-2:#2D5B4C; --text-3:#5F8374; --text-em:#063D30; color:#063D30; }
+
+  /* العناوين الكبيرة (أقسامُ الباب وعناوينُ الأحاديث والأسئلة والجداول) بذهبيّ أرقام الآيات نفسِه */
+  :is(#s-azkar, #s-tasbih) :is(.fq-bt, .wa-t, .fq-ki .q, .fq-tbl th, .fq-src-h, .fadl .lbl, .wa-s .lbl){ color:var(--c-repeat); }
+  :is(#s-azkar, #s-tasbih) :is(.fq-bt, .wa-t)::before{ background:var(--c-repeat); }
 </style>
 </head>
 <body>
