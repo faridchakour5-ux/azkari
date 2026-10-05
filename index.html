@@ -69,6 +69,7 @@
     /* الشريط السفليّ: الخامل رماديّ هادئ، والنشِط بلون التطبيق — لا لونَ غريبًا عنه */
     --tab-idle:rgba(58,53,46,.5); --tab-on:#2F9E44; --tab-on-bg:rgba(47,158,68,.14);
     --qc-blue:#2166D6; --qc-blue2:#16509E; --qc-navy:#0B2C66;
+    --qc-g1:#1E8566; --qc-g2:#0F6B52; --qc-g3:#0A5441; --qc-g4:#063D30;
     /* ألوان زرّي «اقرأ» (أزرق) و«تكرار» (كهرماني) في صفحة الاستماع */
     --c-read:#1553CC; --c-read-bg:rgba(28,95,191,.16);
     --c-repeat:#9E6410; --c-repeat-bg:rgba(169,113,26,.17);
@@ -128,6 +129,7 @@
     --shadow-2:0 4px 14px rgba(0,0,0,.5);
     --tab-idle:rgba(230,225,214,.5); --tab-on:#34C77B; --tab-on-bg:rgba(52,199,123,.18);
     --qc-blue:#78B0FF; --qc-blue2:#5E97F2; --qc-navy:#4C86E6;
+    --qc-g1:#8AE8C6; --qc-g2:#6FDDB4; --qc-g3:#4CC79B; --qc-g4:#35B087;
     --c-read:#7FB2FF; --c-read-bg:rgba(127,178,255,.16);
     --c-repeat:#E3B25A; --c-repeat-bg:rgba(227,178,90,.16);
     color-scheme:dark;
@@ -844,6 +846,10 @@
   body.qc-blue  .wird-text, body.qc-blue  .wird-basmala, body.qc-blue  .card.quran .txt{ color:var(--qc-blue); }
   body.qc-blue2 .wird-text, body.qc-blue2 .wird-basmala, body.qc-blue2 .card.quran .txt{ color:var(--qc-blue2); }
   body.qc-navy  .wird-text, body.qc-navy  .wird-basmala, body.qc-navy  .card.quran .txt{ color:var(--qc-navy); }
+  body.qc-g1 .wird-text, body.qc-g1 .wird-basmala, body.qc-g1 .card.quran .txt{ color:var(--qc-g1); }
+  body.qc-g2 .wird-text, body.qc-g2 .wird-basmala, body.qc-g2 .card.quran .txt{ color:var(--qc-g2); }
+  body.qc-g3 .wird-text, body.qc-g3 .wird-basmala, body.qc-g3 .card.quran .txt{ color:var(--qc-g3); }
+  body.qc-g4 .wird-text, body.qc-g4 .wird-basmala, body.qc-g4 .card.quran .txt{ color:var(--qc-g4); }
   /* حفص + نسخ نوتو: التشكيل أخضر دائمًا (من لوحة ألوان الخط)، ولون الحروف يتبع اختيار «لون خط القرآن» */
   /* سُمكُ خطّ المصحف: خطُّ حفص (الملك فهد) وخطُّ أميري رفيعان بجانب الخطّ
      المغربيّ، فيبدو نصُّ حفص باهتًا بجانب ورش. لا وزنَ ثقيلًا في الملفَّين
@@ -865,7 +871,7 @@
   html[data-bg="dark"] body.qtashkeel .wird-text, html[data-bg="dark"] body.qtashkeel .wird-basmala, html[data-bg="dark"] body.qtashkeel .card.quran .txt{
     font-palette:--hafsTashkeelDark;}
   /* منتقي ألوان خطّ القرآن */
-  .qcolor-swatches{display:flex; gap:10px; align-items:center;}
+  .qcolor-swatches{display:flex; flex-wrap:wrap; gap:9px; align-items:center; justify-content:flex-end; max-width:140px;}
   .qcolor-swatches button{border:0; background:transparent; padding:0; cursor:pointer; line-height:0;}
   .qcolor-swatches button i{display:block; width:26px; height:26px; border-radius:50%;
     border:2px solid var(--sep); box-shadow:0 1px 3px rgba(0,0,0,.15); transition:transform .13s ease;}
@@ -893,7 +899,7 @@
   .q-preview{padding:4px 18px 18px; text-align:center; line-height:2.1; color:var(--qink, var(--text));
     font-family:'AmiriQuran',serif; font-size:calc(22px * var(--qscale,1));}
   body.riw-warsh .q-preview{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--qscale,1)); line-height:2.5;}
-  body.qc-blue .q-preview{color:var(--qc-blue);} body.qc-blue2 .q-preview{color:var(--qc-blue2);} body.qc-navy .q-preview{color:var(--qc-navy);}
+  body.qc-blue .q-preview{color:var(--qc-blue);} body.qc-blue2 .q-preview{color:var(--qc-blue2);} body.qc-navy .q-preview{color:var(--qc-navy);} body.qc-g1 .q-preview{color:var(--qc-g1);} body.qc-g2 .q-preview{color:var(--qc-g2);} body.qc-g3 .q-preview{color:var(--qc-g3);} body.qc-g4 .q-preview{color:var(--qc-g4);}
   .row .tzoom .tz-lbl{display:none;}
   .wird-num{display:inline-block; color:var(--accent); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;
     padding:1px 4px; border-radius:8px; cursor:pointer; transition:background-color .2s, color .2s, transform .15s;}
@@ -1644,6 +1650,10 @@
         <button data-r="blue"  title="أزرق"><i style="background:var(--qc-blue)"></i></button>
         <button data-r="blue2" class="on" title="أزرق أقل غموقاً"><i style="background:var(--qc-blue2)"></i></button>
         <button data-r="navy"  title="أزرق غامق"><i style="background:var(--qc-navy)"></i></button>
+        <button data-r="g1" title="زمرّديّ ١ — فاتح"><i style="background:var(--qc-g1)"></i></button>
+        <button data-r="g2" title="زمرّديّ ٢ — متوسط"><i style="background:var(--qc-g2)"></i></button>
+        <button data-r="g3" title="زمرّديّ ٣ — عميق"><i style="background:var(--qc-g3)"></i></button>
+        <button data-r="g4" title="زمرّديّ ٤ — غامق جدًّا"><i style="background:var(--qc-g4)"></i></button>
       </div>
     </div>
   </div>
@@ -1927,7 +1937,8 @@ function applyHafsFont(){
 }
 function applyQuranColor(){
   const c = settings.quranColor||'normal';
-  document.body.classList.remove('qc-blue','qc-blue2','qc-navy');
+  document.body.classList.remove('qc-blue','qc-blue2','qc-navy','qc-g1','qc-g2','qc-g3','qc-g4');
+  if(/^g[1-4]$/.test(c)) document.body.classList.add('qc-'+c);
   if(c==='blue')  document.body.classList.add('qc-blue');
   else if(c==='blue2') document.body.classList.add('qc-blue2');
   else if(c==='navy')  document.body.classList.add('qc-navy');
