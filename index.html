@@ -4842,38 +4842,40 @@ function scrollToAya(ai, smooth){
 
 /* المستوى الأول: قائمة السور ← الضغط على سورة يفتح اختيار الحزب داخلها */
 function openMushafPicker(){
-  /* النقرةُ على السورة تنتقل إليها من فورها — كان يلزم نقرتان: السورةُ ثمّ
-     «من بداية السورة». ومن أراد حزبًا بعينِه ضغط السهمَ الصغير في حرف الصفّ. */
+  /* النقرةُ على سورةٍ تمتدّ على أكثر من حزبٍ تفتح قائمةَ أحزابها ليصل القارئُ إلى الآية التي يريد؛
+     والسورةُ التي تقع في حزبٍ واحدٍ تنتقل إليها من فورها. */
   openSuraOverlay(currentSuraFromScroll(), (idx, wantHizb)=>{
-    if(wantHizb) showHizbPicker(idx);
+    if(wantHizb || suraHizbEntries(idx).length>1) showHizbPicker(idx);
     else commitMushafJump(idx, WIRD.sur[idx].i);
   }, 'اختر السورة', true);
 }
-/* المستوى الثاني: الأحزاب التي تبدأ داخل السورة + خيار «بداية السورة» */
+/* الأحزابُ التي تمسّ السورة: [{k: رقمُ الحزب، ai: أولُ آيةٍ منه داخل السورة، first: هل يبدأ بالسورة نفسِها}] */
+function suraHizbEntries(suraIdx){
+  const s=WIRD.sur[suraIdx], hz=WIRD.hizb||[];
+  const surStart=s.i, surEnd=(suraIdx+1<WIRD.sur.length)? WIRD.sur[suraIdx+1].i : WIRD.a.length;
+  const out=[]; let startK=0;
+  for(let k=0;k<hz.length;k++){ if(hz[k]<=surStart) startK=k; else break; }   // الحزبُ الذي تبدأ السورةُ داخلَه
+  out.push({ k:startK+1, ai:surStart, first:true });
+  for(let k=startK+1;k<hz.length;k++){
+    if(hz[k]>=surEnd) break;
+    if(hz[k]>surStart) out.push({ k:k+1, ai:hz[k], first:false });
+  }
+  return out;
+}
+/* المستوى الثاني: أحزابُ السورة كلُّها، مع رقم الآية التي يبدأ منها كلُّ حزبٍ داخلها */
 function showHizbPicker(suraIdx){
   const list=$('#sura-list'); if(!list||!WIRD) return;
   const s=WIRD.sur[suraIdx];
-  const surStart=s.i;
-  const surEnd=(suraIdx+1<WIRD.sur.length)? WIRD.sur[suraIdx+1].i : WIRD.a.length;
   $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = s.n;
   const bk=$('#sura-overlay-back'); if(bk) bk.style.display='';
   suraListPlain(); list.innerHTML='';
-  const mkBtn=(cls, label, page, ai)=>{
-    const b=document.createElement('button'); b.type='button'; b.className=cls;
-    b.innerHTML='<span>'+label+'</span><span class="hz-pg">ص '+page+'</span>';
-    b.addEventListener('click', ()=> commitMushafJump(suraIdx, ai));
+  const E=suraHizbEntries(suraIdx);
+  E.forEach(e=>{
+    const no=e.ai-s.i+1, b=document.createElement('button'); b.type='button'; b.className='hz'+(e.first?' hz-head':'');
+    b.innerHTML='<span>الحزب '+e.k+' — '+(e.first?'من بداية السورة':'من الآية '+no)+'</span><span class="hz-pg">ص '+WIRD.a[e.ai].p+'</span>';
+    b.addEventListener('click', ()=> commitMushafJump(suraIdx, e.ai));
     list.appendChild(b);
-  };
-  mkBtn('hz hz-head','من بداية السورة', WIRD.a[surStart].p, surStart);
-  const hz=WIRD.hizb||[]; let count=0;
-  for(let k=0;k<hz.length-1;k++){
-    const ai=hz[k];
-    if(ai>=surStart && ai<surEnd){ count++; mkBtn('hz','الحزب '+(k+1), WIRD.a[ai].p, ai); }
-  }
-  if(!count){
-    const none=document.createElement('div'); none.className='khatma-done';
-    none.textContent='لا يبدأ حزب داخل هذه السورة'; list.appendChild(none);
-  }
+  });
   list.scrollTop=0;
 }
 function commitMushafJump(suraIdx, ai){
