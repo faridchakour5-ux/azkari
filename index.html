@@ -6361,48 +6361,70 @@ function quarterPage(){
 
 /* ---- بناء النافذة ---- */
 let __qpQuran=null;
-function buildQuickPop(){
+/* التذكيرُ شيءٌ واحدٌ في كلّ مرّة: صلاةٌ على الحبيب ﷺ، أو ربعُ صفحةٍ من القرآن، أو حديثٌ صحيح — ويتبدّل نوعُه في كلّ فتحة. */
+let __qpKind='salat', __qpHadith=null, __qpHadithPool=null;
+async function qpHadithPool(){
+  if(__qpHadithPool) return __qpHadithPool;
+  try{ if(!window.FIQH_EXTRA) await loadScriptOnce('sunna.js'); }catch(e){}
+  const out=[];
+  (window.FIQH_EXTRA||[]).filter(c=>c.cat==='hadith').forEach(c=> (c.blocks||[]).forEach(b=>{
+    if(b.k==='wasiyya' && b.v && b.s && b.v.length<=330) out.push({ t:b.t||'', v:b.v, s:b.s });
+  }));
+  __qpHadithPool=out; return out;
+}
+const QP_SUBS={ salat:'صلِّ على الحبيب ﷺ ثلاثًا — اضغط على الذكر حتى يكتمل العدد.', quran:'اقرأ ربعَ صفحةٍ من كتاب الله.', hadith:'حديثٌ صحيحٌ من البخاري أو مسلم.' };
+async function buildQuickPop(){
   const st=qpState();
-  const ti=qpPick(QP_TASBIH.length, st.tas), si=qpPick(QP_SALAT.length, st.sal);
-  st.tas=ti; st.sal=si; st.last=Date.now(); qpSave(st);
-  const rows=[
-    { k:'t', d:QP_TASBIH[ti], n:3 },
-    { k:'s', d:QP_SALAT[si],  n:3 }
-  ];
-  $('#qp-rows').innerHTML = rows.map((r,i)=>
-    '<div class="qp-row" data-i="'+i+'" data-left="'+r.n+'">'+
-      '<div class="qp-txt">'+escapeHtml(r.d.t)+'</div>'+
-      '<div class="qp-bot"><span class="qp-src">'+escapeHtml(r.d.s)+'</span>'+
-        '<button class="qp-cnt" type="button">'+AR(r.n)+'</button></div>'+
-    '</div>').join('');
-  $$('#qp-rows .qp-row').forEach(row=>{
+  const kinds=['salat','quran','hadith'].filter(k=>k!==st.kind);
+  let kind=kinds[Math.floor(Math.random()*kinds.length)];
+  const rows=$('#qp-rows'), box=$('#qp-quran');
+  __qpQuran=null; __qpHadith=null; __qpFile=null;
+  if(kind==='hadith'){
+    const pool=await qpHadithPool();
+    if(pool.length){ let i; do{ i=Math.floor(Math.random()*pool.length); }while(pool.length>1 && i===st.hd); st.hd=i; __qpHadith=pool[i]; }
+    else kind=Math.random()<.5?'salat':'quran';       // تعذّر تحميل الأحاديث: نوعٌ آخر
+  }
+  __qpKind=kind; st.kind=kind; st.last=Date.now();
+  $('.qp-sub') && ($('.qp-sub').textContent=QP_SUBS[kind]);
+  const riw=$('#qp-riw'); if(riw) riw.style.display = kind==='quran' ? '' : 'none';
+  rows.innerHTML=''; box.innerHTML=''; rows.style.display=box.style.display='none';
+  const addRow=(txt,src,n)=>{
+    rows.style.display='';
+    rows.innerHTML='<div class="qp-row" data-left="'+n+'"><div class="qp-txt">'+escapeHtml(txt)+'</div>'+
+      '<div class="qp-bot"><span class="qp-src">'+escapeHtml(src)+'</span><button class="qp-cnt" type="button">'+AR(n)+'</button></div></div>';
+    const row=rows.firstChild;
+    if(n<=1){ const c1=row.querySelector('.qp-cnt'); if(c1) c1.style.display='none'; }   // حديثٌ: لا عدّادَ له
     row.addEventListener('click', ()=>{
-      let left=parseInt(row.dataset.left);
-      if(left<=0) return;
+      let left=parseInt(row.dataset.left); if(left<=0) return;
       left--; row.dataset.left=left;
-      const b=row.querySelector('.qp-cnt');
-      if(left<=0){ row.classList.add('done'); b.innerHTML=CHK_IC; vibrate([12,35,12]); }
-      else { b.textContent=AR(left); vibrate(8); }
+      const bt=row.querySelector('.qp-cnt');
+      if(left<=0){ row.classList.add('done'); bt.innerHTML=CHK_IC; vibrate([12,35,12]); }
+      else { bt.textContent=AR(left); vibrate(8); }
     });
-  });
-  // اختيار الرواية
+  };
+  if(kind==='salat'){
+    const si=qpPick(QP_SALAT.length, st.sal); st.sal=si; qpSave(st);
+    addRow(QP_SALAT[si].t, QP_SALAT[si].s, 3); qpPrepareImage();
+  } else if(kind==='hadith'){
+    qpSave(st); addRow(__qpHadith.v, __qpHadith.s, 1); qpPrepareImage();
+  } else {
+    qpSave(st);
+    box.style.display='';
+    box.innerHTML='<div class="qp-load">…جارٍ إحضار ربع صفحة</div>';
+    ensureWirdForPop().then(()=>{
+      const q=quarterPage();
+      if(!q){ box.innerHTML='<div class="qp-load">تعذّر إحضار الآيات</div>'; return; }
+      __qpQuran=q;
+      qpPrepareImage();
+      box.innerHTML=
+        '<div class="qp-qhead">سورة '+escapeHtml(q.name)+' · '+
+          (q.ayat.length>1 ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no)) : ('الآية '+AR(q.ayat[0].no)))+
+          ' · صفحة '+AR(q.pg)+'</div>'+
+        '<div class="wird-text qp-qtext">'+q.ayat.map(a=>
+          '<span class="aya-t">'+a.t+'</span><span class="wird-num">۝'+AR(a.no)+'</span> ').join('')+'</div>';
+    });
+  }
   $$('#qp-riw button').forEach(x=> x.classList.toggle('on', x.dataset.r===settings.riwaya));
-  // ربع صفحة من القرآن
-  const box=$('#qp-quran');
-  box.innerHTML='<div class="qp-load">…جارٍ إحضار ربع صفحة</div>';
-  __qpQuran=null;
-  ensureWirdForPop().then(()=>{
-    const q=quarterPage();
-    if(!q){ box.innerHTML='<div class="qp-load">تعذّر إحضار الآيات</div>'; return; }
-    __qpQuran=q;
-    qpPrepareImage();
-    box.innerHTML=
-      '<div class="qp-qhead">سورة '+escapeHtml(q.name)+' · '+
-        (q.ayat.length>1 ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no)) : ('الآية '+AR(q.ayat[0].no)))+
-        ' · صفحة '+AR(q.pg)+'</div>'+
-      '<div class="wird-text qp-qtext">'+q.ayat.map(a=>
-        '<span class="aya-t">'+a.t+'</span><span class="wird-num">۝'+AR(a.no)+'</span> ').join('')+'</div>';
-  });
 }
 /* تحميل بيانات المصحف في الخلفية دون إبطاء الإقلاع */
 function ensureWirdForPop(){
@@ -6418,7 +6440,7 @@ function ensureWirdForPop(){
 
 function openQuickPop(){
   const el=$('#quick-pop'); if(!el) return;
-  buildQuickPop();
+  buildQuickPop();            // غير متزامنة: يُرسَم المحتوى فور اختيار النوع
   el.classList.add('show');
 }
 function closeQuickPop(){
@@ -6427,19 +6449,15 @@ function closeQuickPop(){
 }
 /* نصّ المشاركة: الأذكار + ربع الصفحة + الرابط */
 function qpShareText(){
-  const st=qpState();
   const L=[];
-  L.push('🤍 *تذكير* — تطبيق «صلاتي»');
-  L.push('');
-  L.push('سبِّح ثلاثًا:');
-  L.push('﴿ '+QP_TASBIH[Math.max(st.tas,0)].t+' ﴾');
-  L.push('');
-  L.push('وصلِّ على الحبيب ﷺ ثلاثًا:');
-  L.push('﴿ '+QP_SALAT[Math.max(st.sal,0)].t+' ﴾');
-  if(__qpQuran){
-    L.push('');
-    L.push('وربع صفحة من سورة '+__qpQuran.name+':');
+  L.push('🤍 *تذكير* — تطبيق «صلاتي»'); L.push('');
+  if(__qpKind==='hadith' && __qpHadith){ L.push('حديثٌ صحيح:'); L.push(__qpHadith.v); L.push(''); L.push(__qpHadith.s); }
+  else if(__qpKind==='quran' && __qpQuran){
+    L.push('ربع صفحة من سورة '+__qpQuran.name+':');
     L.push(__qpQuran.ayat.map(a=> a.t+' ۝'+a.no).join(' '));
+  } else {
+    const st=qpState();
+    L.push('وصلِّ على الحبيب ﷺ ثلاثًا:'); L.push('﴿ '+QP_SALAT[Math.max(st.sal,0)].t+' ﴾');
   }
   L.push('');
   L.push('يتغيّر التذكير في كل مرّة. افتح الرابط وخُذ نصيبك اليوم —');
@@ -6483,8 +6501,8 @@ async function qpEnsureFonts(){
 async function buildQuickPopImage(){
   await qpEnsureFonts();
   const st=qpState();
-  const tas=QP_TASBIH[Math.max(st.tas,0)], sal=QP_SALAT[Math.max(st.sal,0)];
-  const q=__qpQuran;
+  const kind=__qpKind, sal=QP_SALAT[Math.max(st.sal,0)], hd=__qpHadith;
+  const q = kind==='quran' ? __qpQuran : null;
 
   const S=2;                      // دقّة مضاعفة
   const W=560, PAD=30, BOX=22, IN=20;
@@ -6500,7 +6518,9 @@ async function buildQuickPopImage(){
   const m=document.createElement('canvas').getContext('2d');
   const innerW=W-2*PAD-2*IN;
   m.font="23px "+"'AmiriQuran',serif";
-  const l1=wrapAr(m,tas.t,innerW), l2=wrapAr(m,sal.t,innerW);
+  const l2 = kind==='hadith' && hd ? wrapAr(m,hd.v,innerW) : wrapAr(m,sal.t,innerW);
+  m.font="500 13px 'PlexAr',sans-serif";
+  const srcLines = kind==='hadith' && hd ? wrapAr(m,hd.s,innerW) : [];
   let qLines=[], qHead='';
   if(q){
     m.font=QSZ+"px "+qFont;
@@ -6512,10 +6532,10 @@ async function buildQuickPopImage(){
   }
   const LH1=44, LHQ = maghribi ? 60 : 50;
   const hBox = ls => IN + ls.length*LH1 + 14 + 30 + IN;      // نصّ + سطر المصدر/العدّاد
-  const h1=hBox(l1), h2=hBox(l2);
+  const h2 = kind==='hadith' ? (IN + l2.length*LH1 + 10 + srcLines.length*21 + IN) : (kind==='salat' ? hBox(l2) : 0);
   const QGAP = maghribi ? 24 : 10;             // فراغ يمنع تداخل علامات الوقف مع العنوان
   const h3 = q ? (IN + 28 + QGAP + qLines.length*LHQ + IN) : 0;
-  const H = PAD + 44 + 30 + 16 + h1 + 14 + h2 + (q? 14+h3 : 0) + 26 + 46 + PAD;
+  const H = PAD + 44 + 30 + 16 + (h2 ? h2+14 : 0) + (q? h3+14 : 0) + 26 + 46 + PAD;
 
   // ---- تمرير ثانٍ: الرسم ----
   const cv=document.createElement('canvas');
@@ -6541,7 +6561,7 @@ async function buildQuickPopImage(){
 
   y+=26;
   c.font="600 15px 'PlexAr',sans-serif"; c.fillStyle=cText2;
-  c.fillText('ذكرٌ وصلاةٌ على الحبيب ﷺ وربعُ صفحةٍ من القرآن', W/2, y);
+  c.fillText(kind==='hadith'?'حديثٌ صحيحٌ من الصحيحين':kind==='quran'?'ربعُ صفحةٍ من القرآن الكريم':'صلاةٌ على الحبيب ﷺ', W/2, y);
   y+=22;
 
   function drawBox(lines, src, n, top, h){
@@ -6560,8 +6580,14 @@ async function buildQuickPopImage(){
     c.font="500 12.5px 'PlexAr',sans-serif"; c.fillStyle=cText3;
     c.textAlign='right'; c.fillText(src, W-PAD-IN, cy+4); c.textAlign='center';
   }
-  drawBox(l1, tas.s, 3, y, h1); y+=h1+14;
-  drawBox(l2, sal.s, 3, y, h2); y+=h2+14;
+  if(kind==='hadith' && hd){
+    c.fillStyle=cFill; rrect(c,PAD,y,W-2*PAD,h2,BOX); c.fill();
+    c.font="23px 'AmiriQuran',serif"; c.fillStyle=cText;
+    let ty=y+IN+30; for(const ln of l2){ c.fillText(ln, W/2, ty); ty+=LH1; }
+    c.font="500 13px 'PlexAr',sans-serif"; c.fillStyle=cText3; ty+=-14;
+    for(const ln of srcLines){ c.fillText(ln, W/2, ty+10); ty+=21; }
+    y+=h2+14;
+  } else if(kind==='salat'){ drawBox(l2, sal.s, 3, y, h2); y+=h2+14; }
 
   if(q){
     c.fillStyle=cFill; rrect(c,PAD,y,W-2*PAD,h3,BOX); c.fill();
