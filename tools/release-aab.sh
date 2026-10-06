@@ -105,9 +105,16 @@ for f in $(grep -o "'\./[^']*'" "$ROOT/sw.js" | tr -d "'" | grep -v '^\./$'); do
 done
 [ "$bad" = 0 ] || die "ملفّات الويب داخل الحزمة لا تطابق المستودع"
 ok "ملفّات الويب داخل الحزمة = المستودع"
-for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
-  cmp -s "$X/base/res/mipmap-$d-v4/ic_launcher_foreground.png" "$ROOT/native/android-res/mipmap-$d/ic_launcher_foreground.png" || die "أيقونةُ الإطلاق ($d) ليست شعارَ صلاتي (أيقونة Capacitor الافتراضيّة؟)"
-done
+# aapt2 يعيد ضغطَ PNG فلا تصلح مقارنةُ البايتات؛ نقارن البكسلات
+python3 - "$X" "$ROOT/native/android-res" <<'PY' || die "أيقونةُ الإطلاق ليست شعارَ صلاتي (أيقونة Capacitor الافتراضيّة؟)"
+import sys
+from PIL import Image, ImageChops
+x, r = sys.argv[1:3]
+for d in ("mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"):
+    for f in ("ic_launcher_foreground.png", "ic_launcher.png", "ic_launcher_round.png"):
+        a = Image.open(f"{x}/base/res/mipmap-{d}-v4/{f}").convert("RGBA"); b = Image.open(f"{r}/mipmap-{d}/{f}").convert("RGBA")
+        if a.size != b.size or ImageChops.difference(a, b).getbbox(): sys.exit(1)
+PY
 ok "أيقونةُ الإطلاق = شعارُ صلاتي"
 
 echo
