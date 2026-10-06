@@ -5,6 +5,7 @@
    شافعيّ) — وقد قورنت حزمةُ adhan هنا بـ adhan.min.js في التطبيق على
    3816 موقتًا فلم يختلف واحدٌ منها ولا بجزءٍ من الثانية. */
 import { Coordinates, CalculationParameters, PrayerTimes, Madhab } from "adhan";
+import { MA_HABOUS } from "./ma-habous.mts";
 
 export interface Prefs {
   prayer: boolean;   // إشعارٌ عند دخول وقت الصلاة
@@ -80,11 +81,21 @@ export function localParts(now: Date, tz: string) {
   };
 }
 
+/* فروق المواقيت الرسميّة لأقرب مدينةٍ مغربيّة (≤ 40 كم)، وإلّا الوسيطُ العامّ لكلّ المدن */
+export function maHabousAdj(lat: number, lng: number) {
+  let best = MA_HABOUS.fallback, bd = 40 * 40; const k = Math.cos(lat * Math.PI / 180);
+  for (const c of MA_HABOUS.cities) {
+    const dy = (c[0] - lat) * 111.2, dx = (c[1] - lng) * 111.2 * k, d = dy * dy + dx * dx;
+    if (d < bd) { bd = d; best = c.slice(2); }
+  }
+  return { fajr: best[0], sunrise: best[1], dhuhr: best[2], asr: best[3], maghrib: best[4], isha: best[5] };
+}
+
 export function prayerTimes(lat: number, lng: number, y: number, m: number, d: number) {
   const params = new CalculationParameters("Other", 19, 17);
   params.madhab = Madhab.Shafi;
-  /* داخل المغرب: الظهرُ +5 دقائق والمغربُ +3 دقائق (التوقيتُ الرسميّ) — يطابق computePrayers في index.html */
-  if (lat >= 20.7 && lat <= 35.95 && lng >= -17.3 && lng <= -1.8) params.adjustments = { ...params.adjustments, dhuhr: 5, maghrib: 3 };
+  /* داخل المغرب: فروقُ جدول وزارة الأوقاف لأقرب مدينةٍ (≤ 40 كم) — يطابق computePrayers/maHabousAdj في index.html */
+  if (lat >= 20.7 && lat <= 35.95 && lng >= -17.3 && lng <= -0.9) params.adjustments = { ...params.adjustments, ...maHabousAdj(lat, lng) };
   /* adhan يقرأ اليومَ من مُكوِّنات التاريخ المحلّيّة في الخادم؛ وقد بنيناه من
      مكوّنات يوم المستخدم، فيصحّ الحسابُ أيًّا كانت منطقةُ الخادم. */
   return new PrayerTimes(new Coordinates(lat, lng), new Date(y, m - 1, d), params);

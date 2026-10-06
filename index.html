@@ -1854,6 +1854,7 @@
 
 <script src="data.js" onerror="document.querySelector('#az-list').innerHTML='<div style=\'padding:30px;text-align:center;color:#c0392b\'>تعذّر تحميل الأذكار. افتح الإعدادات في المتصفح وامسح البيانات ثم أعِد الفتح.</div>'"></script>
 <script src="adhan.min.js"></script>
+<script src="ma-habous.js"></script>
 <script>
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -6620,6 +6621,16 @@ function fmtTime(d){
   catch(e){ return d.toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit',hour12:true}); }
 }
 
+/* فروق المواقيت الرسميّة لأقرب مدينةٍ مغربيّة (≤ 40 كم)، وإلّا الوسيطُ العامّ لكلّ المدن */
+function maHabousAdj(lat,lng){
+  const H=window.MA_HABOUS; if(!H) return { dhuhr:5, maghrib:5 };
+  let best=H.fallback, bd=40*40; const k=Math.cos(lat*Math.PI/180);
+  for(const c of H.cities){
+    const dy=(c[0]-lat)*111.2, dx=(c[1]-lng)*111.2*k, d=dy*dy+dx*dx;
+    if(d<bd){ bd=d; best=c.slice(2); }
+  }
+  return { fajr:best[0], sunrise:best[1], dhuhr:best[2], asr:best[3], maghrib:best[4], isha:best[5] };
+}
 function computePrayers(lat,lng,date){
   try{
     const A=window.adhan; if(!A) return null;
@@ -6627,10 +6638,10 @@ function computePrayers(lat,lng,date){
     // Morocco (Ministry of Habous): Fajr 19°, Isha 17°, Asr = Shafi
     const params=new A.CalculationParameters('Other',19,17);
     params.madhab=A.Madhab.Shafi;
-    /* داخل المغرب: التوقيتُ الرسميّ (وزارة الأوقاف) يؤخّر الظهرَ 5 دقائق عن الزوال والمغربَ 3 دقائق عن الغروب.
-       وقد قورنت حساباتُنا بجدول مواقيت El Jadida (6–12 أكتوبر 2026): الفجر والعصر والعشاء متطابقة، والظهر أبكرُ
-       بخمس دقائق والمغرب بثلاث. خارج المغرب لا يُمسّ شيء. (نفس الشرط في netlify/functions/_lib/push-core.mts) */
-    if(lat>=20.7 && lat<=35.95 && lng>=-17.3 && lng<=-1.8) params.adjustments={ dhuhr:5, maghrib:3 };
+    /* داخل المغرب: فروقٌ بالدقائق عن حسابنا مأخوذةٌ من جدول وزارة الأوقاف لأقرب مدينةٍ (ma-habous.js، مولَّد من
+       مواقيت 167 مدينة). الظهرُ +5 تقريبًا في كلّ المدن، أمّا المغرب والشروق فيختلفان حسب المدينة (ارتفاعها). خارج المغرب لا يُمسّ شيء.
+       (نفس المنطق في netlify/functions/_lib/push-core.mts) */
+    if(lat>=20.7 && lat<=35.95 && lng>=-17.3 && lng<=-0.9) params.adjustments=maHabousAdj(lat,lng);
     const pt=new A.PrayerTimes(coords, date||new Date(), params);
     return pt;
   }catch(e){ return null; }

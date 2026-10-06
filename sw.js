@@ -1,11 +1,12 @@
-/* صلاتي — service worker v243 */
-const CACHE = 'azkari-v243';
+/* صلاتي — service worker v244 */
+const CACHE = 'azkari-v244';
 const ASSETS = [
   './',
   './index.html',
   './privacy.html',
   './data.js',
   './adhan.min.js',
+  './ma-habous.js',
   './wird_hafs.js',
   './wird_warsh.js',
   './quiz.js',
