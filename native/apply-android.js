@@ -32,6 +32,29 @@ for (const f of fs.readdirSync(SRC)) {
 }
 console.log('✓ نُسخ ' + n + ' ملفَّ جافا إلى app/src/main/java/app/salaty/twa/');
 
+/* 1ب) أيقونةُ الإطلاق: شعارُ «صلاتي» (نفسُ المرفوع في Play Console) بدل أيقونة Capacitor الافتراضيّة.
+   يُولَّد من tools/make-launcher-icons.py إلى native/android-res/ ثم يُنسخ فوق res/ */
+const ICONS = path.join(HERE, 'android-res');
+const RES   = path.join(APP, 'res');
+if (fs.existsSync(ICONS)) {
+  let k = 0;
+  (function copy(from, to){
+    for (const f of fs.readdirSync(from)) {
+      const a = path.join(from, f), b = path.join(to, f);
+      if (fs.statSync(a).isDirectory()) { fs.mkdirSync(b, { recursive: true }); copy(a, b); }
+      else { fs.copyFileSync(a, b); k++; }
+    }
+  })(ICONS, RES);
+  for (const d of ['mipmap-mdpi','mipmap-hdpi','mipmap-xhdpi','mipmap-xxhdpi','mipmap-xxxhdpi']) {
+    for (const f of ['ic_launcher.png','ic_launcher_round.png','ic_launcher_foreground.png']) {
+      if (!fs.existsSync(path.join(RES, d, f))) die('أيقونةٌ ناقصة: ' + d + '/' + f);
+    }
+  }
+  /* ملفّات Capacitor الافتراضيّة المتعارضة (متّجهاتُ الشعار الأزرق) */
+  for (const f of ['drawable-v24/ic_launcher_foreground.xml']) { const x = path.join(RES, f); if (fs.existsSync(x)) fs.rmSync(x); }
+  console.log('✓ نُسخت أيقونةُ الإطلاق (' + k + ' ملفًّا)');
+} else { die('native/android-res غير موجود — شغّل tools/make-launcher-icons.py'); }
+
 /* 2) ملفُّ الأذان في res/raw — بدونه لا صوتَ يُرفع */
 if (fs.existsSync(MP3)) {
   fs.mkdirSync(RAW, { recursive: true });

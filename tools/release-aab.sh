@@ -105,6 +105,10 @@ for f in $(grep -o "'\./[^']*'" "$ROOT/sw.js" | tr -d "'" | grep -v '^\./$'); do
 done
 [ "$bad" = 0 ] || die "ملفّات الويب داخل الحزمة لا تطابق المستودع"
 ok "ملفّات الويب داخل الحزمة = المستودع"
+for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+  cmp -s "$X/base/res/mipmap-$d-v4/ic_launcher_foreground.png" "$ROOT/native/android-res/mipmap-$d/ic_launcher_foreground.png" || die "أيقونةُ الإطلاق ($d) ليست شعارَ صلاتي (أيقونة Capacitor الافتراضيّة؟)"
+done
+ok "أيقونةُ الإطلاق = شعارُ صلاتي"
 
 echo
 echo "الحزمة جاهزة: $AAB"
