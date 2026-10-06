@@ -74,45 +74,6 @@
     --c-read:#1553CC; --c-read-bg:rgba(28,95,191,.16);
     --c-repeat:#9E6410; --c-repeat-bg:rgba(169,113,26,.17);
   }
-  :root[data-bg="beige"]{
-    --bg:#F1E8D6; --group:#F1E8D6; --card:#F7EFDF; --card-2:#F7EFDF;
-    --text:#3E382E; --text-2:rgba(62,56,46,.58); --text-3:rgba(62,56,46,.3);
-    --sep:rgba(62,56,46,.16); --fill:rgba(130,112,82,.16); --fill-2:rgba(130,112,82,.1);
-    --blur:rgba(241,232,214,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
-  }
-  :root[data-bg="peach"]{
-    --bg:#F5C7AF; --group:#F5C7AF; --card:#F9D6C2; --card-2:#F9D6C2;
-    --text:#4A352B; --text-2:rgba(74,53,43,.58); --text-3:rgba(74,53,43,.3);
-    --sep:rgba(74,53,43,.16); --fill:rgba(175,110,80,.18); --fill-2:rgba(175,110,80,.12);
-    --blur:rgba(245,199,175,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
-  }
-  :root[data-bg="greige"]{
-    --bg:#E4DACB; --group:#E4DACB; --card:#ECE4D5; --card-2:#ECE4D5;
-    --text:#3C372F; --text-2:rgba(60,55,47,.58); --text-3:rgba(60,55,47,.3);
-    --sep:rgba(60,55,47,.16); --fill:rgba(120,105,82,.16); --fill-2:rgba(120,105,82,.1);
-    --blur:rgba(228,218,203,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
-  }
-  :root[data-bg="taupe"]{
-    --bg:#D8CCBE; --group:#D8CCBE; --card:#E1D7C9; --card-2:#E1D7C9;
-    --text:#3A352D; --text-2:rgba(58,53,45,.58); --text-3:rgba(58,53,45,.3);
-    --sep:rgba(58,53,45,.16); --fill:rgba(110,96,76,.16); --fill-2:rgba(110,96,76,.1);
-    --blur:rgba(216,204,190,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
-  }
-  /* لونُ إبراز الآية المتلوّة نفسُه، مأخوذًا خلفيّةً للصفحة كلّها:
-     ‎#E2E1CA‎ هو ناتجُ مزج لون التطبيق بالورقيّة بنسبة ‎7٪‎ — وهي نسبةُ
-     الإبراز بعينها — و‎#E9EAD5‎ هو المزجُ نفسُه على ورقيّةٍ أفتح. */
-  :root[data-bg="sage"]{
-    --bg:#E2E1CA; --group:#E2E1CA; --card:#E9E8D1; --card-2:#E9E8D1;
-    --text:#343A2E; --text-2:rgba(52,58,46,.58); --text-3:rgba(52,58,46,.3);
-    --sep:rgba(52,58,46,.16); --fill:rgba(105,120,82,.16); --fill-2:rgba(105,120,82,.1);
-    --blur:rgba(226,225,202,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
-  }
-  :root[data-bg="sagelite"]{
-    --bg:#E9EAD5; --group:#E9EAD5; --card:#F0F1DC; --card-2:#F0F1DC;
-    --text:#373C2F; --text-2:rgba(55,60,47,.58); --text-3:rgba(55,60,47,.3);
-    --sep:rgba(55,60,47,.15); --fill:rgba(110,125,86,.15); --fill-2:rgba(110,125,86,.09);
-    --blur:rgba(233,234,213,.82); --accent:#2F9E44; --accent-bg:rgba(47,158,68,.15); --accent-txt:#1F7A33;
-  }
   :root[data-bg="white"]{
     --bg:#F2F2F7; --group:#F2F2F7; --card:#FAFAF8; --card-2:#FAFAF8;
     --text:#2B2B2B; --text-2:rgba(43,43,43,.55); --text-3:rgba(43,43,43,.3);
@@ -1031,8 +992,6 @@
   }
   /* على الخلفيّتين الزيتونيّتين يُغلَّظ الإبرازُ قليلًا، فهما من لونه فلولا
      ذلك لذاب فيهما ولم يُرَ. */
-  html[data-bg="sage"]     .aya-t.live{background:color-mix(in srgb, var(--accent) 16%, transparent);}
-  html[data-bg="sagelite"] .aya-t.live{background:color-mix(in srgb, var(--accent) 14%, transparent);}
   .tafsir-body{overflow-y:auto; padding:16px 20px 22px; -webkit-overflow-scrolling:touch;}
   /* شرحُ الأذكار: نصُّ الذكر ثمّ معناه ثمّ شرحُ كلماته */
   .sharh-txt{font-size:calc(18px * var(--tscale)); line-height:2.2; color:var(--accent); font-weight:700;
@@ -1155,6 +1114,10 @@
   .qz-opts button.no{background:#C0392B; color:#fff; border-color:transparent;}
   .qz-next{display:block; width:100%; margin-top:16px; border:0; background:var(--accent); color:#fff; font:inherit;
     font-weight:800; font-size:15.5px; padding:14px; border-radius:14px;}
+  .qz-chal{text-align:center; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px 14px; margin-bottom:16px;}
+  .qz-chal .t{font-weight:800; font-size:calc(18px * var(--tscale)); color:var(--accent); margin-bottom:8px;}
+  .qz-chal .d{line-height:2; color:var(--text-2); font-size:calc(14.5px * var(--tscale));}
+  .qz-vs{margin:10px 0 4px; font-weight:800; color:var(--c-repeat);}
   .qz-res{text-align:center; padding:10px 0;}
   .qz-res .score{font-size:44px; font-weight:800; color:var(--accent); line-height:1.2;}
   .qz-res .of{font-size:14px; color:var(--text-3); margin-bottom:10px;}
@@ -1916,18 +1879,14 @@ if(!settings.__d14){ settings.__d14=1;
    أو على أيّ لونٍ لم يختره يدويًّا؛ ويظلّ حرًّا في تغييره من الإعدادات بعد ذلك. */
 if(!settings.__d15){ settings.__d15=1; settings.quranColor='g3'; store.set('az_settings', settings); }
 
-const BG_COLORS = { sepia:'#EFE6D4', beige:'#F1E8D6', peach:'#F5C7AF', greige:'#E4DACB', taupe:'#D8CCBE', sagelite:'#E9EAD5', sage:'#E2E1CA', white:'#F2F2F7', dark:'#121212' };
+/* ترقية: الخلفيّاتُ ثلاثٌ فقط (أبيض، ورقي، أسود). من كان على خلفيّةٍ محذوفةٍ نُقل إلى الورقيّ الافتراضيّ. */
+if(!settings.__d16){ settings.__d16=1; if(!['white','sepia','dark'].includes(settings.bg)) settings.bg='sepia'; store.set('az_settings', settings); }
+
+const BG_COLORS = { white:'#F2F2F7', sepia:'#EFE6D4', dark:'#121212' };
 const BG_LIST = [
-  {id:'sepia',  name:'ورقية', c:'#EFE6D4'},
-  {id:'beige',  name:'بيج',   c:'#F1E8D6'},
-  {id:'peach',  name:'خوخي',  c:'#F5C7AF'},
-  {id:'greige', name:'بيج غامق', c:'#E4DACB'},
-  {id:'taupe',  name:'توبي',  c:'#D8CCBE'},
-  /* لونُ إبراز الآية أثناء التتبّع نفسُه، وأفتحُ منه */
-  {id:'sagelite', name:'زيتوني فاتح', c:'#E9EAD5'},
-  {id:'sage',     name:'زيتوني',      c:'#E2E1CA'},
   {id:'white',  name:'أبيض',  c:'#F2F2F7'},
-  {id:'dark',   name:'داكن',  c:'#121212'},
+  {id:'sepia',  name:'ورقي',  c:'#EFE6D4'},
+  {id:'dark',   name:'أسود',  c:'#121212'},
 ];
 /* الافتراضيُّ لكلّ من يُثبّت التطبيق: الورقيّة، أيًّا كان وضعُ هاتفه (ليليًّا أو نهاريًّا). والداكنُ باختيار المستخدم وحدَه. */
 const __darkMQ = (window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null);
@@ -3507,7 +3466,7 @@ function drawPdfBands(g, W, pageH, HEAD, FOOT, S, no, total){
   g.restore();
 }
 /* الصورة نفسها مقسّمةً إلى صفحاتٍ بنسبة A4 — فيخرج PDF مطابقًا للهاتف بألوانه */
-async function shotToPages(innerHTML, title, sub){
+async function shotToPages(innerHTML, title, sub, fmt){
   await qpEnsureFonts();
   const cv=await shotToCanvas(innerHTML,title,sub);
   const W=cv.width, H=cv.height;
@@ -3534,7 +3493,7 @@ async function shotToPages(innerHTML, title, sub){
     g.fillStyle=bgcss; g.fillRect(0,0,W,pageH);
     g.drawImage(cv, 0,a,W,(z-a), 0,HEAD,W,(z-a));
     drawPdfBands(g, W, pageH, HEAD, FOOT, S, i+1, cuts.length);
-    pages.push(c2.toDataURL('image/png'));
+    pages.push(fmt==='jpeg' ? c2.toDataURL('image/jpeg',0.92) : c2.toDataURL('image/png'));
   });
   return pages;
 }
@@ -3575,6 +3534,49 @@ function dhikrShotHTML(d){
       (d.source?'<div class="ss-note"><b>المصدر</b> '+escapeHtml(d.source)+'</div>':'')+
     '</div>';
 }
+/* ملفُّ PDF حقيقيّ (يُحفظ ويُرسَل). window.print لا يعمل داخل تطبيق الأندرويد فكان الضغطُ على «PDF» لا يُظهر شيئًا.
+   كلُّ صفحةٍ صورةُ JPEG بنسبة A4 (من shotToPages) تُغلَّف في ملفّ PDF بلا أيّ مكتبةٍ خارجيّة. */
+function buildPdfBlob(jpegUrls){
+  const enc=new TextEncoder(), chunks=[], offs=[]; let len=0;
+  const put=u8=>{ chunks.push(u8); len+=u8.length; };
+  const str=t=>put(enc.encode(t));
+  const n=jpegUrls.length, PW=595.28, PH=841.89;
+  str('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+  const obj=(id,body)=>{ offs[id]=len; str(id+' 0 obj\n'+body+'\nendobj\n'); };
+  obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2,'<< /Type /Pages /Count '+n+' /Kids ['+jpegUrls.map((_,i)=>(3+i*3)+' 0 R').join(' ')+'] >>');
+  jpegUrls.forEach((u,i)=>{
+    const bin=atob(u.split(',')[1]), img=new Uint8Array(bin.length);
+    for(let k=0;k<bin.length;k++) img[k]=bin.charCodeAt(k);
+    // أبعاد JPEG من ترويسة SOF
+    let w=0,h=0; for(let k=2;k<img.length-9;){ if(img[k]!==0xFF){k++;continue;} const m=img[k+1]; if(m>=0xC0&&m<=0xCF&&m!==0xC4&&m!==0xC8&&m!==0xCC){ h=(img[k+5]<<8)|img[k+6]; w=(img[k+7]<<8)|img[k+8]; break; } k+=2+((img[k+2]<<8)|img[k+3]); }
+    const pid=3+i*3, cid=pid+1, iid=pid+2, content='q '+PW+' 0 0 '+PH+' 0 0 cm /Im0 Do Q';
+    obj(pid,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+PW+' '+PH+'] /Resources << /XObject << /Im0 '+iid+' 0 R >> >> /Contents '+cid+' 0 R >>');
+    obj(cid,'<< /Length '+content.length+' >>\nstream\n'+content+'\nendstream');
+    offs[iid]=len; str(iid+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+w+' /Height '+h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+img.length+' >>\nstream\n');
+    put(img); str('\nendstream\nendobj\n');
+  });
+  const total=3+n*3, xref=len;
+  let x='xref\n0 '+total+'\n0000000000 65535 f \n';
+  for(let id=1;id<total;id++) x+=String(offs[id]).padStart(10,'0')+' 00000 n \n';
+  str(x+'trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF\n');
+  return new Blob(chunks,{type:'application/pdf'});
+}
+async function sharePdfShot(innerHTML, title, sub, fname){
+  showToast('…جارٍ تجهيز ملفّ PDF', 2600);
+  let file=null;
+  try{
+    const pages=await shotToPages(innerHTML,title,sub,'jpeg');
+    if(pages && pages.length) file=new File([buildPdfBlob(pages)],(fname||'salaty')+'.pdf',{type:'application/pdf'});
+  }catch(e){ file=null; }
+  if(!file){ showToast('تعذّر إنشاء PDF — جرّب «صورة»', 4000); return; }
+  if(isNative()){ nativeShareBlob(file, file.name); return; }
+  if(navigator.canShare && navigator.share){
+    let ok=false; try{ ok=navigator.canShare({files:[file]}); }catch(e){ ok=false; }
+    if(ok){ navigator.share({ files:[file] }).catch(err=>{ if(err && err.name==='AbortError') return; if(saveFile(file)) showToast('حُفظ ملفّ PDF في هاتفك', 3800); }); return; }
+  }
+  if(saveFile(file)) showToast('حُفظ ملفّ PDF في هاتفك', 3800);
+}
 function openShareSheet(getHTML, title, sub, fname){
   let html='';
   try{ html=getHTML()||''; }catch(e){ html=''; }
@@ -3582,11 +3584,11 @@ function openShareSheet(getHTML, title, sub, fname){
   prepareShot(html, title, sub, fname);          // تُحضَّر أثناء اختيار المستخدم
   openLabelOverlay(
     [ {id:'img', label:'صورة — أرسِلها في واتساب'},
-      {id:'pdf', label:'PDF — للحفظ أو الطباعة'} ],
+      {id:'pdf', label:'PDF — ملفّ للحفظ أو الإرسال'} ],
     'img',
     id=>{ closeSuraOverlay();
           if(id==='img') shareShotNow();
-          else printShot(html, title, sub); },
+          else sharePdfShot(html, title, sub, fname); },
     'شارِك أو احفظ');
 }
 
@@ -4126,8 +4128,10 @@ $('#listen-cat') && $('#listen-cat').addEventListener('click', ()=>{
 applyListenMode('quran');
 
 /* ==================== اختبار الثقافة الإسلامية ==================== */
-const QZ_LEN=10;
-let __qzLoading=null, __qzCat='all', __qzSet=[], __qzI=0, __qzScore=0, __qzAnswered=false;
+/* الاختبار: 20 سؤالًا في الجولة فتكون النتيجةُ «من 20». ولكلّ جولةٍ رقمُ بذرةٍ يُرتّب الأسئلةَ والخيارات
+   ترتيبًا ثابتًا، فإذا أرسلتَ نتيجتَك لصديقٍ فتح الرابطَ لعب الأسئلةَ نفسَها بالترتيب نفسِه (تحدٍّ عادل). */
+const QZ_LEN=20, QZ_URL='https://salatee.org/';
+let __qzLoading=null, __qzCat='all', __qzSet=[], __qzI=0, __qzScore=0, __qzAnswered=false, __qzSeed=0, __qzChal=null;
 function loadQuiz(){
   if(window.QUIZ) return Promise.resolve(true);
   if(__qzLoading) return __qzLoading;
@@ -4138,26 +4142,44 @@ function loadQuiz(){
   });
   return __qzLoading;
 }
-function qzBest(){ return store.get('az_quizbest', {}); }
-function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function qzBest(){ return store.get('az_quizbest20', {}); }
+/* مولّد أعدادٍ عشوائيّةٍ ببذرة (mulberry32) */
+function qzRng(seed){ let t=seed>>>0; return ()=>{ t=(t+0x6D2B79F5)>>>0; let r=Math.imul(t^(t>>>15),1|t); r=(r+Math.imul(r^(r>>>7),61|r))^r; return ((r^(r>>>14))>>>0)/4294967296; }; }
+function shuffle(a, rnd){ rnd=rnd||Math.random; for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function qzSub(t){ const el=$('#tasbih-sub'); if(el) el.textContent=t; }
+function qzCatName(id){ return (QUIZ_CATS.find(c=>c.id===id)||{name:''}).name; }
 async function qzHome(){
   const body=$('#quiz-body'); qzSub('اختر المجال ثمّ ابدأ الاختبار');
   body.innerHTML='<div class="qz-intro">…جارٍ التحميل</div>';
   const ok=await loadQuiz();
   if(!ok){ body.innerHTML='<div class="qz-intro">تعذّر تحميل الأسئلة.</div>'; return; }
+  const ch=__qzChal;
+  if(ch){
+    qzSub('تحدٍّ من صديق');
+    body.innerHTML=
+      '<div class="qz-chal"><div class="t">تحدّاك صديقٌ</div>'+
+      '<div class="d">حصل على <b>'+AR(ch.from)+' من '+AR(QZ_LEN)+'</b> في مجال «'+escapeHtml(qzCatName(ch.cat))+'».<br>العب الأسئلةَ نفسَها وحاول أن تتجاوزه!</div></div>'+
+      '<button class="qz-start" id="qz-start">ابدأ التحدّي</button>'+
+      '<button class="qz-next" id="qz-free" style="background:var(--fill-2); color:var(--text)">اختبارٌ حرّ بدل التحدّي</button>';
+    $('#qz-start').addEventListener('click', ()=>qzStart());
+    $('#qz-free').addEventListener('click', ()=>{ __qzChal=null; qzHome(); });
+    return;
+  }
   const best=qzBest(), b=best[__qzCat];
   body.innerHTML=
-    '<div class="qz-intro">'+AR(QZ_LEN)+' أسئلة في كل جولة — اختر المجال ثم ابدأ.</div>'+
+    '<div class="qz-intro">'+AR(QZ_LEN)+' سؤالًا في كل جولة، ونتيجتُك من '+AR(QZ_LEN)+' — اختر المجال ثم ابدأ.<br>'+AR(QUIZ.length)+' سؤالًا في المجموع.</div>'+
     '<div class="qz-cats">'+QUIZ_CATS.map(c=>'<button data-c="'+c.id+'"'+(c.id===__qzCat?' class="on"':'')+'>'+c.name+'</button>').join('')+'</div>'+
     '<button class="qz-start" id="qz-start">ابدأ الاختبار</button>'+
     (b!=null?'<div class="qz-best">أفضل نتيجة في هذا المجال: '+AR(b)+' من '+AR(QZ_LEN)+'</div>':'');
   body.querySelectorAll('.qz-cats button').forEach(btn=> btn.addEventListener('click', ()=>{ __qzCat=btn.dataset.c; vibrate(5); qzHome(); }));
-  $('#qz-start').addEventListener('click', qzStart);
+  $('#qz-start').addEventListener('click', ()=>qzStart());
 }
 function qzStart(){
+  const ch=__qzChal;
+  if(ch){ __qzCat=ch.cat; __qzSeed=ch.seed; }
+  else __qzSeed=1+Math.floor(Math.random()*999998);
   const pool=(__qzCat==='all')? QUIZ.slice() : QUIZ.filter(q=>q.c===__qzCat);
-  __qzSet=shuffle(pool).slice(0, Math.min(QZ_LEN, pool.length));
+  __qzSet=shuffle(pool, qzRng(__qzSeed)).slice(0, Math.min(QZ_LEN, pool.length));
   __qzI=0; __qzScore=0; vibrate(8); qzRender();
 }
 function qzRender(){
@@ -4166,10 +4188,10 @@ function qzRender(){
   const item=__qzSet[__qzI];
   __qzAnswered=false;
   qzSub('سؤال '+AR(__qzI+1)+' من '+AR(__qzSet.length));
-  const opts=shuffle(item.o.map((t,i)=>({t, ok:i===item.a})));
+  const opts=shuffle(item.o.map((t,i)=>({t, ok:i===item.a})), qzRng(__qzSeed*131+__qzI));
   body.innerHTML=
     '<div class="qz-bar"><i style="width:'+Math.round(__qzI/__qzSet.length*100)+'%"></i></div>'+
-    '<div class="qz-meta"><span>'+(QUIZ_CATS.find(c=>c.id===item.c)||{name:''}).name+'</span><span>النتيجة: '+AR(__qzScore)+'</span></div>'+
+    '<div class="qz-meta"><span>'+qzCatName(item.c)+'</span><span>النتيجة: '+AR(__qzScore)+'</span></div>'+
     '<div class="qz-q">'+escapeHtml(item.q)+'</div>'+
     '<div class="qz-opts">'+opts.map((o,i)=>'<button data-i="'+i+'">'+escapeHtml(o.t)+'</button>').join('')+'</div>';
   const btns=[...body.querySelectorAll('.qz-opts button')];
@@ -4184,23 +4206,58 @@ function qzRender(){
     body.appendChild(nx); nx.scrollIntoView({block:'nearest'});
   }));
 }
+/* رابط التحدّي: المجال والبذرة ونتيجةُ صاحبه */
+function qzLink(){ return QZ_URL+'?quiz=1&c='+encodeURIComponent(__qzCat)+'&s='+__qzSeed+'&f='+__qzScore; }
+function qzShareText(){
+  return 'حصلتُ على '+__qzScore+' من '+QZ_LEN+' في اختبار الثقافة الإسلامية («'+qzCatName(__qzCat)+'») في تطبيق «صلاتي».\n'+
+         'هل تستطيع تجاوزي؟ العب الأسئلةَ نفسَها:\n'+qzLink();
+}
+async function qzShare(){
+  const text=qzShareText();
+  try{
+    if(isNative()){
+      const SH=(window.Capacitor&&Capacitor.Plugins||{}).Share;
+      if(SH){ await SH.share({ title:'تحدّي صلاتي', text, dialogTitle:'أرسِل التحدّي' }); return; }
+    }
+    if(navigator.share){ await navigator.share({ title:'تحدّي صلاتي', text }); return; }
+  }catch(e){ if(e && (e.name==='AbortError' || /cancel/i.test(String(e.message||'')))) return; }
+  try{ await navigator.clipboard.writeText(text); showToast('نُسخ نصُّ التحدّي — الصقه في واتساب أو أيّ تطبيق', 4200); return; }catch(e){}
+  const url='https://wa.me/?text='+encodeURIComponent(text);
+  try{ const w=window.open(url,'_blank','noopener'); if(!w) location.href=url; }catch(e){ location.href=url; }
+}
 function qzResult(){
   const n=__qzSet.length, s=__qzScore, pct=s/n;
-  const best=qzBest(); if(best[__qzCat]==null || s>best[__qzCat]){ best[__qzCat]=s; store.set('az_quizbest', best); }
+  const best=qzBest(); if(best[__qzCat]==null || s>best[__qzCat]){ best[__qzCat]=s; store.set('az_quizbest20', best); }
   const msg = pct===1 ? 'ما شاء الله! إجابات كاملة'
             : pct>=0.7 ? 'أحسنت، نتيجة طيّبة — واصِل.'
             : pct>=0.4 ? 'جيّد، وفي الإعادة إفادة.'
             : 'لا بأس، العلم بالتعلّم — أعِد المحاولة.';
   qzSub('نتيجة الاختبار');
+  const ch=__qzChal;
+  const vs = ch ? '<div class="qz-vs">'+(s>ch.from?'تجاوزتَ صديقَك! ('+AR(ch.from)+' ← '+AR(s)+')': s===ch.from?'تعادلتما: '+AR(s)+' من '+AR(n): 'صديقُك حصل على '+AR(ch.from)+' وأنت '+AR(s)+' — أعِد المحاولة!')+'</div>' : '';
   const body=$('#quiz-body');
   body.innerHTML='<div class="qz-res"><div class="score">'+AR(s)+'</div><div class="of">من '+AR(n)+'</div>'+
-    '<div class="msg">'+msg+'</div></div>'+
-    '<button class="qz-start" id="qz-again">إعادة الاختبار</button>'+
+    '<div class="msg">'+msg+'</div>'+vs+'</div>'+
+    '<button class="qz-start" id="qz-share">شارِك نتيجتك وتحدَّ أصدقاءك</button>'+
+    '<button class="qz-next" id="qz-again" style="background:var(--fill-2); color:var(--text)">إعادة الاختبار بأسئلةٍ جديدة</button>'+
     '<button class="qz-next" id="qz-home" style="background:var(--fill-2); color:var(--text)">اختيار مجال آخر</button>';
-  $('#qz-again').addEventListener('click', qzStart);
-  $('#qz-home').addEventListener('click', qzHome);
+  $('#qz-share').addEventListener('click', qzShare);
+  $('#qz-again').addEventListener('click', ()=>{ __qzChal=null; qzStart(); });
+  $('#qz-home').addEventListener('click', ()=>{ __qzChal=null; qzHome(); });
   vibrate(pct>=0.7?[20,60,20]:8);
 }
+/* فتح رابط تحدٍّ: ‎?quiz=1&c=المجال&s=البذرة&f=نتيجة الصديق */
+(async function(){
+  try{
+    const q=new URLSearchParams(location.search); if(q.get('quiz')!=='1') return;
+    if(!(await loadQuiz())) return;
+    const cat=q.get('c')||'all', seed=parseInt(q.get('s'),10), from=parseInt(q.get('f'),10);
+    if(!QUIZ_CATS.some(c=>c.id===cat) || !(seed>0) || !(from>=0 && from<=QZ_LEN)) return;
+    __qzChal={ cat, seed, from };
+    setTimeout(()=>{ const t=document.querySelector('.tab[data-s="s-tasbih"]'); if(t) t.click(); applyTasbihMode('quiz'); }, 900);
+    try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  }catch(e){}
+})();
 /* تبديل صفحة المسبحة بين العدّاد والاختبار */
 /* ==================== الفقه العملي ==================== */
 let __fqLoading=null, __fqCur=0;
@@ -6015,7 +6072,7 @@ $('#reciter-audio').addEventListener('ended', ()=>{
 });
 /* استئناف تلقائي عند تعثّر الشبكة أثناء البثّ — يُكمل من نفس الموضع ولا يُعيد من البداية */
 let __recTimer=null, __recTry=0;
-function recoverReciter(){
+function recoverReciter(force){
   const a=$('#reciter-audio');
   if(!a || !a.src || a.ended || __recTimer) return;
   // إن أوقفه المستخدم أو أوقفه النظام (مكالمة واردة) دون خطأ شبكة — لا نستأنف
@@ -6031,7 +6088,7 @@ function recoverReciter(){
     __recTimer=null;
     const b=$('#reciter-audio'); if(!b || !b.src || b.ended) return;
     const resume=()=>{ try{ if(pos>0 && b.currentTime<pos) b.currentTime=pos; }catch(e){} b.play().catch(()=> recoverReciter()); };
-    if(b.error){                      // خطأ فعلي: أعِد تحميل المقطع ثمّ تابِع من الموضع نفسه
+    if(b.error || force===true){      // خطأ فعلي أو ثباتُ الموضع (الحارس): أعِد تحميل المقطع ثمّ تابِع من الموضع نفسه
       const onReady=()=>{ b.removeEventListener('loadeddata', onReady); resume(); };
       b.addEventListener('loadeddata', onReady);
       try{ b.src=src; b.load(); }catch(e){ recoverReciter(); }
@@ -6041,12 +6098,44 @@ function recoverReciter(){
 /* الانتقالُ في شريط الصوت — من الإشعار أو من داخل التطبيق — يُبطل الموضعَ
    المحفوظ، فيلحق العرضُ بالقارئ حيث صار لا حيث كان. */
 $('#reciter-audio').addEventListener('seeked', ()=>{ try{ qsClearYCache(); }catch(e){} });
-$('#reciter-audio').addEventListener('error', recoverReciter);
+$('#reciter-audio').addEventListener('error', ()=>recoverReciter());
 $('#reciter-audio').addEventListener('stalled', ()=>{ const a=$('#reciter-audio'); if(a && !a.paused) recoverReciter(); });
 $('#reciter-audio').addEventListener('playing', ()=>{ __recTry=0; if(__recTimer){ clearTimeout(__recTimer); __recTimer=null; } });
 $('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 $('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 $('#reciter-audio').addEventListener('ended', ()=>{ try{ qsFoldCal(); QSY=null; renderFollowPill(); renderAutoReadPill(); }catch(e){} });
+/* ===== ثباتُ التلاوة: ألّا تنقطع وحدَها =====
+   سببان للانقطاع دون أن يطلب المستخدمُ ذلك:
+   1) تعثّرُ البثّ: يتوقّف الصوتُ في «waiting» بلا خطأٍ ولا «stalled»، فلا يتحرّك الموضعُ ولا يُستأنف. يراقبه حارسٌ
+      فإن ثبت الموضعُ أكثرَ من ثمانِ ثوانٍ والتلاوةُ مطلوبةٌ أعاد تحميلَ المقطع من الموضع نفسه.
+   2) إيقافُ النظام للصوت (تركيزُ الصوت يذهب لتنبيهٍ أو تطبيقٍ آخر): نستأنف مرّتين (بعد 5 ثوانٍ ثم 15) إن لم يكن
+      الإيقافُ منّا (أيّ pause() برمجيّةٍ أو من إشعار الوسائط تُعدّ طلبَ مستخدم) ولم يكن بسبب نزعِ السمّاعات. */
+(function(){
+  const a=$('#reciter-audio'); if(!a) return;
+  let wants=false, userPaused=false, lastDev=0, sysTimers=[], lastPos=-1, same=0;
+  const nativePause=a.pause.bind(a);
+  a.pause=function(){ userPaused=true; wants=false; return nativePause(); };
+  a.addEventListener('play', ()=>{ userPaused=false; });
+  a.addEventListener('playing', ()=>{ wants=true; sysTimers.forEach(clearTimeout); sysTimers=[]; });
+  a.addEventListener('ended', ()=>{ wants=false; });
+  a.addEventListener('emptied', ()=>{ wants=false; });
+  try{ navigator.mediaDevices && navigator.mediaDevices.addEventListener('devicechange', ()=>{ lastDev=Date.now(); }); }catch(e){}
+  a.addEventListener('pause', ()=>{
+    if(userPaused || !wants || a.ended || a.error || !a.src) return;
+    if(Date.now()-lastDev<4000){ wants=false; return; }          // نُزعت السمّاعات: لا نرفع الصوتَ على مكبّر الهاتف
+    sysTimers.forEach(clearTimeout);
+    sysTimers=[5000,15000].map(ms=> setTimeout(()=>{
+      if(userPaused || !a.paused || a.ended || !a.src) return;
+      a.play().catch(()=>{});
+    }, ms));
+  });
+  setInterval(()=>{
+    if(!wants || a.paused || a.ended || a.seeking || !a.src){ same=0; lastPos=-1; return; }
+    const t=a.currentTime;
+    if(Math.abs(t-lastPos)<0.05){ if(++same>=3){ same=0; recoverReciter(true); } }
+    else { same=0; lastPos=t; }
+  }, 3000);
+})();
 setupMediaSession();
 let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){
