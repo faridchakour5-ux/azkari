@@ -3424,9 +3424,13 @@ function findCutRow(ctx, W, from, to){
   let run=0;
   for(let ry=rows-1; ry>=0; ry--){
     const o=ry*stride;
-    const r=d[o], g=d[o+1], b=d[o+2];
+    /* لا يُنظر إلى أطراف الصفّ: الشريطُ الملوَّن على حافّة البطاقة (وزوايا الحواف) يمتدّ على ارتفاعها كلِّه،
+       فكان يجعل كلَّ سطرٍ داخل البطاقة «غيرَ فارغ» فلا يوجد موضعُ قطعٍ إلا خارجها — فتُقطَع صفوفُ الجدول نصفين
+       وتُترك صفحاتٌ شبه فارغة. النصُّ نفسُه يقع داخل ‎8٪–92٪‎ من العرض فيبقى محميًّا. */
+    const xa=Math.floor(W*0.08)*4, xb=Math.floor(W*0.92)*4;
+    const r=d[o+xa], g=d[o+xa+1], b=d[o+xa+2];
     let uniform=true;
-    for(let i=o+4; i<o+stride; i+=4){
+    for(let i=o+xa+4; i<o+xb; i+=4){
       if(Math.abs(d[i]-r)>8 || Math.abs(d[i+1]-g)>8 || Math.abs(d[i+2]-b)>8){ uniform=false; break; }
     }
     if(uniform){ run++; if(run>=5) return from+ry+Math.floor(run/2); }
