@@ -3,7 +3,7 @@
  *
  *   PLAY_SA_JSON=/path/service-account.json \
  *   node tools/play-upload.mjs --aab dist/salatee-v2.0.5-code105-signed.aab \
- *        --notes "Release notes in English" [--track <اسم_المسار>] [--dry-run] [--list-tracks]
+ *        --notes "Release notes in English" [--track <اسم_المسار>] [--icon icons/icon-512.png] [--dry-run] [--list-tracks]
  *
  * لا تبعيّات: Node 18+ فقط (fetch وcrypto المدمجان). ولا سرَّ في هذا الملفّ:
  * ملفّ حساب الخدمة (JSON) يبقى خارج المستودع.
@@ -92,6 +92,14 @@ await json("PUT", E + "/tracks/" + encodeURIComponent(track), {
   track, releases: [{ name: vname, versionCodes: [String(vc)], status: "completed", releaseNotes: [{ language: lang, text: notes }] }],
 });
 console.log("✓ الإصدار", vname, "على المسار", track, "(لغة الملاحظات:", lang + ")");
+
+/* --icon ملف.png : يستبدل أيقونةَ المتجر (512×512) في نفس التعديل */
+const iconFile = opt("icon");
+if (iconFile) {
+  await call("DELETE", E + "/listings/" + lang + "/icon");
+  await call("POST", UPLOAD + "/edits/" + edit.id + "/listings/" + lang + "/icon?uploadType=media", fs.readFileSync(iconFile), { "Content-Type": "image/png" });
+  console.log("✓ استُبدلت أيقونةُ المتجر (" + lang + ")");
+}
 
 if (flag("dry-run")) { await call("DELETE", E); console.log("• تجربةٌ فقط: أُلغي التعديل ولم يُنشر شيء"); process.exit(0); }
 const done = await json("POST", E + ":commit");
