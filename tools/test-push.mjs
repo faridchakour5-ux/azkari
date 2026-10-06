@@ -47,6 +47,18 @@ eq(ids(r2, fajrNext + 1000).includes("p-fajr"), true, "وفي اليوم الت�
 markSent(r2, [], new Date(fajr + 2 * 86400e3));
 eq(r2.sent, {}, "سجلُّ «ما أُرسل» يُقتصّ: لا يبقى منه إلا يومُه");
 
+console.log("— المغرب: الظهر +5 والمغرب +3 (التوقيتُ الرسميّ)");
+{
+  const A = fnRequire("adhan");
+  const hm = d => d.toISOString().slice(11, 16);
+  const ja = prayerTimes(33.2316, -8.5007, 2026, 10, 6);   // الجديدة — جدولُ Yabiladi: 05:05 12:27 15:41 18:15 19:29
+  eq([ja.fajr, ja.dhuhr, ja.asr, ja.maghrib, ja.isha].map(hm), ["05:05", "12:27", "15:41", "18:15", "19:29"], "الجديدة 6 أكتوبر 2026 = الجدولُ الرسميّ");
+  const prm = new A.CalculationParameters("Other", 19, 17); prm.madhab = A.Madhab.Shafi;
+  const raw = new A.PrayerTimes(new A.Coordinates(48.85, 2.35), new Date(2026, 9, 6), prm);
+  const paris = prayerTimes(48.85, 2.35, 2026, 10, 6);
+  eq([hm(paris.dhuhr), hm(paris.maghrib)], [hm(raw.dhuhr), hm(raw.maghrib)], "خارج المغرب (باريس): لا تعديل");
+}
+
 console.log("— الأذكار والصلاة على النبي ﷺ (بتوقيت المستخدم لا الخادم)");
 // الدار البيضاء توقيتُها UTC+1 في هذه الأيّام: 07:05 عندهم = 06:05 UTC
 const morning = Date.UTC(2026, 9, 4, 7, 3);

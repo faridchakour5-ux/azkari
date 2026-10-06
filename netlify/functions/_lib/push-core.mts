@@ -83,6 +83,8 @@ export function localParts(now: Date, tz: string) {
 export function prayerTimes(lat: number, lng: number, y: number, m: number, d: number) {
   const params = new CalculationParameters("Other", 19, 17);
   params.madhab = Madhab.Shafi;
+  /* داخل المغرب: الظهرُ +5 دقائق والمغربُ +3 دقائق (التوقيتُ الرسميّ) — يطابق computePrayers في index.html */
+  if (lat >= 20.7 && lat <= 35.95 && lng >= -17.3 && lng <= -1.8) params.adjustments = { ...params.adjustments, dhuhr: 5, maghrib: 3 };
   /* adhan يقرأ اليومَ من مُكوِّنات التاريخ المحلّيّة في الخادم؛ وقد بنيناه من
      مكوّنات يوم المستخدم، فيصحّ الحسابُ أيًّا كانت منطقةُ الخادم. */
   return new PrayerTimes(new Coordinates(lat, lng), new Date(y, m - 1, d), params);

@@ -6627,6 +6627,10 @@ function computePrayers(lat,lng,date){
     // Morocco (Ministry of Habous): Fajr 19°, Isha 17°, Asr = Shafi
     const params=new A.CalculationParameters('Other',19,17);
     params.madhab=A.Madhab.Shafi;
+    /* داخل المغرب: التوقيتُ الرسميّ (وزارة الأوقاف) يؤخّر الظهرَ 5 دقائق عن الزوال والمغربَ 3 دقائق عن الغروب.
+       وقد قورنت حساباتُنا بجدول مواقيت El Jadida (6–12 أكتوبر 2026): الفجر والعصر والعشاء متطابقة، والظهر أبكرُ
+       بخمس دقائق والمغرب بثلاث. خارج المغرب لا يُمسّ شيء. (نفس الشرط في netlify/functions/_lib/push-core.mts) */
+    if(lat>=20.7 && lat<=35.95 && lng>=-17.3 && lng<=-1.8) params.adjustments={ dhuhr:5, maghrib:3 };
     const pt=new A.PrayerTimes(coords, date||new Date(), params);
     return pt;
   }catch(e){ return null; }
