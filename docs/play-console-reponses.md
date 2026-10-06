@@ -64,3 +64,5 @@ Faits vérifiables côté application :
 À compléter par le propriétaire (ce sont des faits que seul lui connaît — ne pas inventer) :
 - Nombre de testeurs ayant accepté l'invitation et date du début du test (Play exige au moins 12 testeurs pendant 14 jours consécutifs).
 - Retours reçus des testeurs et corrections faites (exemples réels de ce projet : horaires de prière du Maroc corrigés ville par ville d'après le ministère des Habous ; icône de l'application corrigée ; PDF qui ne s'ouvrait pas ; lecture du Coran qui s'interrompait).
+
+Retour terrain rapporté par le propriétaire (6 octobre 2026) : l'adhan sonne à l'heure exacte dans plusieurs villes du Maroc, sur différents modèles de téléphones, confirmé par des proches et des amis testeurs. (Déclaration du propriétaire, non mesurée par un outil : à reformuler avec le nombre réel de testeurs au moment de répondre au questionnaire.)
