@@ -3214,16 +3214,16 @@ function markStory(){
 }
 function playStory(i){
   const a=$('#reciter-audio'); const c=__stories && __stories[i]; if(!a || !c) return;
-  if(__storyPlaying===i && !a.paused){ a.pause(); markStory(); return; }
+  if(__storyPlaying===i && !a.paused){ setWantPlay(false); a.pause(); markStory(); return; }
   __storyPlaying=i; __duatPlaying=null; __audioSura=null;
   const urls=[c.url, c.alt].filter(Boolean);
   const tryUrl=k=>{
     if(k>=urls.length){
-      a.onerror=null; c.bad=true; __storyPlaying=null;
+      a.onerror=null; c.bad=true; __storyPlaying=null; setWantPlay(false);
       showToast('تعذّر تشغيل هذه الحلقة — جرّب غيرها أو سلسلةً أخرى', 4200);
       renderStories(__stories); return;
     }
-    a.src=urls[k]; a.currentTime=0;
+    a.src=urls[k]; a.currentTime=0; setWantPlay(true);
     a.play().then(()=>{ a.onerror=null; c.bad=false; }).catch(()=> tryUrl(k+1));
     a.onerror=()=> tryUrl(k+1);
   };
@@ -3998,7 +3998,7 @@ function markDuat(){
 function openVideo(it){
   if(!it) return;
   const ov=$('#vid-overlay'), v=$('#duat-video'); if(!ov||!v) return;
-  try{ const a=$('#reciter-audio'); if(a) a.pause(); }catch(e){}
+  try{ const a=$('#reciter-audio'); if(a){ setWantPlay(false); a.pause(); } }catch(e){}
   const urls=[it.url, it.alt].filter(Boolean);
   $('#vid-title').textContent=it.name||'فيديو';
   const ob=$('#vid-open');
@@ -4023,16 +4023,16 @@ $('#vid-close') && $('#vid-close').addEventListener('click', closeVideo);
 $('#vid-overlay') && $('#vid-overlay').addEventListener('click', e=>{ if(e.target.id==='vid-overlay') closeVideo(); });
 function playDuat(i){
   const a=$('#reciter-audio'); const c=__duatItems[i]; if(!a || !c) return;
-  if(__duatPlaying===i && !a.paused){ a.pause(); markDuat(); return; }
+  if(__duatPlaying===i && !a.paused){ setWantPlay(false); a.pause(); markDuat(); return; }
   __duatPlaying=i; __storyPlaying=null; __audioSura=null;
   const urls = c.drive ? driveUrls(c.drive) : [c.url, c.alt].filter(Boolean);
   const tryUrl=k=>{
     if(k>=urls.length){
-      a.onerror=null; c.bad=true; __duatPlaying=null;
+      a.onerror=null; c.bad=true; __duatPlaying=null; setWantPlay(false);
       showToast('تعذّر تشغيل هذا التسجيل — جرّب غيره أو «مصدرًا آخر»', 4200);
       renderDuat(); return;
     }
-    a.src=urls[k]; a.currentTime=0;
+    a.src=urls[k]; a.currentTime=0; setWantPlay(true);
     a.play().then(()=>{ a.onerror=null; c.bad=false; }).catch(()=> tryUrl(k+1));
     a.onerror=()=> tryUrl(k+1);
   };
@@ -5243,7 +5243,7 @@ function refreshDhikrBtns(){
 function toggleDhikrAudio(pid){
   const a=$('#dhikr-audio'); const src=AZKAR_AUDIO[pid]; if(!a||!src) return;
   if(__dhikrPid===pid && !a.paused){ a.pause(); return; }
-  try{ const r=$('#reciter-audio'); if(r) r.pause(); }catch(e){}
+  try{ const r=$('#reciter-audio'); if(r){ setWantPlay(false); r.pause(); } }catch(e){}
   a.src=src; a.currentTime=0; __dhikrPid=pid;
   a.play().catch(()=>{}); vibrate(6);
 }
@@ -5334,6 +5334,7 @@ function playReciterSurah(info, si){
   markListenActive();
   updateMediaSession(info.name, WIRD.sur[si].n);
   const actions=$('#reciter-actions'); if(actions) actions.style.display='flex';
+  setWantPlay(true);
   audio.play().then(()=>{ setPlayBtn(true); }).catch(()=>{
     /* رفضُ التشغيل له سببان لا يستويان: منعُ المتصفّح حتى يلمسَ المستخدمُ
        الشاشة — فيُطلب منه الضغط، وهو ينفع؛ أو عطبٌ في المصدر نفسِه — فلا
@@ -5347,6 +5348,7 @@ function playReciterSurah(info, si){
 }
 /* عطبٌ دائمٌ في المصدر (لا ضعفُ اتّصال): يُوقَف الاستئنافُ ويُبيَّن للمستمع */
 function reciterSrcDead(){
+  setWantPlay(false);          // مصدرٌ لا يُقرأ: لا معنى لمطاردته
   const st=$('#reciter-status');
   if(st) st.textContent='تعذّر تشغيل هذه السورة — جرّب قارئًا آخر';
   setPlayBtn(false);
@@ -5791,9 +5793,9 @@ function setupMediaSession(){
   if(!('mediaSession' in navigator)) return;
   const audio=$('#reciter-audio');
   const set=(action,fn)=>{ try{ navigator.mediaSession.setActionHandler(action, fn); }catch(e){} };
-  set('play', ()=> audio.play().catch(()=>{}));
-  set('pause', ()=> audio.pause());
-  set('stop', ()=> audio.pause());
+  set('play', ()=> { setWantPlay(true); audio.play().catch(()=>{}); });
+  set('pause', ()=> { setWantPlay(false); audio.pause(); });
+  set('stop', ()=> { setWantPlay(false); audio.pause(); });
   set('previoustrack', ()=>{
     const info=currentReciterInfo();
     if(info && __audioSura!=null && __audioSura>0) playReciterSurah(info, __audioSura-1);
@@ -5992,9 +5994,10 @@ $('#reciter-play').addEventListener('click', async ()=>{
     return;
   }
   if(audio.paused){
+    setWantPlay(true);
     try{ await audio.play(); setPlayBtn(true); }
     catch(e){ $('#reciter-status').textContent='تعذّر التشغيل'; }
-  } else { audio.pause(); setPlayBtn(false); }
+  } else { setWantPlay(false); audio.pause(); setPlayBtn(false); }
 });
 /* عند انتهاء السورة: الانتقال تلقائيًّا للسورة التالية */
 $('#reciter-audio').addEventListener('ended', ()=>{
@@ -6015,11 +6018,22 @@ $('#reciter-audio').addEventListener('ended', ()=>{
 });
 /* استئناف تلقائي عند تعثّر الشبكة أثناء البثّ — يُكمل من نفس الموضع ولا يُعيد من البداية */
 let __recTimer=null, __recTry=0;
+/* ============ لماذا تنقطع التلاوةُ وحدَها ============
+   كانت الاستعادةُ لا تعمل إلّا على خطأٍ معلنٍ من الصوت (error/stalled). وعلى
+   شبكةٍ ضعيفة أكثرُ الانقطاعات ليست كذلك: المتصفّحُ يُفرغ المَخزَن فيُطلق
+   «waiting» ويقف، أو يُوقف العنصرَ بنفسه عند تبدُّل الشبكة أو عند ضغطِ الذاكرة
+   في الخلفيّة — وفي الحالتين ‎paused = true‎ بلا ‎error‎، وكان الشرطُ القديم
+   يرجع فلا يستأنف أبدًا. فتسكُت التلاوةُ «وحدَها» ولا تعود.
+   والفاصلُ بين وقفةٍ أرادها المستمعُ وأخرى وقعت عليه هو نيّتُه، فنُسجّلها. */
+/* ‎var‎ لا ‎let‎: الدالّةُ مرفوعةٌ إلى أعلى المجال، فلو نُوديت قبل تنفيذ هذا
+   السطر لأعطى ‎let‎ خطأَ منطقةِ التحريم. و‎undefined‎ يعطي false وهو الصواب. */
+var __wantPlay=false;
+function setWantPlay(v){ __wantPlay=!!v; }
 function recoverReciter(){
   const a=$('#reciter-audio');
   if(!a || !a.src || a.ended || __recTimer) return;
-  // إن أوقفه المستخدم أو أوقفه النظام (مكالمة واردة) دون خطأ شبكة — لا نستأنف
-  if(a.paused && !a.error) return;
+  // وقفةٌ بلا خطأ: لا نستأنف إلّا إذا كان المستمعُ طالبًا للتشغيل
+  if(a.paused && !a.error && !__wantPlay) return;
   /* MEDIA_ERR_SRC_NOT_SUPPORTED: المصدرُ نفسُه لا يُقرأ (سورةٌ غيرُ مسجّلة،
      أو صيغةٌ لا تُدعم). هذا لا تُصلحه إعادةُ المحاولة، وكان يدور بلا انتهاء
      على «ضعف في الاتصال» وهو غيرُ صحيح. */
@@ -6043,6 +6057,32 @@ function recoverReciter(){
 $('#reciter-audio').addEventListener('seeked', ()=>{ try{ qsClearYCache(); }catch(e){} });
 $('#reciter-audio').addEventListener('error', recoverReciter);
 $('#reciter-audio').addEventListener('stalled', ()=>{ const a=$('#reciter-audio'); if(a && !a.paused) recoverReciter(); });
+/* «waiting» و«suspend»: المَخزَنُ فرغ أو التحميلُ تعلّق — وهما أكثرُ وقوعًا من
+   «stalled» على شبكةٍ ضعيفة، ولم يكن لهما معالجٌ أصلًا. */
+$('#reciter-audio').addEventListener('waiting', ()=>{ const a=$('#reciter-audio'); if(a && !a.paused) recoverReciter(); });
+$('#reciter-audio').addEventListener('suspend', ()=>{
+  const a=$('#reciter-audio');
+  if(a && a.paused && !a.ended && __wantPlay && a.readyState<3) recoverReciter();
+});
+/* حارسٌ كلَّ أربعِ ثوان: لا ينتظر حَدَثًا من المتصفّح، بل يقيس التقدّمَ بنفسه.
+   فإن كان المستمعُ طالبًا للتشغيل والعدّادُ لم يتحرّك — أو وقف العنصرُ بلا
+   أمرٍ منه — استأنفنا. وبهذا تُنقَذ الحالاتُ الصامتةُ التي لا حَدَثَ لها. */
+let __wdLast=-1, __wdSame=0;
+setInterval(()=>{
+  const a=$('#reciter-audio');
+  if(!a || !a.src || a.ended || !__wantPlay){ __wdSame=0; __wdLast=-1; return; }
+  if(a.paused){                               // وقفةٌ لم يطلبها المستمع
+    __wdSame=0; __wdLast=-1;
+    a.play().catch(()=> recoverReciter());
+    return;
+  }
+  const t=a.currentTime||0;
+  if(Math.abs(t-__wdLast)<0.05){              // العدّادُ واقفٌ والصوتُ «شغّال»
+    __wdSame++;
+    if(__wdSame>=2){ __wdSame=0; recoverReciter(); }
+  } else { __wdSame=0; }
+  __wdLast=t;
+}, 4000);
 $('#reciter-audio').addEventListener('playing', ()=>{ __recTry=0; if(__recTimer){ clearTimeout(__recTimer); __recTimer=null; } });
 $('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 $('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
