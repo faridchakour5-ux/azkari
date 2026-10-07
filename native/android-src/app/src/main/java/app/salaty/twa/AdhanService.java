@@ -13,6 +13,9 @@ import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.VolumeProvider;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -49,6 +52,7 @@ public class AdhanService extends Service {
   private AudioManager.OnAudioFocusChangeListener focusLegacy;
   private final Handler handler = new Handler(Looper.getMainLooper());
   private Runnable guard;
+  private MediaSession session;
 
   @Override public IBinder onBind(Intent i) { return null; }
 
@@ -80,6 +84,7 @@ public class AdhanService extends Service {
     acquireWake();
     requestFocus();
     play();
+    if (player != null) startVolumeKeyStop();
 
     guard = new Runnable() { @Override public void run() { stopEverything(); } };
     handler.postDelayed(guard, MAX_MS);
@@ -101,7 +106,7 @@ public class AdhanService extends Service {
     PendingIntent piStop = PendingIntent.getService(this, 2, stop, f);
 
     String title = name.isEmpty() ? "الأذان" : ("حان وقتُ صلاة " + name);
-    String body  = fajr ? "الصلاةُ خيرٌ من النوم" : "حيَّ على الصلاة · حيَّ على الفلاح";
+    String body  = (fajr ? "الصلاةُ خيرٌ من النوم" : "حيَّ على الصلاة · حيَّ على الفلاح") + " — اضغط «خفض الصوت» للإيقاف";
 
     Notification.Builder b = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         ? new Notification.Builder(this, CHANNEL)
@@ -204,10 +209,48 @@ public class AdhanService extends Service {
     } catch (Exception ignored) {}
   }
 
+  /* ===== إيقافُ الأذان بزرّ «خفض الصوت» =====
+     أندرويد لا يُتيح لتطبيقٍ في الخلفيّة أن يسمع أزرارَ الصوت إلا عبر جلسةِ وسائطَ فعّالةٍ تعمل. فنُنشئ جلسةً بمزوِّد صوتٍ نسبيّ
+     (VolumeProvider)، فتصلنا ضغطةُ الزرّ ولو كانت الشاشةُ مطفأةً أو الهاتفُ مقفلًا:
+       • خفض الصوت  ⇐ يُوقَف الأذان.
+       • رفع الصوت  ⇐ يرتفع صوتُ المنبّه درجةً كالمعتاد.
+     وزرُّ «إيقاف» في الإشعار باقٍ كما كان. */
+  private void startVolumeKeyStop() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
+    try {
+      session = new MediaSession(this, "salaty-adhan");
+      session.setCallback(new MediaSession.Callback() {
+        @Override public void onStop()  { stopEverything(); }
+        @Override public void onPause() { stopEverything(); }
+      });
+      session.setPlaybackState(new PlaybackState.Builder()
+          .setActions(PlaybackState.ACTION_STOP | PlaybackState.ACTION_PAUSE)
+          .setState(PlaybackState.STATE_PLAYING, 0, 1f)
+          .build());
+      session.setPlaybackToRemote(new VolumeProvider(VolumeProvider.VOLUME_CONTROL_RELATIVE, 100, 50) {
+        @Override public void onAdjustVolume(int direction) {
+          if (direction < 0) {
+            handler.post(() -> stopEverything());
+          } else if (direction > 0 && audio != null) {
+            try { audio.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI); }
+            catch (Exception ignored) {}
+          }
+        }
+      });
+      session.setActive(true);
+    } catch (Exception ignored) { session = null; }
+  }
+
+  private void stopVolumeKeyStop() {
+    try { if (session != null) { session.setActive(false); session.release(); } } catch (Exception ignored) {}
+    session = null;
+  }
+
   /* ===== الإنهاء ===== */
 
   private void stopEverything() {
     if (guard != null) { handler.removeCallbacks(guard); guard = null; }
+    stopVolumeKeyStop();
     try { if (player != null) { if (player.isPlaying()) player.stop(); player.release(); } } catch (Exception ignored) {}
     player = null;
     try {
