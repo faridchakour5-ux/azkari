@@ -48,6 +48,8 @@ public class AdhanPlugin extends Plugin {
         clean.put(e);
       }
 
+      Boolean vs = call.getBoolean("volStop", Boolean.FALSE);
+      AdhanScheduler.prefs(getContext()).edit().putBoolean("vol_stop", vs != null && vs).apply();
       AdhanScheduler.save(getContext(), clean, enabled);
       AdhanScheduler.arm(getContext());
       call.resolve(status());

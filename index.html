@@ -1744,6 +1744,9 @@
     <div class="row native-only" style="display:none"><span class="k">الأذان عند دخول الوقت</span>
       <label class="sw"><input type="checkbox" id="adhan-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
+    <div class="row native-only" style="display:none"><span class="k">زرّ «خفض الصوت» يوقف الأذان</span>
+      <label class="sw"><input type="checkbox" id="adhan-volstop-toggle"><span class="track"></span><span class="knob"></span></label>
+    </div>
     <div class="gnote native-only" id="adhan-note" style="display:none"></div>
     <div class="gnote web-only" id="adhan-web-note">الأذانُ بصوته كاملًا لا يرفعه المتصفّحُ والتطبيقُ مغلقٌ — وهو قيدٌ في المتصفّح نفسِه لا في التطبيق. وبإمكانك أن يصلك إشعارٌ نصّيٌّ عند دخول كلّ وقتٍ بالخيار أدناه.</div>
     <div class="row web-only" id="push-row"><span class="k">تصلني التذكيرات والتطبيق مغلق</span>
@@ -2487,6 +2490,16 @@ adhanToggle.addEventListener('change', ()=>{
   try{ scheduleNativeNotifs(); }catch(e){}
   showToast(settings.adhan ? 'سيُرفع الأذانُ عند دخول وقت كلّ صلاة ✓' : 'أُوقِف الأذان — تبقى التذكيراتُ النصّيّة', 3000);
 });
+
+const volStopToggle = $('#adhan-volstop-toggle');
+if(volStopToggle){
+  volStopToggle.checked = settings.adhanVolStop===true;      // افتراضًا: خفضُ الصوت يخفّض الصوتَ فقط كأيّ منبّه
+  volStopToggle.addEventListener('change', ()=>{
+    settings.adhanVolStop = volStopToggle.checked; saveSettings(); vibrate(6);
+    try{ scheduleNativeNotifs(); }catch(e){}
+    showToast(settings.adhanVolStop ? 'سيُوقَف الأذانُ بضغط «خفض الصوت» ✓' : 'زرُّ «خفض الصوت» يخفّض صوتَ الأذان فقط', 3200);
+  });
+}
 
 const salatToggle = $('#salat-toggle');
 salatToggle.checked = settings.salat;
@@ -6905,7 +6918,7 @@ async function scheduleNativeNotifs(){
       /* المواقيتُ تُحسَب هنا بـ adhan.min.js — مصدرٌ واحدٌ لا يَختلف عمّا يَراه
          المستخدمُ في شريط المواقيت — وتُسلَّم إلى النظام أرقامًا مطلقة. */
       try{
-        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false });
+        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true });
         paintAdhanNote();
       }catch(e){}
     }

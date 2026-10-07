@@ -84,7 +84,7 @@ public class AdhanService extends Service {
     acquireWake();
     requestFocus();
     play();
-    if (player != null) startVolumeKeyStop();
+    if (player != null && volStop()) startVolumeKeyStop();
 
     guard = new Runnable() { @Override public void run() { stopEverything(); } };
     handler.postDelayed(guard, MAX_MS);
@@ -106,7 +106,7 @@ public class AdhanService extends Service {
     PendingIntent piStop = PendingIntent.getService(this, 2, stop, f);
 
     String title = name.isEmpty() ? "الأذان" : ("حان وقتُ صلاة " + name);
-    String body  = (fajr ? "الصلاةُ خيرٌ من النوم" : "حيَّ على الصلاة · حيَّ على الفلاح") + " — اضغط «خفض الصوت» للإيقاف";
+    String body  = (fajr ? "الصلاةُ خيرٌ من النوم" : "حيَّ على الصلاة · حيَّ على الفلاح") + (volStop() ? " — اضغط «خفض الصوت» للإيقاف" : "");
 
     Notification.Builder b = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         ? new Notification.Builder(this, CHANNEL)
@@ -214,7 +214,12 @@ public class AdhanService extends Service {
      (VolumeProvider)، فتصلنا ضغطةُ الزرّ ولو كانت الشاشةُ مطفأةً أو الهاتفُ مقفلًا:
        • خفض الصوت  ⇐ يُوقَف الأذان.
        • رفع الصوت  ⇐ يرتفع صوتُ المنبّه درجةً كالمعتاد.
-     وزرُّ «إيقاف» في الإشعار باقٍ كما كان. */
+     وزرُّ «إيقاف» في الإشعار باقٍ كما كان. ولا يعمل هذا إلا إن فعّله المستخدمُ من الإعدادات؛ وافتراضًا يخفّض الزرُّ الصوتَ فقط كما في أيّ منبّه. */
+  /** خيارٌ في الإعدادات (مُطفأٌ افتراضيًّا): خفضُ الصوت يوقف الأذان بدل أن يخفّضه. */
+  private boolean volStop() {
+    try { return AdhanScheduler.prefs(this).getBoolean("vol_stop", false); } catch (Exception e) { return false; }
+  }
+
   private void startVolumeKeyStop() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
     try {
