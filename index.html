@@ -1341,6 +1341,7 @@
   /* العناوين الكبيرة (أقسامُ الباب وعناوينُ الأحاديث والأسئلة والجداول) بذهبيّ أرقام الآيات نفسِه */
   :is(#s-azkar, #s-tasbih) :is(.fq-bt, .wa-t, .fq-ki .q, .fq-tbl th, .fq-src-h, .fadl .lbl, .wa-s .lbl){ color:var(--c-repeat); }
   :is(#s-azkar, #s-tasbih) :is(.fq-bt, .wa-t)::before{ background:var(--c-repeat); }
+  .wird-text, .wird-basmala, .card.quran .txt, .aya-t, .tafsir-body .t-aya, .search-result .sr-txt{ text-rendering:geometricPrecision; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; font-synthesis:none; }
 </style>
 </head>
 <body>
@@ -3341,6 +3342,13 @@ function buildShotNode(innerHTML, title, sub){
     '<div class="ss-foot">صلاتي — أذكار ومصحف · <span>www.salatee.org</span></div>';
   return el;
 }
+/* دقّةُ صورة المشاركة وPDF: ثلاثةُ أضعاف الشاشة ما أمكن (كانت ضعفين) — فيخرج النصُّ العربيُّ ومعه التشكيلُ حادًّا عند التكبير والطباعة.
+   وتنخفض الدقّةُ تلقائيًّا للمحتوى الطويل جدًّا حتى لا تتجاوز مساحةُ اللوحة (≈ 16 مليون بكسل) حدَّ المتصفّحات، فتفشل الصورة. */
+function shotScale(W,H){
+  const MAX=15e6; let S=3;
+  while(S>1 && W*S*H*S>MAX) S-=0.5;
+  return Math.max(1,S);
+}
 async function shotToCanvas(innerHTML, title, sub){
   const css=await shotCss();
   const el=buildShotNode(innerHTML,title,sub);
@@ -3358,8 +3366,8 @@ async function shotToCanvas(innerHTML, title, sub){
   const img=new Image();
   img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
   await img.decode();
-  const S=2, cv=document.createElement('canvas');
-  cv.width=W*S; cv.height=H*S;
+  const S=shotScale(W,H), cv=document.createElement('canvas');
+  cv.width=Math.round(W*S); cv.height=Math.round(H*S);
   const c=cv.getContext('2d'); c.scale(S,S);
   c.fillStyle=cssVar('--bg','#F7F3E8'); c.fillRect(0,0,W,H);
   c.drawImage(img,0,0,W,H);
@@ -6504,7 +6512,7 @@ async function buildQuickPopImage(){
   const kind=__qpKind, sal=QP_SALAT[Math.max(st.sal,0)], hd=__qpHadith;
   const q = kind==='quran' ? __qpQuran : null;
 
-  const S=2;                      // دقّة مضاعفة
+  const S=3;                      // دقّة ثلاثيّة
   const W=560, PAD=30, BOX=22, IN=20;
   const cCard=cssVar('--card','#F6F0E2'), cText=cssVar('--text','#2B2721'),
         cText2=cssVar('--text-2','#6B6357'), cText3=cssVar('--text-3','#9A9084'),
