@@ -53,6 +53,8 @@ public class AdhanService extends Service {
   private final Handler handler = new Handler(Looper.getMainLooper());
   private Runnable guard;
   private MediaSession session;
+  private boolean prepared = false;
+  private Runnable watch;
 
   @Override public IBinder onBind(Intent i) { return null; }
 
@@ -169,7 +171,8 @@ public class AdhanService extends Service {
       player.setLooping(false);
       player.setOnCompletionListener(mp -> stopEverything());
       player.setOnErrorListener((mp, what, extra) -> { stopEverything(); return true; });
-      player.setOnPreparedListener(MediaPlayer::start);
+      try { player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK); } catch (Exception ignored) {}
+      player.setOnPreparedListener(mp -> { prepared = true; mp.start(); startWatch(); });
       player.prepareAsync();
     } catch (Exception e) {
       stopEverything();
@@ -220,6 +223,24 @@ public class AdhanService extends Service {
     try { return AdhanScheduler.prefs(this).getBoolean("vol_stop", false); } catch (Exception e) { return false; }
   }
 
+  /* حارسُ الاستمرار: لا نُوقف الأذانَ مؤقّتًا أبدًا (لا زرَّ إيقافٍ مؤقّت)، فإن وُجد المُشغِّلُ واقفًا وهو لم يَنتهِ فالسببُ من النظام
+     (تركيزُ صوتٍ، أو نومُ المعالج، أو جلسةُ وسائط) — فنُعيده فورًا بدل أن ينتظر لمسةً من المستخدم. */
+  private void startWatch() {
+    if (watch != null) return;
+    watch = new Runnable() {
+      @Override public void run() {
+        try {
+          if (player != null && prepared && !player.isPlaying()) {
+            int dur = player.getDuration(), pos = player.getCurrentPosition();
+            if (dur > 0 && pos < dur - 1500) player.start();     // لا نُعيد ما انتهى فعلًا
+          }
+        } catch (Exception ignored) {}
+        if (player != null && watch != null) handler.postDelayed(this, 1000);
+      }
+    };
+    handler.postDelayed(watch, 1000);
+  }
+
   private void startVolumeKeyStop() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
     try {
@@ -256,6 +277,8 @@ public class AdhanService extends Service {
   private void stopEverything() {
     if (guard != null) { handler.removeCallbacks(guard); guard = null; }
     stopVolumeKeyStop();
+    if (watch != null) { handler.removeCallbacks(watch); watch = null; }
+    prepared = false;
     try { if (player != null) { if (player.isPlaying()) player.stop(); player.release(); } } catch (Exception ignored) {}
     player = null;
     try {
