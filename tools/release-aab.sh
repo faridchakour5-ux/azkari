@@ -38,6 +38,7 @@ VERSION_JSON="$ROOT/native/android-version.json"
 VCODE="$(node -p "require('$VERSION_JSON').versionCode")"
 VNAME="$(node -p "require('$VERSION_JSON').versionName")"
 echo "→ الإصدار: $VNAME (code $VCODE)"
+python3 "$ROOT/tools/check-digits.py" || die "أرقامٌ غيرُ لاتينيّة في ملفّات التطبيق (القاعدة: 0123456789 دائمًا)"
 git -C "$ROOT" diff --quiet && git -C "$ROOT" diff --cached --quiet || die "تغييراتٌ غير مُلتزَمة: التزِم بها أوّلًا (البناء من آخر commit)"
 
 WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
