@@ -1362,6 +1362,16 @@
   .hifz-pill button{width:36px; height:36px; border:1px solid var(--line); border-radius:12px; background:transparent; color:var(--accent); display:inline-flex; align-items:center; justify-content:center; cursor:pointer;}
   .hifz-pill .hz-info{font-size:13px; font-weight:700; color:var(--text); padding:0 6px; white-space:nowrap;}
   .aya-t.hifz-live{background:color-mix(in srgb, var(--accent) 22%, transparent); border-radius:6px;}
+  /* ===== استغلالُ جنبات الشاشة: هوامشُ جانبيّةٌ أضيق (كانت 16+18 للمصحف، فتضيع نحوُ 17٪ من العرض) =====
+     يبقى هامشٌ صغيرٌ آمنٌ للحواف المنحنية والـ notch، ولا يتغيّر شيءٌ في الارتفاعات ولا الألوان ولا الخطوط. */
+  :root{ --gx: max(8px, env(safe-area-inset-left), env(safe-area-inset-right)); }
+  .list{padding-inline:var(--gx);}
+  .card{padding-inline:13px;}
+  .fq-card{margin-inline:var(--gx); padding-inline:13px;}
+  .wird-card{margin-inline:max(6px, env(safe-area-inset-left), env(safe-area-inset-right)); padding-inline:12px;}
+  .reciter-box{margin-inline:var(--gx);}
+  .tafsir-body{padding-inline:14px;}
+  .share-shot .card, .share-shot .fq-card{margin:0;}
 </style>
 </head>
 <body>
