@@ -6331,7 +6331,8 @@ const QP_TASBIH = [
   { t:'اللَّهُمَّ أَعِنِّي عَلَىٰ ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ', s:'رواه أبو داود والنسائي' }
 ];
 const QP_SALAT = [
-  { t:'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ', s:'متّفق عليه' },
+  { t:'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ، اللَّهُمَّ بَارِكْ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ', s:'الصلاة الإبراهيمية — متّفق عليه' },
+  { t:'صَلِّ عَلَى الْحَبِيبِ مُحَمَّدٍ ﷺ', s:'الصلاة على النبي ﷺ' },
   { t:'اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ عَلَىٰ نَبِيِّنَا مُحَمَّدٍ', s:'الصلاة على النبي ﷺ' },
   { t:'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ عَبْدِكَ وَرَسُولِكَ، وَصَلِّ عَلَى الْمُؤْمِنِينَ وَالْمُؤْمِنَاتِ، وَالْمُسْلِمِينَ وَالْمُسْلِمَاتِ', s:'رواه البخاري' },
   { t:'صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ تَسْلِيمًا كَثِيرًا', s:'الصلاة على النبي ﷺ' },
@@ -6393,7 +6394,7 @@ async function qpHadithPool(){
   }));
   __qpHadithPool=out; return out;
 }
-const QP_SUBS={ salat:'صلِّ على الحبيب ﷺ ثلاثًا — اضغط على الذكر حتى يكتمل العدد.', quran:'اقرأ ربعَ صفحةٍ من كتاب الله.', hadith:'حديثٌ صحيحٌ من البخاري أو مسلم.' };
+const QP_SUBS={ salat:'صلِّ على الحبيب ﷺ — بلا حدٍّ ولا عدد، فأكثِر منها.', quran:'اقرأ ربعَ صفحةٍ من كتاب الله.', hadith:'حديثٌ صحيحٌ من البخاري أو مسلم.' };
 async function buildQuickPop(){
   const st=qpState();
   const kinds=['salat','quran','hadith'].filter(k=>k!==st.kind);
@@ -6414,7 +6415,7 @@ async function buildQuickPop(){
     rows.innerHTML='<div class="qp-row" data-left="'+n+'"><div class="qp-txt">'+escapeHtml(txt)+'</div>'+
       '<div class="qp-bot"><span class="qp-src">'+escapeHtml(src)+'</span><button class="qp-cnt" type="button">'+AR(n)+'</button></div></div>';
     const row=rows.firstChild;
-    if(n<=1){ const c1=row.querySelector('.qp-cnt'); if(c1) c1.style.display='none'; }   // حديثٌ: لا عدّادَ له
+    if(n<=1){ const c1=row.querySelector('.qp-cnt'); if(c1) c1.style.display='none'; }      // حديثٌ أو صلاةٌ على النبي ﷺ: لا عدّادَ   // حديثٌ: لا عدّادَ له
     row.addEventListener('click', ()=>{
       let left=parseInt(row.dataset.left); if(left<=0) return;
       left--; row.dataset.left=left;
@@ -6425,7 +6426,7 @@ async function buildQuickPop(){
   };
   if(kind==='salat'){
     const si=qpPick(QP_SALAT.length, st.sal); st.sal=si; qpSave(st);
-    addRow(QP_SALAT[si].t, QP_SALAT[si].s, 3); qpPrepareImage();
+    addRow(QP_SALAT[si].t, QP_SALAT[si].s, 0); qpPrepareImage();
   } else if(kind==='hadith'){
     qpSave(st); addRow(__qpHadith.v, __qpHadith.s, 1); qpPrepareImage();
   } else {
@@ -6478,7 +6479,7 @@ function qpShareText(){
     L.push(__qpQuran.ayat.map(a=> a.t+' ۝'+a.no).join(' '));
   } else {
     const st=qpState();
-    L.push('وصلِّ على الحبيب ﷺ ثلاثًا:'); L.push('﴿ '+QP_SALAT[Math.max(st.sal,0)].t+' ﴾');
+    L.push('صلِّ على الحبيب ﷺ:'); L.push('﴿ '+QP_SALAT[Math.max(st.sal,0)].t+' ﴾');
   }
   L.push('');
   L.push('يتغيّر التذكير في كل مرّة. افتح الرابط وخُذ نصيبك اليوم —');
@@ -6590,13 +6591,15 @@ async function buildQuickPopImage(){
     c.font="23px 'AmiriQuran',serif"; c.fillStyle=cText;
     let ty=top+IN+30;
     for(const ln of lines){ c.fillText(ln, W/2, ty); ty+=LH1; }
-    // العدّاد
+    // العدّاد (لا عدّادَ للصلاة على النبي ﷺ: لا تقييدَ لعددها)
     const cy=top+h-IN-12;
-    const lbl=AR(n)+' مرّات';
-    c.font="700 15px 'PlexAr',sans-serif";
-    const pw=Math.round(c.measureText(lbl).width)+26;
-    c.fillStyle=cRepBg; rrect(c,PAD+IN,cy-17,pw,32,16); c.fill();
-    c.fillStyle=cRep; c.fillText(lbl, PAD+IN+pw/2, cy+5);
+    if(n>0){
+      const lbl=AR(n)+' مرّات';
+      c.font="700 15px 'PlexAr',sans-serif";
+      const pw=Math.round(c.measureText(lbl).width)+26;
+      c.fillStyle=cRepBg; rrect(c,PAD+IN,cy-17,pw,32,16); c.fill();
+      c.fillStyle=cRep; c.fillText(lbl, PAD+IN+pw/2, cy+5);
+    }
     // المصدر
     c.font="500 12.5px 'PlexAr',sans-serif"; c.fillStyle=cText3;
     c.textAlign='right'; c.fillText(src, W-PAD-IN, cy+4); c.textAlign='center';
@@ -6608,7 +6611,7 @@ async function buildQuickPopImage(){
     c.font="500 13px 'PlexAr',sans-serif"; c.fillStyle=cText3; ty+=-14;
     for(const ln of srcLines){ c.fillText(ln, W/2, ty+10); ty+=21; }
     y+=h2+14;
-  } else if(kind==='salat'){ drawBox(l2, sal.s, 3, y, h2); y+=h2+14; }
+  } else if(kind==='salat'){ drawBox(l2, sal.s, 0, y, h2); y+=h2+14; }
 
   if(q){
     c.fillStyle=cFill; rrect(c,PAD,y,W-2*PAD,h3,BOX); c.fill();
