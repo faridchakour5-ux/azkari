@@ -1354,6 +1354,7 @@
   .hz-step b{font-size:calc(17px * var(--tscale)); min-width:2.2em; text-align:center;}
   .hz-step button{width:38px; height:38px; border:0; border-radius:12px; background:var(--card); color:var(--accent); font-size:20px; font-weight:800; cursor:pointer;}
   .hz-go{display:block; width:100%; margin-top:18px; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:calc(16px * var(--tscale)); border-radius:16px; padding:14px; cursor:pointer;}
+  .hz-sura{display:flex; justify-content:space-between; align-items:center; width:100%; border:1px solid var(--line); background:var(--fill-2); color:var(--text); font:inherit; font-weight:800; font-size:calc(16px * var(--tscale)); border-radius:16px; padding:12px 16px; cursor:pointer;}
   .hz-hint{font-size:12.5px; color:var(--text-3); margin-top:6px; line-height:1.8;}
   .hifz-pill{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:80; display:none; align-items:center; gap:6px;
     border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow-2); border-radius:22px; padding:6px 10px; max-width:94vw;}
@@ -1474,6 +1475,7 @@
     <button class="qb-del" id="qdl-clear" type="button">احذف الكلّ</button>
   </div>
   <div class="listen-list" id="listen-list"></div>
+  <div class="stories-box" id="hifz-box" style="display:none"><div class="hifz-body" id="hifz-listen"></div></div>
   <div class="stories-box" id="duat-box" style="display:none">
     <button class="duat-pick" id="duat-pick" type="button">
       <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
@@ -4159,7 +4161,9 @@ const LISTEN_CATS=[
     ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h4"/><path d="M15 7h4"/><circle cx="12" cy="12" r="9"/></svg>' },
   { id:'seera',   name:'السيرة النبوية',     sub:'سيرةُ النبيّ ﷺ في سلاسلَ كاملة',
     ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>' },
-  { id:'hadith',  name:'الأحاديث الصحيحة',   sub:'من الصحيحين — والمصدرُ مذكورٌ مع كلّ كتاب', ic:IC_BOOK }
+  { id:'hadith',  name:'الأحاديث الصحيحة',   sub:'من الصحيحين — والمصدرُ مذكورٌ مع كلّ كتاب', ic:IC_BOOK },
+  { id:'hifz',    name:'التحفيظ',            sub:'كرِّر آيةً أو مقطعًا من أيّ سورةٍ لتحفظه (رواية حفص)',
+    ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>' }
 ];
 let __listenCat='quran';
 function applyListenMode(mode){
@@ -4172,6 +4176,8 @@ function applyListenMode(mode){
   $('#listen-list').style.display  = quran ? '' : 'none';
   $('#stories-box').style.display  = series ? '' : 'none';
   $('#duat-box').style.display     = duat ? '' : 'none';
+  const hifz = cat.id==='hifz';
+  $('#hifz-box').style.display     = hifz ? '' : 'none';
   $('#listen-sub').textContent = cat.sub;
   $('#listen-cat-name').textContent = cat.name;
   $('#listen-cat-ic').innerHTML = cat.ic;
@@ -4181,6 +4187,7 @@ function applyListenMode(mode){
     openStories();
   }
   if(duat) openDuat();
+  if(hifz) openHifzListen();
 }
 $('#listen-cat') && $('#listen-cat').addEventListener('click', ()=>{
   vibrate(6);
@@ -4627,24 +4634,29 @@ let __hz=null, __hzSel=null;
 function hzCfg(){ return Object.assign({}, HZ_DEF, settings.hifz||{}); }
 function hzRec(c){ return HZ_RECS.find(r=>r.id===c.rec) || HZ_RECS[0]; }
 function hzNo(n){ return String(n).padStart(3,'0'); }
-function hzUrl(c, si, no){ return 'https://everyayah.com/data/'+hzRec(c).dir+'/'+hzNo(WIRD.sur[si].s)+hzNo(no)+'.mp3'; }
-function hzCount(si){ const end=(si+1<WIRD.sur.length)? WIRD.sur[si+1].i : WIRD.a.length; return end-WIRD.sur[si].i; }
+/* بياناتُ حفص (أرقامُ السور وعددُ الآيات) مستقلّةٌ عن الرواية المعروضة، فيعمل التحفيظ من صفحة الاستماع أيًّا كانت الرواية */
+const HZD=()=>window.WIRD_HAFS;
+async function hzLoad(){ if(!window.WIRD_HAFS){ try{ await loadScript('wird_hafs.js'); }catch(e){} } return window.WIRD_HAFS; }
+function hzUrl(c, si, no){ return 'https://everyayah.com/data/'+hzRec(c).dir+'/'+hzNo(HZD().sur[si].s)+hzNo(no)+'.mp3'; }
+function hzCount(si){ const D=HZD(), end=(si+1<D.sur.length)? D.sur[si+1].i : D.a.length; return end-D.sur[si].i; }
 
-function openHifz(ai){
+async function openHifz(ai){
   if(!WIRD || isNaN(ai)) return;
-  if(settings.riwaya==='warsh'){ showToast('التحفيظ متاحٌ حاليًّا برواية حفص — بدّل الروايةَ من أعلى الصفحة', 4200); return; }
+  if(settings.riwaya==='warsh'){ showToast('التحفيظ من المصحف برواية حفص — أو افتح «الاستماع ← التحفيظ» وأيُّ رواية', 4600); return; }
+  if(!(await hzLoad())) return;
   const si=suraOf(ai), no=ai-WIRD.sur[si].i+1;
   __hzSel={ si, from:no, to:no };
-  renderHifzSheet();
+  renderHifzForm($('#hifz-body'), false, ()=>closeHifz());
   $('#hifz-overlay').classList.add('show');
 }
 function closeHifz(){ $('#hifz-overlay').classList.remove('show'); }
-function renderHifzSheet(){
-  const body=$('#hifz-body'); if(!body || !__hzSel) return;
-  const c=hzCfg(), t=__hzSel, n=hzCount(t.si);
-  $('#hifz-title').textContent='تحفيظ — سورة '+WIRD.sur[t.si].n;
+function renderHifzForm(body, picker, afterStart){
+  if(!body || !__hzSel || !HZD()) return;
+  const c=hzCfg(), t=__hzSel, n=hzCount(t.si), again=()=>renderHifzForm(body, picker, afterStart);
+  if(!picker) $('#hifz-title').textContent='تحفيظ — سورة '+HZD().sur[t.si].n;
   const chips=(key, list, cur)=>'<div class="hz-chips" data-k="'+key+'">'+list.map(([v,l])=>'<button data-v="'+v+'"'+(String(cur)===String(v)?' class="on"':'')+'>'+l+'</button>').join('')+'</div>';
   body.innerHTML=
+    (picker?'<div class="hz-row"><div class="hz-lbl">السورة</div><button class="hz-sura" id="hz-sura" type="button"><span>'+HZD().sur[t.si].n+'</span><span>▾</span></button></div>':'')+
     '<div class="hz-row"><div class="hz-lbl">المقطع</div><div class="hz-range">'+
       '<div class="hz-step"><button data-st="from-">−</button><span>من <b>'+AR(t.from)+'</b></span><button data-st="from+">+</button></div>'+
       '<div class="hz-step"><button data-st="to-">−</button><span>إلى <b>'+AR(t.to)+'</b></span><button data-st="to+">+</button></div>'+
@@ -4657,12 +4669,12 @@ function renderHifzSheet(){
     '<div class="hz-row"><div class="hz-lbl">وقفةٌ صامتةٌ بعد كلّ آية</div>'+chips('gap',[['0','بلا وقفة'],['1','ثانية'],['2','ثانيتان'],['len','بمدّة الآية (لتردِّد أنت)']],c.gap)+'</div>'+
     '<div class="hz-row"><div class="hz-lbl">القارئ</div>'+chips('rec',HZ_RECS.map(r=>[r.id,r.name]),c.rec)+'</div>'+
     '<button class="hz-go" id="hz-go">ابدأ التحفيظ</button>'+
-    '<div class="hz-hint">يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. يعمل مع رواية حفص.</div>';
+    '<div class="hz-hint">يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. الصوتُ برواية حفص.</div>';
   body.querySelectorAll('.hz-chips').forEach(g=> g.addEventListener('click', e=>{
     const b=e.target.closest('button'); if(!b) return;
     const k=g.dataset.k; let v=b.dataset.v;
     if(k==='rv'||k==='rr') v=parseInt(v,10); else if(k==='speed') v=parseFloat(v);
-    settings.hifz=Object.assign(hzCfg(),{[k]:v}); saveSettings(); vibrate(5); renderHifzSheet();
+    settings.hifz=Object.assign(hzCfg(),{[k]:v}); saveSettings(); vibrate(5); again();
   }));
   body.querySelectorAll('[data-st]').forEach(b=> b.addEventListener('click', ()=>{
     const st=b.dataset.st; vibrate(5);
@@ -4671,9 +4683,11 @@ function renderHifzSheet(){
     if(st==='to-')   t.to=Math.max(1,t.to-1);
     if(st==='to+')   t.to=Math.min(n,t.to+1);
     if(t.to<t.from){ if(st.startsWith('from')) t.to=t.from; else t.from=t.to; }
-    renderHifzSheet();
+    again();
   }));
-  $('#hz-go').addEventListener('click', ()=>{ vibrate(8); closeHifz(); hzStart(t.si, t.from, t.to, hzCfg()); });
+  const sb=$('#hz-sura');
+  if(sb) sb.addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(t.si, si=>{ closeSuraOverlay(); __hzSel={ si, from:1, to:1 }; again(); }, 'اختر السورة'); });
+  $('#hz-go').addEventListener('click', ()=>{ vibrate(8); afterStart && afterStart(); hzStart(t.si, t.from, t.to, hzCfg()); });
 }
 
 /* خطّةُ التشغيل: قائمةٌ بالآيات بحسب النمط (دورةٌ واحدة، وتُكرَّر دوراتٍ بحسب «تكرار المقطع») */
@@ -4688,7 +4702,7 @@ function hzPlan(c, from, to){
   return items;
 }
 function hzStart(si, from, to, c){
-  if(!WIRD) return;
+  if(!HZD()) return;
   try{ const r=$('#reciter-audio'); if(r && !r.paused){ setWantPlay(false); r.pause(); } }catch(e){}
   try{ stopAutoRead(); }catch(e){}
   hzStop(true);
@@ -4714,8 +4728,8 @@ function hzUi(){
   $('#hz-info').textContent='آية '+AR(it.no)+' · '+AR(it.r)+'/'+AR(it.rt)+(h.c.rr!==1?' · دورة '+AR(h.cycle)+(h.c.rr?'/'+AR(h.c.rr):''):'');
   $('#hz-play').innerHTML = h.paused ? HZ_PLAY_IC : HZ_PAUSE_IC;
   document.querySelectorAll('.aya-t.hifz-live').forEach(x=>x.classList.remove('hifz-live'));
-  const ai=WIRD.sur[h.si].i+it.no-1;
-  const el=document.querySelector('#wird-body .aya-t[data-tai="'+ai+'"]');
+  const ai=HZD().sur[h.si].i+it.no-1;
+  const el=(settings.riwaya==='hafs') ? document.querySelector('#wird-body .aya-t[data-tai="'+ai+'"]') : null;
   if(el){
     el.classList.add('hifz-live');
     if($('#s-wird').classList.contains('active')){
@@ -4768,7 +4782,7 @@ function hzStop(silent){
 function hzMediaSession(){
   if(!('mediaSession' in navigator) || !__hz) return;
   try{
-    navigator.mediaSession.metadata=new MediaMetadata({ title:'تحفيظ — سورة '+WIRD.sur[__hz.si].n, artist:hzRec(__hz.c).name, album:'صلاتي' });
+    navigator.mediaSession.metadata=new MediaMetadata({ title:'تحفيظ — سورة '+HZD().sur[__hz.si].n, artist:hzRec(__hz.c).name, album:'صلاتي' });
     const set=(k,f)=>{ try{ navigator.mediaSession.setActionHandler(k,f); }catch(e){} };
     set('play', hzToggle); set('pause', hzToggle); set('stop', ()=>hzStop());
     set('nexttrack', ()=>hzStep(1)); set('previoustrack', ()=>hzStep(-1));
@@ -4783,6 +4797,16 @@ $('#hifz-overlay').addEventListener('click', e=>{ if(e.target.id==='hifz-overlay
 /* إن بدأت تلاوةٌ أخرى (سورةٌ، دعاة…) أُنهي التحفيظ كيلا يتداخل صوتان */
 $('#reciter-audio').addEventListener('play', ()=>{ if(__hz) hzStop(true); });
 
+
+/* صفحةُ الاستماع ← «التحفيظ»: نفسُ النموذج داخل الصفحة مع اختيار السورة، فلا حاجةَ إلى فتح المصحف */
+async function openHifzListen(){
+  const box=$('#hifz-listen'); if(!box) return;
+  box.innerHTML='<div class="qz-intro">…جارٍ التحميل</div>';
+  const ok=await hzLoad(); try{ await ensureWirdForPop(); }catch(e){}
+  if(!ok || !window.WIRD_HAFS){ box.innerHTML='<div class="qz-intro">تعذّر تحميل بيانات المصحف.</div>'; return; }
+  if(!__hzSel) __hzSel={ si:Math.min(Math.max(settings.mushafSura||0,0),113), from:1, to:1 };
+  renderHifzForm(box, true, null);
+}
 /* الضغط على رقم الآية: يحفظ (أو يلغي) موضع القراءة هنا بالضبط — قابل للتبديل */
 document.addEventListener('click', e=>{
   const num=e.target.closest('.wird-num');
