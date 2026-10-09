@@ -1342,6 +1342,25 @@
   :is(#s-azkar, #s-tasbih) :is(.fq-bt, .wa-t, .fq-ki .q, .fq-tbl th, .fq-src-h, .fadl .lbl, .wa-s .lbl){ color:var(--c-repeat); }
   :is(#s-azkar, #s-tasbih) :is(.fq-bt, .wa-t)::before{ background:var(--c-repeat); }
   .wird-text, .wird-basmala, .card.quran .txt, .aya-t, .tafsir-body .t-aya, .search-result .sr-txt{ text-rendering:geometricPrecision; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; font-synthesis:none; }
+  /* ===== التحفيظ ===== */
+  .hifz-body{padding:6px 18px 24px; overflow-y:auto; max-height:72vh;}
+  .hz-row{margin:14px 0;}
+  .hz-lbl{font-size:calc(13.5px * var(--tscale)); font-weight:800; color:var(--text-2); margin-bottom:7px;}
+  .hz-chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .hz-chips button{border:1px solid var(--line); background:var(--fill-2); color:var(--text); font:inherit; font-weight:700; border-radius:20px; padding:8px 14px; cursor:pointer;}
+  .hz-chips button.on{background:var(--accent); color:#fff; border-color:transparent;}
+  .hz-range{display:flex; gap:12px; align-items:center; justify-content:space-between;}
+  .hz-step{display:flex; align-items:center; gap:10px; background:var(--fill-2); border-radius:16px; padding:6px 8px; flex:1; justify-content:space-between;}
+  .hz-step b{font-size:calc(17px * var(--tscale)); min-width:2.2em; text-align:center;}
+  .hz-step button{width:38px; height:38px; border:0; border-radius:12px; background:var(--card); color:var(--accent); font-size:20px; font-weight:800; cursor:pointer;}
+  .hz-go{display:block; width:100%; margin-top:18px; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:calc(16px * var(--tscale)); border-radius:16px; padding:14px; cursor:pointer;}
+  .hz-hint{font-size:12.5px; color:var(--text-3); margin-top:6px; line-height:1.8;}
+  .hifz-pill{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:80; display:none; align-items:center; gap:6px;
+    border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow-2); border-radius:22px; padding:6px 10px; max-width:94vw;}
+  .hifz-pill.show{display:flex;}
+  .hifz-pill button{width:36px; height:36px; border:1px solid var(--line); border-radius:12px; background:transparent; color:var(--accent); display:inline-flex; align-items:center; justify-content:center; cursor:pointer;}
+  .hifz-pill .hz-info{font-size:13px; font-weight:700; color:var(--text); padding:0 6px; white-space:nowrap;}
+  .aya-t.hifz-live{background:color-mix(in srgb, var(--accent) 22%, transparent); border-radius:6px;}
 </style>
 </head>
 <body>
@@ -1560,6 +1579,23 @@
   </div>
 </div>
 
+<div class="sura-overlay" id="hifz-overlay">
+  <div class="sura-sheet">
+    <div class="sura-sheet-head">
+      <span id="hifz-title">التحفيظ</span>
+      <button id="hifz-close" aria-label="إغلاق"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="hifz-body" id="hifz-body"></div>
+  </div>
+</div>
+<div class="hifz-pill" id="hifz-pill">
+  <button id="hz-prev" aria-label="السابقة"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+  <button id="hz-play" aria-label="إيقاف مؤقّت"></button>
+  <button id="hz-next" aria-label="التالية"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+  <span class="hz-info" id="hz-info"></span>
+  <button id="hz-stop" aria-label="إنهاء التحفيظ"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+
 <div class="sura-overlay" id="search-overlay">
   <div class="sura-sheet">
     <div class="sura-sheet-head">
@@ -1611,6 +1647,7 @@
 <div class="salat-toast" id="salat-toast">اللهم صلِّ وسلّم على سيّدنا محمد ﷺ</div>
 
 <audio id="dhikr-audio" preload="none"></audio>
+<audio id="hifz-audio" preload="auto"></audio>
 
 <!-- ===== المسبحة ===== -->
 <section id="s-tasbih" class="screen">
@@ -4547,7 +4584,10 @@ async function openTafsir(ai){
     main='<div class="t-note">'+(ok?'لا يوجد تفسير لهذه الآية.':'تعذّر تحميل التفسير — تحقّق من الإنترنت ثم أعِد المحاولة.')+'</div>';
   }
   body.innerHTML = aya + main +
-    '<div class="fq-share"><button class="share-btn" id="tf-share-btn">'+SHARE_IC+'شارِك الآية وتفسيرها</button></div>';
+    '<div class="fq-share"><button class="share-btn" id="tf-share-btn">'+SHARE_IC+'شارِك الآية وتفسيرها</button></div>'+
+    '<div class="fq-share"><button class="share-btn" id="tf-hifz-btn">'+HZ_IC+'تحفيظ هذه الآية (تكرار)</button></div>';
+  const hb=$('#tf-hifz-btn');
+  if(hb) hb.addEventListener('click', ()=>{ vibrate(6); closeTafsir(); openHifz(ai); });
   const sb=$('#tf-share-btn');
   if(sb) sb.addEventListener('click', ()=>{
     vibrate(6);
@@ -4565,6 +4605,183 @@ document.addEventListener('click', e=>{
 });
 $('#tafsir-close') && $('#tafsir-close').addEventListener('click', closeTafsir);
 $('#tafsir-overlay') && $('#tafsir-overlay').addEventListener('click', e=>{ if(e.target.id==='tafsir-overlay') closeTafsir(); });
+
+
+/* ==================== التحفيظ (حفص) ====================
+   نصٌّ صوتيٌّ لكل آيةٍ على حدة من everyayah.com، فيكون قصُّ الصوت عند حدّ الآية بالضبط — وهو ما لا يتيحه ملفُّ السورة
+   الكاملة (أوقاتُ الآيات فيه تقديريّة). تُختار آيةٌ أو مقطعٌ من سورةٍ واحدة، ثم نمطُ التكرار والسرعة والفاصل. */
+const HZ_IC='<svg class="gh-ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>';
+const HZ_PLAY_IC='<svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M8 5v14l11-7z"/></svg>';
+const HZ_PAUSE_IC='<svg class="gh-ic" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+const HZ_RECS=[
+  { id:'ghamdi',   name:'سعد الغامدي',          dir:'Ghamadi_40kbps' },
+  { id:'minshawi', name:'محمد صدّيق المنشاوي',   dir:'Minshawy_Murattal_128kbps' },
+  { id:'shur',     name:'سعود الشريم',          dir:'Saood_ash-Shuraym_128kbps' },
+  { id:'maher',    name:'ماهر المعيقلي',         dir:'Maher_AlMuaiqly_64kbps' },
+  { id:'husary',   name:'محمود خليل الحصري',    dir:'Husary_128kbps' },
+  { id:'sudais',   name:'عبد الرحمن السديس',     dir:'Abdurrahmaan_As-Sudais_192kbps' },
+  { id:'alafasy',  name:'مشاري العفاسي',        dir:'Alafasy_128kbps' }
+];
+const HZ_DEF={ rv:3, rr:1, mode:'verse', speed:1, gap:'0', rec:'ghamdi' };
+let __hz=null, __hzSel=null;
+function hzCfg(){ return Object.assign({}, HZ_DEF, settings.hifz||{}); }
+function hzRec(c){ return HZ_RECS.find(r=>r.id===c.rec) || HZ_RECS[0]; }
+function hzNo(n){ return String(n).padStart(3,'0'); }
+function hzUrl(c, si, no){ return 'https://everyayah.com/data/'+hzRec(c).dir+'/'+hzNo(WIRD.sur[si].s)+hzNo(no)+'.mp3'; }
+function hzCount(si){ const end=(si+1<WIRD.sur.length)? WIRD.sur[si+1].i : WIRD.a.length; return end-WIRD.sur[si].i; }
+
+function openHifz(ai){
+  if(!WIRD || isNaN(ai)) return;
+  if(settings.riwaya==='warsh'){ showToast('التحفيظ متاحٌ حاليًّا برواية حفص — بدّل الروايةَ من أعلى الصفحة', 4200); return; }
+  const si=suraOf(ai), no=ai-WIRD.sur[si].i+1;
+  __hzSel={ si, from:no, to:no };
+  renderHifzSheet();
+  $('#hifz-overlay').classList.add('show');
+}
+function closeHifz(){ $('#hifz-overlay').classList.remove('show'); }
+function renderHifzSheet(){
+  const body=$('#hifz-body'); if(!body || !__hzSel) return;
+  const c=hzCfg(), t=__hzSel, n=hzCount(t.si);
+  $('#hifz-title').textContent='تحفيظ — سورة '+WIRD.sur[t.si].n;
+  const chips=(key, list, cur)=>'<div class="hz-chips" data-k="'+key+'">'+list.map(([v,l])=>'<button data-v="'+v+'"'+(String(cur)===String(v)?' class="on"':'')+'>'+l+'</button>').join('')+'</div>';
+  body.innerHTML=
+    '<div class="hz-row"><div class="hz-lbl">المقطع</div><div class="hz-range">'+
+      '<div class="hz-step"><button data-st="from-">−</button><span>من <b>'+AR(t.from)+'</b></span><button data-st="from+">+</button></div>'+
+      '<div class="hz-step"><button data-st="to-">−</button><span>إلى <b>'+AR(t.to)+'</b></span><button data-st="to+">+</button></div>'+
+    '</div></div>'+
+    '<div class="hz-row"><div class="hz-lbl">تكرار كلّ آية</div>'+chips('rv',[[1,'1'],[2,'2'],[3,'3'],[5,'5'],[7,'7'],[10,'10']],c.rv)+'</div>'+
+    '<div class="hz-row"><div class="hz-lbl">تكرار المقطع كلِّه</div>'+chips('rr',[[1,'مرّة'],[2,'مرّتان'],[3,'3'],[5,'5'],[10,'10'],[0,'بلا حدّ']],c.rr)+'</div>'+
+    '<div class="hz-row"><div class="hz-lbl">طريقة التكرار</div>'+chips('mode',[['verse','كلُّ آية ثمّ التي بعدها'],['cumulative','تراكميّ: 1 ثم 1+2 ثم 1+2+3…']],c.mode)+
+      '<div class="hz-hint">التراكميّ أنفعُ للحفظ: تُعيد ما حفظتَه ثم تُضيف آيةً جديدة.</div></div>'+
+    '<div class="hz-row"><div class="hz-lbl">السرعة</div>'+chips('speed',[[0.75,'0.75×'],[1,'1×'],[1.25,'1.25×']],c.speed)+'</div>'+
+    '<div class="hz-row"><div class="hz-lbl">وقفةٌ صامتةٌ بعد كلّ آية</div>'+chips('gap',[['0','بلا وقفة'],['1','ثانية'],['2','ثانيتان'],['len','بمدّة الآية (لتردِّد أنت)']],c.gap)+'</div>'+
+    '<div class="hz-row"><div class="hz-lbl">القارئ</div>'+chips('rec',HZ_RECS.map(r=>[r.id,r.name]),c.rec)+'</div>'+
+    '<button class="hz-go" id="hz-go">ابدأ التحفيظ</button>'+
+    '<div class="hz-hint">يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. يعمل مع رواية حفص.</div>';
+  body.querySelectorAll('.hz-chips').forEach(g=> g.addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    const k=g.dataset.k; let v=b.dataset.v;
+    if(k==='rv'||k==='rr') v=parseInt(v,10); else if(k==='speed') v=parseFloat(v);
+    settings.hifz=Object.assign(hzCfg(),{[k]:v}); saveSettings(); vibrate(5); renderHifzSheet();
+  }));
+  body.querySelectorAll('[data-st]').forEach(b=> b.addEventListener('click', ()=>{
+    const st=b.dataset.st; vibrate(5);
+    if(st==='from-') t.from=Math.max(1,t.from-1);
+    if(st==='from+') t.from=Math.min(n,t.from+1);
+    if(st==='to-')   t.to=Math.max(1,t.to-1);
+    if(st==='to+')   t.to=Math.min(n,t.to+1);
+    if(t.to<t.from){ if(st.startsWith('from')) t.to=t.from; else t.from=t.to; }
+    renderHifzSheet();
+  }));
+  $('#hz-go').addEventListener('click', ()=>{ vibrate(8); closeHifz(); hzStart(t.si, t.from, t.to, hzCfg()); });
+}
+
+/* خطّةُ التشغيل: قائمةٌ بالآيات بحسب النمط (دورةٌ واحدة، وتُكرَّر دوراتٍ بحسب «تكرار المقطع») */
+function hzPlan(c, from, to){
+  const items=[];
+  const push=(no,r,rt)=>items.push({ no, r, rt });
+  if(c.mode==='cumulative'){
+    for(let k=from;k<=to;k++) for(let r=1;r<=c.rv;r++) for(let j=from;j<=k;j++) push(j,r,c.rv);
+  } else {
+    for(let k=from;k<=to;k++) for(let r=1;r<=c.rv;r++) push(k,r,c.rv);
+  }
+  return items;
+}
+function hzStart(si, from, to, c){
+  if(!WIRD) return;
+  try{ const r=$('#reciter-audio'); if(r && !r.paused){ setWantPlay(false); r.pause(); } }catch(e){}
+  try{ stopAutoRead(); }catch(e){}
+  hzStop(true);
+  __hz={ si, from, to, c, items:hzPlan(c,from,to), i:0, cycle:1, paused:false, timer:null, tries:0 };
+  const a=$('#hifz-audio');
+  a.onended=hzAfterVerse; a.onerror=hzError;
+  $('#hifz-pill').classList.add('show');
+  hzMediaSession();
+  hzPlayCurrent();
+}
+function hzCur(){ return __hz && __hz.items[__hz.i]; }
+function hzPlayCurrent(){
+  const h=__hz; if(!h) return; const it=hzCur(), a=$('#hifz-audio');
+  clearTimeout(h.timer);
+  a.src=hzUrl(h.c, h.si, it.no); a.playbackRate=h.c.speed;
+  a.play().then(()=>{ h.tries=0; }).catch(()=>{ if(!h.paused) hzError(); });
+  hzUi();
+  // نُحضِّر الآيةَ التي بعدها كي لا تتأخّر
+  const nx=h.items[h.i+1]; if(nx){ try{ const pre=new Audio(); pre.preload='auto'; pre.src=hzUrl(h.c,h.si,nx.no); }catch(e){} }
+}
+function hzUi(){
+  const h=__hz; if(!h) return; const it=hzCur();
+  $('#hz-info').textContent='آية '+AR(it.no)+' · '+AR(it.r)+'/'+AR(it.rt)+(h.c.rr!==1?' · دورة '+AR(h.cycle)+(h.c.rr?'/'+AR(h.c.rr):''):'');
+  $('#hz-play').innerHTML = h.paused ? HZ_PLAY_IC : HZ_PAUSE_IC;
+  document.querySelectorAll('.aya-t.hifz-live').forEach(x=>x.classList.remove('hifz-live'));
+  const ai=WIRD.sur[h.si].i+it.no-1;
+  const el=document.querySelector('#wird-body .aya-t[data-tai="'+ai+'"]');
+  if(el){
+    el.classList.add('hifz-live');
+    if($('#s-wird').classList.contains('active')){
+      const r=el.getBoundingClientRect();
+      if(r.top<110 || r.bottom>window.innerHeight-150) scrollToAya(ai, true);
+    }
+  }
+}
+function hzAfterVerse(){
+  const h=__hz; if(!h || h.paused) return;
+  const a=$('#hifz-audio');
+  const gap = h.c.gap==='len' ? Math.round((a.duration||2)*1000/(h.c.speed||1)) : (parseFloat(h.c.gap)||0)*1000;
+  if(gap>0) h.timer=setTimeout(hzNext, gap); else hzNext();
+}
+function hzNext(){
+  const h=__hz; if(!h) return;
+  h.i++;
+  if(h.i>=h.items.length){
+    h.cycle++;
+    if(h.c.rr!==0 && h.cycle>h.c.rr){ hzStop(); showToast('اكتمل التحفيظ ✓ — بارك الله فيك', 3600); return; }
+    h.i=0;
+  }
+  hzPlayCurrent();
+}
+function hzError(){
+  const h=__hz; if(!h) return;
+  if(h.tries<1){ h.tries++; setTimeout(()=>{ if(__hz===h && !h.paused) hzPlayCurrent(); }, 900); return; }
+  showToast('تعذّر تحميل الآية — تحقّق من الإنترنت', 3800); hzStop();
+}
+function hzToggle(){
+  const h=__hz; if(!h) return; const a=$('#hifz-audio');
+  h.paused=!h.paused;
+  if(h.paused){ clearTimeout(h.timer); try{ a.pause(); }catch(e){} }
+  else { if(a.src && !a.ended && a.currentTime>0 && a.currentTime<(a.duration||0)) a.play().catch(()=>{}); else hzNext(); }
+  hzUi();
+}
+function hzStep(d){
+  const h=__hz; if(!h) return;
+  h.paused=false; h.i=Math.max(0,Math.min(h.items.length-1,h.i+d)); hzPlayCurrent();
+}
+function hzStop(silent){
+  const h=__hz; __hz=null;
+  const a=$('#hifz-audio');
+  if(h){ clearTimeout(h.timer); }
+  try{ a.onended=null; a.onerror=null; a.pause(); a.removeAttribute('src'); a.load(); }catch(e){}
+  $('#hifz-pill').classList.remove('show');
+  document.querySelectorAll('.aya-t.hifz-live').forEach(x=>x.classList.remove('hifz-live'));
+  if(h && !silent){ try{ setupMediaSession(); }catch(e){} }
+}
+function hzMediaSession(){
+  if(!('mediaSession' in navigator) || !__hz) return;
+  try{
+    navigator.mediaSession.metadata=new MediaMetadata({ title:'تحفيظ — سورة '+WIRD.sur[__hz.si].n, artist:hzRec(__hz.c).name, album:'صلاتي' });
+    const set=(k,f)=>{ try{ navigator.mediaSession.setActionHandler(k,f); }catch(e){} };
+    set('play', hzToggle); set('pause', hzToggle); set('stop', ()=>hzStop());
+    set('nexttrack', ()=>hzStep(1)); set('previoustrack', ()=>hzStep(-1));
+  }catch(e){}
+}
+$('#hz-play').addEventListener('click', ()=>{ vibrate(6); hzToggle(); });
+$('#hz-next').addEventListener('click', ()=>{ vibrate(6); hzStep(1); });
+$('#hz-prev').addEventListener('click', ()=>{ vibrate(6); hzStep(-1); });
+$('#hz-stop').addEventListener('click', ()=>{ vibrate(8); hzStop(); });
+$('#hifz-close').addEventListener('click', closeHifz);
+$('#hifz-overlay').addEventListener('click', e=>{ if(e.target.id==='hifz-overlay') closeHifz(); });
+/* إن بدأت تلاوةٌ أخرى (سورةٌ، دعاة…) أُنهي التحفيظ كيلا يتداخل صوتان */
+$('#reciter-audio').addEventListener('play', ()=>{ if(__hz) hzStop(true); });
 
 /* الضغط على رقم الآية: يحفظ (أو يلغي) موضع القراءة هنا بالضبط — قابل للتبديل */
 document.addEventListener('click', e=>{
