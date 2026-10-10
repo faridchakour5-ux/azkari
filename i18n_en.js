@@ -476,7 +476,7 @@ add([
 [`مواقيت الصلاة والأذان`,`Prayer times and adhan`],
 [`فعِّل موقعك من صفحة «الأذكار» ليُحسب لك وقتُ كلّ صلاة حسب مدينتك، وفي المغرب بجدول وزارة الأوقاف. وفي تطبيق أندرويد يرفع التطبيقُ الأذانَ بصوت المؤذّن عند دخول الوقت حتى وهو مغلق.`,`Enable your location from the “Adhkar” page to calculate each prayer time for your city — in Morocco, from the Ministry of Habous table. In the Android app, the adhan sounds in the muezzin’s voice when the time begins, even when the app is closed.`],
 [`القرآن والاستماع والتحفيظ`,`Quran, listening and memorization`],
-[`مصحفٌ برواية ورش وحفص مع التفسير الميسّر وترجمة المعاني، وتلاواتٌ بأصوات قرّاء، وتحفيظٌ بالتكرار مع مراجعةٍ متباعدة.`,`A Mushaf in Warsh and Hafs recitations with the simplified tafsir (at-Tafsir al-Muyassar) and meaning translation; recitations by reciters; and memorization by repetition with spaced review.`],
+[`مصحفٌ برواية ورش وحفص مع التفسير الميسّر، وتلاواتٌ بأصوات قرّاء، وتحفيظٌ بالتكرار مع مراجعةٍ متباعدة.`,`A Mushaf in Warsh and Hafs recitations with the simplified tafsir (at-Tafsir al-Muyassar); recitations by reciters; and memorization by repetition with spaced review.`],
 [`الأذكار وأدوات المسلم`,`Adhkar and Muslim tools`],
 [`أذكار الصباح والمساء وغيرها، والفقه والسيرة والاختبار، والقبلة والتقويم الهجريّ ومتابعة الصلوات والصيام والزكاة. المصحفُ والأذكارُ والأدواتُ تعمل دون إنترنت، والاستماعُ يحتاجه إلا ما نزّلتَه. لا حسابَ ولا إعلانات، وتقدّمُك محفوظٌ على هاتفك.`,`Morning and evening adhkar and more, fiqh, biography and quiz, qibla, Hijri calendar, prayer tracker, fasting and zakat. The Quran, adhkar and tools work offline; listening needs Internet, except what you have downloaded. No account, no ads, and your progress stays on your phone.`],
 [`سعد الغامدي`,`Saad Al-Ghamdi`],
@@ -654,7 +654,7 @@ add([
 [`«تثبيت»`,`“Install”`],
 [`أو اضغط أيقونة التثبيت في شريط العنوان.`,`or tap the install icon in the address bar.`],
 [`آيات متشابهة اللفظ (في ورقة التفسير)`,`Verses with similar wording (in the tafsir sheet)`],
-[`الخياران يظهران في ورقة التفسير عند لمس الآية، ولا يمسّان صفحةَ المصحف ولا لونَ نصّه. الترجمةُ ترجمةُ معانٍ لا تُغني عن الأصل؛ والمتشابهاتُ تشابهٌ آليٌّ من النصّ وليست قائمةَ علماء المتشابه اللفظيّ.`,`These two options appear in the tafsir sheet when you tap a verse; they touch neither the Mushaf page nor the colour of its text. The translation is a translation of the meanings and does not replace the original; similar verses reflect an automatic text similarity, not a list compiled by scholars.`],
+[`يظهر الخيارُ في ورقة التفسير عند لمس الآية، ولا يمسّ صفحةَ المصحف ولا لونَ نصّه. المتشابهاتُ تشابهٌ آليٌّ من نصّ المصحف العربيّ وليست قائمةَ علماء المتشابه اللفظيّ. والقرآنُ بالعربيّة وحدَها.`,`This option appears in the tafsir sheet when you tap a verse; it touches neither the Mushaf page nor the colour of its text. Similar verses reflect an automatic similarity of the Arabic Mushaf text, not a list compiled by scholars. The Quran stays in Arabic only.`],
 [`لغة الواجهة`,`Interface language`],
 [`لغة القوائم والإعدادات`,`Language of menus and settings`],
 [`الواجهة المترجمة تشمل القوائمَ والإعدادات والأدوات والرسائل. أمّا القرآنُ والأذكارُ والفقهُ والسيرةُ والأحاديثُ وأسئلةُ الاختبار فتبقى بالعربيّة.`,`The translated interface covers menus, settings, tools and messages. The Quran, adhkar, fiqh, biography, hadiths and quiz questions remain in Arabic.`]
@@ -775,6 +775,7 @@ addS([
 [`الفَلَق`,`Al-Falaq`],
 [`النَّاس`,`An-Nas`]
 ]);
+SURA.clear();   // أسماءُ السور تبقى بالعربيّة (القرآن بالعربيّة وحدَها)
 for(const k in GM) D.set(key(k), GM[k]);
 for(const k in HM) D.set(key(k), HM[k]);
 window.I18N=C.make({ lang:'en', lookup:find, abbr:v=>mapLook(ABBR,v), title:'Salati — Adhkar & Quran' });

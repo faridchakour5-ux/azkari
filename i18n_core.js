@@ -10,8 +10,10 @@ const key=s=>String(s).replace(MARKS,'').replace(/[ \s]+/g,' ').trim();
 const NO_SEL=['#splash','#s-wird','#wird-body','#az-list','#tafsir-body .t-txt','#tafsir-body .t-aya','#tafsir-body .t-intro','#tafsir-body .sv .tx','[data-noi18n]'].join(',');
 const ATTRS=['title','aria-label','placeholder','alt'];
 const SKIP_TAG=new Set(['SCRIPT','STYLE','TEXTAREA','NOSCRIPT']);
+/* القرآن بالعربيّة وحدَها (أمرٌ صريحٌ من فريد): أسماءُ المصحف والسور والآيات والأحزاب والروايات ومصطلحاتُها لا تُترجَم في أيّ لغة */
+const QURAN_KEEP=/^(المصحف الكريم|المصحف كامل( — \d+ سورة)?|القرآن الكريم|القرآن|قرآن|الورد|ورش|حفص|الجزء|الحزب|ربع الحزب|نصف الحزب|حزب كامل|ثمن|سورة|السورة|السور|سور|آية|الآية|آيات|الآيات|رواية القرآن|الرواية|رواية حفص|رواية ورش|نص القرآن|لون خط القرآن|حجم خط القرآن|تكبير خط القرآن|تصغير خط القرآن|مرجع حفص|مرجع ورش|مصحف الملك فهد|المصحف المحمدي|ورش — الخط المغربي|حفص — مصحف الملك فهد|تبديل الرواية|ترجمة معاني الآية)$|^(﴾ ?)?سورة |^\d+\. |^آية \d+$|^(مكية|مدنية) •|^\d+ آي(ات|ة)$|^من \d+ آية|^الباب /;
 function make(o){
-  const find=o.lookup;
+  const find=c=>QURAN_KEEP.test(key(c)) ? null : o.lookup(c);
   function trText(raw){
     const lead=raw.match(/^\s*/)[0], trail=raw.match(/\s*$/)[0], core=raw.trim();
     if(!core || !AR_RE.test(core)) return null;

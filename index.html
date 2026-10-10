@@ -948,8 +948,6 @@
   /* التفسير: الآية قابلة للّمس + الورقة السفلية */
   .aya-t{cursor:pointer; border-radius:6px; transition:background-color .2s;}
   .aya-t.tsel{background:var(--c-repeat-bg);}
-  .tafsir-body .t-tr{font-size:15.5px; line-height:1.85; color:var(--text); background:var(--fill-2); border-radius:14px; padding:11px 13px; margin:0 0 14px; text-align:start; direction:ltr; white-space:pre-wrap;}
-  .tafsir-body .t-trs{font-size:11.5px; color:var(--text-3); margin:-8px 2px 14px; line-height:1.7; direction:ltr; text-align:start;}
   .tafsir-body .t-sim{margin-top:16px; padding-top:12px; border-top:1px solid var(--sep);}
   .tafsir-body .t-sim h4{margin:0 0 4px; font-size:14.5px; color:var(--accent);}
   .tafsir-body .t-sim .nt{font-size:12px; color:var(--text-3); margin-bottom:8px; line-height:1.7;}
@@ -1746,19 +1744,12 @@
         <button data-r="g4" title="زمرّديّ 4 — غامق جدًّا"><i style="background:var(--qc-g4)"></i></button>
       </div>
     </div>
-    <div class="row"><span class="k">ترجمة معاني الآية</span>
-      <div class="miniseg" id="trans-seg">
-        <button data-r="">بلا</button>
-        <button data-r="fr">Français</button>
-        <button data-r="en">English</button>
-      </div>
-    </div>
     <div class="row"><span class="k">آيات متشابهة اللفظ (في ورقة التفسير)</span>
       <label class="sw"><input type="checkbox" id="mut-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
   </div>
   <div class="gnote" id="riwaya-note"></div>
-  <div class="gnote">الخياران يظهران في ورقة التفسير عند لمس الآية، ولا يمسّان صفحةَ المصحف ولا لونَ نصّه. الترجمةُ ترجمةُ معانٍ لا تُغني عن الأصل؛ والمتشابهاتُ تشابهٌ آليٌّ من النصّ وليست قائمةَ علماء المتشابه اللفظيّ.</div>
+  <div class="gnote">يظهر الخيارُ في ورقة التفسير عند لمس الآية، ولا يمسّ صفحةَ المصحف ولا لونَ نصّه. المتشابهاتُ تشابهٌ آليٌّ من نصّ المصحف العربيّ وليست قائمةَ علماء المتشابه اللفظيّ. والقرآنُ بالعربيّة وحدَها.</div>
 
   <div class="gtitle">لغة الواجهة</div>
   <div class="group">
@@ -3046,11 +3037,6 @@ function qFix(t){
 }
 
 /* ===== ترجمة المعاني والآيات المتشابهة (ورقة التفسير) ===== */
-const TR_SRC={ fr:'Traduction du sens des versets — Noor International Center (Dr Nabil Rudwan), via quranenc.com',
-               en:'Translation of the meanings — Noor International Center, via quranenc.com' };
-const __trLoad={};
-function loadTrans(l){ if(!l) return Promise.resolve(false); const v=l==='fr'?'QTR_FR':'QTR_EN'; if(window[v]) return Promise.resolve(true);
-  return __trLoad[l] || (__trLoad[l]=loadScriptOnce('trans_'+l+'.js').then(ok=>{ if(!ok) delete __trLoad[l]; return ok; })); }
 let __mutLoad=null;
 function loadMutash(){ if(window.MUTASH) return Promise.resolve(true); return __mutLoad || (__mutLoad=loadScriptOnce('mutash.js').then(ok=>{ if(!ok) __mutLoad=null; return ok; })); }
 const MS_DIA=/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g;
@@ -4701,19 +4687,10 @@ async function openTafsir(ai){
   } else {
     main='<div class="t-note">'+(ok?'لا يوجد تفسير لهذه الآية.':'تعذّر تحميل التفسير — تحقّق من الإنترنت ثم أعِد المحاولة.')+'</div>';
   }
-  let trHtml='';
-  if(settings.trans){
-    const okT=await loadTrans(settings.trans);
-    if(!ov.classList.contains('show')) return;
-    const arr=window[settings.trans==='fr'?'QTR_FR':'QTR_EN'];
-    const ps=okT && arr ? idx.map(k=>arr[k]).filter(Boolean) : [];
-    trHtml = ps.length ? '<div class="t-tr" lang="'+settings.trans+'">'+escapeHtml(ps.join(' '))+'</div><div class="t-trs">'+TR_SRC[settings.trans]+'</div>'
-                       : (okT ? '' : '<div class="t-note">تعذّر تحميل الترجمة.</div>');
-  }
   let simHtml='';
   try{ if(settings.mutash===true && await loadMutash()) simHtml=similarHtml(ai); }catch(e){}
   if(!ov.classList.contains('show')) return;
-  body.innerHTML = aya + trHtml + main + simHtml +
+  body.innerHTML = aya + main + simHtml +
     '<div class="fq-share"><button class="share-btn" id="tf-share-btn">'+SHARE_IC+'شارِك الآية وتفسيرها</button></div>'+
     '<div class="fq-share"><button class="share-btn" id="tf-hifz-btn">'+HZ_IC+'تحفيظ هذه الآية (تكرار)</button></div>';
   const hb=$('#tf-hifz-btn');
@@ -7443,13 +7420,6 @@ applyHafsFont(); applyQuranColor();
 (function(){
   const mt=$('#mut-toggle');
   if(mt){ mt.checked=settings.mutash===true; mt.addEventListener('change', ()=>{ settings.mutash=mt.checked; saveSettings(); vibrate(6); if(mt.checked) loadMutash(); }); }
-  const ts=$('#trans-seg'); if(!ts) return;
-  if(ts){
-    const paint=()=>ts.querySelectorAll('button').forEach(b=>b.classList.toggle('on', (b.dataset.r||'')===(settings.trans||'')));
-    paint();
-    ts.addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return; settings.trans=b.dataset.r||''; saveSettings(); vibrate(5); paint();
-      if(settings.trans){ loadTrans(settings.trans); showToast('تظهر الترجمةُ عند لمس أيّ آية', 3200); } });
-  }
 })();
 /* لغة الواجهة: العربيّة (الأصل) أو الفرنسيّة أو الإنجليزيّة (i18n_core.js + قاموسُ اللغة يترجمان القوائمَ والرسائلَ ويُبقيان النصوصَ الدينيّةَ بالعربيّة) */
 (function(){
