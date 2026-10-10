@@ -3,7 +3,7 @@
    يفحص ملفّاتِ التطبيق ويفشل إن وجد رقمًا غيرَ لاتينيّ (يُستدعى من tools/release-aab.sh)."""
 import re, sys, os
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FILES=['index.html','tools.js','credits.html','privacy.html','quiz.js','fiqh.js','sunna.js','fadl.js','sharh.js','thabat.js','wasaya.js','data.js','tafsir.js','manifest.json','wird_hafs.js','wird_warsh.js']
+FILES=['index.html','tools.js','credits.html','tajweed.js','mutash.js','trans_fr.js','trans_en.js','privacy.html','quiz.js','fiqh.js','sunna.js','fadl.js','sharh.js','thabat.js','wasaya.js','data.js','tafsir.js','manifest.json','wird_hafs.js','wird_warsh.js']
 bad=0
 for f in FILES:
     p=os.path.join(ROOT,f)

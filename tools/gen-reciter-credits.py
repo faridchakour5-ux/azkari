@@ -27,6 +27,15 @@ page=head+'''<body>
 '''+rows+'''    </ul>
     <p>رخصةُ CC BY-SA تسري على الصورة المذكورة وحدها، لا على بقيّة التطبيق.</p>
   </div>
+  <header><h1>مصادر أخرى</h1></header>
+  <div class="card">
+    <ul>
+      <li><strong>ترجمة معاني الآيات (الفرنسيّة والإنجليزيّة):</strong> من بوّابة <a href="https://quranenc.com" target="_blank" rel="noopener">quranenc.com</a> (مشروع «موسوعة القرآن»): الفرنسيّة «French translation — Noor International Center» (ترجمة د. نبيل رضوان)، والإنجليزيّة «English Translation — Noor International Center». ينصّ المشروعُ على أنّ ترجماتِه مجّانيّةٌ للجميع ومُتاحةٌ للتطبيقات والأجهزة الذكيّة. نُسخت كما هي بلا تغيير، وحُذفت منها أرقامُ الآيات وعلاماتُ الحواشي فحسب. وهي ترجمةُ معانٍ لا تُغني عن الأصل العربيّ.</li>
+      <li><strong>تلوين أحكام التجويد (حفص):</strong> بياناتٌ مفتوحةٌ من مشروع <a href="https://github.com/cpfair/quran-tajweed" target="_blank" rel="noopener">quran-tajweed</a> (المستخدم cpfair على GitHub — رخصة <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>)، نُسقِطت آليًّا على نصّنا بعد التحقّق من مطابقة الحروف. تشمل نحو 94٪ من الآيات، وقد تخطئ في مواضع؛ فالمرجعُ المصحفُ المجوَّد والمقرئ. استُعين بنصّ <a href="https://tanzil.net" target="_blank" rel="noopener">tanzil.net</a> لمطابقة المواضع فقط.</li>
+      <li><strong>الآيات المتشابهة اللفظ:</strong> حُسبت آليًّا من نصّ المصحف نفسه (كلماتٌ متتاليةٌ مشتركةٌ بين آيتين)، وليست قائمةَ علماء المتشابه اللفظيّ.</li>
+      <li><strong>نصّ القرآن:</strong> مجمّع الملك فهد لطباعة المصحف الشريف (حفص)، والمصحف المحمّديّ (ورش). والتفسير: التفسير الميسّر — مجمع الملك فهد.</li>
+    </ul>
+  </div>
   <footer><a class="back" href="./index.html">→ العودة إلى التطبيق</a></footer>
 </div>
 </body>
