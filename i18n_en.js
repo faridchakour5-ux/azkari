@@ -23,6 +23,11 @@ const hDate=s=>{ const m=key(s).match(/^(\d+) (.+?) (\d+) ه$/); if(!m) return n
 const t12=(h,mi,ap)=>String(+h).padStart(2,'0')+':'+mi+' '+(ap==='م'?'PM':'AM');
 const pl=(n,one,many)=>n+' '+(+n===1?one:many);
 const PATS=[
+  [/^ص (\d+)$/, m=>'p. '+m[1]],
+  [/^صفحة (\d+) من (\d+) \((\d+)%\)$/, m=>'Page '+m[1]+' of '+m[2]+' ('+m[3]+'%)'],
+  [/^(قصص الأنبياء|السيرة النبوية) — (.+)$/, m=>(m[1]==='قصص الأنبياء'?'Stories of the prophets':'Prophetic biography')+' — '+m[2]],
+  [/^الباب \((\d+)\)$/, m=>'Chapter ('+m[1]+')'],
+  [/^(\d+) سؤالا في المجموع\.$/, m=>m[1]+' questions in total.'],
   [/^(\d{1,2}):(\d{2}) ([صم])$/, m=>t12(m[1],m[2],m[3])],
   [/^(\d+) من (\d+)$/, m=>m[1]+' of '+m[2]],
   [/^من (\d+)$/, m=>'of '+m[1]],
@@ -66,6 +71,10 @@ function lookup(core){
 }
 function find(core){ return lookup(core); }
 add([
+[`الإيمان وأركان الدين`,`Faith and the pillars of the religion`],
+[`موضع الوِرد (ورش):`,`Reading position (Warsh):`],
+[`موضع الوِرد (حفص):`,`Reading position (Hafs):`],
+[`اقرأ ربعَ صفحةٍ من كتاب الله.`,`Read a quarter of a page of the Book of Allah.`],
 [`الوِرد`,`Reading`],
 [`الاستماع`,`Listen`],
 [`الأذكار`,`Adhkar`],
@@ -774,6 +783,42 @@ addS([
 [`الإخلَاص`,`Al-Ikhlas`],
 [`الفَلَق`,`Al-Falaq`],
 [`النَّاس`,`An-Nas`]
+]);
+add([
+[`القائمة`,`Menu`],
+[`التعلّم والاستماع`,`Learn and listen`],
+[`المزيد`,`More`],
+[`اللغة`,`Language`],
+[`التصنيف`,`Category`],
+[`الطهارة`,`Purification`],
+[`الصلاة`,`Prayer`],
+[`فقه النساء`,`Women’s fiqh`],
+[`الصيام والزكاة`,`Fasting and zakat`],
+[`المتون`,`Foundational texts (mutun)`],
+[`متفرّقات`,`Miscellaneous`],
+[`اضغط في أي مكان للعدّ`,`Tap anywhere to count`],
+[`20 سؤالًا في كل جولة، ونتيجتُك من 20 — اختر المجال ثم ابدأ.`,`20 questions per round, your score out of 20 — choose a field then start.`],
+[`الكل`,`All`],
+[`السيرة`,`Biography`],
+[`الغزوات`,`Battles`],
+[`أسماء الله`,`Names of Allah`],
+[`العبادات`,`Acts of worship`],
+[`الصحابة`,`Companions`],
+[`عامّة`,`General`],
+[`السلسلة:`,`Streak:`],
+[`يوم متتابع`,`consecutive days`],
+[`أيام القراءة (آخر أسبوع):`,`Reading days (last week):`],
+[`عند التفعيل يحفظ خادمُنا ما يلزم لإرسال التذكير وحدَه: موقعَك مقرَّبًا إلى نحو 11 كم، ومنطقتَك الزمنيّة، واختياراتِك، وعنوانَ الإشعارات. لا اسمَ ولا حسابَ ولا تتبّع، ويُمحى كلُّه بإطفاء الخيار. تفاصيلُ أكثر في سياسة الخصوصيّة.`,`When enabled, our server stores only what is needed to send the reminder: your location rounded to about 11 km, your time zone, your choices and the notifications address. No name, no account, no tracking; everything is deleted when you turn the option off. More details in the privacy policy.`],
+[`وأثرُه في حياتك اليوميّة`,`and its effect on your daily life`],
+[`تُشغَّل من أرشيف الإنترنت`,`Streams from the Internet Archive`],
+[`من الصحيحين — والمصدرُ مذكورٌ مع كلّ كتاب`,`From the two Sahihs — the source is given with each book`],
+[`صحيح البخاري — قراءة صوتية`,`Sahih al-Bukhari — audio reading`],
+[`صحيح مسلم — قراءة صوتية`,`Sahih Muslim — audio reading`],
+[`المصدر: صحيح البخاري · تُشغَّل من أرشيف الإنترنت`,`Source: Sahih al-Bukhari · streams from the Internet Archive`],
+[`المصدر: صحيح مسلم · تُشغَّل من أرشيف الإنترنت`,`Source: Sahih Muslim · streams from the Internet Archive`],
+[`من`,`From`],
+[`إلى`,`To`],
+[`اختر سورة للاستماع`,`Choose a surah to listen to`]
 ]);
 SURA.clear();   // أسماءُ السور تبقى بالعربيّة (القرآن بالعربيّة وحدَها)
 for(const k in GM) D.set(key(k), GM[k]);

@@ -32,6 +32,7 @@ function hijri(d){
   return { y:o.year, m:o.month, d:o.day };
 }
 T.hijri = hijri;
+T.hLabel = h => AR(h.d)+' '+HMON[h.m-1]+' '+AR(h.y)+' هـ';
 const hLabel = h => AR(h.d)+' '+HMON[h.m-1]+' '+AR(h.y)+' هـ';
 /* الأحداثُ بحسب (الشهر/اليوم) — كلُّ حكمٍ فيها مرويٌّ بنصٍّ ثابت، وما اختُلف فيه نُصَّ عليه */
 function hEvents(h, g){

@@ -24,6 +24,11 @@ const ABBR={'الاثنين':'Lun','الثلاثاء':'Mar','الأربعاء':'
 const nPl=(n,one,many)=> n+' '+(+n<=1?one:many);
 /* أنماطٌ للنصوص ذات الأعداد والتواريخ (تُطبَّق على النصّ بعد حذف التشكيل) */
 const PATS=[
+  [/^ص (\d+)$/, m=>'p. '+m[1]],
+  [/^صفحة (\d+) من (\d+) \((\d+)%\)$/, m=>'Page '+m[1]+' sur '+m[2]+' ('+m[3]+' %)'],
+  [/^(قصص الأنبياء|السيرة النبوية) — (.+)$/, m=>(m[1]==='قصص الأنبياء'?'Histoires des prophètes':'Biographie du Prophète')+' — '+m[2]],
+  [/^الباب \((\d+)\)$/, m=>'Section ('+m[1]+')'],
+  [/^(\d+) سؤالا في المجموع\.$/, m=>m[1]+' questions au total.'],
   [/^(\d{1,2}):(\d{2}) ([صم])$/, m=>t24(m[1],m[2],m[3])],
   [/^(\d+) من (\d+)$/, m=>m[1]+' sur '+m[2]],
   [/^من (\d+)$/, m=>'sur '+m[1]],
@@ -71,6 +76,10 @@ function find(core){ return lookup(core); }
 
 /* ===================== واجهة التطبيق (index.html) ===================== */
 add([
+[`الإيمان وأركان الدين`,`La foi et les piliers de la religion`],
+[`موضع الوِرد (ورش):`,`Position de lecture (Warsh) :`],
+[`موضع الوِرد (حفص):`,`Position de lecture (Hafs) :`],
+[`اقرأ ربعَ صفحةٍ من كتاب الله.`,`Lisez un quart de page du Livre d’Allah.`],
 [`الوِرد`,`Lecture`], [`الاستماع`,`Écoute`], [`الأذكار`,`Invocations`], [`الفقه`,`Fiqh`], [`الإعدادات`,`Réglages`], [`المسبحة`,`Chapelet`],
 [`المصحف الكريم`,`Le Saint Coran`], [`المصحف كامل`,`Mushaf complet`], [`القرآن الكريم`,`Le Saint Coran`], [`القرآن`,`Coran`], [`صلاتي`,`Salati`],
 [`أدوات المسلم`,`Outils du musulman`], [`القبلة · التقويم الهجري · صلواتي · الصيام · الزكاة`,`Qibla · Calendrier hégirien · Mes prières · Jeûne · Zakat`],
@@ -379,6 +388,42 @@ add([[`مثال: 750`,`ex. : 750`],[`مثال: 9`,`ex. : 9`],[`القبلة`,`Qi
 [`أضِفْه إلى القائمة`,`Ajouter à la liste`],[`فتحُه في المتصفّح`,`L’ouvrir dans le navigateur`],[`دورة كاملة تهتزّ تنبيهاً`,`Un tour complet fait vibrer l’appareil pour vous prévenir`],[`تصفير العدّاد`,`Remettre le compteur à zéro`],
 [`افتح قائمة المتصفّح ثمّ اختر`,`Ouvrez le menu du navigateur puis choisissez`],[`«تثبيت»`,`« Installer »`],[`أو اضغط أيقونة التثبيت في شريط العنوان.`,`ou touchez l’icône d’installation dans la barre d’adresse.`],
 [`آيات متشابهة اللفظ (في ورقة التفسير)`,`Versets de formulation proche (dans la fiche d’exégèse)`],[`يظهر الخيارُ في ورقة التفسير عند لمس الآية، ولا يمسّ صفحةَ المصحف ولا لونَ نصّه. المتشابهاتُ تشابهٌ آليٌّ من نصّ المصحف العربيّ وليست قائمةَ علماء المتشابه اللفظيّ. والقرآنُ بالعربيّة وحدَها.`,`Cette option apparaît dans la fiche d’exégèse quand on touche un verset ; elle ne touche ni la page du Mushaf ni la couleur de son texte. Les versets proches relèvent d’une similitude automatique du texte arabe du Mushaf, et non d’une liste établie par les savants. Le Coran reste en arabe uniquement.`],[`لغة الواجهة`,`Langue de l’interface`],[`لغة القوائم والإعدادات`,`Langue des menus et réglages`],[`الواجهة المترجمة تشمل القوائمَ والإعدادات والأدوات والرسائل. أمّا القرآنُ والأذكارُ والفقهُ والسيرةُ والأحاديثُ وأسئلةُ الاختبار فتبقى بالعربيّة.`,`L’interface traduite couvre les menus, les réglages, les outils et les messages. Le Coran, les invocations, le fiqh, la biographie, les hadiths et les questions du quiz restent en arabe.`]]);
+add([
+[`القائمة`,`Menu`],
+[`التعلّم والاستماع`,`Apprendre et écouter`],
+[`المزيد`,`Plus`],
+[`اللغة`,`Langue`],
+[`التصنيف`,`Catégorie`],
+[`الطهارة`,`Purification (tahara)`],
+[`الصلاة`,`Prière`],
+[`فقه النساء`,`Fiqh des femmes`],
+[`الصيام والزكاة`,`Jeûne et zakat`],
+[`المتون`,`Textes de référence (mutûn)`],
+[`متفرّقات`,`Divers`],
+[`اضغط في أي مكان للعدّ`,`Touchez n’importe où pour compter`],
+[`20 سؤالًا في كل جولة، ونتيجتُك من 20 — اختر المجال ثم ابدأ.`,`20 questions par manche, votre note sur 20 — choisissez un domaine puis commencez.`],
+[`الكل`,`Tous`],
+[`السيرة`,`Biographie`],
+[`الغزوات`,`Batailles`],
+[`أسماء الله`,`Noms d’Allah`],
+[`العبادات`,`Actes d’adoration`],
+[`الصحابة`,`Compagnons`],
+[`عامّة`,`Général`],
+[`السلسلة:`,`Série :`],
+[`يوم متتابع`,`jours consécutifs`],
+[`أيام القراءة (آخر أسبوع):`,`Jours de lecture (dernière semaine) :`],
+[`عند التفعيل يحفظ خادمُنا ما يلزم لإرسال التذكير وحدَه: موقعَك مقرَّبًا إلى نحو 11 كم، ومنطقتَك الزمنيّة، واختياراتِك، وعنوانَ الإشعارات. لا اسمَ ولا حسابَ ولا تتبّع، ويُمحى كلُّه بإطفاء الخيار. تفاصيلُ أكثر في سياسة الخصوصيّة.`,`À l’activation, notre serveur ne conserve que le strict nécessaire pour envoyer le rappel : votre position arrondie à environ 11 km, votre fuseau horaire, vos choix et l’adresse des notifications. Ni nom, ni compte, ni suivi ; tout est effacé en désactivant l’option. Plus de détails dans la politique de confidentialité.`],
+[`وأثرُه في حياتك اليوميّة`,`et son effet dans votre vie quotidienne`],
+[`تُشغَّل من أرشيف الإنترنت`,`Lecture depuis l’archive Internet`],
+[`من الصحيحين — والمصدرُ مذكورٌ مع كلّ كتاب`,`Des deux Sahih — la source est indiquée pour chaque livre`],
+[`صحيح البخاري — قراءة صوتية`,`Sahih al-Bukhari — lecture audio`],
+[`صحيح مسلم — قراءة صوتية`,`Sahih Muslim — lecture audio`],
+[`المصدر: صحيح البخاري · تُشغَّل من أرشيف الإنترنت`,`Source : Sahih al-Bukhari · lecture depuis l’archive Internet`],
+[`المصدر: صحيح مسلم · تُشغَّل من أرشيف الإنترنت`,`Source : Sahih Muslim · lecture depuis l’archive Internet`],
+[`من`,`De`],
+[`إلى`,`À`],
+[`اختر سورة للاستماع`,`Choisissez une sourate à écouter`]
+]);
 SURA.clear();   // أسماءُ السور تبقى بالعربيّة (القرآن بالعربيّة وحدَها)
 for(const k in GM) D.set(key(k), GM[k]);
 for(const k in HM) D.set(key(k), HM[k]);
