@@ -480,6 +480,7 @@
   .reciter-action-btn:active{transform:scale(.96);}
   /* لون مميّز لكل زرّ: أزرق للقراءة، كهرماني للتكرار */
   #reciter-read{background:var(--c-read-bg); color:var(--c-read); border-color:transparent;}
+  #reciter-sleep.on{background:var(--accent); color:#fff; border-color:var(--accent);}
   #reciter-repeat{background:var(--c-repeat-bg); color:var(--c-repeat); border-color:transparent;}
   #reciter-repeat.on{background:var(--c-repeat); color:#fff;}
   /* توزيع لبق للّونين على أزرار مختارة عبر الصفحات */
@@ -1410,6 +1411,11 @@
     <span class="qo-t">تذكيرك<small>ذكر · صلاة على الحبيب ﷺ · ربع صفحة</small></span>
     <span class="qo-go">افتح</span>
   </div>
+  <div class="qp-open" id="tools-open" role="button" tabindex="0">
+    <svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5z"/></svg>
+    <span class="qo-t">أدوات المسلم<small id="tools-sub">القبلة · التقويم الهجري · صلواتي · الصيام · الزكاة</small></span>
+    <span class="qo-go">افتح</span>
+  </div>
   <div class="inst-row" id="inst-row" role="button" tabindex="0">
     <svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
     <span class="ir-t">ثبِّت «صلاتي» على هاتفك<small>يُفتح بلا متصفّح، والأذكارُ والمصحفُ دون إنترنت</small></span>
@@ -1480,6 +1486,7 @@
     </div>
     <div class="reciter-actions" id="reciter-actions" style="display:none">
       <button id="reciter-repeat" class="reciter-action-btn" aria-label="تكرار السورة"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span id="reciter-repeat-label">بلا تكرار</span></button>
+      <button id="reciter-sleep" class="reciter-action-btn" aria-label="مؤقّت النوم"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span id="reciter-sleep-label">مؤقّت النوم</span></button>
       <button id="reciter-read" class="reciter-action-btn" aria-label="اقرأ نفس السورة"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>اقرأ نفس السورة</button>
     </div>
     <audio id="reciter-audio" preload="none"></audio>
@@ -2787,6 +2794,8 @@ $('#salat-toast') && $('#salat-toast').addEventListener('click', ()=> $('#salat-
   let exitArmedUntil=0;
   try{ history.pushState({az:1}, ''); }catch(e){ return; }
   window.addEventListener('popstate', ()=>{
+    // 0) أدوات المسلم مفتوحة → ارجع خطوةً
+    if(window.SalTools && SalTools.back()){ history.pushState({az:1},''); return; }
     // 1) قائمة اختيار السورة مفتوحة → أغلقها
     const ov=$('#sura-overlay');
     if(ov && ov.classList.contains('show')){
@@ -4362,6 +4371,25 @@ const THABAT_CH = {
   sub:'ولو كنتَ على معصية — ماذا يقول أهلُ العلم؟',
   ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>'
 };
+/* أدوات المسلم (tools.js) تُحمَّل عند أوّل طلب */
+let __toolsLoading=null;
+function loadTools(){
+  if(window.SalTools) return Promise.resolve(true);
+  return __toolsLoading || (__toolsLoading=loadScriptOnce('tools.js').then(ok=>{ if(!ok) __toolsLoading=null; return ok; }));
+}
+async function openTools(page){
+  if(!(await loadTools())){ showToast('تعذّر تحميل الأدوات — جرّب ثانيةً', 3200); return; }
+  vibrate(6); SalTools.open(page);
+}
+(function(){
+  const o=document.getElementById('tools-open'); if(!o) return;
+  o.addEventListener('click', ()=>openTools());
+  o.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openTools(); } });
+  const sl=document.getElementById('reciter-sleep');
+  if(sl) sl.addEventListener('click', async()=>{ if(await loadTools()){ vibrate(6); SalTools.sleep(); } });
+  /* يوم الجمعة: نُلمِّح في بطاقة الأدوات */
+  try{ if(lclShift(new Date()).getDay()===5){ const t=document.getElementById('tools-sub'); if(t) t.textContent='اليوم الجمعة — سورة الكهف والصلاة على النبيّ ﷺ وساعة الإجابة'; } }catch(e){}
+})();
 function loadScriptOnce(src){
   return new Promise(res=>{
     const s=document.createElement('script'); s.src=src;
@@ -4693,6 +4721,7 @@ function renderHifzForm(body, picker, afterStart){
     '<div class="hz-row"><div class="hz-lbl">وقفةٌ صامتةٌ بعد كلّ آية</div>'+chips('gap',[['0','بلا وقفة'],['1','ثانية'],['2','ثانيتان'],['len','بمدّة الآية (لتردِّد أنت)']],c.gap)+'</div>'+
     '<div class="hz-row"><div class="hz-lbl">القارئ</div>'+chips('rec',HZ_RECS.map(r=>[r.id,r.name]),c.rec)+'</div>'+
     '<button class="hz-go" id="hz-go">ابدأ التحفيظ</button>'+
+    '<button class="hz-go" id="hz-rev" style="background:var(--fill-2);color:var(--accent);border:1px solid var(--line);margin-top:8px">أضِف هذا المقطع إلى «مراجعة الحفظ»</button>'+
     '<div class="hz-hint">يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. الصوتُ برواية حفص.</div>';
   body.querySelectorAll('.hz-chips').forEach(g=> g.addEventListener('click', e=>{
     const b=e.target.closest('button'); if(!b) return;
@@ -4712,6 +4741,7 @@ function renderHifzForm(body, picker, afterStart){
   const sb=$('#hz-sura');
   if(sb) sb.addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(t.si, si=>{ closeSuraOverlay(); __hzSel={ si, from:1, to:1 }; again(); }, 'اختر السورة'); });
   $('#hz-go').addEventListener('click', ()=>{ vibrate(8); afterStart && afterStart(); hzStart(t.si, t.from, t.to, hzCfg()); });
+  $('#hz-rev').addEventListener('click', async()=>{ vibrate(6); if(await loadTools()) SalTools.addReview(t.si, t.from, t.to); });
 }
 
 /* خطّةُ التشغيل: قائمةٌ بالآيات بحسب النمط (دورةٌ واحدة، وتُكرَّر دوراتٍ بحسب «تكرار المقطع») */
@@ -6355,6 +6385,7 @@ $('#reciter-play').addEventListener('click', async ()=>{
 /* عند انتهاء السورة: الانتقال تلقائيًّا للسورة التالية */
 $('#reciter-audio').addEventListener('ended', ()=>{
   setPlayBtn(false);
+  if(window.__sleepAtEnd && window.SalTools && SalTools.sleepEnded()) return;   // مؤقّت النوم: «عند نهاية السورة»
   const total = __repeatMode==='inf' ? Infinity : (parseInt(__repeatMode,10)||1);
   if(__repeatPlayed < total){
     __repeatPlayed++;
@@ -7226,6 +7257,11 @@ async function scheduleNativeNotifs(){
         }
       }
     }
+    /* تذكيراتُ الصيام ومراجعة الحفظ (اختياريّة، من «أدوات المسلم ← تذكيراتي») */
+    try{
+      const R=store.get('az_tl_rem',{});
+      if(R && (R.fast||R.rev)){ if(await loadTools()) notifs.push(...SalTools.notifs(nowMs, DAYS_NOTIF, 3000)); }
+    }catch(e){}
     if(notifs.length) await LN.schedule({ notifications: notifs });
     if(ADHAN_SVC){
       /* المواقيتُ تُحسَب هنا بـ adhan.min.js — مصدرٌ واحدٌ لا يَختلف عمّا يَراه
