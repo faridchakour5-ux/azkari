@@ -41,6 +41,9 @@
     <h2>2. التخزين محليًّا على جهازك فقط</h2>
     <p>كل بياناتك — تقدّمك في الأذكار، موضع الوِرد والمصحف، السلسلة (الأيام المتتابعة)، الإعدادات، والنسخ الاحتياطية — تُحفظ <strong>محليًّا على جهازك فقط</strong> (داخل المتصفّح في نسخة الويب، وداخل مخزن التطبيق في تطبيق أندرويد) ولا تغادره. يمكنك حذفها في أي وقت: بمسح بيانات الموقع من المتصفّح، أو بمسح بيانات التطبيق من إعدادات أندرويد، أو بحذف التطبيق. وملفُّ النسخة الاحتياطيّة الذي تُنشئه بنفسك يبقى عندك أنت، ولا نملك منه نسخة؛ وهو يضمّ إعداداتِك وتقدّمَك وموقعَك الأخير المحفوظ، فاحفظه في مكانٍ آمن ولا تشاركه.</p>
 
+    <p><strong>النسخ الاحتياطي التلقائي في أندرويد:</strong> قد يحفظ نظامُ أندرويد نسخةً من إعداداتك وتقدّمك (تخزين الصفحة المحلّيّ فقط، لا التلاواتُ المنزَّلة) في حساب Google الخاصّ بك (Google Drive) لتُستعاد على هاتفٍ جديد. هذه خدمةُ النظام ولا نصل نحن إلى تلك النسخة. ويمكنك إيقافها من إعدادات هاتفك.</p>
+    <p><strong>أدواتُ المسلم</strong> (القبلة، التقويم الهجريّ، متابعة الصلوات، الصيام، الزكاة، مراجعة الحفظ) تعمل على جهازك ولا يُرسَل منها شيءٌ إلى أيّ خادم. وويدجت الشاشة الرئيسيّة في أندرويد يقرأ مواقيتَ الأذان المحفوظةَ على الجهاز نفسه.</p>
+
     <h2>3. الموقع الجغرافي</h2>
     <p>عند تفعيل «مواقيت الصلاة حسب موقعك»، يُستخدم موقع جهازك <strong>محليًّا فقط</strong> لحساب أوقات الصلاة على الجهاز. <strong>لا يُرسَل موقعك إلى أي خادم ولا يُخزَّن خارج جهازك</strong>، إلّا إذا فعّلتَ بنفسك خيار «تصلني التذكيرات والتطبيق مغلق»، فيُرسَل حينئذٍ مقرَّبًا إلى نحو 11 كم (البند 4). هذا الإذن اختياري، والتطبيق يعمل بدونه. أمّا تحديدُ موقع الجهاز نفسُه فيتولّاه نظامُ هاتفك أو متصفّحك بحسب سياسته هو.</p>
 
@@ -110,13 +113,15 @@
         <li>All your data (progress, settings, streak, backups) is stored <strong>locally on your device</strong>; it leaves it only when you choose to share or export it, or if you switch on the optional remote notifications described below.</li>
         <li><strong>Location</strong> (optional) is used <strong>on-device</strong> to compute prayer times and is not sent anywhere — unless you enable remote notifications, in which case it is sent rounded to about 11 km.</li>
         <li><strong>Notifications</strong> are local reminders by default. In the web version they only work while the app is open or running; the <strong>Android app</strong> schedules reminders and the adhan on your device through Android (exact alarms + a foreground media service), so they work when the app is closed, with no server involved.</li>
+        <li><strong>Android Auto Backup</strong>: Android may back up your settings and progress (the app’s local page storage only — not downloaded recitations) to your own Google account so they can be restored on a new phone. That is an Android system service; we cannot access it. You can turn it off in your phone settings.</li>
+        <li>The <strong>Muslim tools</strong> (qibla, Hijri calendar, prayer tracker, fasting, zakat, memorization review) run on your device and send nothing to any server. The Android home-screen widget reads the adhan schedule already stored on your device.</li>
         <li><strong>Android permissions</strong>, all for the adhan: approximate/precise location (optional), exact alarms, foreground media-playback service, run at boot, wake lock, and internet (Listening page and updates). No contacts, photos, microphone or camera.</li>
         <li><strong>Hosting</strong>: salatee.org is served by Netlify, whose technical logs may record your IP address and browser type when you load the site. We do not use them to track you.</li>
         <li><strong>Remote notifications</strong> (optional, off by default; web version only): if you switch on “reminders while the app is closed”, our server (hosted on Netlify) stores what it needs to send them: your browser’s push address and keys, your location <strong>rounded to about 11 km</strong>, your time zone, your reminder choices, and the dates of creation/last update. No name, e-mail or account. Nothing is shared or sold. Messages travel through your browser vendor’s push service (Google, Apple, Mozilla or Microsoft). Your record is erased immediately when you switch the option off, and automatically when your browser subscription expires or after about seven months without opening the app. Not used in the Android native app.</li>
         <li>No ads, no tracking, no analytics, no third-party cookies.</li>
         <li>Works offline — <strong>except the Listening page</strong> (recitations, lectures, stories), which streams from mp3quran.net, archive.org, everyayah.com (verse-by-verse memorization) and Google Drive. Using that page (opening it, choosing a section, or playing) reveals your IP address and browser type to those services, as any website visit would. Apart from what is described in this summary, the app sends nothing else off your device.</li>
       </ul>
-      <p>Developer: Farid Chakour. Contact: <a href="mailto:faridchakour5@gmail.com">faridchakour5@gmail.com</a> — Last updated: 4 October 2026.</p>
+      <p>Developer: Farid Chakour. Contact: <a href="mailto:faridchakour5@gmail.com">faridchakour5@gmail.com</a> — Last updated: 10 October 2026.</p>
     </div>
   </div>
 

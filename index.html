@@ -1753,9 +1753,24 @@
         <button data-r="en">English</button>
       </div>
     </div>
+    <div class="row"><span class="k">آيات متشابهة اللفظ (في ورقة التفسير)</span>
+      <label class="sw"><input type="checkbox" id="mut-toggle"><span class="track"></span><span class="knob"></span></label>
+    </div>
   </div>
   <div class="gnote" id="riwaya-note"></div>
-  <div class="gnote">الترجمةُ تظهر عند لمس الآية (تحت الآية في ورقة التفسير)، وهي ترجمةُ معانٍ لا تُغني عن الأصل. لونُ نصّ القرآن في المصحف لا يتغيّر.</div>
+  <div class="gnote">الخياران يظهران في ورقة التفسير عند لمس الآية، ولا يمسّان صفحةَ المصحف ولا لونَ نصّه. الترجمةُ ترجمةُ معانٍ لا تُغني عن الأصل؛ والمتشابهاتُ تشابهٌ آليٌّ من النصّ وليست قائمةَ علماء المتشابه اللفظيّ.</div>
+
+  <div class="gtitle">لغة الواجهة</div>
+  <div class="group">
+    <div class="row"><span class="k">لغة القوائم والإعدادات</span>
+      <div class="miniseg" id="lang-seg">
+        <button data-r="ar">العربية</button>
+        <button data-r="fr">Français</button>
+        <button data-r="en">English</button>
+      </div>
+    </div>
+  </div>
+  <div class="gnote">الواجهة المترجمة تشمل القوائمَ والإعدادات والأدوات والرسائل. أمّا القرآنُ والأذكارُ والفقهُ والسيرةُ والأحاديثُ وأسئلةُ الاختبار فتبقى بالعربيّة.</div>
 
   <div class="gtitle">لون الخلفية</div>
   <div class="group">
@@ -4696,7 +4711,7 @@ async function openTafsir(ai){
                        : (okT ? '' : '<div class="t-note">تعذّر تحميل الترجمة.</div>');
   }
   let simHtml='';
-  try{ if(await loadMutash()) simHtml=similarHtml(ai); }catch(e){}
+  try{ if(settings.mutash===true && await loadMutash()) simHtml=similarHtml(ai); }catch(e){}
   if(!ov.classList.contains('show')) return;
   body.innerHTML = aya + trHtml + main + simHtml +
     '<div class="fq-share"><button class="share-btn" id="tf-share-btn">'+SHARE_IC+'شارِك الآية وتفسيرها</button></div>'+
@@ -7426,6 +7441,8 @@ applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
 syncSeg('#riwaya-seg','riwaya'); syncSeg('#qcolor-seg','quranColor'); renderSwatches();
 applyHafsFont(); applyQuranColor();
 (function(){
+  const mt=$('#mut-toggle');
+  if(mt){ mt.checked=settings.mutash===true; mt.addEventListener('change', ()=>{ settings.mutash=mt.checked; saveSettings(); vibrate(6); if(mt.checked) loadMutash(); }); }
   const ts=$('#trans-seg'); if(!ts) return;
   if(ts){
     const paint=()=>ts.querySelectorAll('button').forEach(b=>b.classList.toggle('on', (b.dataset.r||'')===(settings.trans||'')));
@@ -7433,6 +7450,16 @@ applyHafsFont(); applyQuranColor();
     ts.addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return; settings.trans=b.dataset.r||''; saveSettings(); vibrate(5); paint();
       if(settings.trans){ loadTrans(settings.trans); showToast('تظهر الترجمةُ عند لمس أيّ آية', 3200); } });
   }
+})();
+/* لغة الواجهة: العربيّة (الأصل) أو الفرنسيّة أو الإنجليزيّة (i18n_core.js + قاموسُ اللغة يترجمان القوائمَ والرسائلَ ويُبقيان النصوصَ الدينيّةَ بالعربيّة) */
+(function(){
+  const sg=$('#lang-seg'); if(!sg) return;
+  const lang=(settings.lang==='fr'||settings.lang==='en')?settings.lang:'ar';
+  sg.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.r===lang));
+  sg.addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return;
+    const v=b.dataset.r; if(v===lang) return;
+    settings.lang=v; saveSettings(); vibrate(6); location.reload(); });
+  if(lang!=='ar') loadScriptOnce('i18n_core.js').then(ok=> ok && loadScriptOnce('i18n_'+lang+'.js')).then(ok=>{ if(ok && window.I18N) I18N.start(); });
 })();
 /* رقم الإصدار الفعليّ من عامل الخدمة — ليُعرف أيّ نسخة تعمل على الجهاز */
 (function(){

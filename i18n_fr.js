@@ -6,28 +6,29 @@
 (function(){
 'use strict';
 if(window.I18N) return;
-const MARKS=/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g;
-const AR_RE=/[؀-ۿ]/;
-const key=s=>String(s).replace(MARKS,'').replace(/[ \s]+/g,' ').trim();
+const C=window.I18N_CORE; if(!C) throw new Error('i18n_core.js مطلوب'); const key=C.key;
 const D=new Map(); const add=a=>{ for(const [k,v] of a) D.set(key(k), v); };
-const SURA=new Map(); const addS=a=>{ for(const [k,v] of a) SURA.set(key(k), v); };
-const NO_SEL=['#wird-body','#az-list','#tafsir-body .t-txt','#tafsir-body .t-aya','#tafsir-body .t-intro','#tafsir-body .sv .tx','[data-noi18n]'];
+const SURA=new Map(); const sk=s=>key(s).replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ /g,'');
+const addS=a=>{ for(const [k,v] of a) SURA.set(sk(k), v); };
 const GM={'يناير':'janvier','فبراير':'février','مارس':'mars','أبريل':'avril','ماي':'mai','يونيو':'juin','يوليوز':'juillet','غشت':'août','شتنبر':'septembre','أكتوبر':'octobre','نونبر':'novembre','دجنبر':'décembre'};
 const HM={'محرم':'Mouharram','صفر':'Safar','ربيع الأول':'Rabi’ al-awwal','ربيع الآخر':'Rabi’ ath-thani','جمادى الأولى':'Joumada al-oula','جمادى الآخرة':'Joumada ath-thania','رجب':'Rajab','شعبان':'Chaabane','رمضان':'Ramadan','شوال':'Chawwal','ذو القعدة':'Dhou al-qida','ذو الحجة':'Dhou al-hijja'};
 const DAYS={'الأحد':'Dimanche','الاثنين':'Lundi','الثلاثاء':'Mardi','الأربعاء':'Mercredi','الخميس':'Jeudi','الجمعة':'Vendredi','السبت':'Samedi'};
 const DIRS={'الشمال':'le nord','الشمال الشرقي':'le nord-est','الشرق':'l’est','الجنوب الشرقي':'le sud-est','الجنوب':'le sud','الجنوب الغربي':'le sud-ouest','الغرب':'l’ouest','الشمال الغربي':'le nord-ouest'};
 const norm=s=>key(s).replace(/ّ/g,'');
 const mapLook=(M,s)=>{ s=norm(s); for(const k in M) if(norm(k)===s) return M[k]; return null; };
-const sura=n=>{ const k=key(n); return SURA.get(k) || n; };
+const sura=n=>SURA.get(sk(n)) || n;
 const gDate=s=>{ const m=key(s).match(/^(?:(\S+) )?(\d+) (\S+) (\d+)$/); if(!m) return null; const mo=mapLook(GM,m[3]); if(!mo) return null; const dd=m[1]?mapLook(DAYS,m[1]):null; return (dd?dd+' ':'')+m[2]+' '+mo+' '+m[4]; };
-const hDate=s=>{ const m=key(s).match(/^(\d+) (.+?) (\d+) هـ$/); if(!m) return null; const mo=mapLook(HM,m[2]); return mo? m[1]+' '+mo+' '+m[3]+' H' : null; };
+const hDate=s=>{ const m=key(s).match(/^(\d+) (.+?) (\d+) ه$/); if(!m) return null; const mo=mapLook(HM,m[2]); return mo? m[1]+' '+mo+' '+m[3]+' H' : null; };
 const t24=(h,mi,ap)=>{ let H=+h%12; if(ap==='م') H+=12; return String(H).padStart(2,'0')+':'+mi; };
+const ABBR={'الاثنين':'Lun','الثلاثاء':'Mar','الأربعاء':'Mer','الخميس':'Jeu','الجمعة':'Ven','السبت':'Sam','الأحد':'Dim'};
 const nPl=(n,one,many)=> n+' '+(+n<=1?one:many);
 /* أنماطٌ للنصوص ذات الأعداد والتواريخ (تُطبَّق على النصّ بعد حذف التشكيل) */
 const PATS=[
   [/^(\d{1,2}):(\d{2}) ([صم])$/, m=>t24(m[1],m[2],m[3])],
   [/^(\d+) من (\d+)$/, m=>m[1]+' sur '+m[2]],
+  [/^من (\d+)$/, m=>'sur '+m[1]],
   [/^صفحة (\d+) من (\d+)$/, m=>'Page '+m[1]+' sur '+m[2]],
+  [/^(\d+)\. (.+)$/, m=>{ const v=SURA.get(sk(m[2])); return v? m[1]+'. '+v : null; }],
   [/^سورة (.+)$/, m=>'Sourate '+sura(m[1])],
   [/^﴾ ?سورة (.+)$/, m=>'Sourate '+sura(m[1])],
   [/^آية (\d+)$/, m=>'Verset '+m[1]],
@@ -42,17 +43,17 @@ const PATS=[
   [/^موعد المراجعة: (.+)$/, m=>'Prochaine révision : '+(gDate(m[1])||m[1])],
   [/^بعد (\d+) يوما · (.+)$/, m=>'Dans '+nPl(m[1],'jour','jours')+' · '+(hDate(m[2])||m[2])],
   [/^(اليوم|غدا) · (.+)$/, m=>(m[1]==='اليوم'?'Aujourd’hui':'Demain')+' · '+(hDate(m[2])||m[2])],
-  [/^(\d+) ([^\d]+) (\d+) هـ$/, m=>hDate(m[0])||m[0]],
+  [/^(\d+) ([^\d]+) (\d+) ه$/, m=>hDate(m[0])||m[0]],
   [/^(\S+ \d+ \S+ \d+)$/, m=>gDate(m[1])||null],
-  [/^(\d+) ([^\d]+) (\d+) هـ$/, m=>hDate(m[0])],
+  [/^(\d+) ([^\d]+) (\d+) ه$/, m=>hDate(m[0])],
   [/^(\S+) – (\S+) (\d+)$/, m=>{ const a=mapLook(GM,m[1]), b=mapLook(GM,m[2]); return a&&b? a+' – '+b+' '+m[3] : null; }],
   [/^(\S+) (\d+)$/, m=>{ const a=mapLook(GM,m[1]); return a? a+' '+m[2] : null; }],
-  [/^(.+) (\d+) هـ$/, m=>{ const a=mapLook(HM,m[1]); return a? a+' '+m[2]+' H' : null; }],
+  [/^(.+) (\d+) ه$/, m=>{ const a=mapLook(HM,m[1]); return a? a+' '+m[2]+' H' : null; }],
   [/^من (.+) نحو (.+)$/, m=>{ const a=mapLook(DIRS,m[1].replace(/^ال/,'ال')); const b=mapLook(DIRS,m[2]); return (m[1]===key('الشمال')&&b)? 'du nord vers '+b : null; }],
   [/^تبعد الكعبة عنك نحو ([\d,.]+) كم$/, m=>'La Kaaba est à environ '+m[1]+' km'],
   [/^الإفطار اليوم عند (.+)\.$/, m=>'L’iftar est aujourd’hui à '+m[1]+'.'],
   [/^يبدأ رمضان بالحساب بعد (\d+) يوما \(تقريبا\)\.$/, m=>'Le Ramadan commence, d’après le calcul, dans environ '+nPl(m[1],'jour','jours')+'.'],
-  [/^إمساكية رمضان (\d+) هـ$/, m=>'Imsakiya du Ramadan '+m[1]+' H'],
+  [/^إمساكية رمضان (\d+) ه$/, m=>'Imsakiya du Ramadan '+m[1]+' H'],
   [/^سيتوقف الاستماع بعد (\d+) دقيقة$/, m=>'L’écoute s’arrêtera dans '+m[1]+' minutes'],
   [/^(\d+) دقيقة$/, m=>m[1]+' minutes'],
   [/^غدا: (.+)$/, m=>'Demain : '+(TR_EV(m[1])||m[1])],
@@ -62,58 +63,11 @@ function TR_EV(s){ return find(s); }
 function lookup(core){
   const k=key(core);
   let r=D.get(k); if(r!=null) return r;
-  r=SURA.get(k); if(r!=null) return r;
+  r=SURA.get(sk(k)); if(r!=null) return r;
   for(const [re,fn] of PATS){ const m=k.match(re); if(m){ const v=fn(m); if(v!=null) return v; } }
   return null;
 }
 function find(core){ return lookup(core); }
-function trText(raw){
-  const lead=raw.match(/^\s*/)[0], trail=raw.match(/\s*$/)[0], core=raw.trim();
-  if(!core || !AR_RE.test(core)) return null;
-  let r=find(core); if(r!=null) return lead+r+trail;
-  const m=core.match(/^([•:،؛\-—–··\s]*)([\s\S]*?)([:،؛\-—–·\s]*)$/);
-  if(m && (m[1]||m[3]) && m[2]){ r=find(m[2]); if(r!=null) return lead+m[1]+r+m[3]+trail; }
-  return null;
-}
-const ATTRS=['title','aria-label','placeholder','alt'];
-const SKIP_TAG=new Set(['SCRIPT','STYLE','TEXTAREA','NOSCRIPT']);
-let busy=false;
-function skipped(el){ try{ return !!(el.closest && el.closest(NO_SEL.join(','))); }catch(e){ return false; } }
-function fixNode(n){
-  const v=n.nodeValue; if(!v || !AR_RE.test(v)) return;
-  const p=n.parentNode; if(!p || (p.nodeType===1 && (SKIP_TAG.has(p.nodeName) || skipped(p)))) return;
-  const r=trText(v); if(r!=null && r!==v){ if(n.__ar==null) n.__ar=v; n.nodeValue=r; if(p.nodeType===1 && p.setAttribute && !p.hasAttribute('dir') && /[A-Za-zÀ-ÿ]{3}/.test(r) && r.length>26) p.setAttribute('dir','auto'); }
-}
-function fixAttrs(el){
-  for(const a of ATTRS){ const v=el.getAttribute && el.getAttribute(a); if(v && AR_RE.test(v)){ const r=trText(v); if(r!=null && r!==v) el.setAttribute(a,r); } }
-}
-function walk(root){
-  if(!root) return;
-  if(root.nodeType===3){ fixNode(root); return; }
-  if(root.nodeType!==1) return;
-  if(SKIP_TAG.has(root.nodeName) || skipped(root)) return;
-  fixAttrs(root);
-  for(let c=root.firstChild; c; c=c.nextSibling) walk(c);
-}
-let mo=null;
-function start(){
-  document.documentElement.lang='fr';
-  try{ document.title='Salati — invocations et Coran'; }catch(e){}
-  busy=true; try{ walk(document.body); }finally{ busy=false; }
-  if(mo) return;
-  mo=new MutationObserver(list=>{
-    if(busy) return; busy=true;
-    try{
-      for(const m of list){
-        if(m.type==='characterData'){ fixNode(m.target); }
-        else if(m.type==='attributes'){ fixAttrs(m.target); }
-        else m.addedNodes.forEach(n=>walk(n));
-      }
-    } finally { busy=false; }
-  });
-  mo.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTRS});
-}
-window.I18N={ lang:'fr', start, t:s=>{ const r=trText(String(s)); return r==null?s:r; }, _D:D };
 
 /* ===================== واجهة التطبيق (index.html) ===================== */
 add([
@@ -239,3 +193,194 @@ add([
 [`القرآن والاستماع والتحفيظ`,`Coran, écoute et mémorisation`],[`مصحفٌ برواية ورش وحفص مع التفسير الميسّر وترجمة المعاني، وتلاواتٌ بأصوات قرّاء، وتحفيظٌ بالتكرار مع مراجعةٍ متباعدة.`,`Un Mushaf en récitation de Warsh et de Hafs avec l’exégèse simplifiée (at-Tafsir al-Muyassar), la traduction du sens ; des récitations par des récitants ; et une mémorisation par répétition avec révision espacée.`],
 [`الأذكار وأدوات المسلم`,`Invocations et outils du musulman`],[`أذكار الصباح والمساء وغيرها، والفقه والسيرة والاختبار، والقبلة والتقويم الهجريّ ومتابعة الصلوات والصيام والزكاة. المصحفُ والأذكارُ والأدواتُ تعمل دون إنترنت، والاستماعُ يحتاجه إلا ما نزّلتَه. لا حسابَ ولا إعلانات، وتقدّمُك محفوظٌ على هاتفك.`,`Invocations du matin et du soir et bien d’autres, fiqh, biographie et quiz, qibla, calendrier hégirien, suivi des prières, jeûne et zakat. Le Coran, les invocations et les outils fonctionnent hors ligne ; l’écoute nécessite Internet, sauf ce que vous avez téléchargé. Ni compte ni publicité, et votre progression reste sur votre téléphone.`]
 ]);
+/* أسماءُ السور (تحويلٌ حرفيّ) وأسماءُ القرّاء */
+addS([
+[`الفَاتِحة`,`Al-Fatiha`],
+[`البَقَرَة`,`Al-Baqara`],
+[`آل عِمران`,`Âl ʿImrân`],
+[`النِّسَاء`,`An-Nisâ’`],
+[`المَائدة`,`Al-Mâ’ida`],
+[`الأنعَام`,`Al-Anʿâm`],
+[`الأعرَاف`,`Al-Aʿrâf`],
+[`الأنفَال`,`Al-Anfâl`],
+[`التوبَة`,`At-Tawba`],
+[`يُونس`,`Yûnus`],
+[`هُود`,`Hûd`],
+[`يُوسُف`,`Yûsuf`],
+[`الرَّعد`,`Ar-Raʿd`],
+[`إبراهِيم`,`Ibrâhîm`],
+[`الحِجر`,`Al-Hijr`],
+[`النَّحل`,`An-Nahl`],
+[`الإسرَاء`,`Al-Isrâ’`],
+[`الكَهف`,`Al-Kahf`],
+[`مَريَم`,`Maryam`],
+[`طه`,`Tâ-Hâ`],
+[`الأنبيَاء`,`Al-Anbiyâ’`],
+[`الحج`,`Al-Hajj`],
+[`المؤمنُون`,`Al-Mu’minûn`],
+[`النور`,`An-Nûr`],
+[`الفُرقَان`,`Al-Furqân`],
+[`الشعراء`,`Ach-Chuʿarâ’`],
+[`النَّمل`,`An-Naml`],
+[`القَصَص`,`Al-Qasas`],
+[`العَنكبُوت`,`Al-ʿAnkabût`],
+[`الرُّوم`,`Ar-Rûm`],
+[`لُقمَان`,`Luqmân`],
+[`السَّجدة`,`As-Sajda`],
+[`الأحزَاب`,`Al-Ahzâb`],
+[`سَبإ`,`Saba’`],
+[`فَاطِر`,`Fâtir`],
+[`يسٓ`,`Yâ-Sîn`],
+[`الصَّافَات`,`As-Sâffât`],
+[`صٓ`,`Sâd`],
+[`الزُّمَر`,`Az-Zumar`],
+[`غَافِر`,`Ghâfir`],
+[`فُصِّلَت`,`Fussilat`],
+[`الشُّوري`,`Ach-Chûrâ`],
+[`الزُّخرُف`,`Az-Zukhruf`],
+[`الدُّخان`,`Ad-Dukhân`],
+[`الجاثِية`,`Al-Jâthiya`],
+[`الأحقَاف`,`Al-Ahqâf`],
+[`مُحمد`,`Muhammad`],
+[`الفَتح`,`Al-Fath`],
+[`الحُجُرَات`,`Al-Hujurât`],
+[`قٓ`,`Qâf`],
+[`الذَّاريَات`,`Adh-Dhâriyât`],
+[`الطُّور`,`At-Tûr`],
+[`النَّجم`,`An-Najm`],
+[`القَمَر`,`Al-Qamar`],
+[`الرَّحمٰن`,`Ar-Rahmân`],
+[`الوَاقِعة`,`Al-Wâqiʿa`],
+[`الحدِيد`,`Al-Hadîd`],
+[`المُجَادلة`,`Al-Mujâdila`],
+[`الحَشر`,`Al-Hachr`],
+[`المُمتَحنَة`,`Al-Mumtahana`],
+[`الصَّف`,`As-Saff`],
+[`الجُمعَة`,`Al-Jumuʿa`],
+[`المُنَافِقُونَ`,`Al-Munâfiqûn`],
+[`التغَابُن`,`At-Taghâbun`],
+[`الطَّلَاق`,`At-Talâq`],
+[`التَّحرِيم`,`At-Tahrîm`],
+[`المُلك`,`Al-Mulk`],
+[`القَلَم`,`Al-Qalam`],
+[`الحَاقة`,`Al-Hâqqa`],
+[`المَعَارج`,`Al-Maʿârij`],
+[`نُوح`,`Nûh`],
+[`الجِن`,`Al-Jinn`],
+[`المُزمل`,`Al-Muzzammil`],
+[`المُدثر`,`Al-Muddaththir`],
+[`القِيَامة`,`Al-Qiyâma`],
+[`الإنسَان`,`Al-Insân`],
+[`المُرسَلات`,`Al-Mursalât`],
+[`النَّبَإ`,`An-Naba’`],
+[`النَّازعَات`,`An-Nâziʿât`],
+[`عَبَسَ`,`ʿAbasa`],
+[`التَّكوير`,`At-Takwîr`],
+[`الانفِطَار`,`Al-Infitâr`],
+[`المُطَففين`,`Al-Mutaffifîn`],
+[`الانشِقَاق`,`Al-Inchiqâq`],
+[`البُرُوج`,`Al-Burûj`],
+[`الطَّارق`,`At-Târiq`],
+[`الأعلى`,`Al-Aʿlâ`],
+[`الغَاشِية`,`Al-Ghâchiya`],
+[`الفَجر`,`Al-Fajr`],
+[`البَلَد`,`Al-Balad`],
+[`الشَّمس`,`Ach-Chams`],
+[`اللَّيل`,`Al-Layl`],
+[`الضُّحى`,`Ad-Duhâ`],
+[`الشَّرح`,`Ach-Charh`],
+[`التِّين`,`At-Tîn`],
+[`العَلَق`,`Al-ʿAlaq`],
+[`القَدر`,`Al-Qadr`],
+[`البَينَة`,`Al-Bayyina`],
+[`الزَّلزَلة`,`Az-Zalzala`],
+[`العَاديَات`,`Al-ʿÂdiyât`],
+[`القَارعَة`,`Al-Qâriʿa`],
+[`التَّكاثُر`,`At-Takâthur`],
+[`العَصر`,`Al-ʿAsr`],
+[`الهُمَزة`,`Al-Humaza`],
+[`الفِيل`,`Al-Fîl`],
+[`قُرَيش`,`Quraych`],
+[`المَاعُون`,`Al-Mâʿûn`],
+[`الكَوثر`,`Al-Kawthar`],
+[`الكافِرون`,`Al-Kâfirûn`],
+[`النَّصر`,`An-Nasr`],
+[`المَسَد`,`Al-Masad`],
+[`الإخلَاص`,`Al-Ikhlâs`],
+[`الفَلَق`,`Al-Falaq`],
+[`النَّاس`,`An-Nâs`]
+]);
+add([
+[`سعد الغامدي`,`Saad Al-Ghamdi`],
+[`سعود الشريم`,`Saoud Ach-Chouraïm`],
+[`محمد المنشاوي`,`Mohamed Al-Minchaoui`],
+[`محمد صديق المنشاوي`,`Mohamed Siddiq Al-Minchaoui`],
+[`المنشاوي (مجوّد)`,`Al-Minchaoui (mujawwad)`],
+[`المنشاوي`,`Al-Minchaoui`],
+[`عبد الباسط عبد الصمد`,`Abdelbasset Abdessamad`],
+[`عمر القزابري`,`Omar Al-Qazabri`],
+[`يونس اسويلص`,`Younes Souilas`],
+[`هشام الهراز`,`Hicham Al-Harraz`],
+[`جعفر السعدي`,`Jaafar As-Saadi`],
+[`بدر التركي`,`Badr At-Turki`],
+[`محمد الفقيه اليمني`,`Mohamed Al-Faqih Al-Yamani`],
+[`العيون الكوشي`,`Al-Ayoun Al-Koushi`],
+[`ماهر المعيقلي`,`Maher Al-Muaiqly`],
+[`ناصر القطامي`,`Nasser Al-Qatami`],
+[`خالد الجليل`,`Khaled Al-Jalil`],
+[`هزاع البلوشي`,`Hazza Al-Balushi`],
+[`مشاري العفاسي`,`Mishary Al-Afasy`],
+[`عبد الرحمن السديس`,`Abderrahmane As-Soudays`],
+[`محمود خليل الحصري`,`Mahmoud Khalil Al-Hussary`],
+[`سعد الغامدي`,`Saad Al-Ghamdi`]
+]);
+/* ===================== رسائلُ وعناصرُ أخرى في index.html ===================== */
+add([
+[`تعذّر تحميل المصحف — اضغط هنا للمحاولة مجدداً`,`Impossible de charger le Mushaf — touchez ici pour réessayer`],[`تعذّر تحميل قائمة السور — تحقّق من الاتصال ثمّ أعِد المحاولة`,`Impossible de charger la liste des sourates — vérifiez la connexion puis réessayez`],
+[`…جارٍ تحميل المصحف`,`Chargement du Mushaf…`],[`جارٍ تحميل المصحف…`,`Chargement du Mushaf…`],[`تعذّر إحضار الآيات`,`Impossible de récupérer les versets`],[`…جارٍ إحضار ربع صفحة`,`Récupération d’un quart de page…`],
+[`تعذّر تحميل الأسئلة.`,`Impossible de charger les questions.`],[`تعذّر تحميل بيانات المصحف.`,`Impossible de charger les données du Mushaf.`],[`…جارٍ التحميل`,`Chargement…`],[`جارٍ التحميل…`,`Chargement…`],
+[`اختر داعيةً من القائمة أعلاه.`,`Choisissez un prédicateur dans la liste ci-dessus.`],[`تعذّر التحميل — أعِد المحاولة.`,`Échec du chargement — réessayez.`],[`تعذّر تحميل صفحة الفقه — أعِد المحاولة.`,`Impossible de charger la page de fiqh — réessayez.`],
+[`تعذّر تحميل هذه السلسلة — جرّب سلسلةً أخرى أو تحقّق من الإنترنت.`,`Impossible de charger cette série — essayez-en une autre ou vérifiez Internet.`],[`…جارٍ البحث عن التسجيلات`,`Recherche des enregistrements…`],[`…جارٍ تحميل الحلقات`,`Chargement des épisodes…`],
+[`الفضل`,`Mérite`],[`المعنى`,`Sens`],[`شرحُ الكلمات`,`Explication des mots`],[`تعذّر تحميل الترجمة.`,`Impossible de charger la traduction.`],[`تعذّر تحميل الشرح — أعِد المحاولة.`,`Impossible de charger l’explication — réessayez.`],[`لا يوجد شرحٌ لهذا الذكر بعدُ.`,`Pas encore d’explication pour cette invocation.`],
+[`…جارٍ تحميل التفسير`,`Chargement de l’exégèse…`],[`تعذّر تحميل التفسير — تحقّق من الإنترنت ثم أعِد المحاولة.`,`Impossible de charger l’exégèse — vérifiez Internet puis réessayez.`],[`لا يوجد تفسير لهذه الآية.`,`Pas d’exégèse pour ce verset.`],
+[`المصدر`,`Source`],[`التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف`,`At-Tafsir al-Muyassar — Complexe du roi Fahd pour l’impression du Saint Coran`],
+[`شارِك الآية وتفسيرها`,`Partager le verset et son exégèse`],[`شارِك الذكر وشرحَه`,`Partager l’invocation et son explication`],[`شارِك هذا الباب`,`Partager cette section`],[`شارِك هذه الصفحة`,`Partager cette page`],[`شارِك`,`Partager`],[`شارِك أو احفظ`,`Partager ou enregistrer`],[`مشاركة`,`Partager`],
+[`PDF — ملفّ للحفظ أو الإرسال`,`PDF — fichier à enregistrer ou à envoyer`],[`صورة — أرسِلها في واتساب`,`Image — à envoyer sur WhatsApp`],[`تعذّر إنشاء PDF — جرّب «صورة»`,`Impossible de créer le PDF — essayez « Image »`],[`تعذّر إنشاء الصورة`,`Impossible de créer l’image`],[`تعذّر إنشاء الصورة — جرّب PDF`,`Impossible de créer l’image — essayez le PDF`],
+[`…جارٍ تجهيز ملفّ PDF`,`Préparation du PDF…`],[`…جارٍ تحضير الصفحات`,`Préparation des pages…`],[`…جارٍ تحضير الصورة`,`Préparation de l’image…`],[`حُفظ ملفّ PDF في هاتفك`,`PDF enregistré sur votre téléphone`],[`حُفظت الصورة في هاتفك`,`Image enregistrée sur votre téléphone`],[`حُفظت الصورة — أرفِقها في واتساب`,`Image enregistrée — joignez-la sur WhatsApp`],[`لا يوجد ما يُشارَك`,`Rien à partager`],
+[`حفظ أو مشاركة`,`Enregistrer ou partager`],[`نُسخ الرابط — الصِقْه في المتصفّح`,`Lien copié — collez-le dans le navigateur`],[`انسخ الرابط`,`Copier le lien`],
+[`ابدأ التحفيظ`,`Commencer la mémorisation`],[`السرعة`,`Vitesse`],[`السورة`,`Sourate`],[`القارئ`,`Récitant`],[`المقطع`,`Passage`],[`تكرار المقطع كلِّه`,`Répétition du passage entier`],[`تكرار كلّ آية`,`Répétition de chaque verset`],[`طريقة التكرار`,`Mode de répétition`],[`وقفةٌ صامتةٌ بعد كلّ آية`,`Pause silencieuse après chaque verset`],
+[`كلُّ آية ثمّ التي بعدها`,`Chaque verset puis le suivant`],[`تراكميّ: 1 ثم 1+2 ثم 1+2+3…`,`Cumulatif : 1, puis 1+2, puis 1+2+3…`],[`التراكميّ أنفعُ للحفظ: تُعيد ما حفظتَه ثم تُضيف آيةً جديدة.`,`Le mode cumulatif est le plus efficace : on répète ce qui est acquis, puis on ajoute un nouveau verset.`],
+[`يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. الصوتُ برواية حفص.`,`Connexion requise : la récitation de chaque verset est chargée depuis everyayah.com. Audio en récitation de Hafs.`],
+[`بلا وقفة`,`Sans pause`],[`ثانية`,`1 seconde`],[`ثانيتان`,`2 secondes`],[`بمدّة الآية (لتردِّد أنت)`,`Durée du verset (pour répéter vous-même)`],[`بلا حدّ`,`Sans limite`],[`مرّة`,`1 fois`],[`مرّتان`,`2 fois`],[`أضِف هذا المقطع إلى «مراجعة الحفظ»`,`Ajouter ce passage à la « Révision de la mémorisation »`],
+[`تحفيظ هذه الآية (تكرار)`,`Mémoriser ce verset (répétition)`],[`كرِّر آيةً أو مقطعًا من أيّ سورةٍ لتحفظه (رواية حفص)`,`Répétez un verset ou un passage de n’importe quelle sourate pour le mémoriser (récitation de Hafs)`],
+[`اكتمل التحفيظ ✓ — بارك الله فيك`,`Mémorisation terminée ✓ — qu’Allah vous bénisse`],[`التحفيظ من المصحف برواية حفص — أو افتح «الاستماع ← التحفيظ» وأيُّ رواية`,`La mémorisation depuis le Mushaf se fait en récitation de Hafs — ou ouvrez « Écoute → Mémorisation » avec n’importe quelle récitation`],
+[`إعادة الاختبار بأسئلةٍ جديدة`,`Refaire le quiz avec de nouvelles questions`],[`اختبارٌ حرّ بدل التحدّي`,`Quiz libre au lieu du défi`],[`اختيار مجال آخر`,`Choisir un autre domaine`],[`شارِك نتيجتك وتحدَّ أصدقاءك`,`Partagez votre score et défiez vos amis`],[`ابدأ الاختبار`,`Commencer le quiz`],[`ابدأ التحدّي`,`Commencer le défi`],
+[`السؤال التالي`,`Question suivante`],[`عرض النتيجة`,`Voir le résultat`],[`اختر المجال ثمّ ابدأ الاختبار`,`Choisissez un domaine puis commencez le quiz`],[`تحدّاك صديقٌ`,`Un ami vous défie`],[`أفضل نتيجة في هذا المجال:`,`Meilleur score dans ce domaine :`],[`نتيجة الاختبار`,`Résultat du quiz`],
+[`أحسنت، نتيجة طيّبة — واصِل.`,`Bravo, beau résultat — continuez.`],[`جيّد، وفي الإعادة إفادة.`,`Bien ; refaire le quiz est instructif.`],[`لا بأس، العلم بالتعلّم — أعِد المحاولة.`,`Pas de souci, on apprend en apprenant — réessayez.`],[`ما شاء الله! إجابات كاملة`,`Machallah ! Toutes les réponses sont justes`],[`تحدّي صلاتي`,`Défi Salati`],
+[`اضغط «رجوع» مرّة أخرى للخروج من التطبيق`,`Appuyez encore une fois sur « Retour » pour quitter l’application`],[`حُدِّثت المواقيت حسب موقعك الجديد ✓`,`Horaires mis à jour selon votre nouvelle position ✓`],[`موقعك لم يتغيّر — المواقيت محدَّثة`,`Votre position n’a pas changé — horaires à jour`],
+[`…جارٍ تحديث موقعك`,`Actualisation de votre position…`],[`…جارٍ تحديد الموقع`,`Localisation en cours…`],[`الموقع غير مدعوم على هذا المتصفح.`,`La localisation n’est pas prise en charge par ce navigateur.`],[`تعذّر تحديد الموقع. تأكّد من السماح بالوصول للموقع.`,`Impossible de déterminer la position. Vérifiez que l’accès à la localisation est autorisé.`],
+[`تم تفعيل التذكير ✓`,`Rappel activé ✓`],[`تمّ التفعيل ✓ — ستصلك التذكيراتُ والتطبيقُ مغلق`,`Activé ✓ — vous recevrez les rappels application fermée`],[`تعذّر التفعيل — تأكّد من اتّصالك بالإنترنت ثم أعد المحاولة.`,`Activation impossible — vérifiez votre connexion Internet puis réessayez.`],
+[`لتفعيل التذكير، اسمح بالإشعارات من إعدادات المتصفح.`,`Pour activer le rappel, autorisez les notifications dans les réglages du navigateur.`],[`الإشعارات غير مسموح بها — فعّلها من إعدادات الهاتف للتطبيق`,`Les notifications ne sont pas autorisées — activez-les dans les réglages du téléphone pour l’application`],
+[`تمّ إرسال إشعار تجريبي ✓ — قد لا يظهر ما دام التطبيق مفتوحًا؛ صغّره لتراه`,`Notification de test envoyée ✓ — elle peut ne pas s’afficher tant que l’application est ouverte ; réduisez-la pour la voir`],[`يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته`,`L’adhan retentit — touchez « Arrêter » dans la notification pour le couper`],
+[`تعذّر حفظ الملف`,`Impossible d’enregistrer le fichier`],[`تمت استعادة تقدّمك بنجاح ✓ سيُعاد تحميل التطبيق.`,`Progression restaurée ✓ L’application va se recharger.`],[`تعذّرت قراءة الملف. تأكد أنه ملف نسخة احتياطية صحيح لتطبيق صلاتي.`,`Impossible de lire le fichier. Vérifiez qu’il s’agit d’une sauvegarde valide de Salati.`],[`هذا الملف لا يبدو نسخةً من تطبيق صلاتي. هل تريد المتابعة؟`,`Ce fichier ne ressemble pas à une sauvegarde de Salati. Continuer ?`],
+[`جارٍ التنزيل — اضغط للإيقاف`,`Téléchargement en cours — touchez pour arrêter`],[`نزّل التلاوة على الجهاز`,`Télécharger la récitation sur l’appareil`],[`احذف التلاوة من الجهاز`,`Supprimer la récitation de l’appareil`],[`لا اتّصال — التنزيل يحتاج إنترنت`,`Hors connexion — le téléchargement nécessite Internet`],[`لا اتّصال — نزِّل السورة لتُسمَع دون إنترنت`,`Hors connexion — téléchargez la sourate pour l’écouter sans Internet`],
+[`مساحةُ الجهاز ضاقت — احذف بعضَ المُنزَّل أوّلًا`,`Espace insuffisant — supprimez d’abord des téléchargements`],[`حُذف المُنزَّلُ كلُّه`,`Tous les téléchargements ont été supprimés`],[`تعذّر التشغيل`,`Lecture impossible`],[`ضعف في الاتصال — إعادة المحاولة…`,`Connexion faible — nouvelle tentative…`],
+[`غيرُ مُنزَّلة، ولا اتّصالَ الآن — نزِّلها وأنت متّصلٌ لتُسمَع دائمًا`,`Non téléchargée et hors connexion — téléchargez-la en ligne pour l’écouter à tout moment`],[`تعذّر تشغيل هذه السورة — جرّب قارئًا آخر`,`Impossible de lire cette sourate — essayez un autre récitant`],
+[`لم يُحمَّل القارئُ بعدُ — جرّب بعد لحظة`,`Le récitant n’est pas encore chargé — réessayez dans un instant`],[`غير مسجّلة بصوت`,`Non enregistrée par`],[`لم تُسجَّل بصوت`,`N’a pas été enregistrée par`],[`هذا القارئ`,`ce récitant`],
+[`على آيفون: اضغط زرّ المشاركة (المربّع بالسهم) بالأسفل، ثم اختر «إضافة إلى الشاشة الرئيسية».`,`Sur iPhone : touchez le bouton Partager (le carré avec une flèche) en bas, puis choisissez « Sur l’écran d’accueil ».`],
+[`على أندرويد: افتح قائمة المتصفّح (⋮) أعلى اليمين، ثم اختر «إضافة إلى الشاشة الرئيسية» أو «تثبيت التطبيق».`,`Sur Android : ouvrez le menu du navigateur (⋮) en haut à droite, puis choisissez « Ajouter à l’écran d’accueil » ou « Installer l’application ».`],
+[`على الآيفون: أضِف التطبيق إلى الشاشة الرئيسيّة أوّلًا (زرّ المشاركة ثم «إضافة إلى الشاشة الرئيسيّة») ثم فعِّل هذا الخيار منه.`,`Sur iPhone : ajoutez d’abord l’application à l’écran d’accueil (bouton Partager puis « Sur l’écran d’accueil »), puis activez cette option depuis l’application.`],
+[`سيرة النبيّ ﷺ وأحاديثه الصحيحة`,`Biographie du Prophète ﷺ et hadiths authentiques`],[`سلاسلُ قصص الأنبياء عليهم السلام`,`Séries sur les histoires des prophètes (paix sur eux)`],[`سيرةُ النبيّ ﷺ في سلاسلَ كاملة`,`La biographie du Prophète ﷺ en séries complètes`],
+[`مكّيّة`,`Mecquoise`],[`مدنيّة`,`Médinoise`],[`المنشاوي (مجوّد)`,`Al-Minchaoui (mujawwad)`],[`تلاوة`,`récitation`],[`تلاوات`,`récitations`],[`سؤال`,`question`],[`ورقي`,`Papier`],[`أبيض`,`Blanc`],[`أسود`,`Noir`],
+[`جرّب مصدرًا آخر`,`Essayer une autre source`],[`مقطع`,`Passage`]
+]);
+add([[`مثال: 750`,`ex. : 750`],[`مثال: 9`,`ex. : 9`],[`القبلة`,`Qibla`],[`أضِف مقطعًا`,`Ajouter un clip`],[`رابطُ المقطع`,`Lien du clip`],[`اسمُه (اختياريّ)`,`Son nom (facultatif)`],
+[`يُقبل رابطُ Google Drive، أو رابطٌ مباشرٌ لملفّ mp3 أو mp4. وإن كان من درايف فاجعل مشاركتَه «لكلّ من لديه الرابط» وإلّا لم يُشغَّل. ويُحفظ في جهازك وحدَه.`,`Un lien Google Drive ou un lien direct vers un fichier mp3 ou mp4 est accepté. Pour Drive, réglez le partage sur « Toute personne disposant du lien », sinon la lecture échoue. Il n’est conservé que sur votre appareil.`],
+[`أضِفْه إلى القائمة`,`Ajouter à la liste`],[`فتحُه في المتصفّح`,`L’ouvrir dans le navigateur`],[`دورة كاملة تهتزّ تنبيهاً`,`Un tour complet fait vibrer l’appareil pour vous prévenir`],[`تصفير العدّاد`,`Remettre le compteur à zéro`],
+[`افتح قائمة المتصفّح ثمّ اختر`,`Ouvrez le menu du navigateur puis choisissez`],[`«تثبيت»`,`« Installer »`],[`أو اضغط أيقونة التثبيت في شريط العنوان.`,`ou touchez l’icône d’installation dans la barre d’adresse.`],
+[`آيات متشابهة اللفظ (في ورقة التفسير)`,`Versets de formulation proche (dans la fiche d’exégèse)`],[`الخياران يظهران في ورقة التفسير عند لمس الآية، ولا يمسّان صفحةَ المصحف ولا لونَ نصّه. الترجمةُ ترجمةُ معانٍ لا تُغني عن الأصل؛ والمتشابهاتُ تشابهٌ آليٌّ من النصّ وليست قائمةَ علماء المتشابه اللفظيّ.`,`Ces deux options apparaissent dans la fiche d’exégèse quand on touche un verset ; elles ne touchent ni la page du Mushaf ni la couleur de son texte. La traduction est une traduction du sens, qui ne remplace pas l’original ; les versets proches relèvent d’une similitude automatique du texte, et non d’une liste établie par les savants.`],[`لغة الواجهة`,`Langue de l’interface`],[`لغة القوائم والإعدادات`,`Langue des menus et réglages`],[`الواجهة المترجمة تشمل القوائمَ والإعدادات والأدوات والرسائل. أمّا القرآنُ والأذكارُ والفقهُ والسيرةُ والأحاديثُ وأسئلةُ الاختبار فتبقى بالعربيّة.`,`L’interface traduite couvre les menus, les réglages, les outils et les messages. Le Coran, les invocations, le fiqh, la biographie, les hadiths et les questions du quiz restent en arabe.`]]);
+for(const k in GM) D.set(key(k), GM[k]);
+for(const k in HM) D.set(key(k), HM[k]);
+/* ===================== إخراج ===================== */
+window.I18N=C.make({ lang:'fr', lookup:find, abbr:v=>mapLook(ABBR,v), title:'Salati — invocations et Coran' });
+})();
