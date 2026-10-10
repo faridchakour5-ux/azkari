@@ -524,16 +524,6 @@
   .listen-sura .ls-dl.on{color:var(--accent); border-color:var(--accent); background:var(--accent-bg);}
   .listen-sura .ls-dl.busy{color:var(--accent); border-color:var(--accent);}
   .listen-sura.na .ls-dl{visibility:hidden;}
-  /* شريطُ المُنزَّل أعلى القائمة */
-  .qdl-bar{display:flex; align-items:center; gap:9px; margin:10px 16px 0; padding:10px 13px;
-    border:1px solid var(--line); border-radius:15px; background:var(--card); box-shadow:var(--shadow-1);}
-  .qdl-bar .qb-ic{flex:0 0 auto; color:var(--accent); display:inline-flex;}
-  .qdl-bar .qb-ic .gh-ic{width:17px; height:17px;}
-  .qdl-bar .qb-t{flex:1 1 auto; min-width:0; font-size:13px; font-weight:700; color:var(--text-2); line-height:1.5;}
-  .qdl-bar .qb-t small{display:block; font-size:11.5px; font-weight:600; color:var(--text-3);}
-  .qdl-bar .qb-del{flex:0 0 auto; border:1px solid var(--line); background:var(--fill-2); color:var(--c-repeat);
-    border-radius:11px; padding:7px 11px; font:inherit; font-size:12px; font-weight:800;}
-  .qdl-bar .qb-del:active{transform:scale(.94);}
 
   /* تذكير الصلاة على النبي ﷺ (شريط داخل التطبيق) */
   /* ===== صفحة الفقه ===== */
@@ -1494,11 +1484,6 @@
     </div>
     <audio id="reciter-audio" preload="none"></audio>
   </div>
-  <div class="qdl-bar" id="qdl-bar" style="display:none">
-    <span class="qb-ic"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg></span>
-    <span class="qb-t" id="qdl-txt"></span>
-    <button class="qb-del" id="qdl-clear" type="button">احذف الكلّ</button>
-  </div>
   <div class="listen-list" id="listen-list"></div>
   <div class="stories-box" id="hifz-box" style="display:none"><div class="hifz-body" id="hifz-listen"></div></div>
   <div class="stories-box" id="duat-box" style="display:none">
@@ -1826,6 +1811,15 @@
     <div class="btn-row b-blue svc-only" id="adhan-try" style="display:none">تجربة الأذان الآن</div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
   </div>
+
+  <div class="gtitle">التلاوات المُنزَّلة والتخزين</div>
+  <div class="group">
+    <div class="row"><span class="k">على جهازك</span><span class="v" id="st-dl-count">—</span></div>
+    <div class="row"><span class="k">المساحة التي تشغلها</span><span class="v" id="st-dl-size">—</span></div>
+    <div class="row"><span class="k">المتاح في الجهاز (تقريبًا)</span><span class="v" id="st-dl-free">—</span></div>
+    <div class="btn-row b-amber" id="qdl-clear" style="display:none">احذف كلّ التلاوات المُنزَّلة</div>
+  </div>
+  <div class="gnote">التلاوات التي نزّلتَها من صفحة «الاستماع» تُسمَع دون إنترنت. يمكنك حذفها من هنا لتوفير المساحة.</div>
 
   <div class="gtitle">النسخ الاحتياطي</div>
   <div class="group">
@@ -2830,7 +2824,7 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   if(t.dataset.s!=='s-wird'){ ['#mushaf-jump','#q-zoom-float','#riwaya-float'].forEach(x=>{ const e=$(x); if(e) e.classList.remove('show'); }); }
   if(t.dataset.s==='s-wird') openWird();
   if(t.dataset.s==='s-listen') openListen();
-  if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} }
+  if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} try{ renderQdlBar(); }catch(e){} }
   if(t.dataset.s==='s-tasbih'){
     const on=document.querySelector('#tasbih-mode-seg button.on');
     if(on && on.dataset.t==='fiqh'){ try{ openFiqh(); }catch(e){} }
@@ -5470,7 +5464,8 @@ function qdlCountLabel(k){
 }
 function qdlFmt(b){
   if(!b) return '—';
-  return b>=1048576 ? (b/1048576).toFixed(1)+' م.ب' : Math.max(1,Math.round(b/1024))+' ك.ب';
+  if(b>=1073741824) return String(+(b/1073741824).toFixed(1))+' غ.ب';
+  return b>=1048576 ? String(+(b/1048576).toFixed(1))+' م.ب' : Math.max(1,Math.round(b/1024))+' ك.ب';
 }
 /* التنزيلُ بالتدفّق ليُعرَض التقدّمُ رقمًا، ويُمكنَ إيقافُه في منتصفه */
 async function qdlDownload(url, onPct){
@@ -6285,15 +6280,14 @@ function qdlPaint(si, state, pct){
   else if(state==='on'){ el.innerHTML = QDL_OK; el.setAttribute('aria-label','احذف التلاوة من الجهاز'); }
   else { el.innerHTML = QDL_DOWN; el.setAttribute('aria-label','نزّل التلاوة على الجهاز'); }
 }
-/* شريطُ المُنزَّل: لا يظهر إلّا إذا كان على الجهاز شيء */
+/* المُنزَّلُ في الإعدادات (لا في صفحة الاستماع) */
 async function renderQdlBar(){
-  const bar=$('#qdl-bar'), txt=$('#qdl-txt'); if(!bar||!txt) return;
-  const st=await qdlStats();
-  if(!st.count){ bar.style.display='none'; return; }
-  const free=await qdlFree();
-  txt.innerHTML='على جهازك '+qdlCountLabel(st.count)+' · '+qdlFmt(st.bytes)+
-    '<small>تُسمَع دون إنترنت'+(free&&free.free?(' · في الجهاز متّسعٌ لنحوِ '+qdlFmt(free.free)):'')+'</small>';
-  bar.style.display='flex';
+  const c=$('#st-dl-count'); if(!c) return;
+  const st=await qdlStats(), free=await qdlFree();
+  c.textContent = st.count ? qdlCountLabel(st.count) : 'لا شيء';
+  $('#st-dl-size').textContent = st.count ? qdlFmt(st.bytes) : '—';
+  $('#st-dl-free').textContent = free&&free.free ? qdlFmt(free.free) : '—';
+  $('#qdl-clear').style.display = st.count ? '' : 'none';
 }
 $('#qdl-clear') && $('#qdl-clear').addEventListener('click', async ()=>{
   vibrate(10);
