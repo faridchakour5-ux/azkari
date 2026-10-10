@@ -613,4 +613,44 @@ T.notifs = function(nowMs, days, nextId){
 };
 T.anyReminder = () => { const R=remGet(); return !!(R.fast||R.rev); };
 
+
+/* ============ الجولة التعريفيّة (أوّل فتح) ============ */
+const onbCss=document.createElement('style');
+onbCss.textContent=`
+.onb{position:fixed; inset:0; z-index:300; background:var(--bg); display:flex; flex-direction:column; padding:calc(env(safe-area-inset-top,0px) + 14px) 22px calc(22px + env(safe-area-inset-bottom,0px));}
+.onb .skip{align-self:flex-start; border:0; background:transparent; color:var(--text-2); font:inherit; font-size:14.5px; font-weight:700; padding:8px 4px;}
+.onb .sl{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:16px; animation:onbIn .35s ease;}
+@keyframes onbIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+.onb .ico{width:112px; height:112px; border-radius:50%; background:var(--accent-soft,rgba(47,158,68,.14)); color:var(--accent); display:flex; align-items:center; justify-content:center;}
+.onb .ico svg{width:56px; height:56px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+.onb h2{margin:0; font-size:25px; font-weight:800; color:var(--c-repeat);}
+.onb p{margin:0; font-size:16px; line-height:2; color:var(--text); max-width:420px;}
+.onb .dots{display:flex; justify-content:center; gap:8px; margin:6px 0 16px;}
+.onb .dots i{width:8px; height:8px; border-radius:50%; background:var(--line);} .onb .dots i.on{background:var(--accent); width:22px; border-radius:6px;}
+`;
+document.head.appendChild(onbCss);
+T.onboard = function(force){
+  if(!force && sget('az_onb',false)) return;
+  if(document.getElementById('onb')) return;
+  const SL=[
+    {ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>', t:'مواقيت الصلاة والأذان',
+     p:'فعِّل موقعك من صفحة «الأذكار» ليُحسب لك وقتُ كلّ صلاة حسب مدينتك، وفي المغرب بجدول وزارة الأوقاف. وفي تطبيق أندرويد يرفع التطبيقُ الأذانَ بصوت المؤذّن عند دخول الوقت حتى وهو مغلق.'},
+    {ic:'<svg viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>', t:'القرآن والاستماع والتحفيظ',
+     p:'مصحفٌ برواية ورش وحفص مع التفسير الميسّر وترجمة المعاني، وتلاواتٌ بأصوات قرّاء، وتحفيظٌ بالتكرار مع مراجعةٍ متباعدة.'},
+    {ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5z"/></svg>', t:'الأذكار وأدوات المسلم',
+     p:'أذكار الصباح والمساء وغيرها، والفقه والسيرة والاختبار، والقبلة والتقويم الهجريّ ومتابعة الصلوات والصيام والزكاة. المصحفُ والأذكارُ والأدواتُ تعمل دون إنترنت، والاستماعُ يحتاجه إلا ما نزّلتَه. لا حسابَ ولا إعلانات، وتقدّمُك محفوظٌ على هاتفك.'}
+  ];
+  let i=0; const el=document.createElement('div'); el.className='onb'; el.id='onb'; document.body.appendChild(el);
+  const done=()=>{ sset('az_onb',true); el.remove(); };
+  const draw=()=>{
+    const x=SL[i];
+    el.innerHTML='<button class="skip" id="onb-skip">'+(i<SL.length-1?'تخطَّ':'')+'</button><div class="sl"><div class="ico">'+x.ic+'</div><h2>'+x.t+'</h2><p>'+x.p+'</p></div>'+
+      '<div class="dots">'+SL.map((_,k)=>'<i'+(k===i?' class="on"':'')+'></i>').join('')+'</div>'+
+      '<button class="tl-btn" id="onb-next" style="margin-top:0">'+(i<SL.length-1?'التالي':'ابدأ')+'</button>';
+    el.querySelector('#onb-skip').onclick=done;
+    el.querySelector('#onb-next').onclick=()=>{ vib(6); if(i<SL.length-1){ i++; draw(); } else done(); };
+  };
+  draw();
+};
+
 })();

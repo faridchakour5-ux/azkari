@@ -948,13 +948,6 @@
   /* التفسير: الآية قابلة للّمس + الورقة السفلية */
   .aya-t{cursor:pointer; border-radius:6px; transition:background-color .2s;}
   .aya-t.tsel{background:var(--c-repeat-bg);}
-  /* تلوين التجويد (حفص): الألوانُ على الحرف وحدَه؛ وعلاماتُ التشكيل تبقى بلون لوحة الخطّ حتى لا تنكسر وصلاتُ الحروف */
-  :root{ --tj-g:#A23B8C; --tj-k:#0F8BA8; --tj-n:#6C7A89; --tj-i:#2F6FD0; --tj-q:#3949AB; --tj-m:#C77100; --tj-p:#D2501A; --tj-l:#C62828; --tj-s:#9E9E9E; }
-  html[data-bg="dark"]{ --tj-g:#E08ACD; --tj-k:#5CC8E0; --tj-n:#A3B1BF; --tj-i:#7FA9F5; --tj-q:#98A4F2; --tj-m:#F0A63A; --tj-p:#F28A5A; --tj-l:#F26B6B; --tj-s:#7C7C7C; }
-  .tj-g{color:var(--tj-g)!important;} .tj-k{color:var(--tj-k)!important;} .tj-n{color:var(--tj-n)!important;} .tj-i{color:var(--tj-i)!important;} .tj-q{color:var(--tj-q)!important;}
-  .tj-m{color:var(--tj-m)!important;} .tj-p{color:var(--tj-p)!important;} .tj-l{color:var(--tj-l)!important;} .tj-s{color:var(--tj-s)!important;}
-  .tj-lg{display:flex; align-items:center; gap:12px; padding:10px 2px; border-top:1px solid var(--sep); font-size:14.5px; line-height:1.8;}
-  .tj-lg:first-child{border-top:0;} .tj-lg i{flex:0 0 22px; height:22px; border-radius:50%;} .tj-lg small{display:block; color:var(--text-2); font-size:12.5px;}
   .tafsir-body .t-tr{font-size:15.5px; line-height:1.85; color:var(--text); background:var(--fill-2); border-radius:14px; padding:11px 13px; margin:0 0 14px; text-align:start; direction:ltr; white-space:pre-wrap;}
   .tafsir-body .t-trs{font-size:11.5px; color:var(--text-3); margin:-8px 2px 14px; line-height:1.7; direction:ltr; text-align:start;}
   .tafsir-body .t-sim{margin-top:16px; padding-top:12px; border-top:1px solid var(--sep);}
@@ -1753,10 +1746,6 @@
         <button data-r="g4" title="زمرّديّ 4 — غامق جدًّا"><i style="background:var(--qc-g4)"></i></button>
       </div>
     </div>
-    <div class="row"><span class="k">تلوين أحكام التجويد (حفص)</span>
-      <label class="sw"><input type="checkbox" id="tajweed-toggle"><span class="track"></span><span class="knob"></span></label>
-    </div>
-    <div class="row" id="tajweed-legend-row" style="cursor:pointer"><span class="k">دليل ألوان التجويد</span><span class="v" style="color:var(--accent)">عرض ‹</span></div>
     <div class="row"><span class="k">ترجمة معاني الآية</span>
       <div class="miniseg" id="trans-seg">
         <button data-r="">بلا</button>
@@ -1766,7 +1755,7 @@
     </div>
   </div>
   <div class="gnote" id="riwaya-note"></div>
-  <div class="gnote">التجويد الملوَّن للمصحف برواية حفص فقط: بياناتٌ مفتوحة آليّة (CC BY 4.0) تشمل نحو 94٪ من الآيات، وقد تخطئ في مواضع — فالمرجع المصحفُ المجوَّد والمقرئ. الترجمةُ تظهر عند لمس الآية (تحت الآية في ورقة التفسير) وهي ترجمةُ معانٍ لا تُغني عن الأصل.</div>
+  <div class="gnote">الترجمةُ تظهر عند لمس الآية (تحت الآية في ورقة التفسير)، وهي ترجمةُ معانٍ لا تُغني عن الأصل. لونُ نصّ القرآن في المصحف لا يتغيّر.</div>
 
   <div class="gtitle">لون الخلفية</div>
   <div class="group">
@@ -1878,6 +1867,7 @@
     <div class="row"><span class="k">مرجع حفص</span><span class="v">مصحف الملك فهد</span></div>
     <div class="row"><span class="k">مرجع ورش</span><span class="v">المصحف المحمدي</span></div>
     <a class="row" href="privacy.html" style="text-decoration:none; color:inherit;"><span class="k">سياسة الخصوصية</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
+    <div class="row" id="onb-again" style="cursor:pointer"><span class="k">الجولة التعريفيّة</span><span class="v" style="color:var(--accent)">عرض ‹</span></div>
     <a class="row" href="credits.html" style="text-decoration:none; color:inherit;"><span class="k">صور القرّاء (النَّسب والتراخيص)</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
   </div>
   <div class="gnote">الأذكار من كتاب «حصن المسلم». ونصّ القرآن: رواية حفص عن <b>مصحف الملك فهد</b>، ورواية ورش عن <b>المصحف المحمدي</b>. اللهم تقبّل واغفر لنا.</div>
@@ -3040,58 +3030,6 @@ function qFix(t){
   return x;
 }
 
-/* ===== تلوين التجويد (حفص) =====
-   البياناتُ (tajweed.js) تُحمَّل عند التفعيل؛ كلُّ آيةٍ لها فئاتٌ بأرقام الحروف. الحرفُ وعلاماتُه وحدةٌ واحدة؛ والفراغُ و۞ ليسا حرفًا — كما في tools/build-tajweed.py. */
-const TJ_GAP=new Set([' ','\u00a0','\u06de','\u06e9']);
-const TJ_M=/\p{M}/u;
-const TJON=()=>settings.tajweed===true && settings.riwaya==='hafs' && !!window.TJ;
-function tjHtml(ai, text){
-  const spec=window.TJ && window.TJ[ai]; if(!spec) return text;
-  const ch=Array.from(text), uo=new Array(ch.length); let u=-1;
-  for(let k=0;k<ch.length;k++){
-    const c=ch[k];
-    if(TJ_GAP.has(c)){ uo[k]=-1; continue; }
-    if(c!=='\u0670' && TJ_M.test(c) && u>=0){ uo[k]=u; continue; }
-    u++; uo[k]=u;
-  }
-  const cls=new Array(u+1).fill('');
-  spec.split(';').forEach(r=>{ const c=r[0], p=r.slice(1).split(','), s0=+p[0], l=+p[1]; for(let x=s0;x<s0+l&&x<cls.length;x++) cls[x]=c; });
-  let out='', run='', cur='';
-  const flush=()=>{ if(run){ out+= cur ? '<i class="tj-'+cur+'" style="font-style:normal">'+run+'</i>' : run; run=''; } };
-  for(let k=0;k<ch.length;k++){
-    const cc = uo[k]<0 ? '' : cls[uo[k]];
-    if(cc!==cur){ flush(); cur=cc; }
-    run+=ch[k];
-  }
-  flush(); return out;
-}
-let __tjLoading=null;
-function tjEnsure(){ if(window.TJ) return Promise.resolve(true); return __tjLoading || (__tjLoading=loadScriptOnce('tajweed.js').then(ok=>{ if(!ok) __tjLoading=null; return ok; })); }
-function tjRefresh(){
-  try{ __mushafRenderedRiwaya=null; }catch(e){}
-  try{ if(WIRD && $('#s-wird').classList.contains('active') && document.querySelector('#wird-body').dataset.mode==='mushaf') renderMushaf(true); }catch(e){}
-}
-const TJ_LEG=[['g','غنّة','غنّةُ النون والميم المشدّدتين، والإدغامُ بغنّة، وإدغامُ الميم الشفويّ'],
-  ['k','إخفاء','إخفاءُ النون الساكنة والتنوين، والإخفاءُ الشفويّ'],
-  ['n','إدغام بلا غنّة','وإدغامُ المتماثلين والمتجانسين والمتقاربين'],
-  ['i','إقلاب','قلبُ النون الساكنة والتنوين ميمًا قبل الباء'],
-  ['q','قلقلة','حروفُ «قطبُ جدٍّ» إذا سكنت'],
-  ['m','مدّ بحركتين','المدُّ الطبيعيّ، ويشمل العارضَ للسكون واللّينَ (2 أو 4 أو 6)'],
-  ['p','مدّ متّصل ومنفصل','4 أو 5 حركات'],
-  ['l','مدّ لازم','6 حركات'],
-  ['s','حرفٌ لا يُنطَق','همزةُ الوصل واللامُ الشمسيّة والحرفُ الصامت']];
-function openTjLegend(){
-  let sh=$('#tj-ov');
-  if(!sh){
-    sh=document.createElement('div'); sh.className='sura-overlay'; sh.id='tj-ov';
-    sh.innerHTML='<div class="sura-sheet"><div class="sura-sheet-head"><span>دليل ألوان التجويد</span><button id="tj-x" aria-label="إغلاق" style="border:0;background:transparent;color:inherit;font-size:20px">✕</button></div><div style="padding:6px 16px 18px;overflow-y:auto">'+
-      TJ_LEG.map(x=>'<div class="tj-lg"><i style="background:var(--tj-'+x[0]+')"></i><span><b>'+x[1]+'</b><small>'+x[2]+'</small></span></div>').join('')+
-      '<div class="tl-note" style="font-size:12px;color:var(--text-3);margin-top:8px;line-height:1.8">بياناتُ التلوين مفتوحةٌ آليّة من مشروع quran-tajweed (رخصة CC BY 4.0). تشمل نحو 94٪ من الآيات وقد تخطئ في مواضع؛ فالمرجعُ المصحفُ المجوَّد والمقرئ.</div></div></div>';
-    document.body.appendChild(sh);
-    sh.addEventListener('click',e=>{ if(e.target===sh||e.target.id==='tj-x') sh.classList.remove('show'); });
-  }
-  sh.classList.add('show');
-}
 /* ===== ترجمة المعاني والآيات المتشابهة (ورقة التفسير) ===== */
 const TR_SRC={ fr:'Traduction du sens des versets — Noor International Center (Dr Nabil Rudwan), via quranenc.com',
                en:'Translation of the meanings — Noor International Center, via quranenc.com' };
@@ -3223,7 +3161,7 @@ function buildMushaf(body){
       const b=basmalaHtml(si); if(b) parts.push(b);
     }
     if(!textOpen){ parts.push('<div class="wird-text">'); textOpen=true; }
-    parts.push('<span class="aya-t" data-tai="'+i+'">'+(TJON() ? tjHtml(i, qFix(a.t)) : qFix(a.t))+'</span><span class="wird-num" data-ai="'+i+'">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
+    parts.push('<span class="aya-t" data-tai="'+i+'">'+qFix(a.t)+'</span><span class="wird-num" data-ai="'+i+'">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
   }
   if(textOpen) parts.push('</div>');
   if(pgOpen) parts.push('</div>');
@@ -4484,8 +4422,11 @@ async function openTools(page){
   if(!(await loadTools())){ showToast('تعذّر تحميل الأدوات — جرّب ثانيةً', 3200); return; }
   vibrate(6); SalTools.open(page);
 }
+/* الجولةُ التعريفيّة: لمن يفتح التطبيقَ لأوّل مرّة فقط (بعد شاشة الافتتاح)، ويمكن إعادتُها من الإعدادات */
+try{ if(!__hadSettings && !store.get('az_onb', false)) setTimeout(async()=>{ if(await loadTools()) SalTools.onboard(); }, 4300); }catch(e){}
 (function(){
   const o=document.getElementById('tools-open'); if(!o) return;
+  const ob=document.getElementById('onb-again'); if(ob) ob.addEventListener('click', async()=>{ if(await loadTools()){ vibrate(6); SalTools.onboard(true); } });
   o.addEventListener('click', ()=>openTools());
   o.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openTools(); } });
   const sl=document.getElementById('reciter-sleep');
@@ -7485,19 +7426,7 @@ applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
 syncSeg('#riwaya-seg','riwaya'); syncSeg('#qcolor-seg','quranColor'); renderSwatches();
 applyHafsFont(); applyQuranColor();
 (function(){
-  const tg=$('#tajweed-toggle'); if(!tg) return;
-  tg.checked = settings.tajweed===true;
-  tg.addEventListener('change', async()=>{
-    settings.tajweed=tg.checked; saveSettings(); vibrate(6);
-    if(tg.checked){
-      if(!(await tjEnsure())){ showToast('تعذّر تحميل بيانات التجويد — جرّب ثانيةً', 3200); tg.checked=false; settings.tajweed=false; saveSettings(); return; }
-      showToast(settings.riwaya==='hafs' ? 'تلوينُ التجويد مفعَّل ✓ — اضغط «دليل ألوان التجويد» لمعرفة الألوان' : 'التجويد الملوَّن يظهر برواية حفص — بدِّل الروايةَ لرؤيته', 4200);
-    }
-    tjRefresh();
-  });
-  const lg=$('#tajweed-legend-row'); if(lg) lg.addEventListener('click', ()=>{ vibrate(5); openTjLegend(); });
-  if(settings.tajweed===true && settings.riwaya==='hafs') tjEnsure().then(ok=>{ if(ok) tjRefresh(); });
-  const ts=$('#trans-seg');
+  const ts=$('#trans-seg'); if(!ts) return;
   if(ts){
     const paint=()=>ts.querySelectorAll('button').forEach(b=>b.classList.toggle('on', (b.dataset.r||'')===(settings.trans||'')));
     paint();
