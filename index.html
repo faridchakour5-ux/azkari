@@ -418,6 +418,12 @@
   .reciter-chips button.on{border-color:var(--accent); background:var(--fill-2);}
   .reciter-chips button.on .rc-av{background:var(--accent); color:#fff;}
   .reciter-chips button.on .rc-nm{color:var(--accent); font-weight:800;}
+  /* صورةُ القارئ فوق حرف اسمه؛ إن تعذّر تحميلُها سقطت وبقي الحرف */
+  .rc-av .rc-ph{position:absolute; inset:0; width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; background:var(--fill-2);}
+  .reciter-chips button.on .rc-av.ph{box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--accent);}
+  .rc-av .rc-eq{position:absolute; inset-inline-end:-4px; bottom:-4px; width:22px; height:22px; border-radius:50%; background:var(--accent);
+    color:#fff; display:flex; align-items:center; justify-content:center; border:2px solid var(--card);}
+  .rc-av .rc-eq .eqz{height:9px; gap:1.5px;} .rc-av .rc-eq .eqz i{width:2px;}
   .reciter-chips button:active{transform:scale(.96);}
   .reciter-chips button .ext{position:absolute; inset-inline-end:-2px; top:-2px; width:16px; height:16px;
     border-radius:50%; background:var(--card); color:var(--text-3); font-size:9px;
@@ -1841,6 +1847,7 @@
     <div class="row"><span class="k">مرجع حفص</span><span class="v">مصحف الملك فهد</span></div>
     <div class="row"><span class="k">مرجع ورش</span><span class="v">المصحف المحمدي</span></div>
     <a class="row" href="privacy.html" style="text-decoration:none; color:inherit;"><span class="k">سياسة الخصوصية</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
+    <a class="row" href="credits.html" style="text-decoration:none; color:inherit;"><span class="k">صور القرّاء (النَّسب والتراخيص)</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
   </div>
   <div class="gnote">الأذكار من كتاب «حصن المسلم». ونصّ القرآن: رواية حفص عن <b>مصحف الملك فهد</b>، ورواية ورش عن <b>المصحف المحمدي</b>. اللهم تقبّل واغفر لنا.</div>
   <div style="height:30px"></div>
@@ -5605,13 +5612,16 @@ function reciterMonogram(name){
   return t.charAt(0) || '؟';
 }
 const EQZ='<span class="eqz"><i></i><i></i><i></i></span>';
+/* صورٌ حرّةُ الترخيص (ويكيميديا كومنز) — النَّسبُ في credits.html؛ من لا صورةَ له يبقى بحرفه */
+const RC_PHOTO={ghamdi:'ghamdi',shur:'shur',minshawi:'minshawi','minshawi-mjwd':'minshawi',koshi:'koshi',maher:'maher',qtami:'qtami',turki:'turki',hzza:'hzza'};
 function renderReciterChips(){
   const wrap=$('#reciter-chips'); if(!wrap) return;
   const playing=audioPlaying();
   wrap.innerHTML = RECITERS.map(r=>{
     const on = settings.reciter===r.id;
     return '<button type="button" data-id="'+r.id+'" class="'+(on?'on':'')+'">'+
-      '<span class="rc-av">'+ (on && playing ? EQZ : escapeHtml(reciterMonogram(r.name))) +
+      '<span class="rc-av'+(RC_PHOTO[r.id]?' ph':'')+'">'+ (on && playing && !RC_PHOTO[r.id] ? EQZ : escapeHtml(reciterMonogram(r.name))) +
+        (RC_PHOTO[r.id]?'<img class="rc-ph" src="reciters/'+RC_PHOTO[r.id]+'.webp" alt="" width="46" height="46" decoding="async" onerror="this.remove()">'+(on&&playing?'<span class="rc-eq">'+EQZ+'</span>':''):'')+
         (r.external?'<span class="ext">↗</span>':'')+'</span>'+
       '<span class="rc-nm">'+escapeHtml(r.name)+'</span>'+
     '</button>';

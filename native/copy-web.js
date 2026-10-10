@@ -11,7 +11,7 @@ const ITEMS = [
   'index.html', 'data.js', 'adhan.min.js', 'ma-habous.js', 'wird_hafs.js', 'wird_warsh.js',
   // ملفّاتٌ تُحمَّل عند الطلب من داخل index.html — بدونها تتعطّل صفحاتُها
   'fadl.js', 'wasaya.js', 'fiqh.js', 'thabat.js', 'sunna.js', 'sharh.js', 'quiz.js', 'tafsir.js',
-  'manifest.json', 'privacy.html', 'sw.js', 'fonts', 'icons', 'audio'
+  'manifest.json', 'privacy.html', 'credits.html', 'sw.js', 'fonts', 'icons', 'audio', 'reciters'
 ];
 
 function rmrf(p){ if(fs.existsSync(p)) fs.rmSync(p, { recursive:true, force:true }); }

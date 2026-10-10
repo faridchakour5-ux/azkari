@@ -1,9 +1,10 @@
 /* صلاتي — service worker v256 */
-const CACHE = 'azkari-v257';
+const CACHE = 'azkari-v258';
 const ASSETS = [
   './',
   './index.html',
   './privacy.html',
+  './credits.html',
   './data.js',
   './adhan.min.js',
   './ma-habous.js',
@@ -17,6 +18,14 @@ const ASSETS = [
   './sunna.js',
   './sharh.js',
   './manifest.json',
+  './reciters/ghamdi.webp',
+  './reciters/hzza.webp',
+  './reciters/koshi.webp',
+  './reciters/maher.webp',
+  './reciters/minshawi.webp',
+  './reciters/qtami.webp',
+  './reciters/shur.webp',
+  './reciters/turki.webp',
   './fonts/ui-400.woff2',
   './fonts/ui-600.woff2',
   './fonts/ui-700.woff2',
