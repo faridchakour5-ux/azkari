@@ -4786,6 +4786,7 @@ function hzStop(silent){
   if(h){ clearTimeout(h.timer); }
   try{ a.onended=null; a.onerror=null; a.pause(); a.removeAttribute('src'); a.load(); }catch(e){}
   $('#hifz-pill').classList.remove('show');
+  try{ if(!__wantPlay) listenKeepAlive(false); }catch(e){}
   document.querySelectorAll('.aya-t.hifz-live').forEach(x=>x.classList.remove('hifz-live'));
   if(h && !silent){ try{ setupMediaSession(); }catch(e){} }
 }
@@ -6422,6 +6423,47 @@ $('#reciter-audio').addEventListener('playing', ()=>{ __recTry=0; if(__recTimer)
 $('#reciter-audio').addEventListener('pause', ()=>{ setPlayBtn(false); if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 $('#reciter-audio').addEventListener('playing', ()=>{ setPlayBtn(true); if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing'; try{ renderFollowPill(); renderAutoReadPill(); }catch(e){} });
 $('#reciter-audio').addEventListener('ended', ()=>{ try{ qsFoldCal(); QSY=null; renderFollowPill(); renderAutoReadPill(); }catch(e){} });
+
+/* ===== إبقاءُ الاستماع حيًّا والشاشةُ مطفأة (تطبيق أندرويد) =====
+   الصوتُ في الـWebView، وأندرويد يُجمّد التطبيقَ الذي في الخلفيّة بلا خدمةٍ أماميّة فتنقطع التلاوة،
+   ويُطفئ الـWi-Fi فيتعثّر البثّ. فنُشغّل «خدمةَ الاستماع» ما دامت التلاوةُ تعمل، ونُطلقها بعد توقّفٍ مقصود.
+   الإيقافُ مؤجَّلٌ ثوانيَ: الانتقالُ إلى السورة التالية يمرّ بلحظة «ended» فلا نُسقط الخدمةَ بينهما. */
+let __kaT=null, __kaOn=false;
+function listenKeepAlive(on, title, text){
+  const P=adhanPlugin(); if(!P || !P.listenKeepAlive) return;
+  clearTimeout(__kaT);
+  if(on){ __kaOn=true; P.listenKeepAlive({ on:true, title:title||'الاستماع', text:text||'صلاتي' }).catch(()=>{}); }
+  else if(__kaOn){ __kaT=setTimeout(()=>{ __kaOn=false; P.listenKeepAlive({ on:false }).catch(()=>{}); }, 6000); }
+}
+function listenTitle(){
+  const t=($('#reciter-sura')&&$('#reciter-sura').textContent||'').trim();
+  let r=''; try{ const i=currentReciterInfo(); r=(i&&i.name)||''; }catch(e){}
+  return { title: t||'الاستماع', text: r ? (r+' — صلاتي') : 'صلاتي' };
+}
+(function(){
+  const a=$('#reciter-audio'), h=$('#hifz-audio');
+  if(a){
+    a.addEventListener('playing', ()=>{ const x=listenTitle(); listenKeepAlive(true, x.title, x.text); });
+    a.addEventListener('pause', ()=>{ if(!__wantPlay) listenKeepAlive(false); });   // وقفةٌ من النظام: نُبقيها ليستأنف الحارس
+    a.addEventListener('ended', ()=> listenKeepAlive(false));
+  }
+  if(h){
+    h.addEventListener('playing', ()=>{ if(__hz) listenKeepAlive(true, 'تحفيظ — سورة '+HZD().sur[__hz.si].n, hzRec(__hz.c).name+' — صلاتي'); });
+  }
+  const P=adhanPlugin();
+  if(P && P.addListener){
+    try{ P.addListener('listenStop', ()=>{
+      try{ setWantPlay(false); const r=$('#reciter-audio'); if(r && !r.paused) r.pause(); }catch(e){}
+      try{ if(__hz) hzStop(); }catch(e){}
+      __kaOn=false;
+    }); }catch(e){}
+  }
+  /* عاد الاتّصال: نستأنف فورًا بدل انتظار مهلة إعادة المحاولة */
+  window.addEventListener('online', ()=>{
+    const r=$('#reciter-audio');
+    if(r && r.src && __wantPlay && (r.paused || r.readyState<3)){ __recTry=0; if(__recTimer){ clearTimeout(__recTimer); __recTimer=null; } recoverReciter(true); }
+  });
+})();
 setupMediaSession();
 let __scrollSaveT=null, __tapSaveUntil=0;
 function saveMushafScroll(){

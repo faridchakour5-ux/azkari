@@ -82,6 +82,13 @@ const COMPONENTS = `
         android:exported="false"
         android:foregroundServiceType="mediaPlayback" />
 
+    <!-- خدمةُ الاستماع: تُبقي التلاوةَ تعمل والشاشةُ مطفأة (قفلُ استيقاظٍ وWi-Fi + إشعار) -->
+    <service
+        android:name=".ListenService"
+        android:enabled="true"
+        android:exported="false"
+        android:foregroundServiceType="mediaPlayback" />
+
     <!-- مُستقبِلُ المنبّه: يُطلق الخدمةَ عند دخول الوقت ثمّ يُسلّح الوقتَ التالي -->
     <receiver
         android:name=".AdhanReceiver"

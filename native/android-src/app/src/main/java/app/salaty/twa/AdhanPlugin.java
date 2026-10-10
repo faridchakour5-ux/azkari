@@ -26,6 +26,32 @@ import org.json.JSONObject;
 @CapacitorPlugin(name = "Adhan")
 public class AdhanPlugin extends Plugin {
 
+  /** المثيلُ الحاليّ: لتُبلِغ خدمةُ الاستماع الواجهةَ حين يضغط المستخدمُ «إيقاف» في الإشعار */
+  private static AdhanPlugin instance;
+  @Override public void load() { instance = this; }
+  static void emitListenStop() {
+    try { if (instance != null) instance.notifyListeners("listenStop", new JSObject()); } catch (Exception ignored) {}
+  }
+
+  /** يُبقي التطبيقَ حيًّا أثناء الاستماع (on=true) أو يُطلقه (on=false). */
+  @PluginMethod
+  public void listenKeepAlive(PluginCall call) {
+    Boolean on = call.getBoolean("on", Boolean.FALSE);
+    Intent svc = new Intent(getContext(), ListenService.class);
+    try {
+      if (on != null && on) {
+        svc.setAction(ListenService.ACTION_START)
+           .putExtra(ListenService.EXTRA_TITLE, call.getString("title", ""))
+           .putExtra(ListenService.EXTRA_TEXT, call.getString("text", ""));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) getContext().startForegroundService(svc);
+        else getContext().startService(svc);
+      } else {
+        getContext().stopService(svc);
+      }
+    } catch (Exception ignored) {}   // بدءُ خدمةٍ من الخلفيّة قد يُمنع — لا نُسقط الواجهة
+    call.resolve();
+  }
+
   /** يَستقبل جدولَ الأيّام القادمة ويُسلّح أقربَها. */
   @PluginMethod
   public void setSchedule(PluginCall call) {

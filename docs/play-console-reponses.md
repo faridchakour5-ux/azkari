@@ -48,7 +48,7 @@ Remarque de transparence : les serveurs audio (mp3quran.net, archive.org, Google
 | `ACCESS_COARSE_LOCATION` / `ACCESS_FINE_LOCATION` (facultatives) | Calculer sur l'appareil les horaires de prière selon la position de l'utilisateur. Rien n'est envoyé à un serveur. |
 | `POST_NOTIFICATIONS` | Rappels des prières et des invocations (facultatif). |
 | `SCHEDULE_EXACT_ALARM` / `USE_EXACT_ALARM` | Déclencher l'adhan à la minute exacte de l'heure de prière. Fonction principale de l'application (rappel/alarme de prière). |
-| `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Type **mediaPlayback** : lire l'adhan en entier avec une notification visible permettant de l'arrêter. |
+| `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Type **mediaPlayback** : (1) lire l'adhan en entier avec une notification « Arrêter » ; (2) garder la récitation du Coran / la mémorisation en lecture quand l'écran est éteint, avec une notification « Arrêter » (démarrée seulement quand l'utilisateur lance la lecture). |
 | `RECEIVE_BOOT_COMPLETED` | Reprogrammer les adhans après un redémarrage du téléphone. |
 | `WAKE_LOCK` | Garder l'appareil éveillé pendant la lecture de l'adhan. |
 
