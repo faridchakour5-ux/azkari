@@ -33,6 +33,7 @@
 <!-- خطّا شاشة الافتتاح يُحمَّلان أوّلًا، فلا ترتجف العبارةُ بخطٍّ بديلٍ ثمّ تتبدّل -->
 <link rel="preload" href="fonts/ruqaa.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/amiri-quran.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <title>صلاتي</title>
 <style>
@@ -3691,7 +3692,7 @@ async function printShot(innerHTML, title, sub){
   try{ pages=await shotToPages(innerHTML,title,sub); }catch(e){ pages=null; }
   if(pages && pages.length){
     pa.innerHTML=pages.map((u,i)=>
-      '<img class="print-pg'+(i===pages.length-1?' last':'')+'" src="'+u+'" alt="">').join('');
+      '<img class="print-pg'+(i===pages.length-1?' last':'')+'" '+'src'+'="'+u+'" alt="">').join('');
     await Promise.all([...pa.querySelectorAll('img')].map(im=>
       im.complete ? Promise.resolve() : new Promise(r=>{ im.onload=im.onerror=r; })));
   } else {
@@ -5835,6 +5836,7 @@ function reciterMonogram(name){
 }
 const EQZ='<span class="eqz"><i></i><i></i><i></i></span>';
 /* صورٌ حرّةُ الترخيص (ويكيميديا كومنز) — النَّسبُ في credits.html؛ من لا صورةَ له يبقى بحرفه */
+/* ملاحظة: `'src'` مفصولةً في قوالب <img> أدناه عمدًا — ماسحُ التحميل المسبق في كروم يلتقط أحيانًا «src=\"…'+x+'…\"» من داخل السكربت فيطلب رابطًا مكسورًا (404) */
 const RC_PHOTO={ghamdi:'ghamdi',shur:'shur',minshawi:'minshawi','minshawi-mjwd':'minshawi',koshi:'koshi',maher:'maher',qtami:'qtami',turki:'turki',hzza:'hzza'};
 function renderReciterChips(){
   const wrap=$('#reciter-chips'); if(!wrap) return;
@@ -5843,7 +5845,7 @@ function renderReciterChips(){
     const on = settings.reciter===r.id;
     return '<button type="button" data-id="'+r.id+'" class="'+(on?'on':'')+'">'+
       '<span class="rc-av'+(RC_PHOTO[r.id]?' ph':'')+'">'+ (on && playing && !RC_PHOTO[r.id] ? EQZ : escapeHtml(reciterMonogram(r.name))) +
-        (RC_PHOTO[r.id]?'<img class="rc-ph" src="reciters/'+RC_PHOTO[r.id]+'.webp" alt="" width="46" height="46" decoding="async" onerror="this.remove()">'+(on&&playing?'<span class="rc-eq">'+EQZ+'</span>':''):'')+
+        (RC_PHOTO[r.id]?'<img class="rc-ph" '+'src'+'="reciters/'+RC_PHOTO[r.id]+'.webp" alt="" width="46" height="46" decoding="async" onerror="this.remove()">'+(on&&playing?'<span class="rc-eq">'+EQZ+'</span>':''):'')+
         (r.external?'<span class="ext">↗</span>':'')+'</span>'+
       '<span class="rc-nm">'+escapeHtml(r.name)+'</span>'+
     '</button>';
