@@ -351,6 +351,7 @@
   .tab svg,.tab-m svg{width:26px; height:26px; box-sizing:content-box; padding:3px 14px; border-radius:15px;
     transition:background-color .25s ease, transform .15s ease;}
   .tab span,.tab-m span{font-size:10px; font-weight:600;}
+  .tab-off{display:none;}
   .tab.on{color:var(--tab-on);}
   .tab.on svg{background:var(--tab-on-bg);}
   .tab:active svg,.tab-m:active svg{transform:scale(.88);}
@@ -1926,7 +1927,7 @@
   <span class="ub-go">حدِّث</span>
 </div>
 <nav class="tabbar">
-  <!-- الترتيب: الوِرد (البداية)، ثمّ الاستماع، ثمّ الأذكار، ثمّ الفقه -->
+  <!-- الترتيب: الوِرد (البداية)، ثمّ الاستماع، ثمّ الأذكار، ثمّ الإعدادات، ثمّ القائمة. الفقهُ والتسبيح والاختبار في القائمة الجانبيّة (زرُّ الفقه مخفيٌّ يعمل برمجيًّا فقط). -->
   <button class="tab on" data-s="s-wird">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><line x1="9" y1="7" x2="15" y2="7"/></svg>
     <span>الوِرد</span>
@@ -1939,7 +1940,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>
     <span>الأذكار</span>
   </button>
-  <button class="tab" data-s="s-tasbih">
+  <button class="tab tab-off" data-s="s-tasbih" tabindex="-1" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/><path d="M8 16h4"/></svg>
     <span>الفقه</span>
   </button>
@@ -2896,6 +2897,7 @@ $('#salat-toast') && $('#salat-toast').addEventListener('click', ()=> $('#salat-
 /* ---------- tab switching ---------- */
 $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   $$('.tab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+  { const tm=document.getElementById('tab-menu'); if(tm) tm.classList.toggle('on', t.dataset.s==='s-tasbih'); }
   $$('.screen').forEach(s=>s.classList.remove('active'));
   $('#'+t.dataset.s).classList.add('active');
   /* صفحةُ الوِرد تُموضِع نفسَها بعدُ على آخر موضعٍ بلغه القارئ، فلا تُصفَّر
