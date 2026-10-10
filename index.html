@@ -1364,6 +1364,14 @@
   .aya-t.hifz-live{background:color-mix(in srgb, var(--accent) 22%, transparent); border-radius:6px;}
   /* ===== استغلالُ جنبات الشاشة: هوامشُ جانبيّةٌ أضيق (كانت 16+18 للمصحف، فتضيع نحوُ 17٪ من العرض) =====
      يبقى هامشٌ صغيرٌ آمنٌ للحواف المنحنية والـ notch، ولا يتغيّر شيءٌ في الارتفاعات ولا الألوان ولا الخطوط. */
+  /* من الحافّة إلى الحافّة (أندرويد 15+ إلزامًا، وما قبله بـ EdgeToEdge.enable):
+     الصفحةُ تُرسَم تحت شريط الحالة وشريط التنقّل، فنحجز مساحتَيهما بـ env(safe-area-inset-*).
+     شريطٌ ثابت بلون الخلفيّة تحت شريط الحالة، حتى لا يمرّ النصُّ المُمرَّر تحت الساعة والأيقونات. */
+  .sb-scrim{position:fixed; top:0; left:0; right:0; height:env(safe-area-inset-top,0px); background:var(--bg); z-index:70; pointer-events:none;}
+  #s-listen .reciter-box{top:env(safe-area-inset-top,0px);}
+  .sura-sheet{padding-bottom:env(safe-area-inset-bottom,0px); max-height:calc(76vh - env(safe-area-inset-top,0px));}
+  .tabbar{padding-left:env(safe-area-inset-left,0px); padding-right:env(safe-area-inset-right,0px);}
+  .vid-overlay{padding:max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));}
   :root{ --gx: max(8px, env(safe-area-inset-left), env(safe-area-inset-right)); }
   .list{padding-inline:var(--gx);}
   .card{padding-inline:13px;}
@@ -1375,6 +1383,7 @@
 </style>
 </head>
 <body>
+<div class="sb-scrim" aria-hidden="true"></div>
 
 <div id="splash" role="presentation">
   <!-- نجمةُ الحزب الثُّمانيّة: تُرسَم خطًّا خطًّا ثمّ تدور على مهل -->
@@ -1964,6 +1973,10 @@ function applyBg(){
   const b = settings.bg || 'sepia';
   document.documentElement.setAttribute('data-bg', b);
   const mc = $('meta[name=theme-color]'); if(mc) mc.setAttribute('content', BG_COLORS[b]||'#EFE6D4');
+  /* أيقوناتُ شريطَي الحالة والتنقّل (أندرويد): فاتحةٌ على الأسود، داكنةٌ على الأبيض والورقيّ —
+     تتبع خلفيّةَ التطبيق لا وضعَ النظام، وإلا اختفت الساعةُ على خلفيّةٍ من لونها. */
+  try{ const SB=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.SystemBars;
+    if(SB&&SB.setStyle) SB.setStyle({style: b==='dark'?'DARK':'LIGHT'}).catch(()=>{}); }catch(e){}
 }
 /* المدى أوسعُ من ذي قبل: لمّا صار التكبيرُ للنصّ المقروء وحدَه — لا
    للعناوين والأزرار — أمكن أن يبلغ الضِّعفَ ونصفًا بلا أن تنكسر الشاشة. */
