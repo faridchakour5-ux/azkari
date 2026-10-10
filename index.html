@@ -1721,7 +1721,7 @@
   <div class="head"><h1 id="tasbih-title">الفقه العملي</h1><div class="sub" id="tasbih-sub">كيف أتوضّأ · أصلّي · أغتسل · أصوم</div></div>
   <button class="listen-cat" id="tasbih-mode-btn" type="button" aria-haspopup="listbox">
     <span class="lc-ic" id="tasbih-mode-ic"></span>
-    <span class="lc-tx"><span class="lc-lbl">ماذا تريد؟</span><span class="lc-nm" id="tasbih-mode-name">الفقه</span></span>
+    <span class="lc-tx"><span class="lc-lbl">القسم</span><span class="lc-nm" id="tasbih-mode-name">الفقه</span></span>
     <span class="chev">▾</span>
   </button>
   <div class="seg" id="tasbih-mode-seg" hidden style="display:none">
@@ -4315,7 +4315,7 @@ function applyListenMode(mode){
 $('#listen-cat') && $('#listen-cat').addEventListener('click', ()=>{
   vibrate(6);
   openLabelOverlay(LISTEN_CATS.map(c=>({id:c.id, label:c.name})), __listenCat,
-    id=>{ closeSuraOverlay(); applyListenMode(id); }, 'ماذا تريد أن تسمع؟');
+    id=>{ closeSuraOverlay(); applyListenMode(id); }, 'اختر القسم');
 });
 applyListenMode('quran');
 
@@ -4779,7 +4779,7 @@ $('#tasbih-mode-btn').addEventListener('click', ()=>{
   vibrate(6);
   openLabelOverlay($$('#tasbih-mode-seg button').map(b=>({id:b.dataset.t,label:b.textContent.trim()})),
     $$('#tasbih-mode-seg button').find(b=>b.classList.contains('on'))?.dataset.t,
-    id=>{ closeSuraOverlay(); applyTasbihMode(id); }, 'ماذا تريد؟');
+    id=>{ closeSuraOverlay(); applyTasbihMode(id); }, 'اختر القسم');
 });
 (function(){ const b=$('#tasbih-mode-seg button.on'); if(b){ $('#tasbih-mode-name').textContent=b.textContent.trim(); $('#tasbih-mode-ic').innerHTML=b.querySelector('svg').outerHTML; } })();
 
