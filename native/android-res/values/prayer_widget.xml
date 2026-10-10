@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pw_accent">#0A5441</color>
+    <color name="pw_gold">#A8741A</color>
+    <color name="pw_muted">#6E6757</color>
+    <string name="pw_desc">الصلاة القادمة ووقتها</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pw_accent">#34C77B</color>
+    <color name="pw_gold">#E3B25A</color>
+    <color name="pw_muted">#A8A39A</color>
+</resources>

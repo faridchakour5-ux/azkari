@@ -15,5 +15,6 @@ public class BootReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {
     try { AdhanScheduler.arm(context.getApplicationContext()); } catch (Exception ignored) {}
+    try { PrayerWidget.refresh(context.getApplicationContext()); } catch (Exception ignored) {}
   }
 }

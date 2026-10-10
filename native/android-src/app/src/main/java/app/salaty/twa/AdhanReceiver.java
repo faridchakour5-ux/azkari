@@ -43,5 +43,6 @@ public class AdhanReceiver extends BroadcastReceiver {
     }
     // الوقتُ التالي: المنبّهاتُ الدقيقة تُطلَق مرّةً واحدة، فالتسليحُ يتجدّد هنا
     try { AdhanScheduler.arm(app); } catch (Exception ignored) {}
+    try { PrayerWidget.refresh(app); } catch (Exception ignored) {}
   }
 }

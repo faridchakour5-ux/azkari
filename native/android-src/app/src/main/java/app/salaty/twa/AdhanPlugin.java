@@ -71,6 +71,7 @@ public class AdhanPlugin extends Plugin {
         e.put("at", at);
         e.put("name", o.optString("name", ""));
         e.put("fajr", o.optBoolean("fajr", false));
+        e.put("label", o.optString("label", ""));      // الوقتُ كما يعرضه التطبيق (للويدجت)
         clean.put(e);
       }
 
@@ -78,6 +79,7 @@ public class AdhanPlugin extends Plugin {
       AdhanScheduler.prefs(getContext()).edit().putBoolean("vol_stop", vs != null && vs).apply();
       AdhanScheduler.save(getContext(), clean, enabled);
       AdhanScheduler.arm(getContext());
+      PrayerWidget.refresh(getContext());
       call.resolve(status());
     } catch (Exception e) {
       call.reject(e.getMessage() == null ? "setSchedule failed" : e.getMessage(), e);

@@ -7330,10 +7330,10 @@ async function scheduleNativeNotifs(){
         if(at.getTime() < nowMs+60000) return; // تخطّي ما مضى
         /* الأذانُ عند دخول الوقت نفسِه — وهو المقصودُ الأوّل من التطبيق
            الأصليّ: يُرفع والتطبيقُ مغلقٌ والهاتفُ نائمٌ وبلا إنترنت. */
+        /* الجدولُ يُسلَّم دائمًا إلى النظام (ويدجتُ الشاشة الرئيسيّة يقرؤه)؛ وعلَمُ enabled وحدَه يقرّر أيُسلَّح الأذانُ أم لا */
+        if(ADHAN_SVC) adhanTimes.push({ at:at.getTime(), name:nm, fajr:k==='fajr', label:fmtTime(at) });
         if(settings.adhan!==false){
-          if(ADHAN_SVC){
-            adhanTimes.push({ at:at.getTime(), name:nm, fajr:k==='fajr' });
-          } else {
+          if(!ADHAN_SVC){
             notifs.push({ id:id++, channelId:'adhan_wadee', sound:'adhan_wadee',
               title:'حان وقتُ صلاة '+nm,
               body:(k==='fajr' ? 'الصلاةُ خيرٌ من النوم' : 'حيَّ على الصلاة · حيَّ على الفلاح'),

@@ -107,6 +107,18 @@ const COMPONENTS = `
             <action android:name="android.intent.action.TIMEZONE_CHANGED" />
         </intent-filter>
     </receiver>
+
+    <!-- ويدجتُ الشاشة الرئيسيّة: الصلاةُ القادمة -->
+    <receiver
+        android:name=".PrayerWidget"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/prayer_widget_info" />
+    </receiver>
     ${SHUT}
 `;
 
@@ -133,6 +145,11 @@ const PERMS = `
     ${SHUT}
 `;
 
+/* النسخُ الاحتياطيّ التلقائيّ مع حساب Google: تخزينُ الصفحة المحلّيّ فقط (res/xml/backup_rules.xml وdata_extraction_rules.xml) */
+m = m.replace(/\s+android:fullBackupContent="[^"]*"/g, '').replace(/\s+android:dataExtractionRules="[^"]*"/g, '');
+m = m.replace(/<application\b/, '<application android:fullBackupContent="@xml/backup_rules" android:dataExtractionRules="@xml/data_extraction_rules"');
+if (!/android:allowBackup="true"/.test(m)) m = m.replace(/\s+android:allowBackup="[^"]*"/, '').replace(/<application\b/, '<application android:allowBackup="true"');
+
 if (m.indexOf('</application>') < 0) die('لم أجد </application> في البيان');
 m = m.replace('</application>', COMPONENTS + '</application>');
 
@@ -140,7 +157,7 @@ if (m.indexOf('</manifest>') < 0) die('لم أجد </manifest> في البيان
 m = m.replace('</manifest>', PERMS + '</manifest>');
 
 fs.writeFileSync(MAN, m, 'utf8');
-console.log('✓ حُدّث AndroidManifest.xml (خدمةٌ + مُستقبِلان + 7 أذونات)');
+console.log('✓ حُدّث AndroidManifest.xml (خدمتان + مُستقبِلان + ويدجت + نسخٌ احتياطيّ + 7 أذونات)');
 
 /* 4) رقمُ الإصدار: يُقرأ من android-version.json لا من تحريرٍ يدويٍّ في build.gradle —
       فمجلّدُ android/ مُولَّدٌ ويُعاد توليدُه، وما يُكتب فيه باليد يضيع، ثمّ يُرفض
