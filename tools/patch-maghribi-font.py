@@ -47,10 +47,20 @@ Réparations (script déjà appliqué — conservé pour référence):
    les 1 824 تنوين ضمّ متراكب s'y affichaient en ALIF («آ»). Signalé par
    l'utilisateur sur سورة الملك.
    Règle: le nom du fichier porte les 8 premiers caractères de son SHA-1
-   (maghribi-7d058b2e.woff2). Toute modification => nouveau nom => mettre à
+   (maghribi-520e7013.woff2). Toute modification => nouveau nom => mettre à
    jour index.html (@font-face + quranFontFile), sw.js (ASSETS) et
    store/feature.html. tools/fahs-khatt-warsh.py vérifie cette règle et
    refuse une police dont le nom ne correspond pas à son contenu.
+
+6. (11 oct. 2026) Le cercle U+06EA (imala de Warsh, «lowstop») était trop
+   petit et trop haut: dans 461 des 2 573 positions il disparaissait dans
+   le trait de la lettre (وَأَكْدَىٰ، سَعَىٰ، أَعْطَىٰ، المنتهى…) et dans 976 il
+   touchait l'encre. Seul le CONTOUR du glyphe «lowstop» est redessiné
+   (anneau 215/105 unités, centre y=-960, ancrage GPOS inchangé: le texte
+   n'est pas touché). Mesure sur tout le texte de Warsh (1 275 mots, 2 573
+   marques, rendu Chromium 100 px, avec/sans la marque): cachées 461→0,
+   au contact 976→232. Script: tools/patch-lowstop-ring.py (cercle = 2 contours, 8 courbes
+   quadratiques par cercle).
 
 Vérification: uharfbuzz (shaping) + captures Chromium sur les versets
 contenant chaque signe. Zéro caractère non couvert sur les 3 sources.

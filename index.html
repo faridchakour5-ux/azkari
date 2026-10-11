@@ -41,7 +41,7 @@
   @font-face{font-family:'PlexAr'; src:url('fonts/ui-600.woff2') format('woff2'); font-weight:600; font-display:swap;}
   @font-face{font-family:'PlexAr'; src:url('fonts/ui-700.woff2') format('woff2'); font-weight:700; font-display:swap;}
   @font-face{font-family:'AmiriQuran'; src:url('fonts/amiri-quran.woff2') format('woff2'); font-display:swap;}
-  @font-face{font-family:'Maghribi'; src:url('fonts/maghribi-7d058b2e.woff2') format('woff2'); font-display:swap;}
+  @font-face{font-family:'Maghribi'; src:url('fonts/maghribi-520e7013.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fNaskh'; src:url('fonts/naskh.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fKufi'; src:url('fonts/kufi.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fCairo'; src:url('fonts/cairo.woff2') format('woff2'); font-display:swap;}
@@ -835,7 +835,8 @@
   .mushaf-page{display:flex; align-items:center; gap:12px; margin:18px 4px; color:var(--text-3);
     font-family:'PlexAr'; font-size:13px; font-weight:700;}
   .mushaf-page::before,.mushaf-page::after{content:''; flex:1; height:1px; background:var(--sep);}
-  .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.3; text-align:justify;}
+  /* حفص: المسافةُ بين الأسطر = مسافتُها في ورش تمامًا (25px×2.7 = 23px×2.935) لراحة العين؛ لا يُمَسّ الحرفُ ولا التشكيل */
+  .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.935; text-align:justify;}
   body.riw-warsh .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7;}
   /* لون خطّ القرآن (اختياري لورش وحفص) — أربع درجات */
   /* لونُ «خطّ القرآن» للقرآن وحده — المصحف وآياتُ الأذكار — كما يقول اسمُه.
@@ -895,7 +896,7 @@
   .tzoom .tz-val-q{min-width:50px; text-align:center; color:var(--text-2); font-size:13px; font-weight:700;}
   .tzoom button:disabled{opacity:.35;}
   /* معاينةُ خطّ القرآن تحت مِقياسه: يرى القارئُ الحجمَ قبل أن يفتح المصحف */
-  .q-preview{padding:4px 18px 18px; text-align:center; line-height:2.1; color:var(--qink, var(--text));
+  .q-preview{padding:4px 18px 18px; text-align:center; line-height:2.84; color:var(--qink, var(--text));
     font-family:'AmiriQuran',serif; font-size:calc(22px * var(--qscale,1));}
   body.riw-warsh .q-preview{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--qscale,1)); line-height:2.5;}
   body.qc-blue .q-preview{color:var(--qc-blue);} body.qc-blue2 .q-preview{color:var(--qc-blue2);} body.qc-navy .q-preview{color:var(--qc-navy);} body.qc-g1 .q-preview{color:var(--qc-g1);} body.qc-g2 .q-preview{color:var(--qc-g2);} body.qc-g3 .q-preview{color:var(--qc-g3);} body.qc-g4 .q-preview{color:var(--qc-g4);}
@@ -2395,6 +2396,8 @@ $('#t-reset').addEventListener('click', ()=>{ tasbih.count=0; saveTasbih(); pain
 /* ---------- SETTINGS bindings ---------- */
 function bindSeg(sel, key, after){
   $$(sel+' button').forEach(b=> b.addEventListener('click', ()=>{
+    /* لمسُ الخيار المختار نفسِه لا يغيّر شيئًا: كان يُفرِّغ المصحفَ فيبقى «جارٍ تحميل المصحف» حين تعود إلى الوِرد */
+    if(settings[key]===(b.dataset.r||b.dataset.th||b.dataset.f)) return;
     $$(sel+' button').forEach(x=>x.classList.remove('on'));
     b.classList.add('on');
     settings[key] = b.dataset.r||b.dataset.th||b.dataset.f;
@@ -3465,7 +3468,7 @@ let __shotCss=null, __shotKey='';
 function quranFontFile(){
   const b=document.body;
   if(b.classList.contains('qtashkeel')) return { f:'NotoNaskhTashkeel', u:'fonts/naskh-tashkeel.woff2' };
-  if(settings.riwaya==='warsh') return { f:'Maghribi', u:'fonts/maghribi-7d058b2e.woff2' };
+  if(settings.riwaya==='warsh') return { f:'Maghribi', u:'fonts/maghribi-520e7013.woff2' };
   return { f:'AmiriQuran', u:'fonts/amiri-quran.woff2' };
 }
 async function fontDataUrl(u){
