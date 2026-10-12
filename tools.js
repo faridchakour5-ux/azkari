@@ -492,39 +492,64 @@ PAGES.fast = { title:'الصيام', render(body){
 
 /* ============ حاسبة الزكاة ============ */
 PAGES.zakat = { title:'حاسبة الزكاة', render(body){
-  const S=Object.assign({gold:'',base:'gold',cash:'',gw:'',sw:'',trade:'',recv:'',debt:'',hawl:true}, sget('az_zakat',{}));
-  body.innerHTML='<div class="tl-card"><h3>سعر الذهب اليوم</h3><div class="tl-lbl" style="margin-top:0">سعر غرام الذهب عيار 24 بعملتك (أدخله بنفسك من مصدرٍ تثق به)</div><input class="tl-in" id="z-gold" inputmode="decimal" placeholder="مثال: 750" value="'+esc(S.gold)+'">'+
+  const S=Object.assign({gold:'',base:'gold',cash:'',gw:'',sw:'',trade:'',recv:'',debt:'',hawl:true,karat:24,cur:'',subDebt:true}, sget('az_zakat',{}));
+  const KS=[24,22,21,18,14];
+  body.innerHTML='<div class="tl-card"><h3>سعر الذهب اليوم</h3><div class="tl-lbl" style="margin-top:0">سعر غرام الذهب عيار 24 بعملتك (أدخله بنفسك من مصدرٍ تثق به)</div><input class="tl-in" id="z-gold" inputmode="decimal" placeholder="750" value="'+esc(S.gold)+'">'+
     '<div class="tl-lbl">أساس النصاب</div><div class="tl-chips" id="z-base"><button data-b="gold"'+(S.base==='gold'?' class="on"':'')+'>الذهب (85 غرامًا)</button><button data-b="silver"'+(S.base==='silver'?' class="on"':'')+'>الفضّة (595 غرامًا)</button></div>'+
-    '<div class="tl-lbl">سعر غرام الفضّة (إن اخترتَ الفضّة)</div><input class="tl-in" id="z-silver" inputmode="decimal" placeholder="مثال: 9" value="'+esc(S.silver||'')+'"></div>'+
+    '<div class="tl-lbl">سعر غرام الفضّة (إن اخترتَ الفضّة)</div><input class="tl-in" id="z-silver" inputmode="decimal" placeholder="9" value="'+esc(S.silver||'')+'">'+
+    '<div class="tl-lbl">العملة (للعرض فقط، مثل MAD)</div><input class="tl-in" id="z-cur" maxlength="8" dir="ltr" placeholder="MAD" value="'+esc(S.cur||'')+'"></div>'+
     '<div class="tl-card"><h3>أموالك</h3>'+
-    [['cash','نقدٌ وأرصدةٌ في الحساب'],['gw','ذهبٌ مدّخَر (بالغرام)'],['sw','فضّةٌ مدّخَرة (بالغرام)'],['trade','عروضُ تجارةٍ (قيمتُها السوقيّة)'],['recv','ديونٌ لك مرجوّةُ السداد'],['debt','ديونٌ حالّةٌ عليك']].map(x=>'<div class="tl-lbl">'+x[1]+'</div><input class="tl-in" data-f="'+x[0]+'" inputmode="decimal" placeholder="0" value="'+esc(S[x[0]]||'')+'">').join('')+
-    '<div class="tl-row" style="margin-top:8px"><span>مرّ على المال سنةٌ هجريّةٌ كاملة (الحَوْل)</span><button class="tl-sw'+(S.hawl?' on':'')+'" id="z-hawl" aria-label="الحول"></button></div></div>'+
+    [['cash','نقدٌ وأرصدةٌ في الحساب'],['gw','ذهبٌ مدّخَر (بالغرام)'],['sw','فضّةٌ مدّخَرة (بالغرام)'],['trade','عروضُ تجارةٍ (قيمتُها السوقيّة)'],['recv','ديونٌ لك مرجوّةُ السداد'],['debt','ديونٌ حالّةٌ عليك']].map(x=>
+      '<div class="tl-lbl">'+x[1]+'</div><input class="tl-in" data-f="'+x[0]+'" inputmode="decimal" placeholder="0" value="'+esc(S[x[0]]||'')+'">'+
+      (x[0]==='gw' ? '<div class="tl-lbl">عيار الذهب المدّخَر</div><div class="tl-chips" id="z-karat">'+KS.map(k=>'<button data-k="'+k+'"'+(+S.karat===k?' class="on"':'')+'>'+k+'</button>').join('')+'</div>' : '')
+    ).join('')+
+    '<div class="tl-row" style="margin-top:8px"><span>مرّ على المال سنةٌ هجريّةٌ كاملة (الحَوْل)</span><button class="tl-sw'+(S.hawl?' on':'')+'" id="z-hawl" aria-label="الحول"></button></div>'+
+    '<div class="tl-row"><span>أطرح الديونَ الحالّةَ من المال الزكويّ</span><button class="tl-sw'+(S.subDebt?' on':'')+'" id="z-sub" aria-label="طرح الدين"></button></div></div>'+
     '<div class="tl-card" id="z-res"></div>'+
+    '<div class="tl-note">يُحوَّل وزنُ الذهب المدّخَر إلى ما يعادله من عيار 24 بحسب العيار الذي تختاره. وفي أثر الدَّين على الزكاة خلافٌ بين أهل العلم؛ تطرح الحاسبةُ الدَّينَ الحالَّ افتراضيًّا ويمكنك إيقافُ ذلك، وللاطمئنان استفتِ من تثق به.</div>'+
     '<div class="tl-note">حاسبةٌ تقديريّةٌ للمال النقديّ والذهب والفضّة وعروض التجارة بنسبة 2.5٪ بعد بلوغ النصاب وتمام الحول. لا تشمل الأنعامَ والزروعَ والمعادنَ والحالاتِ الخاصّة؛ ولأهل العلم في النصاب خلافٌ (ذهبٌ أم فضّة) وفي زكاة حُليّ المرأة المستعمَل خلاف — فللتحقّق اسأل مفتيًا أو الجهةَ الرسميّة. لا يُحفَظ في هاتفك غيرُ هذه الأرقام ولا تغادره.</div>';
-  const num=v=>{ const x=parseFloat(String(v||'').replace(/,/g,'.').replace(/[^0-9.]/g,'')); return isFinite(x)?x:0; };
+  /* يقبل الأرقامَ الهنديّة والفاصلةَ آلافًا (1,500) أو عشريّةً (1,5) والنقطةَ كذلك */
+  const num=v=>{
+    let t=String(v||'').replace(/[٠-٩]/g,d=>d.charCodeAt(0)-0x660).replace(/[۰-۹]/g,d=>d.charCodeAt(0)-0x6F0)
+      .replace(/[٬،]/g,',').replace(/٫/g,'.').replace(/[\s  ']/g,'').replace(/[^0-9.,]/g,'');
+    const lc=t.lastIndexOf(','), ld=t.lastIndexOf('.');
+    if(lc>=0 && ld>=0){ const dec=Math.max(lc,ld); t=t.slice(0,dec).replace(/[.,]/g,'')+'.'+t.slice(dec+1).replace(/[.,]/g,''); }
+    else if(lc>=0){ t=(/^\d{1,3}(,\d{3})+$/.test(t))? t.replace(/,/g,'') : t.replace(/,/g,'.'); }
+    else if(ld>=0 && t.split('.').length>2){ t=t.replace(/\./g,''); }
+    const x=parseFloat(t); return isFinite(x)&&x>0?x:0;
+  };
   const calc=()=>{
-    const gp=num(S.gold), sp=num(S.silver);
-    const money=num(S.cash)+num(S.trade)+num(S.recv)-num(S.debt);
-    const gold=num(S.gw)*gp, silver=num(S.sw)*sp;
-    const total=Math.max(0,money)+gold+silver;
-    const nisabG=85, nisabS=595; const nisab = S.base==='gold' ? nisabG*gp : nisabS*sp;
+    const gp=num(S.gold), sp=num(S.silver), k=Math.min(24,Math.max(1,+S.karat||24));
+    const cur=String(S.cur||'').trim();
+    const gold=num(S.gw)*(k/24)*gp, silver=num(S.sw)*sp;
+    const assets=num(S.cash)+num(S.trade)+num(S.recv)+gold+silver;
+    const debt=S.subDebt?num(S.debt):0;
+    const total=Math.max(0,assets-debt);
+    const nisab = S.base==='gold' ? 85*gp : 595*sp;
     const res=body.querySelector('#z-res');
-    const f=x=>(Math.round(x*100)/100).toLocaleString('en-US');
+    const f=x=>(Math.round(x*100)/100).toLocaleString('en-US')+(cur?' '+esc(cur):'');
     if(!nisab){ res.innerHTML='<h3>النتيجة</h3><div class="tl-note" style="margin:0">أدخل سعر '+(S.base==='gold'?'الذهب':'الفضّة')+' ليُحسَب النصاب.</div>'; return; }
-    const reach=total>=nisab;
+    const reach=total>=nisab, due=reach&&S.hawl;
     res.innerHTML='<h3>النتيجة</h3>'+
       '<div class="tl-row"><span>مجموع الأموال الزكويّة</span><span class="v">'+f(total)+'</span></div>'+
       '<div class="tl-row"><span>النصاب ('+(S.base==='gold'?'85 غ ذهب':'595 غ فضّة')+')</span><span class="v">'+f(nisab)+'</span></div>'+
       '<div class="tl-row"><span>بلوغ النصاب</span><span class="v">'+(reach?'نعم':'لا')+'</span></div>'+
-      (reach && S.hawl ? '<div class="tl-row"><span><b>الزكاة الواجبة (2.5٪)</b></span><span class="v" style="font-size:19px;color:var(--c-repeat);font-weight:800">'+f(total*0.025)+'</span></div>'
-       : '<div class="tl-note">'+(reach?'بلغ مالُك النصابَ؛ تجب الزكاةُ إذا تمّ الحول (سنةٌ هجريّةٌ كاملة) وهو لم ينقص عن النصاب.':'لم يبلغ مالُك النصابَ فلا زكاةَ عليك الآن.')+'</div>');
+      (due ? '<div class="tl-row"><span><b>الزكاة الواجبة (2.5٪)</b></span><span class="v" style="font-size:19px;color:var(--c-repeat);font-weight:800">'+f(total*0.025)+'</span></div>'
+       : '<div class="tl-note">'+(reach?'بلغ مالُك النصابَ؛ تجب الزكاةُ إذا تمّ الحول (سنةٌ هجريّةٌ كاملة) وهو لم ينقص عن النصاب.':'لم يبلغ مالُك النصابَ فلا زكاةَ عليك الآن.')+'</div>')+
+      '<button class="tl-btn alt" id="z-copy">نسخ النتيجة</button>';
+    res.querySelector('#z-copy').onclick=async()=>{
+      const txt='صلاتي — '+res.querySelector('h3').textContent+'\n'+[...res.querySelectorAll('.tl-row')].map(r=>r.innerText.replace(/\s*\n\s*/g,': ').trim()).join('\n');
+      try{ await navigator.clipboard.writeText(txt); toast('نُسخت النتيجة'); }catch(e){ toast('تعذّر النسخ'); }
+    };
   };
   body.querySelectorAll('.tl-in').forEach(i=>i.addEventListener('input',()=>{
-    if(i.id==='z-gold') S.gold=i.value; else if(i.id==='z-silver') S.silver=i.value; else S[i.dataset.f]=i.value;
+    if(i.id==='z-gold') S.gold=i.value; else if(i.id==='z-silver') S.silver=i.value; else if(i.id==='z-cur') S.cur=i.value; else S[i.dataset.f]=i.value;
     sset('az_zakat',S); calc();
   }));
   body.querySelectorAll('#z-base button').forEach(b=>b.onclick=()=>{ S.base=b.dataset.b; sset('az_zakat',S); body.querySelectorAll('#z-base button').forEach(x=>x.classList.toggle('on',x===b)); calc(); });
+  body.querySelectorAll('#z-karat button').forEach(b=>b.onclick=()=>{ S.karat=+b.dataset.k; sset('az_zakat',S); body.querySelectorAll('#z-karat button').forEach(x=>x.classList.toggle('on',x===b)); calc(); });
   body.querySelector('#z-hawl').onclick=e=>{ S.hawl=!S.hawl; e.currentTarget.classList.toggle('on',S.hawl); sset('az_zakat',S); calc(); };
+  body.querySelector('#z-sub').onclick=e=>{ S.subDebt=!S.subDebt; e.currentTarget.classList.toggle('on',S.subDebt); sset('az_zakat',S); calc(); };
   calc();
 }};
 

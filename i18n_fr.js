@@ -91,7 +91,7 @@ function lookup(core){
 function find(core){ return lookup(core); }
 
 /* ===================== واجهة التطبيق (index.html) ===================== */
-add([
+add([[`النصاب (85 غ ذهب)`,`Nisab (85 g d’or)`],[`النصاب (595 غ فضّة)`,`Nisab (595 g d’argent)`],[`العملة (للعرض فقط، مثل MAD)`,`Devise (affichage seulement, ex. MAD)`],[`عيار الذهب المدّخَر`,`Carat de votre or`],[`أطرح الديونَ الحالّةَ من المال الزكويّ`,`Déduire les dettes exigibles des biens soumis à la zakat`],[`يُحوَّل وزنُ الذهب المدّخَر إلى ما يعادله من عيار 24 بحسب العيار الذي تختاره. وفي أثر الدَّين على الزكاة خلافٌ بين أهل العلم؛ تطرح الحاسبةُ الدَّينَ الحالَّ افتراضيًّا ويمكنك إيقافُ ذلك، وللاطمئنان استفتِ من تثق به.`,`Le poids de votre or est converti en équivalent 24 carats selon le carat choisi. Les savants divergent sur l’effet de la dette sur la zakat ; le calculateur déduit par défaut les dettes exigibles, vous pouvez le désactiver — pour être rassuré, consultez une personne de confiance.`],[`نسخ النتيجة`,`Copier le résultat`],[`نُسخت النتيجة`,`Résultat copié`],[`تعذّر النسخ`,`Échec de la copie`],
 [`صوت الأذان`,`Voix de l’adhan`],
 [`أذان وادي (الافتراضي)`,`Adhan de Wadee (par défaut)`],
 [`سعيد بلقاضي — المغربي`,`Said Belkadi — marocain`],

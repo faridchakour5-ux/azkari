@@ -86,7 +86,7 @@ function lookup(core){
   return null;
 }
 function find(core){ return lookup(core); }
-add([
+add([[`العملة (للعرض فقط، مثل MAD)`,`Currency (display only, e.g. MAD)`],[`عيار الذهب المدّخَر`,`Karat of your gold`],[`أطرح الديونَ الحالّةَ من المال الزكويّ`,`Deduct debts due now from zakatable wealth`],[`يُحوَّل وزنُ الذهب المدّخَر إلى ما يعادله من عيار 24 بحسب العيار الذي تختاره. وفي أثر الدَّين على الزكاة خلافٌ بين أهل العلم؛ تطرح الحاسبةُ الدَّينَ الحالَّ افتراضيًّا ويمكنك إيقافُ ذلك، وللاطمئنان استفتِ من تثق به.`,`The weight of your gold is converted to its 24-karat equivalent according to the karat you choose. Scholars differ on how debt affects zakat; the calculator deducts debts due now by default and you can turn that off — for reassurance, consult someone you trust.`],[`نسخ النتيجة`,`Copy result`],[`نُسخت النتيجة`,`Result copied`],[`تعذّر النسخ`,`Copy failed`],
 [`صوت الأذان`,`Adhan voice`],
 [`أذان وادي (الافتراضي)`,`Wadee’s adhan (default)`],
 [`سعيد بلقاضي — المغربي`,`Said Belkadi — Moroccan`],
