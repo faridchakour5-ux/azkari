@@ -7780,7 +7780,7 @@ async function scheduleNativeNotifs(){
   }catch(e){}
 }
 /* الصوتُ الثاني الاختياريّ للأذان: يُسمّى هنا حين يُضاف ملفُّه (انظر native/apply-android.js)؛ فارغٌ = لا خيار */
-const ADHAN_ALT_NAME = 'أذان مغربي';
+const ADHAN_ALT_NAME = 'محمد العمراني — المغربي';
 function adhanVoice(){
   return (settings.adhanVoice==='alt' && ADHAN_ALT_NAME && __adhanState && __adhanState.altAvailable) ? 'alt' : 'wadee';
 }
