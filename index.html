@@ -207,6 +207,10 @@
   /* iOS-style dropdown (select) */
   .selectrow{display:flex; align-items:center; justify-content:space-between; padding:13px 16px; min-height:48px;}
   .selectwrap{position:relative; display:flex; align-items:center;}
+  /* صفوفُ مواقيت الصلاة: أسماءُ الطرق طويلة، فتنزل القائمةُ تحت الاسم بعرضٍ كامل */
+  .selectrow.ptrow{flex-wrap:wrap; gap:4px 12px;}
+  .selectrow.ptrow .selectwrap{flex:1 1 100%;}
+  .selectrow.ptrow .selectwrap select{width:100%; text-align:start; text-overflow:ellipsis;}
   .selectwrap select{appearance:none; -webkit-appearance:none; border:0; background:transparent; color:var(--accent);
     font:inherit; font-size:16px; font-weight:600; padding:4px 22px 4px 6px; text-align:left; direction:rtl;}
   .selectwrap::after{content:'⌄'; position:absolute; left:4px; top:42%; transform:translateY(-50%); color:var(--text-3); font-size:18px; pointer-events:none;}
@@ -1858,6 +1862,25 @@
   </div>
   <div class="gnote" id="install-note">ثبِّت التطبيق ليعمل كتطبيق مستقلّ بدون متصفّح — والأذكارُ والمصحفُ يعملان دون إنترنت.</div>
 
+  <div class="gtitle">مواقيت الصلاة</div>
+  <div class="group">
+    <div class="selectrow ptrow">
+      <span class="k">طريقة الحساب</span>
+      <div class="selectwrap"><select id="ptm-select"></select></div>
+    </div>
+    <div class="selectrow ptrow">
+      <span class="k">العصر</span>
+      <div class="selectwrap">
+        <select id="pta-select">
+          <option value="auto">تلقائي (حسب بلدك)</option>
+          <option value="shafi">شافعي (ظلّ المثل)</option>
+          <option value="hanafi">حنفي (ظلّ المثلين)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="gnote" id="pt-set-note"></div>
+
   <div class="gtitle">التنبيهات</div>
   <div class="group">
     <div class="row"><span class="k">تذكير بالأذكار</span>
@@ -2430,6 +2453,29 @@ fontSelect.value = settings.duaFont || 'plex';
 fontSelect.addEventListener('change', ()=>{
   settings.duaFont = fontSelect.value; saveSettings(); applyDuaFont(); vibrate(6);
 });
+
+/* طريقة حساب المواقيت (خارج المغرب فقط — المغرب يبقى بالأوقاف دائمًا) */
+(function(){
+  const sel=$('#ptm-select'), asr=$('#pta-select'), note=$('#pt-set-note'); if(!sel||!asr) return;
+  const M=window.PT_METHODS||{};
+  sel.innerHTML='<option value="auto">تلقائي (حسب بلدك)</option>'+Object.keys(M).map(k=>'<option value="'+k+'">'+M[k].s+'</option>').join('');
+  sel.value=settings.ptMethod||'auto'; asr.value=settings.ptAsr||'auto';
+  function refreshNote(){
+    const g=geoStore(); const inMA=g && g.lat>=20.7&&g.lat<=35.95&&g.lng>=-17.3&&g.lng<=-0.9;
+    note.textContent = inMA
+      ? 'داخل المغرب تُعتمد دائمًا مواقيتُ وزارة الأوقاف بجدولها الدقيق، ولا يغيّرها هذا الاختيار.'
+      : 'الاختيار «تلقائي» يعتمد طريقةَ بلدك من موقعك. اختر طريقةً أخرى إن كان مسجدك يعتمدها. يسري الاختيارُ خارج المغرب فقط.';
+    note.style.display='';
+  }
+  function apply(){
+    settings.ptMethod=sel.value; settings.ptAsr=asr.value; saveSettings(); vibrate(6);
+    try{ renderPrayers(); }catch(e){}
+    try{ scheduleNativeNotifs(); }catch(e){}
+    refreshNote();
+  }
+  sel.addEventListener('change',apply); asr.addEventListener('change',apply);
+  refreshNote();
+})();
 
 /* notifications */
 const notifToggle = $('#notif-toggle');
@@ -7334,34 +7380,30 @@ function maHabousAdj(lat,lng){
 /* سطرٌ صادقٌ تحت المواقيت خارج المغرب: بأيّ طريقةٍ حُسبت، وأنها قد تختلف بدقائق عن المسجد المحلّيّ. داخل المغرب: لا شيء. */
 function ptMethodNote(lat,lng){
   if(lat>=20.7 && lat<=35.95 && lng>=-17.3 && lng<=-0.9) return '';
-  const rg = window.PT_REGION ? window.PT_REGION(lat,lng) : null;
-  if(rg==='us') return 'طريقة الحساب: أمريكا الشمالية (ISNA) — الفجر والعشاء 15 درجة. قد تختلف بدقائق عن مسجدك.';
-  if(rg==='de') return 'طريقة الحساب: رابطة العالم الإسلامي — الفجر 18 والعشاء 17 درجة. قد تختلف بدقائق عن مسجدك.';
-  return 'طريقة الحساب: إعداد وزارة الأوقاف المغربية (19 و17 درجة). قد تختلف عن الجهة المحلية في بلدك.';
+  if(!window.PT_NOTE) return '';
+  return window.PT_NOTE(window.PT_KEY(lat,lng,settings.ptMethod), settings.ptAsr);
 }
 function computePrayers(lat,lng,date){
   try{
     const A=window.adhan; if(!A) return null;
     const coords=new A.Coordinates(lat,lng);
-    // Morocco (Ministry of Habous): Fajr 19°, Isha 17°, Asr = Shafi
-    let params=new A.CalculationParameters('Other',19,17);
-    params.madhab=A.Madhab.Shafi;
     const inMorocco = lat>=20.7 && lat<=35.95 && lng>=-17.3 && lng<=-0.9;
-    /* خارج المغرب: الولايات المتحدة بطريقة ISNA (15°/15°)، وألمانيا برابطة العالم الإسلامي (18°/17°)،
-       وخطوطُ العرض العليا بقاعدة adhan الموصى بها (سُبع الليل فوق 48°). والمغرب لا يدخل هنا أبدًا.
-       وبقيّة العالم تبقى على الإعداد الحاليّ (انظر pt-regions.js). */
-    const rg = !inMorocco && window.PT_REGION ? window.PT_REGION(lat,lng) : null;
-    if(rg){
-      params = rg==='us' ? A.CalculationMethod.NorthAmerica() : A.CalculationMethod.MuslimWorldLeague();
-      params.madhab = A.Madhab.Shafi;
-      params.highLatitudeRule = A.HighLatitudeRule.recommended(coords);
+    let params;
+    if(inMorocco){
+      /* المغرب (وزارة الأوقاف): الفجر 19° والعشاء 17° والعصر شافعي، ثمّ فروقٌ بالدقائق عن حسابنا مأخوذةٌ من جدول
+         الأوقاف لأقرب مدينةٍ (ma-habous.js، مواقيت 167 مدينة). لا يدخله اختيارُ المستخدم ولا مناطقُ pt-regions أبدًا.
+         (نفس المنطق في netlify/functions/_lib/push-core.mts) */
+      params=new A.CalculationParameters('Other',19,17);
+      params.madhab=A.Madhab.Shafi;
+      params.adjustments=maHabousAdj(lat,lng);
+    } else if(window.PT_PARAMS){
+      /* خارج المغرب: طريقةُ البلد تلقائيًّا (pt-regions.js)، أو ما اختاره المستخدمُ في الإعدادات */
+      params=window.PT_PARAMS(A, window.PT_KEY(lat,lng,settings.ptMethod), coords, settings.ptAsr);
+    } else {
+      params=new A.CalculationParameters('Other',19,17);
+      params.madhab=A.Madhab.Shafi;
     }
-    /* داخل المغرب: فروقٌ بالدقائق عن حسابنا مأخوذةٌ من جدول وزارة الأوقاف لأقرب مدينةٍ (ma-habous.js، مولَّد من
-       مواقيت 167 مدينة). الظهرُ +5 تقريبًا في كلّ المدن، أمّا المغرب والشروق فيختلفان حسب المدينة (ارتفاعها). خارج المغرب لا يُمسّ شيء.
-       (نفس المنطق في netlify/functions/_lib/push-core.mts) */
-    if(inMorocco) params.adjustments=maHabousAdj(lat,lng);
-    const pt=new A.PrayerTimes(coords, date||new Date(), params);
-    return pt;
+    return new A.PrayerTimes(coords, date||new Date(), params);
   }catch(e){ return null; }
 }
 /* ===== جدولة الأذان على مستوى النظام (تطبيق Capacitor الأصلي) =====

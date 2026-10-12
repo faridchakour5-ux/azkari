@@ -22,7 +22,23 @@ const gDate=s=>{ const m=key(s).match(/^(?:(\S+) )?(\d+) (\S+) (\d+)$/); if(!m) 
 const hDate=s=>{ const m=key(s).match(/^(\d+) (.+?) (\d+) ه$/); if(!m) return null; const mo=mapLook(HM,m[2]); return mo? m[1]+' '+mo+' '+m[3]+' AH' : null; };
 const t12=(h,mi,ap)=>String(+h).padStart(2,'0')+':'+mi+' '+(ap==='م'?'PM':'AM');
 const pl=(n,one,many)=>n+' '+(+n===1?one:many);
+const MB=new Map(); const addM=a=>{ for(const [k,v] of a) MB.set(key(k), v); };
+addM([
+[`رابطة العالم الإسلامي — الفجر 18 والعشاء 17 درجة`,`Muslim World League — Fajr at 18° and Isha at 17°`],
+[`أمريكا الشمالية (ISNA) — الفجر والعشاء 15 درجة`,`North America (ISNA) — Fajr and Isha at 15°`],
+[`أمّ القرى — الفجر 18.5 درجة، والعشاء بعد المغرب بتسعين دقيقة (وقد تُزاد في رمضان)`,`Umm al-Qura — Fajr at 18.5°, Isha 90 minutes after Maghrib (it may be longer in Ramadan)`],
+[`دبي — الفجر والعشاء 18.2 درجة`,`Dubai — Fajr and Isha at 18.2°`],
+[`قطر — الفجر 18 درجة، والعشاء بعد المغرب بتسعين دقيقة`,`Qatar — Fajr at 18°, Isha 90 minutes after Maghrib`],
+[`الكويت — الفجر 18 والعشاء 17.5 درجة`,`Kuwait — Fajr at 18° and Isha at 17.5°`],
+[`الهيئة المصرية العامة للمساحة — الفجر 19.5 والعشاء 17.5 درجة`,`Egyptian General Authority of Survey — Fajr at 19.5° and Isha at 17.5°`],
+[`جامعة العلوم الإسلامية بكراتشي — الفجر والعشاء 18 درجة`,`University of Islamic Sciences, Karachi — Fajr and Isha at 18°`],
+[`الفجر والعشاء 18 درجة`,`Fajr and Isha at 18°`],
+[`جنوب شرق آسيا — الفجر 20 والعشاء 18 درجة`,`Southeast Asia — Fajr at 20° and Isha at 18°`],
+[`رئاسة الشؤون الدينية التركية — الفجر 18 والعشاء 17 درجة`,`Turkish Directorate of Religious Affairs — Fajr at 18° and Isha at 17°`],
+[`معهد الجيوفيزياء بجامعة طهران — الفجر 17.7 والعشاء 14 درجة`,`Institute of Geophysics, University of Tehran — Fajr at 17.7° and Isha at 14°`],
+]);
 const PATS=[
+  [/^طريقة الحساب: (.+?)(?:، والعصر على المذهب (الحنفي|الشافعي))?\. قد تختلف بدقائق عن مسجدك\.$/, m=>{ const b=MB.get(key(m[1])); if(!b) return null; return 'Calculation method: '+b+(m[2]?', '+(m[2]==='الحنفي'?'and Asr by the Hanafi school':'and Asr by the Shafi‘i school'):'')+'. It may differ by a few minutes from your mosque.'; }],
   [/^ص (\d+)$/, m=>'p. '+m[1]],
   [/^صفحة (\d+) من (\d+) \((\d+)%\)$/, m=>'Page '+m[1]+' of '+m[2]+' ('+m[3]+'%)'],
   [/^(قصص الأنبياء|السيرة النبوية) — (.+)$/, m=>(m[1]==='قصص الأنبياء'?'Stories of the prophets':'Prophetic biography')+' — '+m[2]],
@@ -71,6 +87,25 @@ function lookup(core){
 }
 function find(core){ return lookup(core); }
 add([
+[`مواقيت الصلاة`,`Prayer times`],
+[`طريقة الحساب`,`Calculation method`],
+[`تلقائي (حسب بلدك)`,`Automatic (by your country)`],
+[`شافعي (ظلّ المثل)`,`Shafi‘i (shadow equal to height)`],
+[`حنفي (ظلّ المثلين)`,`Hanafi (shadow twice the height)`],
+[`رابطة العالم الإسلامي`,`Muslim World League`],
+[`أمريكا الشمالية (ISNA)`,`North America (ISNA)`],
+[`أمّ القرى`,`Umm al-Qura`],
+[`دبي`,`Dubai`],
+[`قطر`,`Qatar`],
+[`الكويت`,`Kuwait`],
+[`الهيئة المصرية`,`Egyptian Authority`],
+[`كراتشي`,`Karachi`],
+[`زاوية 18 للفجر والعشاء`,`18° for Fajr and Isha`],
+[`جنوب شرق آسيا`,`Southeast Asia`],
+[`تركيا (الشؤون الدينية)`,`Turkey (Religious Affairs)`],
+[`طهران`,`Tehran`],
+[`داخل المغرب تُعتمد دائمًا مواقيتُ وزارة الأوقاف بجدولها الدقيق، ولا يغيّرها هذا الاختيار.`,`In Morocco, the Ministry of Habous prayer times with their precise table are always used; this choice does not change them.`],
+[`الاختيار «تلقائي» يعتمد طريقةَ بلدك من موقعك. اختر طريقةً أخرى إن كان مسجدك يعتمدها. يسري الاختيارُ خارج المغرب فقط.`,`“Automatic” uses your country’s method from your location. Choose another method if your mosque uses it. The choice applies outside Morocco only.`],
 [`طريقة الحساب: أمريكا الشمالية (ISNA) — الفجر والعشاء 15 درجة. قد تختلف بدقائق عن مسجدك.`,`Calculation method: North America (ISNA) — Fajr and Isha at 15°. It may differ by a few minutes from your mosque.`],
 [`طريقة الحساب: رابطة العالم الإسلامي — الفجر 18 والعشاء 17 درجة. قد تختلف بدقائق عن مسجدك.`,`Calculation method: Muslim World League — Fajr at 18° and Isha at 17°. It may differ by a few minutes from your mosque.`],
 [`طريقة الحساب: إعداد وزارة الأوقاف المغربية (19 و17 درجة). قد تختلف عن الجهة المحلية في بلدك.`,`Calculation method: Moroccan Ministry of Habous setting (19° and 17°). It may differ from your country’s local authority.`],
