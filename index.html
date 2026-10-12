@@ -2200,7 +2200,7 @@ function saveSettings(){ store.set('az_settings', settings); try{ pushSyncSoon()
 /* «لا تترك الصلاة» انتقلت إلى صفحة الفقه، فهي بابُ حكمٍ لا بابُ ذِكر */
 const CATS = [
   {id:'fadl',     name:'فضل الذكر',      title:'فضل الذكر'},
-  {id:'wasaya',   name:'وصايا النبي ﷺ',  title:'من وصايا النبي ﷺ'},
+  {id:'wasaya',   name:'وصايا النبي ﷺ',  title:'من وصايا النبي ﷺ', hidden:true},   // في القائمة الجانبيّة لا بين أزرار الأذكار
   {id:'morning',  name:'الصباح',        title:'أذكار الصباح'},
   {id:'evening',  name:'المساء',        title:'أذكار المساء'},
   {id:'baad',     name:'بعد الصلاة',    title:'أذكار ما بعد الصلاة'},
@@ -2218,6 +2218,7 @@ let currentTab = 'fadl';     // الصفحة الأولى عند الفتح: ف�
 function buildCats(){
   const seg=$('#time-seg'); seg.innerHTML='';
   CATS.forEach(c=>{
+    if(c.hidden) return;
     const b=document.createElement('button');
     b.dataset.t=c.id; b.textContent=c.name;
     b.classList.toggle('on', c.id===currentTab);
@@ -2228,6 +2229,13 @@ function buildCats(){
     });
     seg.appendChild(b);
   });
+}
+
+/* يفتح صفحةً من صفحات الأذكار مباشرةً (ومنها المخفيّة من الأزرار، كالوصايا) */
+function showAzkarPage(id){
+  currentTab=id; window.__userPickedTime=true;
+  $$('#time-seg button').forEach(b=>b.classList.toggle('on', b.dataset.t===id));
+  renderAzkar();
 }
 
 function progressState(){
@@ -4558,6 +4566,7 @@ async function openTools(page){
     stories:I('<circle cx="12" cy="12" r="9"/><path d="M12 3v18M5 7h4M15 7h4"/>'),
     hadith:I('<path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2zM22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/>'),
     duat:I('<path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),
+    wasaya:I('<path d="M12 3l2.2 5.5 5.8.5-4.4 3.8 1.4 5.7L12 15.2 7 18.5l1.4-5.7L4 9l5.8-.5z"/>'),
     quiz:I('<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5M12 17.5h.01"/>'),
     settings:I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
     info:I('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'),
@@ -4570,7 +4579,8 @@ async function openTools(page){
   const goTab=(sid,fn)=>()=>later(()=>{ const t=document.querySelector('.tab[data-s="'+sid+'"]'); if(t) t.click(); if(fn) setTimeout(fn,70); });
   const tool=p=>()=>later(()=>openTools(p));
   const A={
-    wird:goTab('s-wird'), listen:goTab('s-listen'), azkar:goTab('s-azkar'),
+    wird:goTab('s-wird'), listen:goTab('s-listen'), azkar:goTab('s-azkar',()=>{ if(catMeta(currentTab).hidden) showAzkarPage('fadl'); }),
+    wasaya:goTab('s-azkar',()=>showAzkarPage('wasaya')),
     fiqh:goTab('s-tasbih',()=>applyTasbihMode('fiqh')), tasbih:goTab('s-tasbih',()=>applyTasbihMode('tasbih')), quiz:goTab('s-tasbih',()=>applyTasbihMode('quiz')),
     qibla:tool('qibla'), cal:tool('cal'), pt:tool('pt'), fast:tool('fast'), zakat:tool('zakat'), rev:tool('rev'), bell:tool('rem'),
     sleep:goTab('s-listen',async()=>{ if(await loadTools()) SalTools.sleep(); }),
@@ -4581,7 +4591,7 @@ async function openTools(page){
   const GROUPS=[
     [null,[['wird','الوِرد'],['listen','الاستماع'],['azkar','الأذكار'],['fiqh','الفقه'],['tasbih','المسبحة']]],
     ['أدوات المسلم',[['qibla','القبلة'],['cal','التقويم الهجريّ'],['pt','صلواتي'],['fast','الصيام'],['zakat','حاسبة الزكاة'],['rev','مراجعة الحفظ'],['sleep','مؤقّت النوم'],['bell','تذكيراتي']]],
-    ['التعلّم والاستماع',[['hifz','التحفيظ'],['seera','السيرة النبوية'],['stories','قصص الأنبياء'],['hadith','الأحاديث الصحيحة'],['duat','الدعاة'],['quiz','اختبار الثقافة الإسلامية']]],
+    ['التعلّم والاستماع',[['hifz','التحفيظ'],['seera','السيرة النبوية'],['stories','قصص الأنبياء'],['hadith','الأحاديث الصحيحة'],['duat','الدعاة'],['wasaya','وصايا النبي ﷺ'],['quiz','اختبار الثقافة الإسلامية']]],
     ['المزيد',[['settings','الإعدادات'],['info','الجولة التعريفيّة'],['shield','سياسة الخصوصية','privacy.html'],['photo','صور القرّاء (النَّسب والتراخيص)','credits.html']]]
   ];
   const curKey=()=>{
