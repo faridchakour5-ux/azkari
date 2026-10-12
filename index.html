@@ -1892,6 +1892,15 @@
     <div class="row native-only" style="display:none"><span class="k">الأذان عند دخول الوقت</span>
       <label class="sw"><input type="checkbox" id="adhan-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
+    <div class="selectrow ptrow" id="adhan-voice-row" style="display:none">
+      <span class="k">صوت الأذان</span>
+      <div class="selectwrap">
+        <select id="adhan-voice">
+          <option value="wadee">أذان وادي (الافتراضي)</option>
+          <option value="said">سعيد بلقاضي — المغربي</option>
+        </select>
+      </div>
+    </div>
     <div class="row native-only" style="display:none"><span class="k">زرّ «خفض الصوت» يوقف الأذان</span>
       <label class="sw"><input type="checkbox" id="adhan-volstop-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
@@ -7533,12 +7542,30 @@ async function scheduleNativeNotifs(){
       /* المواقيتُ تُحسَب هنا بـ adhan.min.js — مصدرٌ واحدٌ لا يَختلف عمّا يَراه
          المستخدمُ في شريط المواقيت — وتُسلَّم إلى النظام أرقامًا مطلقة. */
       try{
-        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true });
-        paintAdhanNote();
+        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true, voice: settings.adhanVoice==='said' ? 'said' : 'wadee' });
+        paintAdhanNote(); paintVoiceRow();
       }catch(e){}
     }
   }catch(e){}
 }
+/* صوتُ الأذان المختار: «said» لا يصحّ إلّا إن كان في هذا البناء ملفُّه (saidAvailable) */
+function adhanVoice(){
+  return (settings.adhanVoice==='said' && __adhanState && __adhanState.saidAvailable) ? 'said' : 'wadee';
+}
+function paintVoiceRow(){
+  const row=$('#adhan-voice-row'), sel=$('#adhan-voice'); if(!row||!sel) return;
+  const ok = !!(__adhanState && __adhanState.saidAvailable);
+  row.style.display = ok ? '' : 'none';
+  if(ok) sel.value = settings.adhanVoice==='said' ? 'said' : 'wadee';
+}
+(function(){
+  const sel=$('#adhan-voice'); if(!sel) return;
+  sel.addEventListener('change', ()=>{
+    settings.adhanVoice = sel.value==='said' ? 'said' : 'wadee'; saveSettings(); vibrate(6);
+    try{ scheduleNativeNotifs(); }catch(e){}      // يُحفَظ الصوتُ في الجدول الأصليّ
+    const P=adhanPlugin(); if(P) P.preview({ name:'', voice:adhanVoice() }).then(()=>showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200)).catch(()=>{});
+  });
+})();
 /* ملحقُ الأذان الأصليّ، أو null في الويب وفي نسخةٍ أصليّةٍ لم تُزرَع فيها الطبقة */
 function adhanPlugin(){
   try{ return (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Adhan) || null; }catch(e){ return null; }
@@ -7567,7 +7594,7 @@ $('#adhan-exact-btn') && $('#adhan-exact-btn').addEventListener('click', async (
 $('#adhan-try') && $('#adhan-try').addEventListener('click', async ()=>{
   const P = adhanPlugin(); if(!P) return;
   vibrate(6);
-  try{ await P.preview({ name:'' }); showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200); }catch(e){}
+  try{ await P.preview({ name:'', voice: adhanVoice() }); showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200); }catch(e){}
 });
 function renderPrayers(){
   const g=geoStore(); const bar=$('#prayer-bar'); const btn=$('#loc-btn');

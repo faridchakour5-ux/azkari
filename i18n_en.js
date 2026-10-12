@@ -87,6 +87,9 @@ function lookup(core){
 }
 function find(core){ return lookup(core); }
 add([
+[`صوت الأذان`,`Adhan voice`],
+[`أذان وادي (الافتراضي)`,`Wadee’s adhan (default)`],
+[`سعيد بلقاضي — المغربي`,`Said Belkadi — Moroccan`],
 [`مواقيت الصلاة`,`Prayer times`],
 [`طريقة الحساب`,`Calculation method`],
 [`تلقائي (حسب بلدك)`,`Automatic (by your country)`],

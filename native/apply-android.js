@@ -64,6 +64,19 @@ if (fs.existsSync(MP3)) {
   console.warn('⚠ لم يُعثَر على resources/adhan_wadee.mp3 — لن يُرفع صوتٌ حتّى تضعه');
 }
 
+/* 2-ب) صوتُ «سعيد بلقاضي» الاختياريّ: الملفُّ خارج المستودع عمدًا (حقوقُه لأصحابه، والمستودعُ عامّ).
+   يُمرَّر مساره بـ ADHAN_SAID_FILE (أو ~/.salatee-private/adhan_said.m4a)؛ وإن غاب بُني التطبيقُ دونه ولا يظهر الخيارُ. */
+{
+  const SAID = process.env.ADHAN_SAID_FILE || path.join(process.env.HOME || '', '.salatee-private', 'adhan_said.m4a');
+  if (SAID && fs.existsSync(SAID)) {
+    fs.mkdirSync(RAW, { recursive: true });
+    fs.copyFileSync(SAID, path.join(RAW, 'adhan_said.m4a'));
+    console.log('✓ نُسخ أذانُ سعيد بلقاضي إلى res/raw/adhan_said.m4a');
+  } else {
+    console.log('• بلا أذان سعيد بلقاضي (لم يُعثَر على الملفّ) — لن يظهر الخيار');
+  }
+}
+
 /* 3) البيان (AndroidManifest) */
 let m = fs.readFileSync(MAN, 'utf8');
 

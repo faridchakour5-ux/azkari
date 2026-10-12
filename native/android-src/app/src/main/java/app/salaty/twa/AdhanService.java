@@ -39,6 +39,7 @@ public class AdhanService extends Service {
   public static final String ACTION_STOP = "app.salaty.twa.ADHAN_STOP";
   public static final String EXTRA_NAME  = "name";
   public static final String EXTRA_FAJR  = "fajr";
+  public static final String EXTRA_VOICE = "voice";   // معاينةٌ بصوتٍ معيَّن؛ وإلّا الصوتُ المحفوظ في الإعدادات
 
   private static final String CHANNEL = "adhan_play";
   private static final int    NOTIF_ID = 7311;
@@ -68,6 +69,7 @@ public class AdhanService extends Service {
     }
 
     String name = intent == null ? "" : intent.getStringExtra(EXTRA_NAME);
+    voiceOverride = intent == null ? null : intent.getStringExtra(EXTRA_VOICE);
     boolean fajr = intent != null && intent.getBooleanExtra(EXTRA_FAJR, false);
     if (name == null) name = "";
 
@@ -148,8 +150,18 @@ public class AdhanService extends Service {
 
   /* ===== التشغيل ===== */
 
+  /** صوتُ المعاينة إن مُرِّر، وإلّا ما اختاره المستخدمُ ("wadee" الافتراضيّ أو "said"). */
+  private String voiceOverride = null;
+  private String voice() {
+    if (voiceOverride != null && !voiceOverride.isEmpty()) return voiceOverride;
+    try { return AdhanScheduler.prefs(this).getString("voice", "wadee"); } catch (Exception e) { return "wadee"; }
+  }
+
   private void play() {
-    int res = getResources().getIdentifier("adhan_wadee", "raw", getPackageName());
+    /* "said": ملفٌّ اختياريّ (adhan_said) لا يوجد إلّا في بناءٍ وُضع له الملفّ؛ فإن غاب رجعنا إلى الصوت الافتراضيّ */
+    int res = 0;
+    if ("said".equals(voice())) res = getResources().getIdentifier("adhan_said", "raw", getPackageName());
+    if (res == 0) res = getResources().getIdentifier("adhan_wadee", "raw", getPackageName());
     if (res == 0) { stopEverything(); return; }   // لا ملفَّ صوت: لا نُبقي الخدمةَ عالقة
     /* نبني المُشغِّلَ يدويًّا ولا نستعمل MediaPlayer.create: تلك تُحضِّر الملفَّ
        فورًا، وضبطُ خصائصِ الصوت بعد التحضير يرمي IllegalStateException. وضبطُها

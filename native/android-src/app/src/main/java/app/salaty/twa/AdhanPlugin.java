@@ -76,7 +76,10 @@ public class AdhanPlugin extends Plugin {
       }
 
       Boolean vs = call.getBoolean("volStop", Boolean.FALSE);
-      AdhanScheduler.prefs(getContext()).edit().putBoolean("vol_stop", vs != null && vs).apply();
+      String voice = call.getString("voice", "wadee");
+      AdhanScheduler.prefs(getContext()).edit()
+          .putBoolean("vol_stop", vs != null && vs)
+          .putString("voice", "said".equals(voice) ? "said" : "wadee").apply();
       AdhanScheduler.save(getContext(), clean, enabled);
       AdhanScheduler.arm(getContext());
       PrayerWidget.refresh(getContext());
@@ -103,6 +106,7 @@ public class AdhanPlugin extends Plugin {
       Intent svc = new Intent(getContext(), AdhanService.class)
           .setAction(AdhanService.ACTION_PLAY)
           .putExtra(AdhanService.EXTRA_NAME, call.getString("name", ""))
+          .putExtra(AdhanService.EXTRA_VOICE, call.getString("voice", ""))
           .putExtra(AdhanService.EXTRA_FAJR, false);
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         getContext().startForegroundService(svc);
@@ -165,6 +169,8 @@ public class AdhanPlugin extends Plugin {
     r.put("nextAt", AdhanScheduler.nextAt(getContext()));
     r.put("exact", AdhanScheduler.canExact(getContext()));
     r.put("battery", ignoringBattery());
+    /* هل في هذا البناء صوتٌ إضافيّ (سعيد بلقاضي)؟ — لا نعرضُ خيارًا لا ملفَّ له */
+    r.put("saidAvailable", getContext().getResources().getIdentifier("adhan_said", "raw", getContext().getPackageName()) != 0);
     return r;
   }
 }

@@ -92,6 +92,9 @@ function find(core){ return lookup(core); }
 
 /* ===================== واجهة التطبيق (index.html) ===================== */
 add([
+[`صوت الأذان`,`Voix de l’adhan`],
+[`أذان وادي (الافتراضي)`,`Adhan de Wadee (par défaut)`],
+[`سعيد بلقاضي — المغربي`,`Said Belkadi — marocain`],
 [`مواقيت الصلاة`,`Horaires de prière`],
 [`طريقة الحساب`,`Méthode de calcul`],
 [`تلقائي (حسب بلدك)`,`Automatique (selon votre pays)`],
