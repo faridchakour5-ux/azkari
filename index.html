@@ -1897,7 +1897,7 @@
       <div class="selectwrap">
         <select id="adhan-voice">
           <option value="wadee">أذان وادي (الافتراضي)</option>
-          <option value="said">سعيد بلقاضي — المغربي</option>
+          <option value="alt"></option>
         </select>
       </div>
     </div>
@@ -7542,26 +7542,27 @@ async function scheduleNativeNotifs(){
       /* المواقيتُ تُحسَب هنا بـ adhan.min.js — مصدرٌ واحدٌ لا يَختلف عمّا يَراه
          المستخدمُ في شريط المواقيت — وتُسلَّم إلى النظام أرقامًا مطلقة. */
       try{
-        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true, voice: settings.adhanVoice==='said' ? 'said' : 'wadee' });
+        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true, voice: settings.adhanVoice==='alt' ? 'alt' : 'wadee' });
         paintAdhanNote(); paintVoiceRow();
       }catch(e){}
     }
   }catch(e){}
 }
-/* صوتُ الأذان المختار: «said» لا يصحّ إلّا إن كان في هذا البناء ملفُّه (saidAvailable) */
+/* الصوتُ الثاني الاختياريّ للأذان: يُسمّى هنا حين يُضاف ملفُّه (انظر native/apply-android.js)؛ فارغٌ = لا خيار */
+const ADHAN_ALT_NAME = '';
 function adhanVoice(){
-  return (settings.adhanVoice==='said' && __adhanState && __adhanState.saidAvailable) ? 'said' : 'wadee';
+  return (settings.adhanVoice==='alt' && ADHAN_ALT_NAME && __adhanState && __adhanState.altAvailable) ? 'alt' : 'wadee';
 }
 function paintVoiceRow(){
   const row=$('#adhan-voice-row'), sel=$('#adhan-voice'); if(!row||!sel) return;
-  const ok = !!(__adhanState && __adhanState.saidAvailable);
+  const ok = !!(ADHAN_ALT_NAME && __adhanState && __adhanState.altAvailable);
   row.style.display = ok ? '' : 'none';
-  if(ok) sel.value = settings.adhanVoice==='said' ? 'said' : 'wadee';
+  if(ok){ const o=sel.querySelector('option[value="alt"]'); if(o) o.textContent=ADHAN_ALT_NAME; sel.value = settings.adhanVoice==='alt' ? 'alt' : 'wadee'; }
 }
 (function(){
   const sel=$('#adhan-voice'); if(!sel) return;
   sel.addEventListener('change', ()=>{
-    settings.adhanVoice = sel.value==='said' ? 'said' : 'wadee'; saveSettings(); vibrate(6);
+    settings.adhanVoice = sel.value==='alt' ? 'alt' : 'wadee'; saveSettings(); vibrate(6);
     try{ scheduleNativeNotifs(); }catch(e){}      // يُحفَظ الصوتُ في الجدول الأصليّ
     const P=adhanPlugin(); if(P) P.preview({ name:'', voice:adhanVoice() }).then(()=>showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200)).catch(()=>{});
   });

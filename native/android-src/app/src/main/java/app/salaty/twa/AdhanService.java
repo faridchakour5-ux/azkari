@@ -150,7 +150,7 @@ public class AdhanService extends Service {
 
   /* ===== التشغيل ===== */
 
-  /** صوتُ المعاينة إن مُرِّر، وإلّا ما اختاره المستخدمُ ("wadee" الافتراضيّ أو "said"). */
+  /** صوتُ المعاينة إن مُرِّر، وإلّا ما اختاره المستخدمُ ("wadee" الافتراضيّ أو "alt"). */
   private String voiceOverride = null;
   private String voice() {
     if (voiceOverride != null && !voiceOverride.isEmpty()) return voiceOverride;
@@ -158,9 +158,9 @@ public class AdhanService extends Service {
   }
 
   private void play() {
-    /* "said": ملفٌّ اختياريّ (adhan_said) لا يوجد إلّا في بناءٍ وُضع له الملفّ؛ فإن غاب رجعنا إلى الصوت الافتراضيّ */
+    /* "alt": صوتٌ ثانٍ اختياريّ (adhan_alt) لا يوجد إلّا في بناءٍ وُضع له الملفّ؛ فإن غاب رجعنا إلى الصوت الافتراضيّ */
     int res = 0;
-    if ("said".equals(voice())) res = getResources().getIdentifier("adhan_said", "raw", getPackageName());
+    if ("alt".equals(voice())) res = getResources().getIdentifier("adhan_alt", "raw", getPackageName());
     if (res == 0) res = getResources().getIdentifier("adhan_wadee", "raw", getPackageName());
     if (res == 0) { stopEverything(); return; }   // لا ملفَّ صوت: لا نُبقي الخدمةَ عالقة
     /* نبني المُشغِّلَ يدويًّا ولا نستعمل MediaPlayer.create: تلك تُحضِّر الملفَّ
