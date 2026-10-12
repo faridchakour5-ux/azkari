@@ -5817,6 +5817,14 @@ function saadiFiles(){
   f[34]=B+'034.mp3'; f[75]=B+'075.mp3';
   return f;
 }
+/* عبد المغيث معروف — ليس في mp3quran. المتاحُ منه على archive.org (رفعه مستخدمٌ من «منتدى الفردوس»، بلا ترخيصٍ مذكور)
+   سورتان فقط برواية ورش: المؤمنون (23) والقمر (54). تُبَثّ من هناك ولا تدخل المستودع، وتبقى باقي السور
+   «غير مسجّلة» بصوته حتى يتوفّر مصحفٌ كاملٌ بإذن (قائمةُ السور تُبنى من هذه الخريطة). */
+function maaroufFiles(){
+  const A='https://archive.org/download/023_2hhhhhhhhhhhhhhhh0210503/', f={};
+  [23,54].forEach(n=>{ f[n]=A+encodeURIComponent('عبد المغيث معروف  برواية ورش سورة رقم '+pad3(n)+'.mp3'); });
+  return f;
+}
 const RECITERS=[
   {id:'ghamdi',      name:'سعد الغامدي',      exact:'سعد الغامدي',   match:['الغامدي'],
     fallback:'https://server9.mp3quran.net/s_gmd/'},
@@ -5836,6 +5844,7 @@ const RECITERS=[
      نفسِه (ثانيةٌ لكلّ حرف) فكانت كلُّها سورًا كاملة. واستُبعد ما سواها: الروم
      وفصّلت مقطعان لا سورتان، وفاطر والمزّمّل لم تُذكر روايتُهما. */
   {id:'saadi',       name:'جعفر السعدي',       files:saadiFiles(),    moshaf:'المصحف المرتّل — رواية ورش'},
+  {id:'maarouf',     name:'عبد المغيث معروف',  files:maaroufFiles(),  moshaf:'برواية ورش — سورتان فقط حاليًّا'},
   {id:'turki',       name:'بدر التركي',        exact:'بدر التركي',    match:['التركي'],
     fallback:'https://server6.mp3quran.net/turki/'},
   {id:'mhmd-lfkyh',  name:'محمد الفقيه اليمني', match:['الفقيه']},
