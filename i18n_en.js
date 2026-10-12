@@ -71,6 +71,9 @@ function lookup(core){
 }
 function find(core){ return lookup(core); }
 add([
+[`طريقة الحساب: أمريكا الشمالية (ISNA) — الفجر والعشاء 15 درجة. قد تختلف بدقائق عن مسجدك.`,`Calculation method: North America (ISNA) — Fajr and Isha at 15°. It may differ by a few minutes from your mosque.`],
+[`طريقة الحساب: رابطة العالم الإسلامي — الفجر 18 والعشاء 17 درجة. قد تختلف بدقائق عن مسجدك.`,`Calculation method: Muslim World League — Fajr at 18° and Isha at 17°. It may differ by a few minutes from your mosque.`],
+[`طريقة الحساب: إعداد وزارة الأوقاف المغربية (19 و17 درجة). قد تختلف عن الجهة المحلية في بلدك.`,`Calculation method: Moroccan Ministry of Habous setting (19° and 17°). It may differ from your country’s local authority.`],
 [`الإيمان وأركان الدين`,`Faith and the pillars of the religion`],
 [`موضع الوِرد (ورش):`,`Reading position (Warsh):`],
 [`موضع الوِرد (حفص):`,`Reading position (Hafs):`],

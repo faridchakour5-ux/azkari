@@ -4,7 +4,8 @@
    والنصوص)، وحسابُ المواقيت بالمعادلة نفسِها (الفجر 19°، العشاء 17°، العصر
    شافعيّ) — وقد قورنت حزمةُ adhan هنا بـ adhan.min.js في التطبيق على
    3816 موقتًا فلم يختلف واحدٌ منها ولا بجزءٍ من الثانية. */
-import { Coordinates, CalculationParameters, PrayerTimes, Madhab } from "adhan";
+import { Coordinates, CalculationParameters, CalculationMethod, HighLatitudeRule, PrayerTimes, Madhab } from "adhan";
+import { ptRegion } from "./pt-regions.mts";
 import { MA_HABOUS } from "./ma-habous.mts";
 
 export interface Prefs {
@@ -92,10 +93,18 @@ export function maHabousAdj(lat: number, lng: number) {
 }
 
 export function prayerTimes(lat: number, lng: number, y: number, m: number, d: number) {
-  const params = new CalculationParameters("Other", 19, 17);
+  let params = new CalculationParameters("Other", 19, 17);
   params.madhab = Madhab.Shafi;
+  const inMorocco = lat >= 20.7 && lat <= 35.95 && lng >= -17.3 && lng <= -0.9;
+  /* خارج المغرب: أمريكا بـ ISNA وألمانيا برابطة العالم الإسلامي — يطابق computePrayers في index.html */
+  const rg = inMorocco ? null : ptRegion(lat, lng);
+  if (rg) {
+    params = rg === "us" ? CalculationMethod.NorthAmerica() : CalculationMethod.MuslimWorldLeague();
+    params.madhab = Madhab.Shafi;
+    params.highLatitudeRule = HighLatitudeRule.recommended(new Coordinates(lat, lng));
+  }
   /* داخل المغرب: فروقُ جدول وزارة الأوقاف لأقرب مدينةٍ (≤ 40 كم) — يطابق computePrayers/maHabousAdj في index.html */
-  if (lat >= 20.7 && lat <= 35.95 && lng >= -17.3 && lng <= -0.9) params.adjustments = { ...params.adjustments, ...maHabousAdj(lat, lng) };
+  if (inMorocco) params.adjustments = { ...params.adjustments, ...maHabousAdj(lat, lng) };
   /* adhan يقرأ اليومَ من مُكوِّنات التاريخ المحلّيّة في الخادم؛ وقد بنيناه من
      مكوّنات يوم المستخدم، فيصحّ الحسابُ أيًّا كانت منطقةُ الخادم. */
   return new PrayerTimes(new Coordinates(lat, lng), new Date(y, m - 1, d), params);

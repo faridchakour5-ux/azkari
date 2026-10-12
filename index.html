@@ -410,6 +410,7 @@
   .prayerbar .next span{font-size:13px; color:var(--text-2);}
   .prayerbar .next .next-lbl{color:var(--c-read);}
   .prayerbar .next .next-time{color:var(--c-repeat); font-weight:800;}
+  .pt-note{margin:6px 20px 0; font-size:12px; line-height:1.7; color:var(--text-3);}
   .prayerbar .times{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
   .prayerbar .t{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:42px;}
   .prayerbar .t .nm{font-size:11px; color:var(--text-2);}
@@ -1457,6 +1458,7 @@
   </div>
   <button class="locbtn b-blue" id="loc-btn"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>تفعيل مواقيت الصلاة حسب موقعك</button>
   <div id="prayer-bar" class="prayerbar" style="display:none"></div>
+  <div id="pt-note" class="pt-note" style="display:none"></div>
   <div class="qp-open" id="qp-open" role="button" tabindex="0">
     <svg class="gh-ic" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
     <span class="qo-t">تذكيرك<small>ذكر · صلاة على الحبيب ﷺ · ربع صفحة</small></span>
@@ -1962,6 +1964,7 @@
 <script src="data.js" onerror="document.querySelector('#az-list').innerHTML='<div style=\'padding:30px;text-align:center;color:#c0392b\'>تعذّر تحميل الأذكار. افتح الإعدادات في المتصفح وامسح البيانات ثم أعِد الفتح.</div>'"></script>
 <script src="adhan.min.js"></script>
 <script src="ma-habous.js"></script>
+<script src="pt-regions.js"></script>
 <script>
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -7328,17 +7331,35 @@ function maHabousAdj(lat,lng){
   }
   return { fajr:best[0], sunrise:best[1], dhuhr:best[2], asr:best[3], maghrib:best[4], isha:best[5] };
 }
+/* سطرٌ صادقٌ تحت المواقيت خارج المغرب: بأيّ طريقةٍ حُسبت، وأنها قد تختلف بدقائق عن المسجد المحلّيّ. داخل المغرب: لا شيء. */
+function ptMethodNote(lat,lng){
+  if(lat>=20.7 && lat<=35.95 && lng>=-17.3 && lng<=-0.9) return '';
+  const rg = window.PT_REGION ? window.PT_REGION(lat,lng) : null;
+  if(rg==='us') return 'طريقة الحساب: أمريكا الشمالية (ISNA) — الفجر والعشاء 15 درجة. قد تختلف بدقائق عن مسجدك.';
+  if(rg==='de') return 'طريقة الحساب: رابطة العالم الإسلامي — الفجر 18 والعشاء 17 درجة. قد تختلف بدقائق عن مسجدك.';
+  return 'طريقة الحساب: إعداد وزارة الأوقاف المغربية (19 و17 درجة). قد تختلف عن الجهة المحلية في بلدك.';
+}
 function computePrayers(lat,lng,date){
   try{
     const A=window.adhan; if(!A) return null;
     const coords=new A.Coordinates(lat,lng);
     // Morocco (Ministry of Habous): Fajr 19°, Isha 17°, Asr = Shafi
-    const params=new A.CalculationParameters('Other',19,17);
+    let params=new A.CalculationParameters('Other',19,17);
     params.madhab=A.Madhab.Shafi;
+    const inMorocco = lat>=20.7 && lat<=35.95 && lng>=-17.3 && lng<=-0.9;
+    /* خارج المغرب: الولايات المتحدة بطريقة ISNA (15°/15°)، وألمانيا برابطة العالم الإسلامي (18°/17°)،
+       وخطوطُ العرض العليا بقاعدة adhan الموصى بها (سُبع الليل فوق 48°). والمغرب لا يدخل هنا أبدًا.
+       وبقيّة العالم تبقى على الإعداد الحاليّ (انظر pt-regions.js). */
+    const rg = !inMorocco && window.PT_REGION ? window.PT_REGION(lat,lng) : null;
+    if(rg){
+      params = rg==='us' ? A.CalculationMethod.NorthAmerica() : A.CalculationMethod.MuslimWorldLeague();
+      params.madhab = A.Madhab.Shafi;
+      params.highLatitudeRule = A.HighLatitudeRule.recommended(coords);
+    }
     /* داخل المغرب: فروقٌ بالدقائق عن حسابنا مأخوذةٌ من جدول وزارة الأوقاف لأقرب مدينةٍ (ma-habous.js، مولَّد من
        مواقيت 167 مدينة). الظهرُ +5 تقريبًا في كلّ المدن، أمّا المغرب والشروق فيختلفان حسب المدينة (ارتفاعها). خارج المغرب لا يُمسّ شيء.
        (نفس المنطق في netlify/functions/_lib/push-core.mts) */
-    if(lat>=20.7 && lat<=35.95 && lng>=-17.3 && lng<=-0.9) params.adjustments=maHabousAdj(lat,lng);
+    if(inMorocco) params.adjustments=maHabousAdj(lat,lng);
     const pt=new A.PrayerTimes(coords, date||new Date(), params);
     return pt;
   }catch(e){ return null; }
@@ -7511,6 +7532,7 @@ function renderPrayers(){
   if(!g){ bar.style.display='none'; btn.style.display='block'; return; }
   const pt=computePrayers(g.lat,g.lng); if(!pt){ bar.style.display='none'; return; }
   btn.style.display='none'; bar.style.display='flex'; prayerToday=pt;
+  try{ const n=$('#pt-note'); if(n){ const t=ptMethodNote(g.lat,g.lng); n.textContent=t; n.style.display=t?'':'none'; } }catch(e){}
   const A=window.adhan;
   let nextName='—', nextTime='', nextKey=null;
   try{

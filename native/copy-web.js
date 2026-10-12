@@ -8,7 +8,7 @@ const WWW  = path.resolve(__dirname, 'www');
 
 // ملفات ومجلدات تطبيق الويب المطلوبة داخل التطبيق الأصلي
 const ITEMS = [
-  'index.html', 'data.js', 'adhan.min.js', 'ma-habous.js', 'wird_hafs.js', 'wird_warsh.js',
+  'index.html', 'data.js', 'adhan.min.js', 'ma-habous.js', 'pt-regions.js', 'wird_hafs.js', 'wird_warsh.js',
   // ملفّاتٌ تُحمَّل عند الطلب من داخل index.html — بدونها تتعطّل صفحاتُها
   'tools.js', 'i18n_core.js', 'i18n_fr.js', 'i18n_en.js', 'mutash.js', 'fadl.js', 'wasaya.js', 'fiqh.js', 'thabat.js', 'sunna.js', 'sharh.js', 'quiz.js', 'tafsir.js',
   'manifest.json', 'privacy.html', 'credits.html', 'sw.js', 'fonts', 'icons', 'audio', 'reciters'
