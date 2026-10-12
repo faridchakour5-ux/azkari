@@ -140,7 +140,7 @@ css.textContent=`
 .pt-stat{display:flex; gap:8px; margin-bottom:12px;}
 .pt-stat div{flex:1; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:10px 6px; text-align:center; font-size:12px; color:var(--text-2);}
 .pt-stat b{display:block; font-size:22px; color:var(--c-repeat); line-height:1.4;}
-/* الصيام والإمساكيّة */
+/* الصيام والفجر */
 .fs-i{display:flex; align-items:center; gap:10px; padding:10px 2px; border-top:1px solid var(--sep);}
 .fs-i:first-child{border-top:0;}
 .fs-i .d{min-width:54px; text-align:center; background:var(--fill-2); border-radius:12px; padding:6px 4px; font-size:11.5px; color:var(--text-2); line-height:1.5;}
@@ -217,7 +217,7 @@ PAGES.hub = { title:'أدوات المسلم', render(body){
     ['qibla','القبلة','qibla','بوصلةٌ نحو الكعبة'],
     ['cal','التقويم الهجريّ','cal','الأيّام والمناسبات'],
     ['pt','صلواتي','pray','تابِع صلواتك اليوم'],
-    ['fast','الصيام','fast','التطوّع وإمساكيّة رمضان'],
+    ['fast','الصيام','fast','التطوّع ووقت الفجر'],
     ['zakat','حاسبة الزكاة','zakat','تقديريّةٌ وبسيطة'],
     ['rev','مراجعة الحفظ','rev',due?('عندك '+AR(due)+' للمراجعة'):'تذكيرٌ متباعد'],
     ['rem','تذكيراتي','bell','الجمعة والمراجعة']
@@ -443,7 +443,7 @@ PAGES.pt = { title:'صلواتي', render(body){
   draw();
 }};
 
-/* ============ الصيام وإمساكيّة رمضان ============ */
+/* ============ الصيام ووقت الفجر ============ */
 function nextFastDays(limit, horizon){
   const out=[]; const now=new Date();
   for(let i=0;i<horizon && out.length<limit;i++){
@@ -470,24 +470,18 @@ PAGES.fast = { title:'الصيام', render(body){
   body.innerHTML='<div class="tl-card"><h3>الصيامُ القادم</h3>'+rows+'<div class="tl-note">الاثنين والخميس (الترمذي والنسائي)، والأيّامُ البيض، وعاشوراء مع تاسوعاء، وعرفةُ لغير الحاجّ، وستٌّ من شوّال. التواريخُ بحساب أمّ القرى؛ عدِّل يومَ الشهر من «التقويم» إن خالف إعلانَ الوزارة.</div></div>'+
    '<div class="tl-card"><h3>أيّامٌ لا يُصام فيها</h3><div class="tl-note" style="margin:0">يومُ عيد الفطر، ويومُ عيد الأضحى (البخاري 1990)، وأيّامُ التشريق الثلاثة بعده (مسلم 1141). ويُكره إفرادُ يوم الجمعة بالصيام (البخاري 1985).</div></div>'+
    '<div class="tl-card" id="im-card"></div>';
-  const im=body.querySelector('#im-card'); const rs=ramadanStart(); const g=sget('az_geo',null);
-  if(!rs){ im.style.display='none'; return; }
-  const h=hijri(now); const inRam=h.m===9;
-  const left=Math.round((rs-now)/86400000);
-  if(!g){ im.innerHTML='<h3>إمساكيّة رمضان</h3><div class="tl-note" style="margin:0">فعِّل موقعك من صفحة الأذكار ليُحسَب لك وقتُ الفجر والمغرب كلَّ يوم.</div>'; return; }
-  let tr=''; const n=30; let todayRow='';
-  for(let i=0;i<n;i++){
-    const d=addDays(rs,i); if(hijri(d).m!==9) break;
-    let p=null; try{ p=computePrayers(g.lat,g.lng,d); }catch(e){}
-    if(!p) continue;
-    const isT=lk(d)===lk(now);
-    tr+='<tr'+(isT?' class="td"':'')+'><td>'+AR(i+1)+'</td><td>'+AR(d.getDate())+' '+GMON[d.getMonth()]+'</td><td>'+fmtTime(p.fajr)+'</td><td>'+fmtTime(p.maghrib)+'</td></tr>';
-    if(isT) todayRow=fmtTime(p.maghrib);
-  }
-  im.innerHTML='<h3>إمساكيّة رمضان '+AR(h.m===9?h.y:hijri(rs).y)+' هـ</h3>'+
-    '<div class="tl-note" style="margin:0 0 8px">'+(inRam?'نحن في رمضان — بارك الله لك فيه.'+(todayRow?' الإفطارُ اليومَ عند '+todayRow+'.':''):('يبدأ رمضانُ بالحساب بعد '+AR(left)+' يومًا (تقريبًا).'))+'</div>'+
-    '<table class="im-t"><tr><th>اليوم</th><th>التاريخ</th><th>الفجر (الإمساك)</th><th>المغرب (الإفطار)</th></tr>'+tr+'</table>'+
-    '<div class="tl-note">الأوقاتُ بجدول مواقيت وزارة الأوقاف لأقرب مدينةٍ إليك، والإمساكُ عند أذان الفجر. أوّلُ رمضان يُحدَّد بالرؤية فقد يختلف يومًا عن الحساب.</div>';
+  const im=body.querySelector('#im-card'); const g=sget('az_geo',null);
+  if(!g){ im.innerHTML='<h3>الفجر — بدءُ الصيام</h3><div class="tl-note" style="margin:0">فعِّل موقعك من صفحة الأذكار ليُحسَب لك وقتُ الفجر كلَّ يوم.</div>'; return; }
+  let p=null, p2=null; try{ p=computePrayers(g.lat,g.lng,now); p2=computePrayers(g.lat,g.lng,addDays(now,1)); }catch(e){}
+  if(!p){ im.style.display='none'; return; }
+  const inRam=hijri(now).m===9;
+  /* الإمساكُ عند أذان الفجر نفسِه: لا إمساكيّةَ احتياطيّةَ قبله */
+  const upcoming = p.fajr && now>p.fajr && p2 ? p2.fajr : p.fajr;
+  const lbl = upcoming===p.fajr ? 'الفجر اليوم' : 'الفجر غدًا';
+  im.innerHTML='<h3>الفجر — بدءُ الصيام</h3>'+
+    '<div class="tl-row"><span>'+lbl+'</span><span class="v" style="font-size:19px;color:var(--c-repeat);font-weight:800">'+fmtTime(upcoming)+'</span></div>'+
+    (inRam && p.maghrib ? '<div class="tl-row"><span>المغرب اليوم (الإفطار)</span><span class="v">'+fmtTime(p.maghrib)+'</span></div>' : '')+
+    '<div class="tl-note">يبدأ الصيامُ بطلوع الفجر، فيجب الإمساكُ عن الطعام والشراب إذا أُذِّن للفجر (البقرة 187) — فلا إمساكيّةَ قبل الأذان. الأوقاتُ بجدول مواقيت وزارة الأوقاف لأقرب مدينةٍ إليك في المغرب، وبالحساب في غيره. وأوّلُ رمضان يُحدَّد بالرؤية فقد يختلف يومًا عن الحساب.</div>';
 }};
 
 /* ============ حاسبة الزكاة ============ */

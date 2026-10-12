@@ -178,6 +178,8 @@
 
   .progressbar{margin:18px 16px 0; height:6px; border-radius:3px; background:var(--fill); overflow:hidden;}
   .progressbar i{display:block; height:100%; width:0; background:var(--accent); border-radius:3px; transition:width .4s ease;}
+  .pg-time{margin:6px 16px 0; font-size:13px; color:var(--text-2); display:flex; flex-wrap:wrap; gap:4px 14px;}
+  .pg-time b{color:var(--c-repeat); font-weight:800;}
   .progresslabel{margin:10px 16px 0; color:var(--text-2); font-size:13px; display:flex; justify-content:space-between;}
 
   /* Cards list */
@@ -1171,9 +1173,33 @@
   .qz-chal .t{font-weight:800; font-size:calc(18px * var(--tscale)); color:var(--accent); margin-bottom:8px;}
   .qz-chal .d{line-height:2; color:var(--text-2); font-size:calc(14.5px * var(--tscale));}
   .qz-vs{margin:10px 0 4px; font-weight:800; color:var(--c-repeat);}
+  .qz-name{margin:0 0 14px; text-align:start;}
+  .qz-name label{display:block; font-size:12.5px; color:var(--text-3); font-weight:700; margin-bottom:6px;}
+  .qz-name input{width:100%; border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; border-radius:14px; padding:11px 14px;}
+  .qz-who{font-weight:800; color:var(--text-2); font-size:calc(15px * var(--tscale)); margin-bottom:18px;}
+  .qz-ring{position:relative; width:172px; height:172px; margin:6px auto 12px;}
+  .qz-ring svg:first-child{width:100%; height:100%; transform:rotate(-90deg); overflow:visible;}
+  .qz-ring circle{fill:none; stroke-width:9; stroke-linecap:round;}
+  .qz-ring .bg{stroke:var(--fill);}
+  .qz-ring .fg{stroke:var(--accent); transition:stroke-dashoffset 1.5s cubic-bezier(.2,.8,.2,1);}
+  .qz-ring.L4 .fg,.qz-ring.L5 .fg{stroke:var(--c-repeat);}
+  .qz-ring.L5 .fg{filter:drop-shadow(0 0 7px color-mix(in srgb, var(--c-repeat) 65%, transparent));}
+  .qz-ring.L5{animation:qzPulse 2.4s ease-in-out infinite;}
+  .qz-ring .in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .qz-ring .score{font-size:50px; font-weight:800; color:var(--accent); line-height:1.15;}
+  .qz-ring.L4 .score,.qz-ring.L5 .score{color:var(--c-repeat);}
+  .qz-ring.L5 .score{animation:qzGlow 2.4s ease-in-out infinite;}
+  .qz-ring .of{font-size:13px; color:var(--text-3); margin:0;}
+  .qz-star{position:absolute; top:-14px; left:50%; width:30px; height:30px; margin-left:-15px; fill:var(--c-repeat); animation:qzPop .7s .9s cubic-bezier(.2,1.6,.4,1) both;}
+  .qz-ring.L5 .qz-star{width:36px; height:36px; margin-left:-18px; top:-18px; animation:qzPop .7s .9s cubic-bezier(.2,1.6,.4,1) both, qzTwinkle 1.8s 1.7s ease-in-out infinite;}
+  .qz-res.L5 .msg{color:var(--c-repeat);} .qz-res.L4 .msg{color:var(--c-repeat);}
+  .qz-fx{position:fixed; inset:0; width:100vw; height:100vh; z-index:170; pointer-events:none;}
+  @keyframes qzPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.045);}}
+  @keyframes qzGlow{0%,100%{opacity:1;}50%{opacity:.78;}}
+  @keyframes qzPop{from{transform:scale(0) rotate(-40deg); opacity:0;}to{transform:scale(1) rotate(0); opacity:1;}}
+  @keyframes qzTwinkle{0%,100%{transform:scale(1) rotate(0);}50%{transform:scale(1.18) rotate(12deg);}}
+  @media (prefers-reduced-motion: reduce){ .qz-ring,.qz-ring .score,.qz-star{animation:none !important;} .qz-ring .fg{transition:none;} }
   .qz-res{text-align:center; padding:10px 0;}
-  .qz-res .score{font-size:44px; font-weight:800; color:var(--accent); line-height:1.2;}
-  .qz-res .of{font-size:14px; color:var(--text-3); margin-bottom:10px;}
   .qz-res .msg{font-size:calc(16px * var(--tscale)); font-weight:700; line-height:1.9; margin-bottom:18px;}
   .search-box{padding:4px 16px 10px; border-bottom:1px solid var(--sep);}
   .search-box input{width:100%; border:1px solid var(--line); background:var(--fill-2); color:var(--text);
@@ -1408,6 +1434,18 @@
   .hz-step button{width:38px; height:38px; border:0; border-radius:12px; background:var(--card); color:var(--accent); font-size:20px; font-weight:800; cursor:pointer;}
   .hz-go{display:block; width:100%; margin-top:18px; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:calc(16px * var(--tscale)); border-radius:16px; padding:14px; cursor:pointer;}
   .hz-sura{display:flex; justify-content:space-between; align-items:center; width:100%; border:1px solid var(--line); background:var(--fill-2); color:var(--text); font:inherit; font-weight:800; font-size:calc(16px * var(--tscale)); border-radius:16px; padding:12px 16px; cursor:pointer;}
+  .hz-presets{display:flex; flex-direction:column; gap:8px;}
+  .hz-pre{display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:start; border:1px solid var(--line); background:var(--fill-2); color:var(--text); font:inherit; border-radius:16px; padding:11px 14px; cursor:pointer;}
+  .hz-pre b{font-size:calc(15.5px * var(--tscale)); font-weight:800;}
+  .hz-pre small{font-size:calc(12.5px * var(--tscale)); color:var(--text-2); line-height:1.7;}
+  .hz-pre.on{background:var(--accent); border-color:transparent; color:#fff;} .hz-pre.on small{color:rgba(255,255,255,.88);}
+  .hz-sel{width:100%; border:1px solid var(--line); background:var(--fill-2); border-radius:16px; padding:2px 12px;}
+  .hz-sel select{width:100%; text-align:start; font-weight:700; padding:10px 0;}
+  .hz-adv{margin-top:14px; border-top:1px solid var(--line); padding-top:6px;}
+  .hz-adv summary{cursor:pointer; font-weight:800; color:var(--accent); padding:10px 0; font-size:calc(14px * var(--tscale)); list-style:none;}
+  .hz-adv summary::-webkit-details-marker{display:none;}
+  .hz-adv summary::after{content:' ⌄'; color:var(--text-3);}
+  .hz-adv[open] summary::after{content:' ⌃';}
   .hz-hint{font-size:12.5px; color:var(--text-3); margin-top:6px; line-height:1.8;}
   .hifz-pill{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:80; display:none; align-items:center; gap:6px;
     border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow-2); border-radius:22px; padding:6px 10px; max-width:94vw;}
@@ -1485,6 +1523,7 @@
   </div>
   <div class="progressbar"><i id="pg-fill"></i></div>
   <div class="progresslabel"><span id="pg-text">0 من 0</span><span id="pg-reset-day"></span></div>
+  <div class="pg-time" id="pg-time" style="display:none"></div>
   <div class="list" id="az-list"></div>
 </section>
 
@@ -1889,6 +1928,7 @@
     <div class="row"><span class="k">تذكير بالصلاة على النبي ﷺ</span>
       <label class="sw"><input type="checkbox" id="salat-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
+    <div class="gnote">التذكيراتُ تصل من بعد الفجر بخمسين دقيقة إلى العاشرة ليلًا فقط: أذكارُ الصباح عند بدء هذه النافذة، والمساء بعد العصر، والصلاةُ على النبيّ ﷺ كلَّ ساعتين، وتنبيهٌ قبل الصلاة بعشر دقائق. أمّا الأذانُ فيرتفع في وقته دائمًا.</div>
     <div class="row native-only" style="display:none"><span class="k">الأذان عند دخول الوقت</span>
       <label class="sw"><input type="checkbox" id="adhan-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
@@ -1928,6 +1968,13 @@
     <div class="btn-row b-amber" id="qdl-clear" style="display:none">احذف كلّ التلاوات المُنزَّلة</div>
   </div>
   <div class="gnote">التلاوات التي نزّلتَها من صفحة «الاستماع» تُسمَع دون إنترنت. يمكنك حذفها من هنا لتوفير المساحة.</div>
+
+  <div class="gtitle">وقتك في التطبيق</div>
+  <div class="group">
+    <div class="row"><span class="k">اليوم</span><span class="v" id="use-today">—</span></div>
+    <div class="row"><span class="k">المجموع منذ بدأتَ</span><span class="v" id="use-total">—</span></div>
+  </div>
+  <div class="gnote">يُحسَب الوقتُ والتطبيقُ ظاهرٌ على شاشتك فقط، ويبقى على جهازك ولا يُرسَل إلى أحد.</div>
 
   <div class="gtitle">النسخ الاحتياطي</div>
   <div class="group">
@@ -2287,6 +2334,7 @@ function renderArticle(id){
   $('#az-scope').style.display='none';
   $('.progressbar').style.display='none';
   $('.progresslabel').style.display='none';
+  const pgt=$('#pg-time'); if(pgt) pgt.style.display='none';
   if(!window[a.g]){
     wrap.innerHTML='<div class="search-hint">جارٍ التحميل…</div>';
     loadArticle(id).then(ok=>{
@@ -2385,6 +2433,40 @@ function updateProgressBar(done,total){
   $('#pg-fill').style.width = (total? (done/total*100):0)+'%';
   $('#pg-text').textContent = AR(done)+' من '+AR(total);
   $('#pg-reset-day').textContent = done>=total && total>0 ? 'أتممت أذكارك' : '';
+  paintAzkarTime();
+}
+/* مدّةُ الأذكار تقريبًا: القراءةُ الأولى لكلّ ذكرٍ بقراءةٍ هادئةٍ (نحو كلمةٍ ونصف في الثانية)، وما بعدها من التكرار أسرعُ
+   لأنّه محفوظ (نحو ثلاث كلماتٍ في الثانية) مع لمسةِ العدّ. فيعرف كلُّ شخصٍ أيبدأ الآن أم يؤجّل — تقديرٌ لا ساعةٌ دقيقة. */
+const AZ_WPS_FIRST=1.7, AZ_WPS_REPEAT=3.2, AZ_TAP_S=0.3;
+function azFmtDur(sec){
+  const lang=(settings.lang==='fr'||settings.lang==='en')?settings.lang:'ar';
+  const U={ar:['س','د'],en:['h','min'],fr:['h','min']}[lang];
+  const m=Math.round(sec/60);
+  if(sec<45) return 'أقلّ من دقيقة';
+  if(m<60) return AR(m)+' '+U[1];
+  const h=Math.floor(m/60), r=m%60;
+  return AR(h)+' '+U[0]+(r?' '+AR(r)+' '+U[1]:'');
+}
+function azkarWords(d){
+  const txt=d.quran ? (settings.riwaya==='warsh'? d.warsh : d.hafs) : d.text;
+  return String(txt||'').trim().split(/\s+/).filter(Boolean).length;
+}
+/* ثواني ما بقي من ذكرٍ عدد مرّات إنجازه done من count */
+function azkarSecsLeft(d, done){
+  const w=azkarWords(d), first=w/AZ_WPS_FIRST+AZ_TAP_S, rep=w/AZ_WPS_REPEAT+AZ_TAP_S;
+  if(done>=d.count) return 0;
+  return done===0 ? first+(d.count-1)*rep : (d.count-done)*rep;
+}
+function paintAzkarTime(){
+  const el=$('#pg-time'); if(!el) return;
+  if(ARTICLES[currentTab]){ el.style.display='none'; return; }
+  const list=azkarList(currentTab), prog=progressState();
+  let all=0, left=0;
+  list.forEach(d=>{ all+=azkarSecsLeft(d,0); left+=azkarSecsLeft(d, Math.min(prog[currentTab+'_'+d.id]||0, d.count)); });
+  if(!list.length){ el.style.display='none'; return; }
+  el.style.display='';
+  el.title='تقديرٌ بقراءةٍ هادئة';
+  el.innerHTML='<span>المدّة التقريبيّة: <b>'+azFmtDur(all)+'</b></span>'+(left<all-1 ? '<span>المتبقّي: <b>'+azFmtDur(left)+'</b></span>' : '');
 }
 
 function escapeHtml(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -2825,13 +2907,28 @@ navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', e
 
 /* client-side scheduler: تذكير بأذكار الصباح/المساء/النوم + 6 تذكيرات متفرّقة بالصلاة على النبي ﷺ
    (أفضل جهد أثناء فتح التطبيق أو تشغيله في الخلفية) */
-const AZKAR_SLOTS=[
-  {h:7,  title:'حان وقت أذكار الصباح 🌅', body:['ابدأ يومك بأذكار الصباح، تحصينًا وبركة'], data:{action:'azkar', tab:'morning'}},
-  {h:17, title:'حان وقت أذكار المساء 🌇', body:['من بعد العصر إلى المغرب — لا تنسَ أذكار المساء'], data:{action:'azkar', tab:'evening'}},
-  {h:22, title:'حان وقت أذكار النوم 🌙',  body:['قبل أن تنام، اختم يومك بأذكار النوم'], data:{action:'azkar', tab:'sleep'}},
+/* كلُّ التذكيرات تبدأ بعد الفجر بخمسين دقيقة وتنتهي عند العاشرة ليلًا (والأذانُ في وقته دائمًا).
+   وبلا موقعٍ لا يُعرَف الفجرُ فيبدأ اليومُ عند الثامنة. */
+const FAJR_LAG_MIN=50, NOTIF_FROM=8, NOTIF_TO=22;
+const AFTER_PRAYER_MIN=20;                      // أذكارُ المساء بعد العصر بهذه الدقائق
+const SALAT_HOURS=[5,7,9,11,13,15,17,19,21];    // الصلاةُ على النبيّ ﷺ كلَّ ساعتين (ما بعد بدء النافذة منها فقط)
+const SALAT_HOURS_FRIDAY=SALAT_HOURS;
+const SALAT_MSGS=[
+  {t:'الصلاةُ الإبراهيميّة ﷺ',
+   b:'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ، اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ'},
+  {t:'صَلِّ على الحبيب المصطفى ﷺ', b:'اللهم صلِّ وسلِّم على حبيبنا المصطفى محمدٍ ﷺ', fri:true},
+  {t:'صَلِّ على الحبيب ﷺ',        b:'اللهم صلِّ وسلّم على سيّدنا محمد ﷺ', fri:true},
+  {t:'قال الله تعالى',
+   b:'﴿إِنَّ اللَّهَ وَمَلَائِكَتَهُ يُصَلُّونَ عَلَى النَّبِيِّ ۚ يَا أَيُّهَا الَّذِينَ آمَنُوا صَلُّوا عَلَيْهِ وَسَلِّمُوا تَسْلِيمًا﴾ [الأحزاب: 56]'},
 ];
-const SALAT_HOURS=[7,10,13,16,19,22]; // 6 مرّات متفرّقة في الأيام العادية
-const SALAT_HOURS_FRIDAY=[6,8,10,11,12,14,16,18,20,22]; // 10 مرّات يوم الجمعة (الإكثار من الصلاة على النبي ﷺ)
+const FRIDAY_SALAT_TITLE='يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ';
+const TAHLIL_TEXT='لا إله إلا الله وحده لا شريك له، له الملك وله الحمد، وهو على كل شيء قدير';
+/* ما يُكتب مع إشعار «بقي عشر دقائق على الصلاة» — بأسلوبٍ لطيف، وبلا حديثٍ منسوب */
+const PRE_NOTES=[
+  'اترك كلَّ ما بيدك الآن وتفرّغ للصلاة؛ فهي راحةُ قلبك وزادُ يومك.',
+  'أمسِك عمّا أنت فيه، وتوضّأ وتهيّأ للصلاة — لحظاتٌ بينك وبين ربّك.',
+  'اترك الدنيا قليلًا وأقبِل على الصلاة؛ ما شغلك سينتظرك، والصلاةُ لا تنتظر.',
+];
 /* الجهازُ (أو متصفّحُه) قد يحمل قاعدةَ توقيتٍ قديمةً: عاد المغربُ إلى توقيت غرينيتش (GMT) ثابتًا
    يومَ 20 سبتمبر 2026 (المرسوم 2.26.530)، ومن لم تُحدَّث قاعدتُه ما زال يحسب GMT+1، فتظهر المواقيتُ
    المعروضةُ بساعةٍ زائدة (والأذانُ الفعليّ صحيحٌ لأنّه يُجدوَل بلحظةٍ مطلقة).
@@ -2848,8 +2945,44 @@ const lclShift=d=>TZ_SKEW ? new Date(d.getTime()-TZ_SKEW*60000) : d;    // حق�
 const lclAt=d=>TZ_SKEW ? new Date(d.getTime()+TZ_SKEW*60000) : d;       // لحظةٌ بُنيت بـsetHours المحلّيّ فتُصحَّح
 function isFridayNow(){ return lclShift(new Date()).getDay()===5; }
 function salatHoursToday(){ return isFridayNow() ? SALAT_HOURS_FRIDAY : SALAT_HOURS; }
+function dayOfYear(d){ const x=lclShift(d); return Math.floor((Date.UTC(x.getFullYear(),x.getMonth(),x.getDate())-Date.UTC(x.getFullYear(),0,0))/864e5); }
+/* نافذةُ التنبيهات ليومٍ: من الفجر + 50 دقيقة (أو 08:00 بلا موقع) إلى 22:00 */
+function notifBounds(day, pt){
+  const at=(h)=>{ const x=new Date(day); x.setHours(h,0,0,0); return new Date(lclAt(x).getTime()); };
+  let from=null;
+  try{
+    if(!pt){ const g=geoStore(); if(g) pt=computePrayers(g.lat,g.lng,day); }
+    if(pt && pt.fajr) from=new Date(+pt.fajr+FAJR_LAG_MIN*60000);
+  }catch(e){}
+  return { from: from||at(NOTIF_FROM), to: at(NOTIF_TO) };
+}
+function inNotifWindow(t, pt){ const b=notifBounds(new Date(t), pt); return +t>=+b.from && +t<=+b.to; }
+function salatMsg(d, slot, friday){
+  const m=SALAT_MSGS[(dayOfYear(d)+slot)%SALAT_MSGS.length];
+  return { title:(friday && m.fri) ? FRIDAY_SALAT_TITLE : m.t, body:m.b };
+}
+function preMsg(nm, d, idx){
+  return { title:'اقترب وقت صلاة '+nm, body:'تبقّى 10 دقائق على صلاة '+nm+'. '+PRE_NOTES[(dayOfYear(d)+idx)%PRE_NOTES.length] };
+}
+/* خطّةُ تذكيرات يومٍ واحد — مصدرٌ واحدٌ للتطبيق الأصليّ (يجدولها على النظام) وللمتصفّح (يُطلقها وهو مفتوح).
+   d: يومٌ محلّيّ، pt: مواقيتُه (أو null بلا موقع). كلُّ عنصر: {id, flag:'notif'|'salat', at:Date, title, body, data} */
+function dayReminders(d, pt){
+  const out=[], fri=lclShift(d).getDay()===5;
+  const atH=(h,m)=>{ const x=new Date(d); x.setHours(h,m||0,0,0); return new Date(lclAt(x).getTime()); };
+  const win=notifBounds(d, pt);
+  const add=(id,flag,at,title,body,data)=>{ if(at && +at>=+win.from && +at<=+win.to) out.push({id,flag,at,title,body,data:data||null}); };
+  // أوّلُ تنبيهٍ في اليوم: أذكارُ الصباح عند بدء النافذة (الفجر + 50 دقيقة)، ثم الذكر العظيم بعده بربع ساعة
+  add('morning','notif',win.from,'حان وقت أذكار الصباح 🌅','بعد صلاة الفجر — ابدأ يومك بأذكار الصباح، تحصينًا وبركة',{action:'azkar',tab:'morning'});
+  add('tahlil','notif',new Date(+win.from+15*60000),'ذِكرٌ عظيمٌ كلَّ صباح 🤍',TAHLIL_TEXT+'\nوقد ورد فضلٌ عظيمٌ لمن قالها مئةَ مرّةٍ في اليوم (متّفقٌ عليه)',{action:'azkar',tab:'morning'});
+  const ev=(pt&&pt.asr)?new Date(+pt.asr+AFTER_PRAYER_MIN*60000):atH(17,0);
+  add('evening','notif',ev,'حان وقت أذكار المساء 🌇','بعد صلاة العصر — لا تنسَ أذكار المساء',{action:'azkar',tab:'evening'});
+  add('sleep','notif',atH(22,0),'حان وقت أذكار النوم 🌙','قبل أن تنام، اختم يومك بأذكار النوم',{action:'azkar',tab:'sleep'});
+  SALAT_HOURS.forEach((h,i)=>{ const mg=salatMsg(d,i,fri); add('salat-'+h,'salat',atH(h,0),mg.title,mg.body); });
+  if(fri) add('kahf','notif',atH(KAHF_HOUR,0),'اليوم الجمعة — سورة الكهف 📖','من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين',{action:'kahf'});
+  return out;
+}
 // تذكير قراءة سورة الكهف يوم الجمعة
-const KAHF_HOUR=9;
+const KAHF_HOUR=10;
 const KAHF_SURA_NUM=18;
 /* تذكير بقراءة القرآن مرّتين يوميًّا — يتوقّف تلقائيًّا إن كان قد قرأ اليوم */
 const QURAN_READ_SLOTS=[
@@ -2859,36 +2992,26 @@ const QURAN_READ_SLOTS=[
 function scheduleChecks(){
   if(!window.__salatToastTimer){
     window.__salatToastTimer = setInterval(()=>{
-      if(settings.salat && !document.hidden) showSalatToast();
+      if(settings.salat && !document.hidden && inNotifWindow(Date.now())) showSalatToast();
     }, 40*60*1000);
   }
   if(window.__azTimer) return;
   const check=()=>{
     const now=lclShift(new Date()), h=now.getHours(), m=now.getMinutes();
     const srv=pushActive();   // الخادمُ يُرسل: لا نُكرّر الإشعار (وتبقى التنبيهاتُ داخل التطبيق)
-    if(settings.notif && m<10 && !srv){
-      const slot = AZKAR_SLOTS.find(s=>s.h===h);
-      if(slot){
-        const fired = store.get('az_fired_'+todayKey(), {});
-        if(!fired[h]){ fired[h]=1; store.set('az_fired_'+todayKey(),fired);
-          fireNotification(slot.title, slot.body, slot.data); }
-      }
-    }
-    if(settings.salat && salatHoursToday().includes(h) && m<5){
-      const sf = store.get('az_salatfired_'+todayKey(), {});
-      if(!sf[h]){ sf[h]=1; store.set('az_salatfired_'+todayKey(), sf);
-        const fri = now.getDay()===5;
-        if(!srv) fireNotification(fri?'يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ':'صَلِّ على الحبيب ﷺ',
-          ['اللهم صلِّ وسلّم على سيّدنا محمد ﷺ']);
-        showSalatToast(); }
-    }
-    // تذكير سورة الكهف يوم الجمعة
-    if(settings.notif && now.getDay()===5 && h===KAHF_HOUR && m<10){
-      const kf = store.get('az_kahffired_'+todayKey(), {});
-      if(!kf.done){ kf.done=1; store.set('az_kahffired_'+todayKey(), kf);
-        if(!srv) fireNotification('اليوم الجمعة — سورة الكهف 📖',
-          ['من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين'], {action:'kahf'}); }
-    }
+    /* خطّةُ اليوم (أذكار الصباح والمساء والنوم، الصلاةُ على النبيّ ﷺ، سورةُ الكهف): يُطلَق ما حان في آخر 10 دقائق ولم يُطلَق */
+    try{
+      const g=geoStore(), pt=g ? computePrayers(g.lat,g.lng) : null, nowMs=Date.now();
+      const fired = store.get('az_planfired_'+todayKey(), {});
+      dayReminders(new Date(), pt).forEach(it=>{
+        const dt=nowMs-it.at.getTime();
+        if(dt<0 || dt>10*60000 || fired[it.id]) return;
+        if(it.flag==='salat' ? !settings.salat : !settings.notif) return;
+        fired[it.id]=1; store.set('az_planfired_'+todayKey(), fired);
+        if(!srv) fireNotification(it.title, it.body.split('\n'), it.data);
+        if(it.flag==='salat') showToast(it.body.length>90 ? it.title : it.body, 6000);
+      });
+    }catch(e){}
     if(settings.notif && m<10 && !qreadToday()){
       const qslot = QURAN_READ_SLOTS.find(s=>s.h===h);
       if(qslot){
@@ -2910,12 +3033,14 @@ function checkPrayerReminder(now){
   const list=[['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
   const fired=store.get('az_prayerfired_'+todayKey(), {});
   let changed=false;
-  list.forEach(([k,nm])=>{
+  list.forEach(([k,nm],i)=>{
     const t=pt[k]; if(!t) return;
-    const diffMin=(t-now)/60000;
+    const diffMin=(t-Date.now())/60000;
     if(diffMin<=PRAYER_REMIND_MIN && diffMin>PRAYER_REMIND_MIN-1 && !fired[k]){
       fired[k]=1; changed=true;
-      fireNotification('🕌 اقترب وقت صلاة '+nm, ['تبقّى 10 دقائق على أذان '+nm]);
+      if(!inNotifWindow(Date.now(), pt)) return;     // قبل (الفجر + 50 دقيقة) أو بعد العاشرة ليلًا: لا تنبيه
+      const mg=preMsg(nm,new Date(),i);
+      fireNotification('🕌 '+mg.title, [mg.body]);
     }
   });
   if(changed) store.set('az_prayerfired_'+todayKey(), fired);
@@ -4396,16 +4521,19 @@ applyListenMode('quran');
 const QZ_LEN=20, QZ_URL='https://salatee.org/';
 let __qzLoading=null, __qzCat='all', __qzSet=[], __qzI=0, __qzScore=0, __qzAnswered=false, __qzSeed=0, __qzChal=null;
 function loadQuiz(){
-  if(window.QUIZ) return Promise.resolve(true);
+  if(window.QUIZ && window.__qz2) return Promise.resolve(true);
   if(__qzLoading) return __qzLoading;
-  __qzLoading=new Promise(res=>{
-    const s=document.createElement('script'); s.src='quiz.js';
-    s.onload=()=>res(!!window.QUIZ); s.onerror=()=>{ __qzLoading=null; res(false); };
-    document.head.appendChild(s);
+  /* quiz.js (الأسئلةُ الأولى والمجالات) ثم quiz2.js (الإضافة)؛ فإن تعذّر الثاني بقي الأوّل يعمل */
+  __qzLoading=loadScriptOnce('quiz.js').then(ok=>{
+    if(!ok||!window.QUIZ){ __qzLoading=null; return false; }
+    return loadScriptOnce('quiz2.js').then(()=>{ window.__qz2=true; return true; });
   });
   return __qzLoading;
 }
 function qzBest(){ return store.get('az_quizbest20', {}); }
+/* اسمُ اللاعب (اختياريّ): يُحفظ على الجهاز ويظهر في رسالة المشاركة والتحدّي */
+function qzName(){ try{ return String(store.get('az_qzname','')||'').trim().slice(0,24); }catch(e){ return ''; } }
+function qzSetName(v){ try{ store.set('az_qzname', String(v||'').replace(/[<>&"]/g,'').trim().slice(0,24)); }catch(e){} }
 /* مولّد أعدادٍ عشوائيّةٍ ببذرة (mulberry32) */
 function qzRng(seed){ let t=seed>>>0; return ()=>{ t=(t+0x6D2B79F5)>>>0; let r=Math.imul(t^(t>>>15),1|t); r=(r+Math.imul(r^(r>>>7),61|r))^r; return ((r^(r>>>14))>>>0)/4294967296; }; }
 function shuffle(a, rnd){ rnd=rnd||Math.random; for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -4420,10 +4548,12 @@ async function qzHome(){
   if(ch){
     qzSub('تحدٍّ من صديق');
     body.innerHTML=
-      '<div class="qz-chal"><div class="t">تحدّاك صديقٌ</div>'+
+      '<div class="qz-chal"><div class="t">'+(ch.name?'تحدّاك «'+escapeHtml(ch.name)+'»':'تحدّاك صديقٌ')+'</div>'+
       '<div class="d">حصل على <b>'+AR(ch.from)+' من '+AR(QZ_LEN)+'</b> في مجال «'+escapeHtml(qzCatName(ch.cat))+'».<br>العب الأسئلةَ نفسَها وحاول أن تتجاوزه!</div></div>'+
+      '<div class="qz-name"><label for="qz-name">اسمك (اختياري)</label><input id="qz-name" type="text" maxlength="24" autocomplete="off" value="'+escapeHtml(qzName())+'"></div>'+
       '<button class="qz-start" id="qz-start">ابدأ التحدّي</button>'+
       '<button class="qz-next" id="qz-free" style="background:var(--fill-2); color:var(--text)">اختبارٌ حرّ بدل التحدّي</button>';
+    const ni0=$('#qz-name'); if(ni0) ni0.addEventListener('input', ()=>qzSetName(ni0.value));
     $('#qz-start').addEventListener('click', ()=>qzStart());
     $('#qz-free').addEventListener('click', ()=>{ __qzChal=null; qzHome(); });
     return;
@@ -4432,17 +4562,31 @@ async function qzHome(){
   body.innerHTML=
     '<div class="qz-intro">'+AR(QZ_LEN)+' سؤالًا في كل جولة، ونتيجتُك من '+AR(QZ_LEN)+' — اختر المجال ثم ابدأ.<br>'+AR(QUIZ.length)+' سؤالًا في المجموع.</div>'+
     '<div class="qz-cats">'+QUIZ_CATS.map(c=>'<button data-c="'+c.id+'"'+(c.id===__qzCat?' class="on"':'')+'>'+c.name+'</button>').join('')+'</div>'+
+    '<div class="qz-name"><label for="qz-name">اسمك (اختياري — يظهر عند مشاركة نتيجتك)</label><input id="qz-name" type="text" maxlength="24" autocomplete="off" value="'+escapeHtml(qzName())+'"></div>'+
     '<button class="qz-start" id="qz-start">ابدأ الاختبار</button>'+
     (b!=null?'<div class="qz-best">أفضل نتيجة في هذا المجال: '+AR(b)+' من '+AR(QZ_LEN)+'</div>':'');
   body.querySelectorAll('.qz-cats button').forEach(btn=> btn.addEventListener('click', ()=>{ __qzCat=btn.dataset.c; vibrate(5); qzHome(); }));
+  const ni=$('#qz-name'); if(ni) ni.addEventListener('input', ()=>qzSetName(ni.value));
   $('#qz-start').addEventListener('click', ()=>qzStart());
+}
+/* اختيارُ الجولة: في «الكل» تتناوب المجالاتُ بالتناوب فلا يطغى مجالٌ كثيرُ الأسئلة (كالقرآن) على الجولة.
+   وكلُّه بالبذرة نفسِها، فيلعب المتحدَّى الأسئلةَ ذاتَها. */
+function qzPick(cat, seed){
+  const rnd=qzRng(seed);
+  if(cat!=='all'){ const pool=QUIZ.filter(q=>q.c===cat); return shuffle(pool, rnd).slice(0, Math.min(QZ_LEN, pool.length)); }
+  const by={}; QUIZ.forEach(q=>{ (by[q.c]=by[q.c]||[]).push(q); });
+  const ids=shuffle(Object.keys(by).sort(), rnd); ids.forEach(id=>shuffle(by[id], rnd));
+  const out=[]; let i=0;
+  while(out.length<QZ_LEN && ids.some(id=>by[id].length)){
+    const id=ids[i++%ids.length]; if(by[id].length) out.push(by[id].pop());
+  }
+  return shuffle(out, rnd);
 }
 function qzStart(){
   const ch=__qzChal;
   if(ch){ __qzCat=ch.cat; __qzSeed=ch.seed; }
   else __qzSeed=1+Math.floor(Math.random()*999998);
-  const pool=(__qzCat==='all')? QUIZ.slice() : QUIZ.filter(q=>q.c===__qzCat);
-  __qzSet=shuffle(pool, qzRng(__qzSeed)).slice(0, Math.min(QZ_LEN, pool.length));
+  __qzSet=qzPick(__qzCat, __qzSeed);
   __qzI=0; __qzScore=0; vibrate(8); qzRender();
 }
 function qzRender(){
@@ -4470,10 +4614,11 @@ function qzRender(){
   }));
 }
 /* رابط التحدّي: المجال والبذرة ونتيجةُ صاحبه */
-function qzLink(){ return QZ_URL+'?quiz=1&c='+encodeURIComponent(__qzCat)+'&s='+__qzSeed+'&f='+__qzScore; }
+function qzLink(){ const n=qzName(); return QZ_URL+'?quiz=1&c='+encodeURIComponent(__qzCat)+'&s='+__qzSeed+'&f='+__qzScore+(n?'&n='+encodeURIComponent(n):''); }
 function qzShareText(){
-  return 'حصلتُ على '+__qzScore+' من '+QZ_LEN+' في اختبار الثقافة الإسلامية («'+qzCatName(__qzCat)+'») في تطبيق «صلاتي».\n'+
-         'هل تستطيع تجاوزي؟ العب الأسئلةَ نفسَها:\n'+qzLink();
+  const n=qzName(), cat=qzCatName(__qzCat);
+  return (n ? 'نتيجة «'+n+'» في اختبار الثقافة الإسلامية («'+cat+'»): '+__qzScore+' من '+QZ_LEN+' في تطبيق «صلاتي».\nهل تستطيع تجاوزَها؟ العب الأسئلةَ نفسَها:\n'
+            : 'حصلتُ على '+__qzScore+' من '+QZ_LEN+' في اختبار الثقافة الإسلامية («'+cat+'») في تطبيق «صلاتي».\nهل تستطيع تجاوزي؟ العب الأسئلةَ نفسَها:\n')+qzLink();
 }
 async function qzShare(){
   const text=qzShareText();
@@ -4488,18 +4633,73 @@ async function qzShare(){
   const url='https://wa.me/?text='+encodeURIComponent(text);
   try{ const w=window.open(url,'_blank','noopener'); if(!w) location.href=url; }catch(e){ location.href=url; }
 }
+/* حركةُ النتيجة تزداد روعةً كلّما اقتربت النسبةُ من 100%:
+   1 (دون 40%): عدٌّ هادئ · 2 (40–69%): حلقةٌ خضراء وشراراتٌ خفيفة · 3 (70–89%): وقصاصاتٌ ملوّنة
+   4 (90–99%): حلقةٌ ذهبيّة ونجمةٌ وألعابٌ ناريّة · 5 (100%): احتفالٌ كامل: توهّجٌ وانفجاراتٌ متتابعة ومدافعُ قصاصات */
+function qzLevel(p){ return p>=1 ? 5 : p>=0.9 ? 4 : p>=0.7 ? 3 : p>=0.4 ? 2 : 1; }
+function qzFx(level, anchor){
+  try{
+    if(level<2 || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    const old=document.querySelector('.qz-fx'); if(old) old.remove();
+    const cv=document.createElement('canvas'); cv.className='qz-fx'; cv.setAttribute('aria-hidden','true');
+    const dpr=Math.min(window.devicePixelRatio||1,2), W=innerWidth, H=innerHeight;
+    cv.width=W*dpr; cv.height=H*dpr; document.body.appendChild(cv);
+    const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+    const COL=['#0B5742','#34C77B','#8AE8C6','#E3B25A','#A8741A','#ffffff'];
+    const R=Math.random, rc=()=>COL[(R()*COL.length)|0];
+    const r=anchor ? anchor.getBoundingClientRect() : {left:W/2-80,top:H/3,width:160,height:160};
+    const cx=r.left+r.width/2, cy=r.top+r.height/2;
+    const P=[];
+    const conf=(n,x0,y0,vx0,vy0,spread)=>{ for(let i=0;i<n;i++) P.push({k:'c',x:x0+(R()-.5)*spread,y:y0,vx:vx0+(R()-.5)*3,vy:vy0+R()*-3,w:5+R()*5,h:3+R()*5,rot:R()*6.28,vr:(R()-.5)*.35,c:rc(),g:.09,t:0,life:150+R()*90}); };
+    const burst=(bx,by,n,sp)=>{ for(let i=0;i<n;i++){ const a=R()*6.28, v=(.4+R())*sp; P.push({k:'b',x:bx,y:by,vx:Math.cos(a)*v,vy:Math.sin(a)*v,rad:1.6+R()*1.6,c:rc(),g:.045,t:0,life:55+R()*35}); } };
+    const spark=(n)=>{ for(let i=0;i<n;i++){ const a=R()*6.28, d=70+R()*40; P.push({k:'s',x:cx+Math.cos(a)*d,y:cy+Math.sin(a)*d,vx:Math.cos(a)*.4,vy:Math.sin(a)*.4-.3,rad:1.5+R()*2,c:rc(),g:0,t:-R()*40,life:70+R()*40}); } };
+    const sched=[]; const at=(ms,fn)=>sched.push([ms,fn]);
+    const dur=[0,0,2200,3200,4400,6200][level];
+    if(level===2){ spark(26); at(500,()=>spark(16)); }
+    if(level===3){ conf(70,W/2,-10,0,2,W); at(450,()=>conf(40,W/2,-10,0,2,W)); spark(14); }
+    if(level===4){ conf(110,W/2,-10,0,2,W); at(500,()=>conf(60,W/2,-10,0,2,W)); at(300,()=>burst(cx-70,cy-30,50,3.6)); at(900,()=>burst(cx+70,cy-50,50,3.6)); spark(20); }
+    if(level===5){
+      conf(150,W/2,-10,0,2.4,W); at(350,()=>conf(60,0,H*.7,5,-9,6)); at(350,()=>conf(60,W,H*.7,-5,-9,6));
+      [[0,-60,-20],[450,70,-60],[900,-20,-90],[1400,90,-10],[1900,-80,-70]].forEach(b=>at(b[0],()=>burst(cx+b[1],cy+b[2],70,4.4)));
+      at(1200,()=>conf(120,W/2,-10,0,2.4,W)); at(2400,()=>conf(100,W/2,-10,0,2.4,W)); spark(28);
+    }
+    const t0=performance.now(); let done=false;
+    (function frame(now){
+      const el=now-t0;
+      sched.forEach(x=>{ if(!x[2] && el>=x[0]){ x[2]=1; x[1](); } });
+      ctx.clearRect(0,0,W,H);
+      for(let i=P.length-1;i>=0;i--){
+        const q=P[i]; q.t++; if(q.t<0) continue;
+        q.vy+=q.g; q.x+=q.vx; q.y+=q.vy; if(q.k==='b'||q.k==='c'){ q.vx*=.992; }
+        const f=Math.max(0,1-q.t/q.life); if(f<=0 || q.y>H+20){ P.splice(i,1); continue; }
+        ctx.globalAlpha=q.k==='c' ? Math.min(1,f*2) : f; ctx.fillStyle=q.c;
+        if(q.k==='c'){ q.rot+=q.vr; ctx.save(); ctx.translate(q.x,q.y); ctx.rotate(q.rot); ctx.fillRect(-q.w/2,-q.h/2,q.w,q.h); ctx.restore(); }
+        else { ctx.beginPath(); ctx.arc(q.x,q.y,q.rad,0,6.283); ctx.fill(); }
+      }
+      ctx.globalAlpha=1;
+      if(el<dur || P.length || sched.some(x=>!x[2])) requestAnimationFrame(frame); else cv.remove();
+    })(t0);
+    setTimeout(()=>{ try{ cv.remove(); }catch(e){} }, dur+3500);
+  }catch(e){}
+}
 function qzResult(){
-  const n=__qzSet.length, s=__qzScore, pct=s/n;
+  const n=__qzSet.length, s=__qzScore, pct=s/n, lv=qzLevel(pct), C=439.8;
   const best=qzBest(); if(best[__qzCat]==null || s>best[__qzCat]){ best[__qzCat]=s; store.set('az_quizbest20', best); }
-  const msg = pct===1 ? 'ما شاء الله! إجابات كاملة'
-            : pct>=0.7 ? 'أحسنت، نتيجة طيّبة — واصِل.'
-            : pct>=0.4 ? 'جيّد، وفي الإعادة إفادة.'
+  const nm=qzName();
+  const msg = lv===5 ? 'ما شاء الله، تبارك الله! إجاباتٌ كاملة'
+            : lv===4 ? 'ممتاز، ما شاء الله — قاربتَ الكمال'
+            : lv===3 ? 'أحسنت، نتيجة طيّبة — واصِل.'
+            : lv===2 ? 'جيّد، وفي الإعادة إفادة.'
             : 'لا بأس، العلم بالتعلّم — أعِد المحاولة.';
   qzSub('نتيجة الاختبار');
-  const ch=__qzChal;
-  const vs = ch ? '<div class="qz-vs">'+(s>ch.from?'تجاوزتَ صديقَك! ('+AR(ch.from)+' ← '+AR(s)+')': s===ch.from?'تعادلتما: '+AR(s)+' من '+AR(n): 'صديقُك حصل على '+AR(ch.from)+' وأنت '+AR(s)+' — أعِد المحاولة!')+'</div>' : '';
+  const ch=__qzChal, who=ch ? (ch.name?'«'+escapeHtml(ch.name)+'»':'صديقُك') : '';
+  const vs = ch ? '<div class="qz-vs">'+(s>ch.from?'تجاوزتَ '+who+'! ('+AR(ch.from)+' ← '+AR(s)+')': s===ch.from?'تعادلتما: '+AR(s)+' من '+AR(n): who+' حصل على '+AR(ch.from)+' وأنت '+AR(s)+' — أعِد المحاولة!')+'</div>' : '';
+  const STAR='<svg class="qz-star" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>';
   const body=$('#quiz-body');
-  body.innerHTML='<div class="qz-res"><div class="score">'+AR(s)+'</div><div class="of">من '+AR(n)+'</div>'+
+  body.innerHTML='<div class="qz-res L'+lv+'">'+
+    (nm?'<div class="qz-who">'+escapeHtml(nm)+'</div>':'')+
+    '<div class="qz-ring L'+lv+'" id="qz-ring"><svg viewBox="0 0 160 160"><circle class="bg" cx="80" cy="80" r="70"/><circle class="fg" cx="80" cy="80" r="70" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'"/></svg>'+
+      (lv>=4?STAR:'')+'<div class="in"><div class="score" id="qz-score">0</div><div class="of">من '+AR(n)+'</div></div></div>'+
     '<div class="msg">'+msg+'</div>'+vs+'</div>'+
     '<button class="qz-start" id="qz-share">شارِك نتيجتك وتحدَّ أصدقاءك</button>'+
     '<button class="qz-next" id="qz-again" style="background:var(--fill-2); color:var(--text)">إعادة الاختبار بأسئلةٍ جديدة</button>'+
@@ -4507,7 +4707,12 @@ function qzResult(){
   $('#qz-share').addEventListener('click', qzShare);
   $('#qz-again').addEventListener('click', ()=>{ __qzChal=null; qzStart(); });
   $('#qz-home').addEventListener('click', ()=>{ __qzChal=null; qzHome(); });
-  vibrate(pct>=0.7?[20,60,20]:8);
+  // الحلقةُ تمتلئ بنسبة النتيجة، والرقمُ يعدّ صاعدًا؛ ثم الاحتفال بحسب المستوى
+  const ring=$('#qz-ring'), fg=ring.querySelector('.fg'), sc=$('#qz-score');
+  const ms=700+lv*220, t0=performance.now();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ fg.style.strokeDashoffset=String(C*(1-pct)); }));
+  (function tick(now){ const k=Math.min(1,(now-t0)/ms); sc.textContent=AR(Math.round(s*(1-Math.pow(1-k,3)))); if(k<1) requestAnimationFrame(tick); })(t0);
+  setTimeout(()=>{ if(!document.body.contains(ring)) return; qzFx(lv, ring); vibrate([[8],[15,40,15],[20,60,20],[20,50,20,50,30],[30,60,30,60,30,60,60]][lv-1]); }, ms*0.7);
 }
 /* فتح رابط تحدٍّ: ‎?quiz=1&c=المجال&s=البذرة&f=نتيجة الصديق */
 (async function(){
@@ -4516,7 +4721,7 @@ function qzResult(){
     if(!(await loadQuiz())) return;
     const cat=q.get('c')||'all', seed=parseInt(q.get('s'),10), from=parseInt(q.get('f'),10);
     if(!QUIZ_CATS.some(c=>c.id===cat) || !(seed>0) || !(from>=0 && from<=QZ_LEN)) return;
-    __qzChal={ cat, seed, from };
+    __qzChal={ cat, seed, from, name:String(q.get('n')||'').replace(/[<>&"]/g,'').trim().slice(0,24) };
     setTimeout(()=>{ const t=document.querySelector('.tab[data-s="s-tasbih"]'); if(t) t.click(); applyTasbihMode('quiz'); }, 900);
     try{ history.replaceState(null,'',location.pathname); }catch(e){}
   }catch(e){}
@@ -4951,7 +5156,14 @@ const HZ_RECS=[
   { id:'sudais',   name:'عبد الرحمن السديس',     dir:'Abdurrahmaan_As-Sudais_192kbps' },
   { id:'alafasy',  name:'مشاري العفاسي',        dir:'Alafasy_128kbps' }
 ];
-const HZ_DEF={ rv:3, rr:1, mode:'verse', speed:1, gap:'0', rec:'ghamdi' };
+const HZ_DEF={ rv:3, rr:1, mode:'verse', speed:1, gap:'len', rec:'ghamdi' };
+/* ثلاثُ طرائقَ جاهزةٌ تكفي أكثرَ الناس؛ والتفصيلُ لمن أراده تحت «خيارات متقدّمة» */
+const HZ_PRESETS=[
+  { id:'learn',  n:'تلقين',  d:'كلُّ آيةٍ 3 مرّات مع وقفةٍ لتردّدها أنت، ثم التي بعدها', c:{ rv:3, rr:1, mode:'verse',      gap:'len', speed:1 } },
+  { id:'build',  n:'تثبيت الحفظ',  d:'تُعيد ما حفظتَه ثم تُضيف إليه آيةً جديدةً في كلّ مرّة', c:{ rv:1, rr:1, mode:'cumulative', gap:'0',   speed:1 } },
+  { id:'review', n:'مراجعة', d:'المقطعُ كلُّه 3 دوراتٍ متتاليةٍ بلا وقفة',                  c:{ rv:1, rr:3, mode:'verse',      gap:'0',   speed:1 } },
+];
+let __hzAdvOpen=false;
 let __hz=null, __hzSel=null;
 function hzCfg(){ return Object.assign({}, HZ_DEF, settings.hifz||{}); }
 function hzRec(c){ return HZ_RECS.find(r=>r.id===c.rec) || HZ_RECS[0]; }
@@ -4976,6 +5188,7 @@ function renderHifzForm(body, picker, afterStart){
   if(!body || !__hzSel || !HZD()) return;
   const c=hzCfg(), t=__hzSel, n=hzCount(t.si), again=()=>renderHifzForm(body, picker, afterStart);
   if(!picker) $('#hifz-title').textContent='تحفيظ — سورة '+HZD().sur[t.si].n;
+  const isPre=pr=>Object.keys(pr.c).every(k=>String(c[k])===String(pr.c[k]));
   const chips=(key, list, cur)=>'<div class="hz-chips" data-k="'+key+'">'+list.map(([v,l])=>'<button data-v="'+v+'"'+(String(cur)===String(v)?' class="on"':'')+'>'+l+'</button>').join('')+'</div>';
   body.innerHTML=
     (picker?'<div class="hz-row"><div class="hz-lbl">السورة</div><button class="hz-sura" id="hz-sura" type="button"><span>'+HZD().sur[t.si].n+'</span><span>▾</span></button></div>':'')+
@@ -4983,16 +5196,27 @@ function renderHifzForm(body, picker, afterStart){
       '<div class="hz-step"><button data-st="from-">−</button><span>من <b>'+AR(t.from)+'</b></span><button data-st="from+">+</button></div>'+
       '<div class="hz-step"><button data-st="to-">−</button><span>إلى <b>'+AR(t.to)+'</b></span><button data-st="to+">+</button></div>'+
     '</div></div>'+
-    '<div class="hz-row"><div class="hz-lbl">تكرار كلّ آية</div>'+chips('rv',[[1,'1'],[2,'2'],[3,'3'],[5,'5'],[7,'7'],[10,'10']],c.rv)+'</div>'+
-    '<div class="hz-row"><div class="hz-lbl">تكرار المقطع كلِّه</div>'+chips('rr',[[1,'مرّة'],[2,'مرّتان'],[3,'3'],[5,'5'],[10,'10'],[0,'بلا حدّ']],c.rr)+'</div>'+
-    '<div class="hz-row"><div class="hz-lbl">طريقة التكرار</div>'+chips('mode',[['verse','كلُّ آية ثمّ التي بعدها'],['cumulative','تراكميّ: 1 ثم 1+2 ثم 1+2+3…']],c.mode)+
-      '<div class="hz-hint">التراكميّ أنفعُ للحفظ: تُعيد ما حفظتَه ثم تُضيف آيةً جديدة.</div></div>'+
-    '<div class="hz-row"><div class="hz-lbl">السرعة</div>'+chips('speed',[[0.75,'0.75×'],[1,'1×'],[1.25,'1.25×']],c.speed)+'</div>'+
-    '<div class="hz-row"><div class="hz-lbl">وقفةٌ صامتةٌ بعد كلّ آية</div>'+chips('gap',[['0','بلا وقفة'],['1','ثانية'],['2','ثانيتان'],['len','بمدّة الآية (لتردِّد أنت)']],c.gap)+'</div>'+
-    '<div class="hz-row"><div class="hz-lbl">القارئ</div>'+chips('rec',HZ_RECS.map(r=>[r.id,r.name]),c.rec)+'</div>'+
+    '<div class="hz-row"><div class="hz-lbl">طريقة التحفيظ</div><div class="hz-presets">'+
+      HZ_PRESETS.map(pr=>'<button type="button" class="hz-pre'+(isPre(pr)?' on':'')+'" data-p="'+pr.id+'"><b>'+pr.n+'</b><small>'+pr.d+'</small></button>').join('')+
+    '</div>'+(HZ_PRESETS.some(isPre)?'':'<div class="hz-hint">إعدادٌ مخصّص (من «خيارات متقدّمة»)</div>')+'</div>'+
+    '<div class="hz-row"><div class="hz-lbl">القارئ</div><div class="selectwrap hz-sel"><select id="hz-rec">'+HZ_RECS.map(r=>'<option value="'+r.id+'"'+(r.id===c.rec?' selected':'')+'>'+r.name+'</option>').join('')+'</select></div></div>'+
     '<button class="hz-go" id="hz-go">ابدأ التحفيظ</button>'+
     '<button class="hz-go" id="hz-rev" style="background:var(--fill-2);color:var(--accent);border:1px solid var(--line);margin-top:8px">أضِف هذا المقطع إلى «مراجعة الحفظ»</button>'+
+    '<details class="hz-adv" id="hz-adv"'+(__hzAdvOpen?' open':'')+'><summary>خيارات متقدّمة</summary>'+
+      '<div class="hz-row"><div class="hz-lbl">تكرار كلّ آية</div>'+chips('rv',[[1,'1'],[2,'2'],[3,'3'],[5,'5'],[7,'7'],[10,'10']],c.rv)+'</div>'+
+      '<div class="hz-row"><div class="hz-lbl">تكرار المقطع كلِّه</div>'+chips('rr',[[1,'مرّة'],[2,'مرّتان'],[3,'3'],[5,'5'],[10,'10'],[0,'بلا حدّ']],c.rr)+'</div>'+
+      '<div class="hz-row"><div class="hz-lbl">طريقة التكرار</div>'+chips('mode',[['verse','كلُّ آية ثمّ التي بعدها'],['cumulative','تراكميّ: 1 ثم 1+2 ثم 1+2+3…']],c.mode)+
+        '<div class="hz-hint">التراكميّ أنفعُ للحفظ: تُعيد ما حفظتَه ثم تُضيف آيةً جديدة.</div></div>'+
+      '<div class="hz-row"><div class="hz-lbl">السرعة</div>'+chips('speed',[[0.75,'0.75×'],[1,'1×'],[1.25,'1.25×']],c.speed)+'</div>'+
+      '<div class="hz-row"><div class="hz-lbl">وقفةٌ صامتةٌ بعد كلّ آية</div>'+chips('gap',[['0','بلا وقفة'],['1','ثانية'],['2','ثانيتان'],['len','بمدّة الآية (لتردِّد أنت)']],c.gap)+'</div>'+
+    '</details>'+
     '<div class="hz-hint">يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. الصوتُ برواية حفص.</div>';
+  body.querySelectorAll('.hz-pre').forEach(b=> b.addEventListener('click', ()=>{
+    const pr=HZ_PRESETS.find(x=>x.id===b.dataset.p); if(!pr) return;
+    settings.hifz=Object.assign(hzCfg(), pr.c); saveSettings(); vibrate(5); again();
+  }));
+  const rs=$('#hz-rec'); if(rs) rs.addEventListener('change', ()=>{ settings.hifz=Object.assign(hzCfg(),{rec:rs.value}); saveSettings(); vibrate(5); });
+  const adv=$('#hz-adv'); if(adv) adv.addEventListener('toggle', ()=>{ __hzAdvOpen=adv.open; });
   body.querySelectorAll('.hz-chips').forEach(g=> g.addEventListener('click', e=>{
     const b=e.target.closest('button'); if(!b) return;
     const k=g.dataset.k; let v=b.dataset.v;
@@ -7510,37 +7734,25 @@ async function scheduleNativeNotifs(){
               schedule:{ at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
           }
         }
-        // تذكير قبل الأذان بـ10 دقائق
+        // تذكير قبل الأذان بـ10 دقائق (داخل نافذة 08:00–22:00 فقط، بعبارةٍ لطيفة)
         if(settings.notif && day < DAYS_NOTIF){
           const rem=new Date(at.getTime()-10*60000);
-          if(rem.getTime() > nowMs+60000){
-            notifs.push({ id:id++, channelId:'reminders', title:'اقترب وقت صلاة '+nm, body:'تبقّى 10 دقائق على '+nm,
+          if(rem.getTime() > nowMs+60000 && inNotifWindow(rem, pt)){
+            const mg=preMsg(nm,d,prayers.findIndex(x=>x[0]===k));
+            notifs.push({ id:id++, channelId:'reminders', title:mg.title, body:mg.body, largeBody:mg.body,
               schedule:{ at:rem, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
           }
         }
       });
-      // خاصّ بيوم الجمعة: الإكثار من الصلاة على النبي ﷺ (10 مرّات) + تذكير سورة الكهف
-      const isFri = d.getDay()===5;
       if(day >= DAYS_NOTIF) continue;   // ما بعدَ أفُقِ الإشعارات: الأذانُ وحدَه
-      if(settings.salat){
-        (isFri ? SALAT_HOURS_FRIDAY : SALAT_HOURS).forEach(hh=>{
-          const at=new Date(d); at.setHours(hh,0,0,0); at.setTime(lclAt(at).getTime());
-          if(at.getTime() > nowMs+60000){
-            notifs.push({ id:id++, channelId:'reminders',
-              title:isFri?'يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ':'صَلِّ على الحبيب ﷺ',
-              body:'اللهم صلِّ وسلّم على سيّدنا محمد ﷺ',
-              schedule:{ at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
-          }
-        });
-      }
-      if(settings.notif && isFri){
-        const at=new Date(d); at.setHours(KAHF_HOUR,0,0,0); at.setTime(lclAt(at).getTime());
-        if(at.getTime() > nowMs+60000){
-          notifs.push({ id:id++, channelId:'reminders', title:'اليوم الجمعة — سورة الكهف 📖',
-            body:'من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين',
-            schedule:{ at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
-        }
-      }
+      /* أذكار الصباح بعد الفجر، والمساء بعد العصر، والنوم، وذكرُ الصباح، والصلاةُ على النبيّ ﷺ كلَّ ساعتين، وسورةُ الكهف يومَ الجمعة:
+         من خطّة اليوم المشتركة، وكلُّها داخل 08:00–22:00 */
+      dayReminders(d, pt).forEach(it=>{
+        if(it.flag==='salat' ? !settings.salat : !settings.notif) return;
+        if(it.at.getTime() <= nowMs+60000) return;
+        notifs.push({ id:id++, channelId:'reminders', title:it.title, body:it.body, largeBody:it.body,
+          schedule:{ at:it.at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+      });
     }
     /* تذكيراتُ الصيام ومراجعة الحفظ (اختياريّة، من «أدوات المسلم ← تذكيراتي») */
     try{
@@ -7703,6 +7915,38 @@ try{
 try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
 try{ setTimeout(()=>refreshGeo(false), 4000); }catch(e){}
 try{ renderWirdKpi(); $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m===wirdMode())); }catch(e){}
+
+/* ================= وقتُ الاستعمال (على الجهاز وحده) ================= */
+(function(){
+  const KEY='az_usage';
+  let t0=document.hidden?null:Date.now();
+  const get=()=>{ const u=store.get(KEY,null); return (u && typeof u.t==='number') ? u : { t:0, f:Date.now(), d:todayKey(), dm:0 }; };
+  function flush(){
+    if(t0==null) return;
+    const now=Date.now(), dt=Math.max(0, Math.min(now-t0, 70*1000)); t0=now;   // سقفٌ يمنع احتسابَ جهازٍ نام والتطبيقُ ظاهر
+    if(!dt) return;
+    const u=get(); if(u.d!==todayKey()){ u.d=todayKey(); u.dm=0; }
+    u.t+=dt; u.dm+=dt; store.set(KEY,u);
+  }
+  /* بلا ثوانٍ: أيّامٌ وساعاتٌ ودقائق فقط */
+  function fmt(ms){
+    const lang=(settings.lang==='fr'||settings.lang==='en')?settings.lang:'ar';
+    const U={ar:['يوم','س','د'],en:['d','h','m'],fr:['j','h','min']}[lang];
+    const min=Math.floor(ms/60000), d=Math.floor(min/1440), h=Math.floor((min%1440)/60), m=min%60;
+    const out=[]; if(d) out.push(AR(d)+' '+U[0]); if(d||h) out.push(AR(h)+' '+U[1]); out.push(AR(m)+' '+U[2]);
+    return out.join(' ');
+  }
+  function paint(){
+    const a=$('#use-today'), b=$('#use-total'); if(!a||!b) return;
+    flush(); const u=get();
+    a.textContent=fmt(u.d===todayKey()?u.dm:0); b.textContent=fmt(u.t);
+  }
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ flush(); t0=null; } else { t0=Date.now(); paint(); } });
+  window.addEventListener('pagehide', flush);
+  setInterval(()=>{ if(!document.hidden){ flush(); const st=$('#s-settings'); if(st && st.classList.contains('active')) paint(); } }, 30*1000);
+  const tab=document.querySelector('.tab[data-s="s-settings"]'); if(tab) tab.addEventListener('click', ()=>setTimeout(paint,50));
+  window.paintUsage=paint; paint();
+})();
 
 /* ================= BACKUP / RESTORE ================= */
 function backupStatusHtml(){

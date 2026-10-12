@@ -35,15 +35,31 @@ export interface Push {
   payload: { title: string; body: string; tag: string; data?: Record<string, string> };
 }
 
-/* --- جدولُ التذكير: منقولٌ من index.html (AZKAR_SLOTS وما حولها) --- */
-export const AZKAR_SLOTS = [
-  { h: 7,  title: "حان وقت أذكار الصباح 🌅", body: "ابدأ يومك بأذكار الصباح، تحصينًا وبركة", tab: "morning" },
-  { h: 17, title: "حان وقت أذكار المساء 🌇", body: "من بعد العصر إلى المغرب — لا تنسَ أذكار المساء", tab: "evening" },
-  { h: 22, title: "حان وقت أذكار النوم 🌙",  body: "قبل أن تنام، اختم يومك بأذكار النوم", tab: "sleep" },
+/* --- جدولُ التذكير: منقولٌ من index.html (dayReminders وما حولها) ---
+   كلُّ التذكيرات من بعد الفجر بخمسين دقيقة إلى العاشرة ليلًا فقط (وبلا موقعٍ تبدأ عند الثامنة)؛
+   والأذانُ في وقته دائمًا. */
+export const FAJR_LAG_MIN = 50, NOTIF_FROM = 8, NOTIF_TO = 22;
+export const AFTER_PRAYER_MIN = 20;                         // أذكارُ المساء بعد العصر
+export const SALAT_HOURS = [5, 7, 9, 11, 13, 15, 17, 19, 21];   // الصلاةُ على النبيّ ﷺ كلَّ ساعتين (ما داخل النافذة منها فقط)
+export const KAHF_HOUR = 10;
+export const SALAT_MSGS: { t: string; b: string; fri?: boolean }[] = [
+  { t: "الصلاةُ الإبراهيميّة ﷺ",
+    b: "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ، اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ" },
+  { t: "صَلِّ على الحبيب المصطفى ﷺ", b: "اللهم صلِّ وسلِّم على حبيبنا المصطفى محمدٍ ﷺ", fri: true },
+  { t: "صَلِّ على الحبيب ﷺ",        b: "اللهم صلِّ وسلّم على سيّدنا محمد ﷺ", fri: true },
+  { t: "قال الله تعالى",
+    b: "﴿إِنَّ اللَّهَ وَمَلَائِكَتَهُ يُصَلُّونَ عَلَى النَّبِيِّ ۚ يَا أَيُّهَا الَّذِينَ آمَنُوا صَلُّوا عَلَيْهِ وَسَلِّمُوا تَسْلِيمًا﴾ [الأحزاب: 56]" },
 ];
-export const SALAT_HOURS = [7, 10, 13, 16, 19, 22];
-export const SALAT_HOURS_FRIDAY = [6, 8, 10, 11, 12, 14, 16, 18, 20, 22];
-export const KAHF_HOUR = 9;
+export const FRIDAY_SALAT_TITLE = "يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ";
+export const TAHLIL_TEXT = "لا إله إلا الله وحده لا شريك له، له الملك وله الحمد، وهو على كل شيء قدير";
+export const PRE_NOTES = [
+  "اترك كلَّ ما بيدك الآن وتفرّغ للصلاة؛ فهي راحةُ قلبك وزادُ يومك.",
+  "أمسِك عمّا أنت فيه، وتوضّأ وتهيّأ للصلاة — لحظاتٌ بينك وبين ربّك.",
+  "اترك الدنيا قليلًا وأقبِل على الصلاة؛ ما شغلك سينتظرك، والصلاةُ لا تنتظر.",
+];
+export function dayOfYear(y: number, m: number, d: number): number {
+  return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86_400_000);
+}
 const PRAYERS: [string, string][] = [["fajr", "الفجر"], ["dhuhr", "الظهر"], ["asr", "العصر"], ["maghrib", "المغرب"], ["isha", "العشاء"]];
 
 const MIN = 60_000;
@@ -83,6 +99,7 @@ export function localParts(now: Date, tz: string) {
   };
 }
 
+export function minutesOf(date: Date, tz: string): number { const p = localParts(date, tz); return p.h * 60 + p.min; }
 /* فروق المواقيت الرسميّة لأقرب مدينةٍ مغربيّة (≤ 40 كم)، وإلّا الوسيطُ العامّ لكلّ المدن */
 export function maHabousAdj(lat: number, lng: number) {
   let best = MA_HABOUS.fallback, bd = 40 * 40; const k = Math.cos(lat * Math.PI / 180);
@@ -118,6 +135,11 @@ export function dueEvents(rec: Rec, now: Date): Push[] {
   const pr = rec.prefs;
   const done = (id: string) => rec.sent[id] === t.key;
   const add = (p: Push) => { if (!done(p.id)) out.push(p); };
+  /* نافذةُ التنبيهات: من الفجر + 50 دقيقة (08:00 بلا موقع) إلى 22:00 */
+  const hasGeo = rec.lat !== 0 || rec.lng !== 0;
+  const ptDay = hasGeo ? (prayerTimes(rec.lat, rec.lng, t.y, t.m, t.d) as unknown as Record<string, Date>) : null;
+  const fromMin = ptDay && isFinite(+ptDay.fajr) ? minutesOf(new Date(+ptDay.fajr + FAJR_LAG_MIN * 60_000), rec.tz) : NOTIF_FROM * 60;
+  const inWin = (min: number) => min >= fromMin && min <= NOTIF_TO * 60;
 
   if (pr.prayer || pr.pre) {
     const pt = prayerTimes(rec.lat, rec.lng, t.y, t.m, t.d);
@@ -135,36 +157,41 @@ export function dueEvents(rec: Rec, now: Date): Push[] {
         });
       }
       const pre = at - PRE_LEAD;
-      if (pr.pre && nowMs >= pre && nowMs < pre + WIN_PRE) {
+      if (pr.pre && nowMs >= pre && nowMs < pre + WIN_PRE && inWin(minutesOf(new Date(pre), rec.tz))) {   // لا تنبيه خارج النافذة
         add({
           id: `r-${k}`, ttl: 300,
-          payload: { title: `🕌 اقترب وقت صلاة ${nm}`, body: `تبقّى 10 دقائق على أذان ${nm}`, tag: `pre-${k}` },
+          payload: { title: `🕌 اقترب وقت صلاة ${nm}`, body: `تبقّى 10 دقائق على صلاة ${nm}. ${PRE_NOTES[(dayOfYear(t.y, t.m, t.d) + PRAYERS.findIndex(x => x[0] === k)) % PRE_NOTES.length]}`, tag: `pre-${k}` },
         });
       }
     }
   }
-  if (pr.azkar && t.min < 10) {
-    const s = AZKAR_SLOTS.find(x => x.h === t.h);
-    if (s) add({ id: `a-${s.h}`, ttl: 1800, payload: { title: s.title, body: s.body, tag: `azkar-${s.h}`, data: { action: "azkar", tab: s.tab } } });
+  /* خطّةُ اليوم: أذكارُ الصباح بعد الفجر (ولا قبل الثامنة) والمساء بعد العصر والنوم، وذكرُ الصباح، والصلاةُ على النبيّ ﷺ، والكهفُ يومَ الجمعة */
+  let asrMin = 17 * 60;
+  if (ptDay && isFinite(+ptDay.asr)) asrMin = minutesOf(new Date(+ptDay.asr + AFTER_PRAYER_MIN * 60_000), rec.tz);
+  const nowMin = t.h * 60 + t.min;
+  const doy = dayOfYear(t.y, t.m, t.d);
+  const slot = (id: string, min: number, win: number, p: Push["payload"], ttl: number) => {
+    if (inWin(min) && nowMin >= min && nowMin < min + win) add({ id, ttl, payload: p });
+  };
+  if (pr.azkar) {
+    slot("a-morning", fromMin, 10,
+      { title: "حان وقت أذكار الصباح 🌅", body: "بعد صلاة الفجر — ابدأ يومك بأذكار الصباح، تحصينًا وبركة", tag: "azkar-morning", data: { action: "azkar", tab: "morning" } }, 1800);
+    slot("a-tahlil", fromMin + 15, 10,
+      { title: "ذِكرٌ عظيمٌ كلَّ صباح 🤍", body: `${TAHLIL_TEXT}\nوقد ورد فضلٌ عظيمٌ لمن قالها مئةَ مرّةٍ في اليوم (متّفقٌ عليه)`, tag: "azkar-tahlil", data: { action: "azkar", tab: "morning" } }, 1800);
+    slot("a-evening", asrMin, 10,
+      { title: "حان وقت أذكار المساء 🌇", body: "بعد صلاة العصر — لا تنسَ أذكار المساء", tag: "azkar-evening", data: { action: "azkar", tab: "evening" } }, 1800);
+    slot("a-sleep", 22 * 60, 10,
+      { title: "حان وقت أذكار النوم 🌙", body: "قبل أن تنام، اختم يومك بأذكار النوم", tag: "azkar-sleep", data: { action: "azkar", tab: "sleep" } }, 1800);
   }
-  if (pr.salat && t.min < 5 && (t.friday ? SALAT_HOURS_FRIDAY : SALAT_HOURS).includes(t.h)) {
-    add({
-      id: `s-${t.h}`, ttl: 900,
-      payload: {
-        title: t.friday ? "يوم الجمعة — أكثِر من الصلاة على الحبيب ﷺ" : "صَلِّ على الحبيب ﷺ",
-        body: "اللهم صلِّ وسلّم على سيّدنا محمد ﷺ", tag: `salat-${t.h}`,
-      },
+  if (pr.salat) {
+    SALAT_HOURS.forEach((h, i) => {
+      const m = SALAT_MSGS[(doy + i) % SALAT_MSGS.length];
+      slot(`s-${h}`, h * 60, 5, { title: t.friday && m.fri ? FRIDAY_SALAT_TITLE : m.t, body: m.b, tag: `salat-${h}` }, 900);
     });
   }
-  if (pr.kahf && t.friday && t.h === KAHF_HOUR && t.min < 10) {
-    add({
-      id: "k-9", ttl: 1800,
-      payload: {
-        title: "اليوم الجمعة — سورة الكهف 📖",
-        body: "من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين",
-        tag: "kahf", data: { action: "kahf" },
-      },
-    });
+  if (pr.kahf && t.friday) {
+    slot("k-kahf", KAHF_HOUR * 60, 10,
+      { title: "اليوم الجمعة — سورة الكهف 📖", body: "من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين", tag: "kahf", data: { action: "kahf" } }, 1800);
   }
   return out;
 }
