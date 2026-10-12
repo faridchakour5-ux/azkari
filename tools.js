@@ -510,8 +510,8 @@ PAGES.zakat = { title:'حاسبة الزكاة', render(body){
     '<div class="tl-note">حاسبةٌ تقديريّةٌ للمال النقديّ والذهب والفضّة وعروض التجارة بنسبة 2.5٪ بعد بلوغ النصاب وتمام الحول. لا تشمل الأنعامَ والزروعَ والمعادنَ والحالاتِ الخاصّة؛ ولأهل العلم في النصاب خلافٌ (ذهبٌ أم فضّة) وفي زكاة حُليّ المرأة المستعمَل خلاف — فللتحقّق اسأل مفتيًا أو الجهةَ الرسميّة. لا يُحفَظ في هاتفك غيرُ هذه الأرقام ولا تغادره.</div>';
   /* يقبل الأرقامَ الهنديّة والفاصلةَ آلافًا (1,500) أو عشريّةً (1,5) والنقطةَ كذلك */
   const num=v=>{
-    let t=String(v||'').replace(/[٠-٩]/g,d=>d.charCodeAt(0)-0x660).replace(/[۰-۹]/g,d=>d.charCodeAt(0)-0x6F0)
-      .replace(/[٬،]/g,',').replace(/٫/g,'.').replace(/[\s  ']/g,'').replace(/[^0-9.,]/g,'');
+    let t=String(v||'').replace(/[\u0660-\u0669]/g,d=>d.charCodeAt(0)-0x660).replace(/[\u06F0-\u06F9]/g,d=>d.charCodeAt(0)-0x6F0)
+      .replace(/[\u066C\u060C]/g,',').replace(/\u066B/g,'.').replace(/[\s  ']/g,'').replace(/[^0-9.,]/g,'');
     const lc=t.lastIndexOf(','), ld=t.lastIndexOf('.');
     if(lc>=0 && ld>=0){ const dec=Math.max(lc,ld); t=t.slice(0,dec).replace(/[.,]/g,'')+'.'+t.slice(dec+1).replace(/[.,]/g,''); }
     else if(lc>=0){ t=(/^\d{1,3}(,\d{3})+$/.test(t))? t.replace(/,/g,'') : t.replace(/,/g,'.'); }
