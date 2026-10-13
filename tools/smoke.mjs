@@ -28,6 +28,8 @@ for (const lang of ['ar', 'fr', 'en']) {
     await p.evaluate(i => document.querySelector('.drawer [data-a="' + i + '"]').click(), id); await p.waitForTimeout(700);
     await p.evaluate(() => { try { window.SalTools && SalTools.close && SalTools.close(); } catch (e) {} });
   }
+  /* صفحةُ «الوقف والابتداء» المستقلّة: تُفتح بكلّ تبويباتها بلا خطأ */
+  for (const h of ['hafs', 'warsh', 'rules']) { await p.goto(BASE + 'waqf.html#' + h); await p.waitForTimeout(400); }
   const ov = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   if (ov > 2) errs.push('تمرير أفقيّ: ' + ov + 'px');
   console.log((errs.length ? '✗ ' : '✓ ') + lang + ' — ' + ids.length + ' قسمًا من القائمة' + (errs.length ? '\n   ' + [...new Set(errs)].join('\n   ') : ''));

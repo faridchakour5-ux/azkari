@@ -5,6 +5,7 @@ const ASSETS = [
   './index.html',
   './privacy.html',
   './credits.html',
+  './waqf.html',
   './tools.js',
   './i18n_core.js',
   './i18n_fr.js',

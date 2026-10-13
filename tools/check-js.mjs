@@ -7,7 +7,8 @@ let bad = 0;
 const fail = m => { console.error('✗ ' + m); bad++; };
 
 const html = fs.readFileSync('index.html', 'utf8');
-const blocks = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]).filter(s => s.trim());
+const inline = h => [...h.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]).filter(s => s.trim());
+const blocks = inline(html).concat(inline(fs.readFileSync('waqf.html', 'utf8')));
 blocks.forEach((src, i) => { try { new vm.Script(src, { filename: 'index.html#script' + (i + 1) }); } catch (e) { fail('index.html script ' + (i + 1) + ': ' + e.message); } });
 
 const js = ['tools.js', 'i18n_core.js', 'i18n_en.js', 'i18n_fr.js', 'quiz.js', 'quiz2.js', 'sw.js', 'fiqh.js', 'fadl.js', 'wasaya.js', 'thabat.js', 'sunna.js', 'sharh.js', 'mutash.js', 'ma-habous.js', 'pt-regions.js'];
