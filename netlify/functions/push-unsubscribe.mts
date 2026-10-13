@@ -12,4 +12,9 @@ export default async (req: Request) => {
   return jsonRes({ ok: true });
 };
 
-export const config: Config = { path: "/api/push/unsubscribe" };
+/* حدٌّ للمعدّل لكلّ عنوان IP: يمنع إغراقَ المخزن باشتراكاتٍ وهميّة، وهو واسعٌ بما يكفي
+   لشبكات الجوّال التي يشترك فيها كثيرون في عنوانٍ واحد. */
+export const config: Config = {
+  path: "/api/push/unsubscribe",
+  rateLimit: { windowLimit: 60, windowSize: 60, aggregateBy: ["ip", "domain"] },
+};

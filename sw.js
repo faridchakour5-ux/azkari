@@ -1,5 +1,5 @@
 /* صلاتي — service worker v256 */
-const CACHE = 'azkari-v275';
+const CACHE = 'azkari-v283';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const ASSETS = [
   './wird_warsh.js',
   './quiz.js',
   './quiz2.js',
+  './mutash.js',
   './fiqh.js',
   './fadl.js',
   './wasaya.js',

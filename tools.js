@@ -1,4 +1,4 @@
-/* أدوات المسلم — تُحمَّل عند الطلب من index.html (القبلة، التقويم الهجري، متابعة الصلوات، الصيام، الزكاة، مراجعة الحفظ، مؤقّت النوم).
+/* أدوات المسلم — تُحمَّل عند الطلب من index.html (القبلة، التقويم الهجري، متابعة الصلوات، الصيام، مراجعة الحفظ، مؤقّت النوم).
    كلّها محلّيّة: لا خادمَ ولا حسابَ ولا تتبّع؛ ما تحفظه يبقى في الجهاز وينتقل مع النسخة الاحتياطيّة.
    الأرقامُ لاتينيّة دائمًا (AR=String). */
 (function(){
@@ -169,7 +169,6 @@ const IC = {
   cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
   pray:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>',
   fast:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',
-  zakat:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1 1-1.7 2.5-1.7s2.5.7 2.5 1.7-1 1.5-2.5 1.8-2.5.8-2.5 1.9 1 1.7 2.5 1.7 2.5-.7 2.5-1.7"/></svg>',
   rev:'<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2M3 12A9 9 0 0 1 18.5 5.8"/><path d="M18.5 2v4h-4M5.5 22v-4h4"/></svg>',
   bell:'<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>'
 };
@@ -218,7 +217,6 @@ PAGES.hub = { title:'أدوات المسلم', render(body){
     ['cal','التقويم الهجريّ','cal','الأيّام والمناسبات'],
     ['pt','صلواتي','pray','تابِع صلواتك اليوم'],
     ['fast','الصيام','fast','التطوّع ووقت الفجر'],
-    ['zakat','حاسبة الزكاة','zakat','تقديريّةٌ وبسيطة'],
     ['rev','مراجعة الحفظ','rev',due?('عندك '+AR(due)+' للمراجعة'):'تذكيرٌ متباعد'],
     ['rem','تذكيراتي','bell','الجمعة والمراجعة']
   ];
@@ -484,69 +482,6 @@ PAGES.fast = { title:'الصيام', render(body){
     '<div class="tl-note">يبدأ الصيامُ بطلوع الفجر، فيجب الإمساكُ عن الطعام والشراب إذا أُذِّن للفجر (البقرة 187) — فلا إمساكيّةَ قبل الأذان. الأوقاتُ بجدول مواقيت وزارة الأوقاف لأقرب مدينةٍ إليك في المغرب، وبالحساب في غيره. وأوّلُ رمضان يُحدَّد بالرؤية فقد يختلف يومًا عن الحساب.</div>';
 }};
 
-/* ============ حاسبة الزكاة ============ */
-PAGES.zakat = { title:'حاسبة الزكاة', render(body){
-  const S=Object.assign({gold:'',base:'gold',cash:'',gw:'',sw:'',trade:'',recv:'',debt:'',hawl:true,karat:24,cur:'',subDebt:true}, sget('az_zakat',{}));
-  const KS=[24,22,21,18,14];
-  body.innerHTML='<div class="tl-card"><h3>سعر الذهب اليوم</h3><div class="tl-lbl" style="margin-top:0">سعر غرام الذهب عيار 24 بعملتك (أدخله بنفسك من مصدرٍ تثق به)</div><input class="tl-in" id="z-gold" inputmode="decimal" placeholder="750" value="'+esc(S.gold)+'">'+
-    '<div class="tl-lbl">أساس النصاب</div><div class="tl-chips" id="z-base"><button data-b="gold"'+(S.base==='gold'?' class="on"':'')+'>الذهب (85 غرامًا)</button><button data-b="silver"'+(S.base==='silver'?' class="on"':'')+'>الفضّة (595 غرامًا)</button></div>'+
-    '<div class="tl-lbl">سعر غرام الفضّة (إن اخترتَ الفضّة)</div><input class="tl-in" id="z-silver" inputmode="decimal" placeholder="9" value="'+esc(S.silver||'')+'">'+
-    '<div class="tl-lbl">العملة (للعرض فقط، مثل MAD)</div><input class="tl-in" id="z-cur" maxlength="8" dir="ltr" placeholder="MAD" value="'+esc(S.cur||'')+'"></div>'+
-    '<div class="tl-card"><h3>أموالك</h3>'+
-    [['cash','نقدٌ وأرصدةٌ في الحساب'],['gw','ذهبٌ مدّخَر (بالغرام)'],['sw','فضّةٌ مدّخَرة (بالغرام)'],['trade','عروضُ تجارةٍ (قيمتُها السوقيّة)'],['recv','ديونٌ لك مرجوّةُ السداد'],['debt','ديونٌ حالّةٌ عليك']].map(x=>
-      '<div class="tl-lbl">'+x[1]+'</div><input class="tl-in" data-f="'+x[0]+'" inputmode="decimal" placeholder="0" value="'+esc(S[x[0]]||'')+'">'+
-      (x[0]==='gw' ? '<div class="tl-lbl">عيار الذهب المدّخَر</div><div class="tl-chips" id="z-karat">'+KS.map(k=>'<button data-k="'+k+'"'+(+S.karat===k?' class="on"':'')+'>'+k+'</button>').join('')+'</div>' : '')
-    ).join('')+
-    '<div class="tl-row" style="margin-top:8px"><span>مرّ على المال سنةٌ هجريّةٌ كاملة (الحَوْل)</span><button class="tl-sw'+(S.hawl?' on':'')+'" id="z-hawl" aria-label="الحول"></button></div>'+
-    '<div class="tl-row"><span>أطرح الديونَ الحالّةَ من المال الزكويّ</span><button class="tl-sw'+(S.subDebt?' on':'')+'" id="z-sub" aria-label="طرح الدين"></button></div></div>'+
-    '<div class="tl-card" id="z-res"></div>'+
-    '<div class="tl-note">يُحوَّل وزنُ الذهب المدّخَر إلى ما يعادله من عيار 24 بحسب العيار الذي تختاره. وفي أثر الدَّين على الزكاة خلافٌ بين أهل العلم؛ تطرح الحاسبةُ الدَّينَ الحالَّ افتراضيًّا ويمكنك إيقافُ ذلك، وللاطمئنان استفتِ من تثق به.</div>'+
-    '<div class="tl-note">حاسبةٌ تقديريّةٌ للمال النقديّ والذهب والفضّة وعروض التجارة بنسبة 2.5٪ بعد بلوغ النصاب وتمام الحول. لا تشمل الأنعامَ والزروعَ والمعادنَ والحالاتِ الخاصّة؛ ولأهل العلم في النصاب خلافٌ (ذهبٌ أم فضّة) وفي زكاة حُليّ المرأة المستعمَل خلاف — فللتحقّق اسأل مفتيًا أو الجهةَ الرسميّة. لا يُحفَظ في هاتفك غيرُ هذه الأرقام ولا تغادره.</div>';
-  /* يقبل الأرقامَ الهنديّة والفاصلةَ آلافًا (1,500) أو عشريّةً (1,5) والنقطةَ كذلك */
-  const num=v=>{
-    let t=String(v||'').replace(/[\u0660-\u0669]/g,d=>d.charCodeAt(0)-0x660).replace(/[\u06F0-\u06F9]/g,d=>d.charCodeAt(0)-0x6F0)
-      .replace(/[\u066C\u060C]/g,',').replace(/\u066B/g,'.').replace(/[\s  ']/g,'').replace(/[^0-9.,]/g,'');
-    const lc=t.lastIndexOf(','), ld=t.lastIndexOf('.');
-    if(lc>=0 && ld>=0){ const dec=Math.max(lc,ld); t=t.slice(0,dec).replace(/[.,]/g,'')+'.'+t.slice(dec+1).replace(/[.,]/g,''); }
-    else if(lc>=0){ t=(/^\d{1,3}(,\d{3})+$/.test(t))? t.replace(/,/g,'') : t.replace(/,/g,'.'); }
-    else if(ld>=0 && t.split('.').length>2){ t=t.replace(/\./g,''); }
-    const x=parseFloat(t); return isFinite(x)&&x>0?x:0;
-  };
-  const calc=()=>{
-    const gp=num(S.gold), sp=num(S.silver), k=Math.min(24,Math.max(1,+S.karat||24));
-    const cur=String(S.cur||'').trim();
-    const gold=num(S.gw)*(k/24)*gp, silver=num(S.sw)*sp;
-    const assets=num(S.cash)+num(S.trade)+num(S.recv)+gold+silver;
-    const debt=S.subDebt?num(S.debt):0;
-    const total=Math.max(0,assets-debt);
-    const nisab = S.base==='gold' ? 85*gp : 595*sp;
-    const res=body.querySelector('#z-res');
-    const f=x=>(Math.round(x*100)/100).toLocaleString('en-US')+(cur?' '+esc(cur):'');
-    if(!nisab){ res.innerHTML='<h3>النتيجة</h3><div class="tl-note" style="margin:0">أدخل سعر '+(S.base==='gold'?'الذهب':'الفضّة')+' ليُحسَب النصاب.</div>'; return; }
-    const reach=total>=nisab, due=reach&&S.hawl;
-    res.innerHTML='<h3>النتيجة</h3>'+
-      '<div class="tl-row"><span>مجموع الأموال الزكويّة</span><span class="v">'+f(total)+'</span></div>'+
-      '<div class="tl-row"><span>النصاب ('+(S.base==='gold'?'85 غ ذهب':'595 غ فضّة')+')</span><span class="v">'+f(nisab)+'</span></div>'+
-      '<div class="tl-row"><span>بلوغ النصاب</span><span class="v">'+(reach?'نعم':'لا')+'</span></div>'+
-      (due ? '<div class="tl-row"><span><b>الزكاة الواجبة (2.5٪)</b></span><span class="v" style="font-size:19px;color:var(--c-repeat);font-weight:800">'+f(total*0.025)+'</span></div>'
-       : '<div class="tl-note">'+(reach?'بلغ مالُك النصابَ؛ تجب الزكاةُ إذا تمّ الحول (سنةٌ هجريّةٌ كاملة) وهو لم ينقص عن النصاب.':'لم يبلغ مالُك النصابَ فلا زكاةَ عليك الآن.')+'</div>')+
-      '<button class="tl-btn alt" id="z-copy">نسخ النتيجة</button>';
-    res.querySelector('#z-copy').onclick=async()=>{
-      const txt='صلاتي — '+res.querySelector('h3').textContent+'\n'+[...res.querySelectorAll('.tl-row')].map(r=>r.innerText.replace(/\s*\n\s*/g,': ').trim()).join('\n');
-      try{ await navigator.clipboard.writeText(txt); toast('نُسخت النتيجة'); }catch(e){ toast('تعذّر النسخ'); }
-    };
-  };
-  body.querySelectorAll('.tl-in').forEach(i=>i.addEventListener('input',()=>{
-    if(i.id==='z-gold') S.gold=i.value; else if(i.id==='z-silver') S.silver=i.value; else if(i.id==='z-cur') S.cur=i.value; else S[i.dataset.f]=i.value;
-    sset('az_zakat',S); calc();
-  }));
-  body.querySelectorAll('#z-base button').forEach(b=>b.onclick=()=>{ S.base=b.dataset.b; sset('az_zakat',S); body.querySelectorAll('#z-base button').forEach(x=>x.classList.toggle('on',x===b)); calc(); });
-  body.querySelectorAll('#z-karat button').forEach(b=>b.onclick=()=>{ S.karat=+b.dataset.k; sset('az_zakat',S); body.querySelectorAll('#z-karat button').forEach(x=>x.classList.toggle('on',x===b)); calc(); });
-  body.querySelector('#z-hawl').onclick=e=>{ S.hawl=!S.hawl; e.currentTarget.classList.toggle('on',S.hawl); sset('az_zakat',S); calc(); };
-  body.querySelector('#z-sub').onclick=e=>{ S.subDebt=!S.subDebt; e.currentTarget.classList.toggle('on',S.subDebt); sset('az_zakat',S); calc(); };
-  calc();
-}};
-
 /* ============ مراجعة الحفظ بالتكرار المتباعد ============
    نظامُ «لايتنر» مبسَّط: كلُّ مقطعٍ له مستوى؛ السهلُ يرتفع مستواه فتتباعد مراجعتُه، والصعبُ يرجع إلى أوّله فيعود غدًا. */
 const INTV=[1,3,7,14,30,60,120];
@@ -658,7 +593,7 @@ T.onboard = function(force){
     {ic:'<svg viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>', t:'القرآن والاستماع والتحفيظ',
      p:'مصحفٌ برواية ورش وحفص مع التفسير الميسّر، وتلاواتٌ بأصوات قرّاء، وتحفيظٌ بالتكرار مع مراجعةٍ متباعدة.'},
     {ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5z"/></svg>', t:'الأذكار وأدوات المسلم',
-     p:'أذكار الصباح والمساء وغيرها، والفقه والسيرة والاختبار، والقبلة والتقويم الهجريّ ومتابعة الصلوات والصيام والزكاة. المصحفُ والأذكارُ والأدواتُ تعمل دون إنترنت، والاستماعُ يحتاجه إلا ما نزّلتَه. لا حسابَ ولا إعلانات، وتقدّمُك محفوظٌ على هاتفك.'}
+     p:'أذكار الصباح والمساء وغيرها، والفقه والسيرة والاختبار، والقبلة والتقويم الهجريّ ومتابعة الصلوات والصيام. المصحفُ والأذكارُ والأدواتُ تعمل دون إنترنت، والاستماعُ يحتاجه إلا ما نزّلتَه. لا حسابَ ولا إعلانات، وتقدّمُك محفوظٌ على هاتفك.'}
   ];
   let i=0; const el=document.createElement('div'); el.className='onb'; el.id='onb'; document.body.appendChild(el);
   const done=()=>{ sset('az_onb',true); el.remove(); };

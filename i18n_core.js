@@ -8,6 +8,8 @@ const MARKS=/[ؐ-ًؚ-ٰٟۖ-ۭـ‎‏]/g;
 const AR_RE=/[؀-ۿ]/;
 const key=s=>String(s).replace(MARKS,'').replace(/[ \s]+/g,' ').trim();
 const NO_SEL=['#splash','#s-wird','#wird-body','#az-list','#tafsir-body .t-txt','#tafsir-body .t-aya','#tafsir-body .t-intro','#tafsir-body .sv .tx','[data-noi18n]'].join(',');
+/* استثناءٌ من NO_SEL: أزرارُ البطاقة وشاراتُها وعناوينُ فضلها في قائمة الأذكار تُترجَم، ونصُّ الذكر والفضلِ نفسُه يبقى عربيًّا */
+const YES_SEL=['#az-list .badge','#az-list .sharh-btn','#az-list .share-btn','#az-list .fadl .lbl'].join(',');
 const ATTRS=['title','aria-label','placeholder','alt'];
 const SKIP_TAG=new Set(['SCRIPT','STYLE','TEXTAREA','NOSCRIPT']);
 /* القرآن بالعربيّة وحدَها (أمرٌ صريحٌ من فريد): أسماءُ المصحف والسور والآيات والأحزاب والروايات ومصطلحاتُها لا تُترجَم في أيّ لغة */
@@ -23,7 +25,7 @@ function make(o){
     return null;
   }
   let busy=false, mo=null;
-  const skipped=el=>{ try{ return !!(el.closest && el.closest(NO_SEL)); }catch(e){ return false; } };
+  const skipped=el=>{ try{ return !!(el.closest && el.closest(NO_SEL) && !el.closest(YES_SEL)); }catch(e){ return false; } };
   function fixNode(n){
     const v=n.nodeValue; if(!v || !AR_RE.test(v)) return;
     const p=n.parentNode; if(!p || (p.nodeType===1 && (SKIP_TAG.has(p.nodeName) || skipped(p)))) return;
@@ -45,7 +47,11 @@ function make(o){
     if(!root) return;
     if(root.nodeType===3){ fixNode(root); return; }
     if(root.nodeType!==1) return;
-    if(SKIP_TAG.has(root.nodeName) || skipped(root)) return;
+    if(SKIP_TAG.has(root.nodeName)) return;
+    if(skipped(root)){   // منطقةٌ محجوبة (الأذكار…): ندخل فقط المواضعَ المستثناة بـ YES_SEL
+      if(root.querySelectorAll) root.querySelectorAll(YES_SEL).forEach(y=>walk(y));
+      return;
+    }
     fixAttrs(root);
     for(let c=root.firstChild; c; c=c.nextSibling) walk(c);
   }

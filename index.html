@@ -138,6 +138,8 @@
   .riwaya-quick button.on{background:var(--accent); color:#fff;}
   .head h1{margin:0; font-size:calc(34px * var(--scale)); font-weight:800; letter-spacing:-.5px;}
   .head .sub{color:var(--text-2); font-size:15px; margin-top:5px;}
+  /* فرنسيّة/إنجليزيّة: العنوانُ أطول فيزاحم حبّةَ الرواية في الزاوية، فينزل تحتها */
+  html:not([lang="ar"]) .head:has(.riwaya-quick) h1{margin-top:36px; font-size:calc(30px * var(--scale));}
   .az-source{color:var(--accent); font-weight:700; font-size:13px; margin-top:7px;}
   .az-source:empty{display:none;}
   .az-scope{display:flex; gap:10px; justify-content:center; margin:14px 16px 0;}
@@ -374,6 +376,10 @@
     transform:translateX(105%); visibility:hidden; transition:transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s linear .3s; overscroll-behavior:contain;}
   .drawer.show{transform:none; visibility:visible; transition:transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s;}
   body.dr-open{overflow:hidden;}
+  /* فرنسيّة/إنجليزيّة: القائمةُ الجانبيّة من اليسار إلى اليمين (تنزلق من اليسار، والرمزُ قبل النصّ على اليسار) */
+  html:not([lang="ar"]) .drawer{direction:ltr; inset-inline-start:auto; left:0; right:auto; border-radius:0 26px 26px 0; box-shadow:10px 0 36px rgba(0,0,0,.28); transform:translateX(-105%);}
+  html:not([lang="ar"]) .drawer.show{transform:none;}
+  html:not([lang="ar"]) .dr-head{border-radius:0 26px 0 0;}
   .dr-head{position:relative; overflow:hidden; border-radius:26px 0 0 0; color:#fff; padding:calc(env(safe-area-inset-top,0px) + 22px) 20px 18px;
     background:linear-gradient(160deg,#0E6B52 0%,#0A5441 48%,#063D30 100%);}
   .dr-head::before{content:''; position:absolute; inset-inline-end:-46px; top:-46px; width:190px; height:190px; opacity:.13;
@@ -1508,7 +1514,7 @@
   </div>
   <div class="qp-open" id="tools-open" role="button" tabindex="0">
     <svg class="gh-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5z"/></svg>
-    <span class="qo-t">أدوات المسلم<small id="tools-sub">القبلة · التقويم الهجري · صلواتي · الصيام · الزكاة</small></span>
+    <span class="qo-t">أدوات المسلم<small id="tools-sub">القبلة · التقويم الهجري · صلواتي · الصيام</small></span>
     <span class="qo-go">افتح</span>
   </div>
   <div class="inst-row" id="inst-row" role="button" tabindex="0">
@@ -2057,6 +2063,8 @@ const store = {
   set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 };
 
+/* حاسبةُ الزكاة حُذفت: تُمحى أرقامُها المحفوظةُ سابقًا من الجهاز */
+try{ localStorage.removeItem('az_zakat'); }catch(e){}
 /* ---------- settings ---------- */
 /* الخطُّ المغربيُّ لورشٍ وحدَها: هو خطُّها الأصيل. وحفصٌ بخطّ مصحف الملك
    فهد وحدَه — إذ لا يرسم المغربيُّ رموزَ حفص كما هي: الفاءُ نقطتُها تحتها،
@@ -2383,7 +2391,7 @@ function renderAzkar(){
       '<div class="tick"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg></div>'+
       '<div class="txt">'+dhikrHtml(text)+'</div>'+
       '<div class="meta">'+
-        '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span> '+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span>'+
+        '<span class="badge"><span class="rem">'+AR(Math.max(d.count-done,0))+'</span> '+(d.count>1?('تكرار '+AR(d.count)):'مرّة\u200c')+'</span>'+
         (AZKAR_AUDIO[pid] ? '<button class="dhikr-play" data-pid="'+pid+'" aria-label="استماع">'+ICON_PLAY+'</button>':'')+
         '<button class="sharh-btn" aria-label="شرح الذكر">'+SHARH_IC+'الشرح</button>'+
         '<button class="share-btn" aria-label="مشاركة">'+SHARE_IC+'شارِك</button>'+
@@ -2892,6 +2900,20 @@ setTimeout(()=>{ try{ routeFromHash(); }catch(e){} }, 300);
 navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', e=>{
   if(e.data && e.data.type==='navigate') applyNotifNavigation(e.data.data);
 });
+/* إمكانيّةُ الوصول: كلُّ مفتاحٍ وقائمةٍ في الإعدادات يأخذ اسمَه من نصّ صفّه، فيقرؤه قارئُ الشاشة */
+(function labelSettingsControls(){
+  try{
+    let n=0;
+    document.querySelectorAll('.row > .k, .selectrow > .k').forEach(k=>{
+      const row=k.parentNode, c=row.querySelector('input,select');
+      if(!c || c.getAttribute('aria-label') || c.getAttribute('aria-labelledby')) return;
+      if(!k.id) k.id='k-lbl-'+(++n);
+      c.setAttribute('aria-labelledby', k.id);
+    });
+    const q=document.getElementById('quran-search-input');
+    if(q && !q.getAttribute('aria-label')) q.setAttribute('aria-label','ابحث في القرآن');
+  }catch(e){}
+})();
 (function handleNotifOpenParam(){
   try{
     const u=new URL(location.href);
@@ -3912,7 +3934,7 @@ function dhikrShotHTML(d){
   const text = d.quran ? qFix(settings.riwaya==='warsh'? d.warsh : d.hafs) : d.text;
   return '<div class="card'+(d.quran?' quran':'')+'">'+
       '<div class="txt">'+dhikrHtml(text)+'</div>'+
-      '<div class="meta"><span class="badge">'+(d.count>1?('تكرار '+AR(d.count)):'مرّة')+'</span></div>'+
+      '<div class="meta"><span class="badge">'+(d.count>1?('تكرار '+AR(d.count)):'مرّة\u200c')+'</span></div>'+
       (d.fadl  ?'<div class="ss-note"><b>الفضل</b> '+escapeHtml(d.fadl)+'</div>':'')+
       (d.source?'<div class="ss-note"><b>المصدر</b> '+escapeHtml(d.source)+'</div>':'')+
     '</div>';
@@ -4714,16 +4736,40 @@ function qzResult(){
   (function tick(now){ const k=Math.min(1,(now-t0)/ms); sc.textContent=AR(Math.round(s*(1-Math.pow(1-k,3)))); if(k<1) requestAnimationFrame(tick); })(t0);
   setTimeout(()=>{ if(!document.body.contains(ring)) return; qzFx(lv, ring); vibrate([[8],[15,40,15],[20,60,20],[20,50,20,50,30],[30,60,30,60,30,60,60]][lv-1]); }, ms*0.7);
 }
-/* فتح رابط تحدٍّ: ‎?quiz=1&c=المجال&s=البذرة&f=نتيجة الصديق */
-(async function(){
+/* فتح رابط تحدٍّ: ‎?quiz=1&c=المجال&s=البذرة&f=نتيجة الصديق
+   يصل من المتصفّح (عنوانُ الصفحة) أو من التطبيق الأصليّ (رابطُ salatee.org يفتحه أندرويد في التطبيق) */
+async function openQuizChallenge(q){
   try{
-    const q=new URLSearchParams(location.search); if(q.get('quiz')!=='1') return;
+    if(q.get('quiz')!=='1') return;
     if(!(await loadQuiz())) return;
     const cat=q.get('c')||'all', seed=parseInt(q.get('s'),10), from=parseInt(q.get('f'),10);
     if(!QUIZ_CATS.some(c=>c.id===cat) || !(seed>0) || !(from>=0 && from<=QZ_LEN)) return;
     __qzChal={ cat, seed, from, name:String(q.get('n')||'').replace(/[<>&"]/g,'').trim().slice(0,24) };
     setTimeout(()=>{ const t=document.querySelector('.tab[data-s="s-tasbih"]'); if(t) t.click(); applyTasbihMode('quiz'); }, 900);
+  }catch(e){}
+}
+(function(){
+  try{
+    const q=new URLSearchParams(location.search); if(q.get('quiz')!=='1') return;
+    openQuizChallenge(q);
     try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  }catch(e){}
+})();
+(function nativeAppLinks(){
+  try{
+    if(!isNative()) return;
+    const A = Capacitor.Plugins && Capacitor.Plugins.App; if(!A) return;
+    let last='', lastAt=0;
+    const go=url=>{
+      try{
+        const u=new URL(url);
+        if(u.hostname!=='salatee.org' || Date.now()-lastAt<3000 && url===last) return;
+        last=url; lastAt=Date.now();
+        openQuizChallenge(u.searchParams);
+      }catch(e){}
+    };
+    if(A.addListener) A.addListener('appUrlOpen', e=> go(e && e.url));
+    if(A.getLaunchUrl) A.getLaunchUrl().then(r=>{ if(r && r.url) go(r.url); }).catch(()=>{});
   }catch(e){}
 })();
 /* تبديل صفحة المسبحة بين العدّاد والاختبار */
@@ -4762,7 +4808,6 @@ async function openTools(page){
     cal:I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
     pt:I('<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>'),
     fast:I('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'),
-    zakat:I('<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1 1-1.7 2.5-1.7s2.5.7 2.5 1.7-1 1.5-2.5 1.8-2.5.8-2.5 1.9 1 1.7 2.5 1.7 2.5-.7 2.5-1.7"/>'),
     rev:I('<path d="M21 12a9 9 0 0 1-15.5 6.2M3 12A9 9 0 0 1 18.5 5.8"/><path d="M18.5 2v4h-4M5.5 22v-4h4"/>'),
     bell:I('<path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/>'),
     sleep:I('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/><path d="M15 3h4l-4 4h4"/>'),
@@ -4787,7 +4832,7 @@ async function openTools(page){
     wird:goTab('s-wird'), listen:goTab('s-listen'), azkar:goTab('s-azkar',()=>{ if(catMeta(currentTab).hidden) showAzkarPage('fadl'); }),
     wasaya:goTab('s-azkar',()=>showAzkarPage('wasaya')),
     fiqh:goTab('s-tasbih',()=>applyTasbihMode('fiqh')), tasbih:goTab('s-tasbih',()=>applyTasbihMode('tasbih')), quiz:goTab('s-tasbih',()=>applyTasbihMode('quiz')),
-    qibla:tool('qibla'), cal:tool('cal'), pt:tool('pt'), fast:tool('fast'), zakat:tool('zakat'), rev:tool('rev'), bell:tool('rem'),
+    qibla:tool('qibla'), cal:tool('cal'), pt:tool('pt'), fast:tool('fast'), rev:tool('rev'), bell:tool('rem'),
     sleep:goTab('s-listen',async()=>{ if(await loadTools()) SalTools.sleep(); }),
     hifz:goTab('s-listen',()=>applyListenMode('hifz')), seera:goTab('s-listen',()=>applyListenMode('seera')), stories:goTab('s-listen',()=>applyListenMode('stories')),
     hadith:goTab('s-listen',()=>applyListenMode('hadith')), duat:goTab('s-listen',()=>applyListenMode('duat')),
@@ -4795,7 +4840,7 @@ async function openTools(page){
   };
   const GROUPS=[
     [null,[['wird','الوِرد'],['listen','الاستماع'],['azkar','الأذكار'],['fiqh','الفقه'],['tasbih','المسبحة']]],
-    ['أدوات المسلم',[['qibla','القبلة'],['cal','التقويم الهجريّ'],['pt','صلواتي'],['fast','الصيام'],['zakat','حاسبة الزكاة'],['rev','مراجعة الحفظ'],['sleep','مؤقّت النوم'],['bell','تذكيراتي']]],
+    ['أدوات المسلم',[['qibla','القبلة'],['cal','التقويم الهجريّ'],['pt','صلواتي'],['fast','الصيام'],['rev','مراجعة الحفظ'],['sleep','مؤقّت النوم'],['bell','تذكيراتي']]],
     ['التعلّم والاستماع',[['hifz','التحفيظ'],['seera','السيرة النبوية'],['stories','قصص الأنبياء'],['hadith','الأحاديث الصحيحة'],['duat','الدعاة'],['wasaya','وصايا النبي ﷺ'],['quiz','اختبار الثقافة الإسلامية']]],
     ['المزيد',[['settings','الإعدادات'],['info','الجولة التعريفيّة'],['shield','سياسة الخصوصية','privacy.html'],['photo','صور القرّاء (النَّسب والتراخيص)','credits.html']]]
   ];
@@ -4846,7 +4891,7 @@ async function openTools(page){
   document.addEventListener('keydown',e=>{ if(e.key==='Escape' && isOpen()) close(); });
   // سحبةٌ نحو حافّة الشاشة تُغلقه
   let sx=null; dr.addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; },{passive:true});
-  dr.addEventListener('touchend',e=>{ if(sx==null) return; const dx=e.changedTouches[0].clientX-sx; sx=null; if(dx>70) close(); },{passive:true});
+  dr.addEventListener('touchend',e=>{ if(sx==null) return; const dx=e.changedTouches[0].clientX-sx; sx=null; if(document.documentElement.lang==='ar' ? dx>70 : dx<-70) close(); },{passive:true});
   window.__drClose=()=>{ if(isOpen()){ close(); return true; } return false; };
   window.openDrawer=open;
 })();
@@ -6632,8 +6677,11 @@ function renderAutoReadPill(){
   const pill=$('#autoread-pill'); if(!pill) return;
   pill.classList.toggle('show', autoReadShouldShow());
   const main=$('#autoread-toggle'); if(main) main.classList.toggle('on', __autoRead);
-  const ic=$('#autoread-ic'); if(ic) ic.innerHTML = __autoRead ? FOLLOW_ICON_ON : FOLLOW_ICON_OFF;
-  const lbl=$('#autoread-label'); if(lbl) lbl.textContent = __autoRead ? ('سرعة '+fmtLevel(autoReadLevel())) : 'تمرير للقراءة';
+  /* تُستدعى في كلّ إطار تمرير: لا نكتب في DOM إلا إن تغيّر المكتوب (innerHTML يعيد بناءَ الرمز كلَّ مرّة) */
+  const ic=$('#autoread-ic'); const icKey = __autoRead ? 'on' : 'off';
+  if(ic && ic.dataset.k!==icKey){ ic.innerHTML = __autoRead ? FOLLOW_ICON_ON : FOLLOW_ICON_OFF; ic.dataset.k=icKey; }
+  const lbl=$('#autoread-label'); const lblTxt = __autoRead ? ('سرعة '+fmtLevel(autoReadLevel())) : 'تمرير للقراءة';
+  if(lbl && lbl.textContent!==lblTxt) lbl.textContent = lblTxt;
 }
 function autoReadTick(ts){
   __autoReadRAF=null;
@@ -7689,6 +7737,20 @@ async function nativeTestNotif(title, lines){
     return true;
   }catch(e){ return false; }
 }
+/* الضغطُ على إشعارٍ أصليّ يفتح الصفحةَ المقصودة (أذكار الصباح، الكهف…) لا الشاشةَ الرئيسيّة فقط */
+(function nativeNotifTap(){
+  try{
+    if(!isNative()) return;
+    const LN = Capacitor.Plugins && Capacitor.Plugins.LocalNotifications;
+    if(!LN || !LN.addListener) return;
+    LN.addListener('localNotificationActionPerformed', ev=>{
+      try{
+        const o = ev && ev.notification && ev.notification.extra && ev.notification.extra.open;
+        if(o) setTimeout(()=> applyNotifNavigation(o), 700);
+      }catch(e){}
+    });
+  }catch(e){}
+})();
 async function scheduleNativeNotifs(){
   if(!isNative()) return;
   const LN = Capacitor.Plugins && Capacitor.Plugins.LocalNotifications;
@@ -7760,7 +7822,7 @@ async function scheduleNativeNotifs(){
         if(it.flag==='salat' ? !settings.salat : !settings.notif) return;
         if(it.at.getTime() <= nowMs+60000) return;
         notifs.push({ id:id++, channelId:'reminders', title:it.title, body:it.body, largeBody:it.body,
-          schedule:{ at:it.at, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+          schedule:{ at:it.at, allowWhileIdle:true }, smallIcon:'ic_stat_icon', extra: it.data ? { open: it.data } : undefined });
       });
     }
     /* تذكيراتُ الصيام ومراجعة الحفظ (اختياريّة، من «أدوات المسلم ← تذكيراتي») */
@@ -7773,22 +7835,24 @@ async function scheduleNativeNotifs(){
       /* المواقيتُ تُحسَب هنا بـ adhan.min.js — مصدرٌ واحدٌ لا يَختلف عمّا يَراه
          المستخدمُ في شريط المواقيت — وتُسلَّم إلى النظام أرقامًا مطلقة. */
       try{
-        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true, voice: settings.adhanVoice==='alt' ? 'alt' : 'wadee' });
+        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true, voice: adhanPref() });
         paintAdhanNote(); paintVoiceRow();
       }catch(e){}
     }
   }catch(e){}
 }
 /* الصوتُ الثاني الاختياريّ للأذان: يُسمّى هنا حين يُضاف ملفُّه (انظر native/apply-android.js)؛ فارغٌ = لا خيار */
-const ADHAN_ALT_NAME = 'محمد العمراني — المغربي';
+const ADHAN_ALT_NAME = 'سعيد بلقاضي — المغربي';
+/* أذانُ وادي اليمني هو الافتراضيّ؛ «alt» (المغربيّ) لا يُستعمل إلا إن اختاره المستخدمُ صراحةً (وإن غاب الملفّ رجع النظامُ إلى وادي) */
+function adhanPref(){ return settings.adhanVoice==='alt' ? 'alt' : 'wadee'; }
 function adhanVoice(){
-  return (settings.adhanVoice==='alt' && ADHAN_ALT_NAME && __adhanState && __adhanState.altAvailable) ? 'alt' : 'wadee';
+  return (adhanPref()==='alt' && ADHAN_ALT_NAME && __adhanState && __adhanState.altAvailable) ? 'alt' : 'wadee';
 }
 function paintVoiceRow(){
   const row=$('#adhan-voice-row'), sel=$('#adhan-voice'); if(!row||!sel) return;
   const ok = !!(ADHAN_ALT_NAME && __adhanState && __adhanState.altAvailable);
   row.style.display = ok ? '' : 'none';
-  if(ok){ const o=sel.querySelector('option[value="alt"]'); if(o) o.textContent=ADHAN_ALT_NAME; sel.value = settings.adhanVoice==='alt' ? 'alt' : 'wadee'; }
+  if(ok){ const o=sel.querySelector('option[value="alt"]'); if(o) o.textContent=ADHAN_ALT_NAME; sel.value = adhanPref(); }
 }
 (function(){
   const sel=$('#adhan-voice'); if(!sel) return;
@@ -7813,6 +7877,14 @@ function paintAdhanNote(){
   const b = $('#adhan-batt');
   if(b) b.style.display = (__adhanState && __adhanState.battery === false && settings.adhan!==false) ? '' : 'none';
 }
+/* حالةُ الأذان الأصليّة تُقرأ عند الإقلاع، لا بعد أوّل جدولة فقط: فمن لم يُفعِّل الموقعَ بعدُ لا تُجدوَل مواقيتُه
+   فكان خيارُ صوتِ المؤذّن وملاحظاتُ البطّاريّة والمنبّه لا تظهر له أصلًا */
+(function adhanStatusInit(){
+  try{
+    const P=adhanPlugin(); if(!P || !P.getStatus) return;
+    P.getStatus().then(st=>{ if(!__adhanState && st) __adhanState=st; paintAdhanNote(); paintVoiceRow(); }).catch(()=>{});
+  }catch(e){}
+})();
 $('#adhan-batt-btn') && $('#adhan-batt-btn').addEventListener('click', async ()=>{
   const P = adhanPlugin(); if(!P) return;
   vibrate(6);
@@ -8049,7 +8121,6 @@ let deferredInstall=null;
    بـ browser لا standalone، فلولا isNative() لدعا التطبيقُ من ثبّته من
    المتجر إلى تثبيته من جديد. */
 function isStandalone(){ return matchMedia('(display-mode: standalone)').matches || navigator.standalone===true || isNative(); }
-function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 /* متصفّحاتُ التطبيقات (واتساب وفيسبوك وإنستغرام وتيليغرام…): تفتح الرابطَ
    في نافذةٍ داخلَها لا في متصفّح الجهاز، والتثبيتُ فيها ممتنعٌ أصلًا. وأكثرُ
    من يصله الرابطُ يفتحه من هناك، فلا بدّ من إرشاده إلى فتحه في المتصفّح. */

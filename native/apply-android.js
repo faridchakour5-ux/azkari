@@ -64,7 +64,7 @@ if (fs.existsSync(MP3)) {
   console.warn('⚠ لم يُعثَر على resources/adhan_wadee.mp3 — لن يُرفع صوتٌ حتّى تضعه');
 }
 
-/* 2-ب) صوتٌ ثانٍ اختياريّ للأذان (adhan_alt): الملفُّ خارج المستودع عمدًا (حقوقُه لأصحابه، والمستودعُ عامّ).
+/* 2-ب) صوتٌ ثانٍ اختياريّ للأذان (adhan_alt): الملفُّ خارج المستودع عمدًا (المستودعُ عامّ).
    يُمرَّر مساره بـ ADHAN_ALT_FILE، أو يُوضع في ~/.salatee-private/adhan_alt.(m4a|mp3|ogg)؛ وإن غاب بُني التطبيقُ دونه ولا يظهر الخيار. */
 {
   const dir = path.join(process.env.HOME || '', '.salatee-private');
@@ -165,6 +165,22 @@ m = m.replace(/\s+android:fullBackupContent="[^"]*"/g, '').replace(/\s+android:d
 m = m.replace(/<application\b/, '<application android:fullBackupContent="@xml/backup_rules" android:dataExtractionRules="@xml/data_extraction_rules"');
 if (!/android:allowBackup="true"/.test(m)) m = m.replace(/\s+android:allowBackup="[^"]*"/, '').replace(/<application\b/, '<application android:allowBackup="true"');
 
+/* روابطُ salatee.org (تحدّي الاختبار المُرسَل إلى صديق) تُفتح في التطبيق لا في المتصفّح: App Links موثَّقةٌ بـ
+   /.well-known/assetlinks.json على الموقع. المسارُ «/» وحده (يحمل ?quiz=1&…) فلا تُخطَف صفحاتُ الموقع الأخرى. */
+const LINKS = `
+            ${OPEN}
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="salatee.org" android:path="/" />
+            </intent-filter>
+            ${SHUT}
+        `;
+const actRe = /(<activity\b[^>]*android:name="[^"]*MainActivity"[\s\S]*?)(<\/activity>)/;
+if (!actRe.test(m)) die('لم أجد MainActivity في البيان');
+m = m.replace(actRe, (_, a, b) => a + LINKS + b);
+
 if (m.indexOf('</application>') < 0) die('لم أجد </application> في البيان');
 m = m.replace('</application>', COMPONENTS + '</application>');
 
@@ -172,7 +188,7 @@ if (m.indexOf('</manifest>') < 0) die('لم أجد </manifest> في البيان
 m = m.replace('</manifest>', PERMS + '</manifest>');
 
 fs.writeFileSync(MAN, m, 'utf8');
-console.log('✓ حُدّث AndroidManifest.xml (خدمتان + مُستقبِلان + ويدجت + نسخٌ احتياطيّ + 7 أذونات)');
+console.log('✓ حُدّث AndroidManifest.xml (خدمتان + مُستقبِلان + ويدجت + روابط salatee.org + نسخٌ احتياطيّ + 7 أذونات)');
 
 /* 4) رقمُ الإصدار: يُقرأ من android-version.json لا من تحريرٍ يدويٍّ في build.gradle —
       فمجلّدُ android/ مُولَّدٌ ويُعاد توليدُه، وما يُكتب فيه باليد يضيع، ثمّ يُرفض
