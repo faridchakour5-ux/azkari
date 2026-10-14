@@ -40,10 +40,10 @@ a{color:var(--accent);}
 .hero p{position:relative; margin:0; font-size:14.5px; color:rgba(255,255,255,.86); font-weight:500; max-width:34em;}
 :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
 main{max-width:720px; margin:0 auto; padding:14px max(10px,env(safe-area-inset-left)) 0;}
-.prog{display:flex; align-items:center; gap:14px; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:14px 16px; box-shadow:var(--shadow); margin-bottom:12px;}
+.prog{display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:14px 16px; box-shadow:var(--shadow); margin-bottom:12px;}
 .prog .big{font-size:30px; font-weight:800; color:var(--accent); line-height:1;} .prog .big small{font-size:14px; color:var(--text-2); font-weight:600;}
 .prog .tx{font-size:13.5px; color:var(--text-2); line-height:1.5;} .prog .tx b{display:block; font-size:15px; color:var(--ink);}
-.dots{display:flex; gap:6px; margin-inline-start:auto;} .dots i{width:14px; height:14px; border-radius:50%; background:var(--fill); border:1.5px solid var(--sep);} .dots i.on{background:var(--accent); border-color:var(--accent);}
+.dots{display:flex; flex-wrap:wrap; gap:6px; flex:1 1 100%;} .dots i{width:14px; height:14px; border-radius:50%; background:var(--fill); border:1.5px solid var(--sep);} .dots i.on{background:var(--accent); border-color:var(--accent);}
 .door{background:var(--card); border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow); margin:0 0 10px; overflow:hidden;}
 .door>button{all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; gap:12px; padding:14px 14px; cursor:pointer;}
 .door .ic{flex:0 0 46px; height:46px; border-radius:15px; background:var(--accent-bg); color:var(--accent); display:flex; align-items:center; justify-content:center;}

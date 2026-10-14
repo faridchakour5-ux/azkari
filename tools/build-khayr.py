@@ -50,7 +50,7 @@ def src_tag(s):
     return 'bukhari' if 'البخاري' in s.split('.')[0] else 'muslim'
 
 def H(h, who_fr, who_en, ar, fr, en):
-    h = dict(h); h['t'] = h['t'].replace('أَهْلَ، قُبَاءٍ', 'أَهْلَ قُبَاءٍ')   # علامةُ ترقيمٍ شاذّةٌ في القاعدة (فاصلةٌ بين المضاف والمضاف إليه)، لا حرفٌ من اللفظ
+    h = dict(h); h['t'] = h['t'].replace('أَهْلَ، قُبَاءٍ', 'أَهْلَ قُبَاءٍ').replace('رَجُلاً، سَأَلَ', 'رَجُلاً سَأَلَ')   # علامةُ ترقيمٍ شاذّةٌ في القاعدة (فاصلةٌ بين المضاف والمضاف إليه)، لا حرفٌ من اللفظ
     return {'t': h['v'], 's': h['s'], 'k': src_tag(h['s']), 'who': {'fr': who_fr, 'en': who_en}, 'm': {'ar': ar, 'fr': fr, 'en': en}}
 
 DOORS = []
@@ -228,6 +228,188 @@ DOORS.append({
   'ar': ['اجمع بين متخاصمَين بكلمةٍ طيّبةٍ لا تزيد الخلافَ اشتعالًا.', 'لا تنقل كلامًا يُوغر الصدور، وانقل ما يقرّب.', 'ابدأ أنت بالسلام والصلح إن كان بينك وبين أحدٍ خصومة.', 'اطلب العدل بين الطرفين ولا تتحيّز.'],
   'fr': ['Rapprochez deux personnes en conflit par une bonne parole qui n’attise pas la dispute.', 'Ne rapportez pas ce qui envenime les cœurs ; rapportez ce qui rapproche.', 'Si vous avez un différend avec quelqu’un, commencez vous-même par le salut et la réconciliation.', 'Cherchez l’équité entre les deux parties sans prendre parti.'],
   'en': ['Bring two people in conflict together with a kind word that does not inflame the dispute.', 'Do not relay what poisons hearts; relay what brings them closer.', 'If you are in a dispute with someone, begin with the greeting and reconciliation yourself.', 'Seek fairness between both sides without taking sides.'],
+ },
+})
+
+
+# ───────────────────────── ٧ إماطة الأذى
+DOORS.append({
+ 'id': 'adha',
+ 'ic': '<path d="M4 20l8-16 8 16M8.5 13h7"/>',
+ 'ti': {'ar': 'إماطة الأذى عن الطريق', 'fr': 'Écarter ce qui nuit sur le chemin', 'en': 'Removing harm from the road'},
+ 'sub': {'ar': 'عملٌ يسير، أدنى شُعَب الإيمان', 'fr': 'Un geste simple, la plus modeste branche de la foi', 'en': 'A simple deed, the humblest branch of faith'},
+ 'aya': A('', [(99, 7), (99, 8)]),
+ 'had': [
+  H(HD('أدنى شُعَب الإيمان إماطة الأذى', 'وادناها اماطه الاذي عن الطريق', ('أبي هريرة', 'هريره'), ''),
+    'Abu Hurayra', 'Abu Hurayrah',
+    'من شُعَب الإيمان الكثيرة: أعلاها كلمةُ التوحيد، وأدناها إزالةُ ما يؤذي الناسَ من الطريق.',
+    'Parmi les nombreuses branches de la foi : la plus haute est la parole du tawhid, la plus modeste est d’écarter du chemin ce qui nuit aux gens.',
+    'Among the many branches of faith: the highest is the word of tawhid, the humblest is removing from the road whatever harms people.'),
+  H(HD('لأُنحِّينَّ هذا عن المسلمين', 'لانحين هذا عن المسلمين', ('أبي هريرة', 'هريره'), ''),
+    'Abu Hurayra', 'Abu Hurayrah',
+    'رجلٌ أزاح غصنًا يؤذي المسلمين عن الطريق فكان ذلك سببًا لدخوله الجنة.',
+    'Un homme a écarté du chemin une branche qui gênait les musulmans, et cela fut une cause de son entrée au Paradis.',
+    'A man moved a branch off the road that was harming Muslims, and that became a cause of his entering Paradise.'),
+  H(HD('وجد غصن شوك فأخّره', 'وجد غصن شوك', ('أبي هريرة', 'هريره'), '', 'بينما رجل يمشي بطريق', 'فغفر له', 'البخاري'),
+    'Abu Hurayra', 'Abu Hurayrah',
+    'إزالةُ الشوك من الطريق عملٌ يسير، شكر الله لصاحبه وغفر له.',
+    'Écarter une épine du chemin est un geste simple ; Allah en a remercié l’homme et lui a pardonné.',
+    'Removing a thorn from the road is a simple deed; Allah thanked the man for it and forgave him.'),
+ ],
+ 'steps': {
+  'ar': ['ارفع من طريقك اليوم حجرًا أو قشرةً أو زجاجًا قد يؤذي المارّة.', 'ضع النفاياتَ في مكانها ولا ترمِها في الشارع.', 'نبّه برفق على ما قد يؤذي الناس (حفرةٌ، سلكٌ مكشوف).', 'افسح الطريق لغيرك في الممرّات الضيّقة.'],
+  'fr': ['Retirez aujourd’hui de votre chemin une pierre, une écorce ou du verre qui pourrait blesser les passants.', 'Jetez vos déchets à leur place, pas dans la rue.', 'Signalez avec douceur ce qui peut blesser (un trou, un fil dénudé).', 'Laissez la place aux autres dans les passages étroits.'],
+  'en': ['Pick up a stone, peel or glass from your path today that could hurt passers-by.', 'Put litter where it belongs, not in the street.', 'Gently warn about what could hurt people (a hole, a bare wire).', 'Make way for others in narrow passages.'],
+ },
+})
+
+# ───────────────────────── ٨ قضاء الحوائج وتفريج الكرب
+DOORS.append({
+ 'id': 'hajat',
+ 'ic': '<path d="M3 14h4l3 3h4a2 2 0 0 0 0-4H11M7 14V8l5-3 5 3v2"/>',
+ 'ti': {'ar': 'قضاء الحوائج وتفريج الكرب', 'fr': 'Répondre aux besoins et soulager les peines', 'en': 'Meeting needs and easing hardship'},
+ 'sub': {'ar': 'والله في عون العبد ما كان العبد في عون أخيه', 'fr': 'Allah aide le serviteur tant qu’il aide son frère', 'en': 'Allah helps His servant as long as he helps his brother'},
+ 'aya': A('', [(22, 77)]),
+ 'had': [
+  H(HD('من كان في حاجة أخيه', 'من كان في حاجه اخيه', ('عبد الله بن عمر', 'عمر', 'عنهما'), '', 'المسلم أخو المسلم', 'ستره الله يوم القيامة'),
+    'Ibn ‘Umar', 'Ibn ‘Umar',
+    'من سعى في قضاء حاجة أخيه كان الله في حاجته، ومن فرّج عن مسلمٍ كربة فرّج الله عنه كربةً من كُرَب يوم القيامة، ومن ستر مسلمًا ستره الله.',
+    'Celui qui répond au besoin de son frère, Allah répond à son besoin ; celui qui soulage un musulman d’une peine, Allah le soulagera d’une peine du Jour de la Résurrection ; celui qui couvre un musulman, Allah le couvrira.',
+    'Whoever meets his brother’s need, Allah meets his need; whoever relieves a Muslim of a hardship, Allah relieves him of a hardship on the Day of Resurrection; whoever covers a Muslim, Allah will cover him.'),
+  H(HD('من نفّس عن مؤمنٍ كربة', 'من سلك طريقا يلتمس فيه علما', ('أبي هريرة', 'هريره'), '', 'من نفس عن مؤمن كربة', 'في عون أخيه'),
+    'Abu Hurayra', 'Abu Hurayrah',
+    'الجزاء من جنس العمل: من يسّر لأخيه وفرّج عنه أعانه الله في الدنيا والآخرة.',
+    'La récompense est de même nature que l’acte : qui facilite et soulage son frère, Allah l’aide dans ce monde et dans l’autre.',
+    'The reward matches the deed: whoever eases and relieves his brother, Allah helps him in this world and the next.'),
+  H(HD('كلُّ معروفٍ صدقة', 'كل معروف صدقه', ('جابر بن عبد الله', 'جابر', 'عنهما'), ''),
+    'Jabir ibn ‘Abdillah', 'Jabir ibn ‘Abdillah',
+    'كلُّ عملٍ طيّبٍ تُقدّمه للناس صدقة، ولو كان بسيطًا.',
+    'Tout bienfait que vous faites aux gens est une aumône, même simple.',
+    'Every good deed you do for people is charity, however simple.'),
+ ],
+ 'steps': {
+  'ar': ['اسأل نفسك: من في محيطي يحتاج مساعدةً صغيرة اليوم؟', 'ساعد شخصًا في حملٍ أو توصيلٍ أو معاملةٍ لا يحسنها.', 'فرّج عن مدينٍ أو مكروبٍ بكلمةٍ أو بمبلغٍ ميسور أو بمهلة.', 'استر عيب أخيك ولا تُشِعه.'],
+  'fr': ['Demandez-vous : qui, autour de moi, a besoin d’une petite aide aujourd’hui ?', 'Aidez quelqu’un à porter, à transporter ou à faire une démarche qu’il maîtrise mal.', 'Soulagez un débiteur ou une personne en difficulté par un mot, une petite somme ou un délai.', 'Couvrez le défaut de votre frère et ne le divulguez pas.'],
+  'en': ['Ask yourself: who around me needs a little help today?', 'Help someone carry, transport or handle paperwork they struggle with.', 'Ease a debtor or someone in hardship with a word, a small sum or extra time.', 'Cover your brother’s fault and do not spread it.'],
+ },
+})
+
+# ───────────────────────── ٩ الكلمة الطيبة والبشاشة
+DOORS.append({
+ 'id': 'kalima',
+ 'ic': '<path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10h.01M12 10h.01M15.5 10h.01"/>',
+ 'ti': {'ar': 'الكلمة الطيّبة وبشاشة الوجه', 'fr': 'La bonne parole et le visage souriant', 'en': 'A kind word and a cheerful face'},
+ 'sub': {'ar': 'صدقةٌ لا تكلّفك مالًا', 'fr': 'Une aumône qui ne vous coûte rien', 'en': 'Charity that costs you nothing'},
+ 'aya': A('', [(14, 24), (14, 25)]),
+ 'had': [
+  H(HD('لا تحقرنّ من المعروف شيئًا', 'ولو ان تلقي اخاك بوجه طلق', ('أبي ذر', 'ذر'), ''),
+    'Abu Dharr', 'Abu Dharr',
+    'لا تستصغر شيئًا من الخير، ولو كان لقاءُ أخيك ببشاشة وجهٍ.',
+    'Ne méprisez aucun bienfait, fût-ce rencontrer votre frère avec un visage souriant.',
+    'Do not belittle any good deed, even meeting your brother with a cheerful face.'),
+  H(HD('فمن لم يجد فبكلمة طيّبة', 'فمن لم يجد فبكلمه طيبه', ('عدي بن حاتم', 'عدي'), '', 'اتقوا النار ولو بشق تمرة', 'فبكلمة طيبة', 'البخاري'),
+    'ʿAdi ibn Hatim', 'ʿAdi ibn Hatim',
+    'من لم يجد ما يتصدّق به فليتصدّق بكلمةٍ طيّبة.',
+    'Celui qui n’a rien à donner qu’il donne une bonne parole.',
+    'Whoever has nothing to give, let him give a kind word.'),
+  H(HD('فليقل خيرًا أو ليصمت', 'فليقل خيرا او ليصمت', ('أبي هريرة', 'هريره'), '', 'من كان يؤمن بالله واليوم الآخر فليقل خيرا', 'أو ليصمت', 'مسلم'),
+    'Abu Hurayra', 'Abu Hurayrah',
+    'من آمن بالله واليوم الآخر قال خيرًا أو سكت.',
+    'Celui qui croit en Allah et au Jour dernier, qu’il dise du bien ou qu’il se taise.',
+    'Whoever believes in Allah and the Last Day, let him speak good or keep silent.'),
+ ],
+ 'steps': {
+  'ar': ['ابتسم في وجه من تلقاه اليوم، وابدأ بالسلام.', 'امدح بصدقٍ عملًا حسنًا رأيتَه من أحد.', 'استبدل بالعبارة الجارحة عبارةً لطيفة.', 'قبل أن تردّ على من أغضبك، اصمت لحظةً.'],
+  'fr': ['Souriez à ceux que vous croisez aujourd’hui et commencez par le salut.', 'Complimentez sincèrement une bonne action que vous avez vue.', 'Remplacez une phrase blessante par une phrase aimable.', 'Avant de répondre à quelqu’un qui vous a irrité, taisez-vous un instant.'],
+  'en': ['Smile at everyone you meet today and start with the greeting.', 'Sincerely praise a good deed you saw someone do.', 'Replace a hurtful phrase with a kind one.', 'Before replying to someone who angered you, stay silent for a moment.'],
+ },
+})
+
+# ───────────────────────── ١٠ العلم النافع والدلالة على الخير
+DOORS.append({
+ 'id': 'ilm',
+ 'ic': '<path d="M3 5h7a3 3 0 0 1 3 3v12a2.5 2.5 0 0 0-2.5-2.5H3zM21 5h-7a3 3 0 0 0-3 3v12"/>',
+ 'ti': {'ar': 'العلم النافع والدلالة على الخير', 'fr': 'Le savoir utile et guider vers le bien', 'en': 'Beneficial knowledge and guiding to good'},
+ 'sub': {'ar': 'أجرٌ يجري بعد الموت', 'fr': 'Une récompense qui continue après la mort', 'en': 'A reward that continues after death'},
+ 'aya': A('', [(20, 114)]),
+ 'had': [
+  H(HD('إذا مات الإنسان انقطع عمله إلا من ثلاث', 'اذا مات الانسان انقطع عنه عمله الا من ثلاثه', ('أبي هريرة', 'هريره'), ''),
+    'Abu Hurayra', 'Abu Hurayrah',
+    'تبقى للمؤمن بعد موته أبوابٌ يجري أجرُها: صدقةٌ جارية، وعلمٌ يُنتفع به، وولدٌ صالح يدعو له.',
+    'Après sa mort, le croyant garde des portes dont la récompense continue : une aumône continue, un savoir dont on profite, un enfant pieux qui invoque pour lui.',
+    'After death the believer keeps doors whose reward continues: ongoing charity, knowledge that benefits others, a righteous child who prays for him.'),
+  H(HD('من دلّ على خيرٍ فله مثل أجر فاعله', 'من دل علي خير فله مثل اجر فاعله', ('أبي مسعود الأنصاري', 'مسعود'), '', 'من دل على خير', 'مثل أجر فاعله'),
+    'Abu Mas‘ud al-Ansari', 'Abu Mas‘ud al-Ansari',
+    'من دلّ غيره على خيرٍ نال مثلَ أجر من عمل به.',
+    'Celui qui guide quelqu’un vers un bien obtient une récompense semblable à celle de celui qui l’accomplit.',
+    'Whoever guides someone to something good earns a reward like that of the one who does it.'),
+  H(HD('من سلك طريقًا يلتمس فيه علمًا', 'من سلك طريقا يلتمس فيه علما', ('أبي هريرة', 'هريره'), '', 'ومن سلك طريقا يلتمس فيه علما', 'طريقا إلى الجنة'),
+    'Abu Hurayra', 'Abu Hurayrah',
+    'طلبُ العلم طريقٌ يسّره الله لصاحبه إلى الجنة.',
+    'La quête du savoir est un chemin qu’Allah facilite vers le Paradis.',
+    'Seeking knowledge is a path Allah makes easy toward Paradise.'),
+ ],
+ 'steps': {
+  'ar': ['تعلّم اليوم مسألةً أو سنّةً جديدة وعلِّمها غيرك.', 'شارك رابطًا نافعًا أو محاضرةً مفيدة بنيّة الخير.', 'ادلل شخصًا على طريقٍ إلى الخير: جمعيّةٌ موثوقة، درسٌ، مصلّى.', 'ساهم في صدقةٍ جارية: سقيا ماء، أو طباعة مصحف، أو دعم طالب علم.'],
+  'fr': ['Apprenez aujourd’hui une règle ou une sunna nouvelle et transmettez-la.', 'Partagez un lien ou un cours utile dans une bonne intention.', 'Orientez quelqu’un vers un bien : une association fiable, un cours, une mosquée.', 'Contribuez à une aumône continue : point d’eau, impression de Corans, soutien à un étudiant.'],
+  'en': ['Learn a new ruling or sunnah today and teach it to someone.', 'Share a useful link or lecture with good intention.', 'Guide someone to a good: a trustworthy charity, a class, a mosque.', 'Contribute to ongoing charity: a water source, printing Qurans, supporting a student.'],
+ },
+})
+
+# ───────────────────────── ١١ إطعام الطعام وإفشاء السلام
+DOORS.append({
+ 'id': 'taam',
+ 'ic': '<path d="M7 3v8a2 2 0 0 0 2 2v8M7 3v6M11 3v6M16 3c-2 2-2 6 0 8v10"/>',
+ 'ti': {'ar': 'إطعام الطعام وإفشاء السلام', 'fr': 'Nourrir et répandre le salut', 'en': 'Feeding people and spreading the greeting'},
+ 'sub': {'ar': 'من خير خصال الإسلام', 'fr': 'Parmi les meilleures qualités de l’islam', 'en': 'Among the best qualities of Islam'},
+ 'aya': A('', [(76, 8), (76, 9)]),
+ 'had': [
+  H(HD('أيُّ الإسلام خير', 'تطعم الطعام وتقرا السلام', ('عبد الله بن عمرو', 'عمرو', 'عنهما'), '', 'أن رجلا سأل رسول الله صلى الله عليه وسلم أي الإسلام خير', 'ومن لم تعرف'),
+    'Ibn ‘Amr', 'Ibn ‘Amr',
+    'من أفضل خصال الإسلام: إطعامُ الطعام، والسلامُ على من عرفتَ ومن لم تعرف.',
+    'Parmi les meilleures qualités de l’islam : nourrir, et saluer ceux que l’on connaît et ceux que l’on ne connaît pas.',
+    'Among the best qualities of Islam: feeding others, and greeting those you know and those you do not.'),
+  H(HD('أفشوا السلام بينكم', 'افشوا السلام بينكم', ('أبي هريرة', 'هريره'), ''),
+    'Abu Hurayra', 'Abu Hurayrah',
+    'إفشاءُ السلام سببٌ لتحابّ الناس، والمحبّةُ بين المؤمنين من الإيمان.',
+    'Répandre le salut est une cause d’amour entre les gens, et l’amour entre croyants fait partie de la foi.',
+    'Spreading the greeting is a cause of love between people, and love between believers is part of faith.'),
+  H(HD('فكّوا العاني وأطعموا الجائع', 'اطعموا الجائع وعودوا المريض', ('أبي موسى الأشعري', 'موسى'), ''),
+    'Abu Musa al-Ash‘ari', 'Abu Musa al-Ash‘ari',
+    'أوصى النبيُّ ﷺ بفكّ الأسير، وإطعام الجائع، وعيادة المريض.',
+    'Le Prophète ﷺ a recommandé de libérer le captif, de nourrir l’affamé et de visiter le malade.',
+    'The Prophet ﷺ urged freeing the captive, feeding the hungry and visiting the sick.'),
+ ],
+ 'steps': {
+  'ar': ['ادعُ جارًا أو قريبًا أو فقيرًا إلى طعامٍ بسيط.', 'أعدّ وجبةً زائدة وأعطها لمحتاج.', 'سلِّم اليوم على أناسٍ لا تعرفهم، وابدأ أنت بالسلام.', 'عُد مريضًا أو اتصل به، وادعُ له.'],
+  'fr': ['Invitez un voisin, un proche ou une personne pauvre à un repas simple.', 'Préparez un repas en plus et offrez-le à un nécessiteux.', 'Saluez aujourd’hui des gens que vous ne connaissez pas, en commençant par le salut.', 'Rendez visite à un malade ou appelez-le, et invoquez pour lui.'],
+  'en': ['Invite a neighbour, relative or poor person to a simple meal.', 'Prepare an extra meal and give it to someone in need.', 'Greet people you do not know today, and be the first to say salam.', 'Visit or call someone who is ill and make du‘a for them.'],
+ },
+})
+
+# ───────────────────────── ١٢ الرفق بالحيوان وسقي الماء
+DOORS.append({
+ 'id': 'rifq',
+ 'ic': '<path d="M12 3c3 4 6 6 6 10a6 6 0 0 1-12 0c0-4 3-6 6-10z"/>',
+ 'ti': {'ar': 'الرفق بالحيوان وسقي الماء', 'fr': 'Bonté envers les animaux et donner à boire', 'en': 'Kindness to animals and giving water'},
+ 'sub': {'ar': 'في كلّ كبدٍ رطبةٍ أجر', 'fr': 'Il y a une récompense pour tout être vivant', 'en': 'There is reward in every living creature'},
+ 'aya': A('', [(6, 38)]),
+ 'had': [
+  H(HD('في كلّ كبدٍ رطبةٍ أجر', 'في كل كبد رطبه اجر', ('أبي هريرة', 'هريره'), ''),
+    'Abu Hurayra', 'Abu Hurayrah',
+    'في الإحسان إلى كلّ كائنٍ حيٍّ أجر؛ وقد غفر الله لرجلٍ سقى كلبًا عطشان.',
+    'Il y a une récompense à bien traiter tout être vivant ; Allah a pardonné à un homme qui a donné à boire à un chien assoiffé.',
+    'There is reward in being kind to every living creature; Allah forgave a man who gave a thirsty dog water.'),
+  H(HD('دخلت امرأةٌ النار في هرّة', 'دخلت امراه النار في هره', ('عبد الله بن عمر', 'عمر', 'عنهما'), '', 'دخلت امرأة النار في هرة', 'خشاش الأرض'),
+    'Ibn ‘Umar', 'Ibn ‘Umar',
+    'تحذيرٌ من تعذيب الحيوان وتجويعه؛ فقد دخلت امرأةٌ النار بسبب هرّةٍ حبستها ولم تُطعمها.',
+    'Mise en garde contre la maltraitance et la privation des animaux : une femme est entrée en Enfer à cause d’une chatte qu’elle avait enfermée sans la nourrir.',
+    'A warning against mistreating and starving animals: a woman entered the Fire because of a cat she shut up without feeding.'),
+ ],
+ 'steps': {
+  'ar': ['ضع ماءً لقطٍّ أو طيرٍ قرب بيتك.', 'أطعم حيوانًا جائعًا ولا تؤذه.', 'إن كان عندك حيوانٌ فاعتنِ بطعامه وشرابه ونظافته.', 'ابنِ سبيل ماءٍ أو شارك في سقيا للناس.'],
+  'fr': ['Mettez de l’eau pour un chat ou un oiseau près de chez vous.', 'Nourrissez un animal affamé et ne le maltraitez pas.', 'Si vous avez un animal, veillez à sa nourriture, à son eau et à sa propreté.', 'Participez à un point d’eau pour les gens.'],
+  'en': ['Put out water for a cat or bird near your home.', 'Feed a hungry animal and do not hurt it.', 'If you keep an animal, look after its food, water and cleanliness.', 'Contribute to a water point for people.'],
  },
 })
 
