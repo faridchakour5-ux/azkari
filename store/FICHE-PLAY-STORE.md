@@ -97,7 +97,8 @@ https://www.salatee.org/privacy.html
 ---
 
 ## 4) COORDONNÉES (Fiche principale → Coordonnées)
-- E-mail : `faridchakour5@gmail.com`
+- E-mail : `appsalatee@gmail.com` (adresse dédiée à l’application)
+- Téléphone : **laisser vide** (ne pas l’afficher au public)
 - Site web (facultatif) : `https://www.salatee.org`
 
 ---

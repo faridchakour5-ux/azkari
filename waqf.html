@@ -170,7 +170,7 @@ main{max-width:720px; margin:0 auto; padding:14px max(10px,env(safe-area-inset-l
     h += '<article class="card"><h2>'+esc(L.saktT)+'</h2><p class="mean" style="color:var(--text-2)">'+esc(L.saktLead)+'</p>'+D.ex.sk.map(function(x,i){ return '<div class="ex">'+qhtml(x)+'<span class="ref">'+L.sura+' '+esc(x.sura)+' · '+x.ref+' — '+esc(L.saktEx[i][1])+'</span></div>'; }).join('')+'</article>';
     h += '<article class="card"><h2>'+esc(L.endT)+'</h2><ul class="lst">'+L.end.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul></article>';
     h += '<article class="card"><h2>'+esc(L.noRuleT)+'</h2><p class="mean">'+esc(L.noRule)+'</p></article>';
-    h += '<article class="card srcs"><h2>'+esc(L.srcT)+'</h2><p class="mean" style="color:var(--text-2)">'+esc(L.srcNote)+' <a href="mailto:faridchakour5@gmail.com">faridchakour5@gmail.com</a></p>'+L.src.map(function(s){ return '<a href="'+s[1]+'" target="_blank" rel="noopener">'+esc(s[0])+'</a>'; }).join('')+'</article>';
+    h += '<article class="card srcs"><h2>'+esc(L.srcT)+'</h2><p class="mean" style="color:var(--text-2)">'+esc(L.srcNote)+' <a href="mailto:appsalatee@gmail.com">appsalatee@gmail.com</a></p>'+L.src.map(function(s){ return '<a href="'+s[1]+'" target="_blank" rel="noopener">'+esc(s[0])+'</a>'; }).join('')+'</article>';
     return h;
   }
   function render(){
