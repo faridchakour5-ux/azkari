@@ -1,5 +1,5 @@
 /* صلاتي — service worker v256 */
-const CACHE = 'azkari-v288';
+const CACHE = 'azkari-v289';
 const ASSETS = [
   './',
   './index.html',
@@ -47,6 +47,7 @@ const ASSETS = [
   './fonts/tajawal.woff2',
   './fonts/ruqaa.woff2',
   './icons/icon-192.png',
+  './icons/drawer-mosaic.jpg',
   './icons/icon-512.png',
   './icons/icon-180.png',
   './icons/maskable-512.png'
