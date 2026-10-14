@@ -155,6 +155,10 @@ const PERMS = `
          (والتطبيقُ يَفتح له الشاشةَ بنفسه عبر openExactAlarmSettings).
          USE_EXACT_ALARM يُمنَح تلقائيًّا بلا سؤال، لكنّ سياسةَ Play تَقصُره على
          التطبيقات التي جوهرُها منبّهات — راجع CAPACITOR-BUILD.md قبل النشر. -->
+    <!-- الميكروفون: لوضع «ردِّد وقارِن» في التحفيظ فقط؛ يُسجَّل ترديدُ المستخدم على جهازه ثم يُحذف ولا يُرسَل. وليس لازمًا للتثبيت (بلا مستشعرٍ يُحجَب الخيار). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     ${SHUT}

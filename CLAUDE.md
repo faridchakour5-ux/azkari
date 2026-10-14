@@ -37,3 +37,35 @@
 - **صفحة «أبواب الخير» (طلبُ فريد، 14 أكتوبر 2026):** `khayr.html` صفحةٌ **مستقلّةٌ** تُولَّد بـ`HADITH_DB=… python3 tools/build-khayr.py` (قالبُها `tools/khayr-template.html`؛ لا تُعدَّل باليد) وتُفتح من القائمة الجانبيّة؛ لا تمسّ «الورد» ولا الإعدادات، وتحفظ «فعلتُها اليوم» في `az_khayr` على الجهاز وحده. نصوصُ الأحاديث من الصحيحين نصًّا (قاعدة hadith-json كما في `build-sunna.py`، وبلا أرقامٍ لأنّ ترقيمَها يخالف المتداول)، والآياتُ من مصحف المدينة؛ والاقتراحاتُ العمليّةُ اجتهادٌ مُوسومٌ بذلك. الأبوابُ الستّة الأولى: برّ الوالدين، الصدقة، صلة الرحم، الجار، كفالة اليتيم، الإصلاح بين الناس. ويُزاد عليها بطلبه (قُدِّمت أبوابٌ أخرى كإماطة الأذى وإدخال السرور).
 - **⚠ الحاوية قد تُعاد إنشاؤها:** في 16 أكتوبر 2026 ضاعت تسعةُ التزاماتٍ محلّيّةٍ (2.0.40–2.0.47) وملفّاتُ الاعتماد (حساب الخدمة، مفتاح التوقيع، صوت الأذان) حين أُعيدت الحاوية؛ وأُعيد بناءُ الشيفرة من سجلّ الجلسة. فكلُّ ما لم يُدفع إلى GitHub يضيع. ولا أدفع إلا بإذن فريد (التجميد قائم)، فأُذكّره بذلك عند كلّ إصدار.
 
+## 5. استعادة البيئة بعد إعادة إنشاء الحاوية (اقرأه أوّلًا إن كانت الحاوية جديدة)
+**لا أسرارَ هنا (المستودع عامّ).** تُحفَظ الأسرارُ خارجه، وإن ضاعت فعلى فريد أن يُعيد إرسالها في المحادثة (ملفّاتٍ مرفقة) — وأنصحه بحفظ نسخةٍ منها عنده.
+
+### أ) الملفّات المطلوبة (تُوضع في `~/.salatee-private/`، وبصلاحيّة 600)
+| الملفّ | المسار | كيف يُستعاد إن ضاع |
+|---|---|---|
+| مفتاح الرفع | `gp/signing.keystore` (PKCS12، الاسم المستعار `my-key-alias`، صالحٌ حتى 2081) | يُعيد فريد إرسال `signing.keystore`. بصمتُه الصحيحة SHA-256: `94:3E:29:53:04:1E:55:C7:91:4C:5B:CC:36:6C:D0:83:D9:59:BF:94:EB:26:A4:79:11:6B:22:65:83:7C:9F:2D` (يتحقّق منها `tools/release-aab.sh`). وإن ضاع نهائيًّا: «Request upload key reset» في Play Console (Setup ثم App signing) ثم أُنشئ مفتاحًا جديدًا وأُحدّث `EXPECTED_SHA256` في السكربت وبصمتَه في `assetlinks.json` |
+| كلمةُ سرّ المفتاح | `gp/signing-key-info.txt` (فيه سطر «Key store password: …») | يُعيد إرسالَه فريد |
+| حسابُ خدمة Play | `gp/service-account.json` (الحساب `salatee-publisher@salatee.iam.gserviceaccount.com`، المشروع `salatee`) | لا يُستعاد من Google: يُنشئ فريد مفتاحًا جديدًا (Google Cloud Console ← IAM & Admin ← Service Accounts ← الحساب ← Keys ← Add key ← JSON) ويُرسله؛ وصلاحيّاتُه في Play Console باقية |
+| الأذان الثاني | `adhan_alt.m4a` (في `~/.salatee-private/` مباشرةً) | يُعيد فريد إرسال تسجيل سعيد بلقاضي الكامل (3:38، mp3) فأقصّه: `ffmpeg -ss 26.2 -to 194.35 -i الأصل.mp3 -af loudnorm=I=-14:TP=-1.5:LRA=11 (مرّتان: قياسٌ ثم linear=true) -c:a aac -b:a 128k adhan_alt.m4a` ثم تلاشٍ قصير في الطرفين |
+وأرقامُ الجلسات: الملفّاتُ المرفقة تُحفظ في `/root/.claude/uploads/<id>/` ومنها أنسخها.
+
+### ب) أدواتُ البناء (تُثبَّت من جديد)
+- Java وGradle وNode موجودة. **Android SDK** ليس موجودًا: `mkdir -p ~/android-sdk/cmdline-tools && cd ~/android-sdk && curl -o clt.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip && unzip clt.zip -d cmdline-tools && mv cmdline-tools/cmdline-tools cmdline-tools/latest` ثم `yes | cmdline-tools/latest/bin/sdkmanager --licenses` و`sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"`.
+- Pillow لبايثون الذي في `/usr/local/bin/python3`: `/usr/local/bin/python3 -m pip install pillow` (يحتاجه فحصُ الأيقونة في `release-aab.sh`).
+- قاعدةُ الأحاديث (لا تدخل المستودع): `mkdir /tmp/hadithdb && cd /tmp/hadithdb && curl -L -O https://raw.githubusercontent.com/AhmedBaset/hadith-json/main/db/by_book/the_9_books/bukhari.json` وكذلك `muslim.json`؛ ثم `HADITH_DB=/tmp/hadithdb python3 tools/build-sunna.py` أو `tools/build-khayr.py`.
+- خادمُ الاختبار المحلّيّ: `cd /home/user/azkari && (setsid nohup python3 -m http.server 8123 >/dev/null 2>&1 &)` (يتوقّف بين الأوامر أحيانًا فأُعيده). والفحوص: `node tools/check-js.mjs` و`python3 tools/check-digits.py` و`node tools/smoke.mjs` و`node tools/test-push.mjs`. المتصفّح: `/opt/pw-browsers/chromium` وplaywright في `/opt/node-tools/node_modules/playwright`.
+
+### ج) البناءُ والرفع (يجري على آخر commit، فيجب أن تكون الشجرة نظيفة)
+1. ارفع `native/android-version.json` (versionCode وversionName) و`CACHE` في `sw.js`، والتزِم.
+2. `ANDROID_HOME=$HOME/android-sdk KEYSTORE=$HOME/.salatee-private/gp/signing.keystore KEYSTORE_PASS_FILE=$HOME/.salatee-private/gp/signing-key-info.txt tools/release-aab.sh /tmp/aab-out` (مجلّدُ إخراجٍ **مطلق**). قد يفشل بـ429 من Maven فيُعيد المحاولة ويكفي تكرارُ التشغيل. ويفشل إن لم يُنسَخ ملفٌّ جديد في `native/copy-web.js` (اسمُ الملفّ في قائمته) أو في `sw.js`.
+3. `PLAY_SA_JSON=$HOME/.salatee-private/gp/service-account.json node tools/play-upload.mjs --aab /tmp/aab-out/salatee-v<الإصدار>-code<الرقم>-signed.aab --notes "ملاحظاتٌ بالعربيّة"` (ملاحظاتُ المسار بلغة الإدراج العربيّة). و`--list-tracks` يعرض المسارات؛ وقد يبقى الإصدارُ بانتظار «نشر» إن كان «النشر المُدار» مفعَّلًا.
+4. الفرعُ الاحتياطيّ على GitHub `backup/salatee-2.0.48-wip` (مأذونٌ بالدفع إليه وحدَه): `git push origin HEAD:refs/heads/backup/salatee-2.0.48-wip`. **فرعُ النشر لا يُدفع إليه** (التجميد).
+
+### د) الحالةُ حين كُتب هذا (14 أكتوبر 2026)
+- الإنتاج: 2.0.47. مسار الاختبار «salatee»: 2.0.50 (راجع `--list-tracks`).
+- مكتملٌ ومرفوع: «وقتي» (دقائق الاستعمال)، والأذانُ يوقف التلاوةَ مؤقّتًا، وصفحتا «الوقف والابتداء» و«أبواب الخير» (6 أبواب)، وتسمية «القرآن» بدل «الوِرد».
+- مرفوعٌ في 2.0.50 دون تجربةٍ على هاتف: وضعُ «ردِّد وقارِن» في التحفيظ (تسجيل ترديد المستخدم على جهازه ثم إسماعُه إيّاه؛ يعمل والتطبيقُ مفتوحٌ فقط ويتحرّر الميكروفون عند الخلفية؛ لا حكمَ آليًّا على التجويد؛ تنبيهٌ ظاهرٌ بأنّ التطبيق لا يغني عن معلّم). يلزم ملاحظةُ فريد: يُحدَّث استبيانُ Data safety في Play Console لذكر الميكروفون (معالجةٌ محلّيّةٌ بلا إرسال).
+- أفكارٌ معلَّقةٌ بانتظار طلبه: دروسُ تجويدٍ قصيرةٌ مستقلّة (حفص أوّلًا أم ورش) تُراجَع عند معلّمٍ؛ أبوابُ خيرٍ أخرى (إماطة الأذى، إدخال السرور، العلم النافع…)؛ تغيير بريد التواصل العامّ إلى بريدٍ مخصّص للتطبيق في `privacy.html` و`waqf.html` و`store/FICHE-PLAY-STORE.md` حين يعطيني بريدَه الجديد (وتغييرُه في Play Console عليه).
+- ما لم يُجرَّب على هاتفٍ حقيقيّ: إيقافُ التلاوة عند الأذان (جافا)، وميكروفون «ردِّد وقارِن» داخل WebView أندرويد، وروابطُ التحدّي.
+- **ملاحظةٌ مهمّة:** هذا الملفّ نفسُه يضيع إن لم يكن في الفرع الذي تُستنسخ منه الحاوية. فإن لم يجده الجلسةُ الجديدة فليُشغَّل من الفرع الاحتياطيّ أو يقول فريد «ok» لأدفع كلَّ شيءٍ دفعةً واحدة.
+

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- سياسة أمان المحتوى: كل الموارد من نطاق التطبيق فقط، والاتصال الخارجي محصور في mp3quran -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https:; connect-src 'self' https://*.mp3quran.net https://archive.org https://*.archive.org; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https: blob:; connect-src 'self' https://*.mp3quran.net https://archive.org https://*.archive.org; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <!-- لا تكبيرَ بالأصبعين: يُزيح الصفحةَ عن موضعها ويُفسد القراءة. وعِوَضُه
      شريطُ «حجم الكتابة» في كلّ صفحة — تكبيرٌ وتصغيرٌ بنسبةٍ ظاهرة. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
@@ -1456,6 +1456,15 @@
   .hifz-pill{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:80; display:none; align-items:center; gap:6px;
     border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow-2); border-radius:22px; padding:6px 10px; max-width:94vw;}
   .hifz-pill.show{display:flex;}
+  .hz-echo{position:fixed; left:50%; bottom:calc(136px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:81; display:none; flex-direction:column; align-items:center; gap:8px; width:min(92vw,420px);
+    border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow-2); border-radius:20px; padding:12px 14px; text-align:center;}
+  .hz-echo.show{display:flex;}
+  .hz-e-msg{font-size:14.5px; font-weight:700; color:var(--text); line-height:1.7;}
+  .hz-e-bar{width:100%; height:8px; border-radius:6px; background:var(--fill-2); overflow:hidden; display:none;} .hz-e-bar.on{display:block;}
+  .hz-e-bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .1s linear;}
+  .hz-e-btns{display:flex; gap:8px; flex-wrap:wrap; justify-content:center;}
+  .hz-e-btns button{width:auto !important; height:auto !important; padding:9px 16px; border-radius:14px !important; font:inherit; font-size:14px; font-weight:700; border:1px solid var(--line); background:var(--fill-2); color:var(--accent); cursor:pointer;}
+  .hz-e-btns button.pri{background:var(--accent); color:#fff; border-color:var(--accent);}
   .hifz-pill button{width:36px; height:36px; border:1px solid var(--line); border-radius:12px; background:transparent; color:var(--accent); display:inline-flex; align-items:center; justify-content:center; cursor:pointer;}
   .hifz-pill .hz-info{font-size:13px; font-weight:700; color:var(--text); padding:0 6px; white-space:nowrap;}
   .aya-t.hifz-live{background:color-mix(in srgb, var(--accent) 22%, transparent); border-radius:6px;}
@@ -1709,6 +1718,7 @@
     <div class="hifz-body" id="hifz-body"></div>
   </div>
 </div>
+<div class="hz-echo" id="hz-echo" role="status" aria-live="polite"><div class="hz-e-msg" id="hz-e-msg"></div><div class="hz-e-bar" id="hz-e-bar"><i id="hz-e-lvl"></i></div><div class="hz-e-btns" id="hz-e-btns"></div></div>
 <div class="hifz-pill" id="hifz-pill">
   <button id="hz-prev" aria-label="السابقة"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
   <button id="hz-play" aria-label="إيقاف مؤقّت"></button>
@@ -5204,12 +5214,13 @@ const HZ_RECS=[
   { id:'sudais',   name:'عبد الرحمن السديس',     dir:'Abdurrahmaan_As-Sudais_192kbps' },
   { id:'alafasy',  name:'مشاري العفاسي',        dir:'Alafasy_128kbps' }
 ];
-const HZ_DEF={ rv:3, rr:1, mode:'verse', speed:1, gap:'len', rec:'ghamdi' };
+const HZ_DEF={ rv:3, rr:1, mode:'verse', speed:1, gap:'len', rec:'ghamdi', echo:'off' };
 /* ثلاثُ طرائقَ جاهزةٌ تكفي أكثرَ الناس؛ والتفصيلُ لمن أراده تحت «خيارات متقدّمة» */
 const HZ_PRESETS=[
-  { id:'learn',  n:'تلقين',  d:'كلُّ آيةٍ 3 مرّات مع وقفةٍ لتردّدها أنت، ثم التي بعدها', c:{ rv:3, rr:1, mode:'verse',      gap:'len', speed:1 } },
-  { id:'build',  n:'تثبيت الحفظ',  d:'تُعيد ما حفظتَه ثم تُضيف إليه آيةً جديدةً في كلّ مرّة', c:{ rv:1, rr:1, mode:'cumulative', gap:'0',   speed:1 } },
-  { id:'review', n:'مراجعة', d:'المقطعُ كلُّه 3 دوراتٍ متتاليةٍ بلا وقفة',                  c:{ rv:1, rr:3, mode:'verse',      gap:'0',   speed:1 } },
+  { id:'learn',  n:'تلقين',  d:'كلُّ آيةٍ 3 مرّات مع وقفةٍ لتردّدها أنت، ثم التي بعدها', c:{ rv:3, rr:1, mode:'verse',      gap:'len', speed:1, echo:'off' } },
+  { id:'echo',   n:'ردِّد وقارِن', d:'تسمع الآية ثم تردّدها، فيُسجَّل صوتُك ويُعاد عليك لتقارنه بالقارئ، ثم تقرّر الانتقال', c:{ rv:1, rr:1, mode:'verse', gap:'0', speed:1, echo:'gate' } },
+  { id:'build',  n:'تثبيت الحفظ',  d:'تُعيد ما حفظتَه ثم تُضيف إليه آيةً جديدةً في كلّ مرّة', c:{ rv:1, rr:1, mode:'cumulative', gap:'0',   speed:1, echo:'off' } },
+  { id:'review', n:'مراجعة', d:'المقطعُ كلُّه 3 دوراتٍ متتاليةٍ بلا وقفة',                  c:{ rv:1, rr:3, mode:'verse',      gap:'0',   speed:1, echo:'off' } },
 ];
 let __hzAdvOpen=false;
 let __hz=null, __hzSel=null;
@@ -5256,6 +5267,8 @@ function renderHifzForm(body, picker, afterStart){
       '<div class="hz-row"><div class="hz-lbl">طريقة التكرار</div>'+chips('mode',[['verse','كلُّ آية ثمّ التي بعدها'],['cumulative','تراكميّ: 1 ثم 1+2 ثم 1+2+3…']],c.mode)+
         '<div class="hz-hint">التراكميّ أنفعُ للحفظ: تُعيد ما حفظتَه ثم تُضيف آيةً جديدة.</div></div>'+
       '<div class="hz-row"><div class="hz-lbl">السرعة</div>'+chips('speed',[[0.75,'0.75×'],[1,'1×'],[1.25,'1.25×']],c.speed)+'</div>'+
+      '<div class="hz-row"><div class="hz-lbl">ردِّد وقارِن</div>'+chips('echo',[['off','بلا'],['rec','يُسمِعني قراءتي'],['gate','ويسألني قبل الانتقال']],c.echo)+
+        '<div class="hz-hint">يستعمل هذا الوضعُ الميكروفونَ، وفقط حين يكون التطبيقُ مفتوحًا أمامك وهذا الوضعُ يعمل؛ فيتوقّف حين تُنهي التحفيظ أو تغادر التطبيق. يُسجَّل صوتُك على هاتفك فقط ثم يُحذف، ولا يُرسَل إلى أحد. ولا يحكم التطبيقُ على جودة التجويد: يتحقّق فقط أنك ردّدت، وأنت من تقارن وتقرّر. يساعدك هذا على التدريب بين دروسك، ولا يغني عن معلّمٍ يسمع قراءتك ويصحّحها.</div></div>'+
       '<div class="hz-row"><div class="hz-lbl">وقفةٌ صامتةٌ بعد كلّ آية</div>'+chips('gap',[['0','بلا وقفة'],['1','ثانية'],['2','ثانيتان'],['len','بمدّة الآية (لتردِّد أنت)']],c.gap)+'</div>'+
     '</details>'+
     '<div class="hz-hint">يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. الصوتُ برواية حفص.</div>';
@@ -5337,8 +5350,112 @@ function hzUi(){
 function hzAfterVerse(){
   const h=__hz; if(!h || h.paused) return;
   const a=$('#hifz-audio');
+  if(h.c.echo && h.c.echo!=='off' && !h.echoOff){ hzEcho(h); return; }
   const gap = h.c.gap==='len' ? Math.round((a.duration||2)*1000/(h.c.speed||1)) : (parseFloat(h.c.gap)||0)*1000;
   if(gap>0) h.timer=setTimeout(hzNext, gap); else hzNext();
+}
+
+/* ===== ردِّد وقارِن =====
+   بعد أن يتلو القارئُ الآية: نسجّل ترديدَ المستخدم على جهازه (لا يُرسَل ولا يُحفظ)، ثم نُسمِعه تسجيلَه ليقارنه بالقارئ،
+   وفي وضع «يسألني» لا ننتقل إلى الآية التالية حتى يضغط «أحسنتُ — التالية»؛ أو «أعد الآية» فنعيدها.
+   التحقّقُ الآليُّ الوحيد: هل سُمِع صوتٌ يكفي؟ فإن لم يُسمَع شيءٌ أعدنا الآيةَ (حتى 3 مرّاتٍ ثم ننتقل كيلا يعلق). لا نحكم على التجويد. */
+let __hzMic=null;
+/* الميكروفون لا يبقى مفتوحًا والتطبيقُ في الخلفية: عند المغادرة نُنهي التسجيلَ ونحرّره ونوقف التحفيظ مؤقّتًا */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState!=='hidden' || !__hz || !(__hz.c.echo && __hz.c.echo!=='off')) return;
+  hzEchoAbort(__hz); hzMicRelease(); if(!__hz.paused) hzToggle();
+});
+async function hzMicGet(){
+  if(__hzMic) return __hzMic;
+  try{
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder==='undefined') return null;
+    const stream=await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } });
+    const AC=window.AudioContext||window.webkitAudioContext; const ctx=new AC(); const src=ctx.createMediaStreamSource(stream);
+    const an=ctx.createAnalyser(); an.fftSize=1024; src.connect(an);
+    __hzMic={ stream, ctx, an };
+    return __hzMic;
+  }catch(e){ return null; }
+}
+function hzMicRelease(){
+  const m=__hzMic; __hzMic=null; if(!m) return;
+  try{ m.stream.getTracks().forEach(t=>t.stop()); }catch(e){} try{ m.ctx.close(); }catch(e){}
+}
+function hzEchoShow(msg, opt){
+  opt=opt||{}; $('#hz-e-msg').textContent=msg||'';
+  $('#hz-e-bar').classList.toggle('on', !!opt.bar); if(!opt.bar) $('#hz-e-lvl').style.width='0';
+  const bx=$('#hz-e-btns'); bx.textContent='';
+  (opt.btns||[]).forEach(b=>{ const e=document.createElement('button'); e.type='button'; e.textContent=b.t; if(b.pri) e.className='pri'; e.addEventListener('click', ()=>{ vibrate(6); b.f(); }); bx.appendChild(e); });
+  $('#hz-echo').classList.add('show');
+}
+function hzEchoHide(){ $('#hz-echo').classList.remove('show'); }
+function hzEchoAbort(h){
+  if(h) h.echoTok=(h.echoTok||0)+1;                    // يُبطل أيَّ مسارٍ ترديدٍ معلَّقٍ فلا يكمل بعد التخطّي أو التنقّل
+  if(h && h.echoCancel){ const f=h.echoCancel; h.echoCancel=null; try{ f(); }catch(e){} }
+  hzEchoHide();
+}
+/* يسجّل حتى يصمت المستخدمُ بعد أن تكلّم، أو ينقضي سقفٌ يناسب طولَ الآية */
+function hzRecord(h, vd){
+  return new Promise(resolve=>{
+    const m=__hzMic; let rec; const chunks=[];
+    try{ rec=new MediaRecorder(m.stream); }catch(e){ resolve({ blob:null, spoke:false, err:true }); return; }
+    rec.ondataavailable=e=>{ if(e.data && e.data.size) chunks.push(e.data); };
+    const buf=new Uint8Array(m.an.fftSize), t0=Date.now(); let speech=0, lastVoice=0, floor=0.012, stopped=false, skipped=false;
+    const finish=()=>{
+      if(stopped) return; stopped=true; clearInterval(iv); h.echoCancel=null;
+      rec.onstop=()=>resolve({ blob:chunks.length?new Blob(chunks,{type:rec.mimeType||'audio/webm'}):null, spoke:!skipped && speech>=Math.min(1200, vd*250) });
+      try{ rec.state!=='inactive' && rec.stop(); }catch(e){ resolve({ blob:null, spoke:false }); }
+    };
+    h.echoCancel=()=>{ skipped=true; finish(); };
+    rec.start(250);
+    let last=Date.now();
+    const iv=setInterval(()=>{
+      const now=Date.now(), dt=now-last; last=now;
+      m.an.getByteTimeDomainData(buf); let s=0; for(let i=0;i<buf.length;i++){ const v=(buf[i]-128)/128; s+=v*v; }
+      const rms=Math.sqrt(s/buf.length);
+      $('#hz-e-lvl').style.width=Math.min(100, Math.round(rms*400))+'%';
+      const voiced=rms>Math.max(0.03, floor*3);
+      if(voiced){ speech+=dt; lastVoice=now; } else floor=Math.min(0.02, floor*0.97+rms*0.03);
+      const el=now-t0;
+      if(speech>=Math.min(900, vd*300) && lastVoice && now-lastVoice>1300) finish();          // تكلّم ثم صمت
+      else if(el>vd*2+5000) finish();                                                         // سقفٌ أقصى
+    }, 100);
+  });
+}
+function hzPlayBack(blob){
+  return new Promise(resolve=>{
+    let url; try{ url=URL.createObjectURL(blob); }catch(e){ resolve(); return; }
+    const au=new Audio(url); const done=()=>{ try{ URL.revokeObjectURL(url); }catch(e){} resolve(); };
+    au.onended=done; au.onerror=done;
+    const h=__hz; if(h) h.echoCancel=()=>{ try{ au.pause(); }catch(e){} done(); };
+    au.play().catch(done);
+  });
+}
+async function hzEcho(h){
+  const a=$('#hifz-audio'), vd=Math.max(2,(a.duration||3)/(h.c.speed||1));
+  const tok=h.echoTok=(h.echoTok||0)+1, dead=()=>__hz!==h || h.paused || h.echoTok!==tok;
+  const m=await hzMicGet();
+  if(dead()) return;
+  if(!m){ h.echoOff=true; hzEchoHide(); showToast('تعذّر استعمال الميكروفون — يستمرّ التحفيظ بلا ردِّد وقارِن', 4200); hzAfterVerse(); return; }
+  try{ if(m.ctx.state==='suspended') await m.ctx.resume(); }catch(e){}
+  hzEchoShow('ردِّد الآن…', { bar:true, btns:[{ t:'تخطَّ', f:()=>{ hzEchoAbort(h); hzNext(); } }] });
+  const res=await hzRecord(h, vd);
+  if(dead()) return;
+  if(res.err){ h.echoOff=true; hzEchoHide(); showToast('تعذّر التسجيل — يستمرّ التحفيظ بلا ردِّد وقارِن', 4200); hzNext(); return; }
+  if(!res.spoke){
+    h.misses=(h.misses||0)+1;
+    if(h.misses<3){ hzEchoShow('لم أسمع صوتك — ردِّد بصوتٍ مسموع', {}); h.timer=setTimeout(()=>{ if(__hz===h && !h.paused){ hzEchoHide(); hzPlayCurrent(); } }, 1400); return; }
+    h.misses=0; hzEchoHide(); showToast('لم يُسمَع صوتٌ ثلاثَ مرّات — ننتقل إلى الآية التالية', 3600); hzNext(); return;
+  }
+  h.misses=0;
+  hzEchoShow('استمع إلى قراءتك…', {});
+  if(res.blob) await hzPlayBack(res.blob);
+  if(dead()) return;
+  if(h.c.echo==='gate'){
+    hzEchoShow('كيف كانت قراءتك؟ قارنها بقراءة القارئ', { btns:[
+      { t:'أحسنتُ — التالية', pri:true, f:()=>{ hzEchoHide(); hzNext(); } },
+      { t:'أعد الآية', f:()=>{ hzEchoHide(); hzPlayCurrent(); } }
+    ]});
+  } else { hzEchoHide(); hzNext(); }
 }
 function hzNext(){
   const h=__hz; if(!h) return;
@@ -5358,18 +5475,20 @@ function hzError(){
 function hzToggle(){
   const h=__hz; if(!h) return; const a=$('#hifz-audio');
   h.paused=!h.paused;
-  if(h.paused){ clearTimeout(h.timer); try{ a.pause(); }catch(e){} }
+  if(h.paused){ clearTimeout(h.timer); hzEchoAbort(h); try{ a.pause(); }catch(e){} }
   else { if(a.src && !a.ended && a.currentTime>0 && a.currentTime<(a.duration||0)) a.play().catch(()=>{}); else hzNext(); }
   hzUi();
 }
 function hzStep(d){
   const h=__hz; if(!h) return;
+  hzEchoAbort(h); clearTimeout(h.timer);
   h.paused=false; h.i=Math.max(0,Math.min(h.items.length-1,h.i+d)); hzPlayCurrent();
 }
 function hzStop(silent){
   const h=__hz; __hz=null;
   const a=$('#hifz-audio');
-  if(h){ clearTimeout(h.timer); }
+  if(h){ clearTimeout(h.timer); hzEchoAbort(h); }
+  hzMicRelease();
   try{ a.onended=null; a.onerror=null; a.pause(); a.removeAttribute('src'); a.load(); }catch(e){}
   $('#hifz-pill').classList.remove('show');
   try{ if(!__wantPlay) listenKeepAlive(false); }catch(e){}
