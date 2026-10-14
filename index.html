@@ -3436,6 +3436,7 @@ function buildMushaf(body){
   body.innerHTML=parts.join('');
   body.dataset.mode='mushaf';
   __mushafRenderedRiwaya=settings.riwaya;
+  idleDo(prewarmSuraList);   // قائمةُ السور جاهزةٌ قبل أن يلمسها القارئ (انظر prewarmSuraList)
   $('#wird-sub').textContent='المصحف كامل — '+WIRD.sur.length+' سورة';
   try{ qsClearYCache(); }catch(e){}
   updateResumeBtn();
@@ -5614,12 +5615,24 @@ function buildSuraList(curIdx, onPick, withHizb){
     renderSuraRows('');
   }
 }
+/* تُبنى قائمةُ السور مسبقًا في وقتٍ فارغ بعد بناء المصحف أو تبديل الرواية، فلا يتحمّل أوّلُ فتحٍ كلفةَ تخطيط
+   مئةٍ وأربعةَ عشرَ صفًّا (وكانت تُحسَب عند اللمسة فتتأخّر القائمة). لا تمسّ المصحفَ ولا نصَّه. */
+function prewarmSuraList(){
+  try{
+    const list=$('#sura-list'), ov=$('#sura-overlay'); if(!list || !ov || !WIRD) return;
+    if(ov.classList.contains('show')) return;                       // ورقةٌ مفتوحةٌ تستعمل القائمة الآن
+    if(list.__srKey===srKey() && list.querySelector('button.sr')) return;   // مبنيّةٌ سلفًا
+    __srCur=-1; list.classList.add('rows'); renderSuraRows('');
+  }catch(e){}
+}
+function idleDo(f){ try{ if(window.requestIdleCallback) requestIdleCallback(f,{timeout:4000}); else setTimeout(f,2500); }catch(e){ setTimeout(f,2500); } }
 function openSuraOverlay(curIdx, onPick, title, withHizb){
   const bk=$('#sura-overlay-back'); if(bk) bk.style.display='none';
   $('#sura-overlay').querySelector('.sura-sheet-head span').textContent = title || 'اختر السورة';
   buildSuraList(curIdx, onPick, withHizb);
-  $('#sura-overlay').classList.add('show');
+  /* التمركز قبل الإظهار: الورقةُ المخفيّة (opacity:0) مُخطَّطةٌ أصلًا، فلا يُجبَر المتصفّحُ على تخطيطٍ كاملٍ بعد تغيير الصنف */
   centerInList($('#sura-list button.cur'));
+  $('#sura-overlay').classList.add('show');
 }
 /* تمريرٌ داخل القائمة وحدها. scrollIntoView كان يُمرِّر الصفحةَ خلفها أيضًا،
    فيرجع القارئُ إلى أوّل المصحف (البقرة) كلّما فتح ورقةَ المشاركة. */
