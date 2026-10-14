@@ -30,6 +30,10 @@ for (const lang of ['ar', 'fr', 'en']) {
   }
   /* صفحةُ «الوقف والابتداء» المستقلّة: تُفتح بكلّ تبويباتها بلا خطأ */
   for (const h of ['hafs', 'warsh', 'rules']) { await p.goto(BASE + 'waqf.html#' + h); await p.waitForTimeout(400); }
+  /* صفحةُ «أبواب الخير»: تُفتح كلُّ الأبواب وتُسجَّل «فعلتُها» بلا خطأ */
+  await p.goto(BASE + 'khayr.html'); await p.waitForTimeout(400);
+  for (const id of ['birr', 'sadaqa', 'rahim', 'jar', 'yatim', 'islah']) { await p.evaluate(i => document.querySelector('#d-' + i + ' > button').click(), id); await p.waitForTimeout(150); }
+  await p.evaluate(() => { const b = document.querySelector('[data-do]'); if (b) b.click(); });
   const ov = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   if (ov > 2) errs.push('تمرير أفقيّ: ' + ov + 'px');
   console.log((errs.length ? '✗ ' : '✓ ') + lang + ' — ' + ids.length + ' قسمًا من القائمة' + (errs.length ? '\n   ' + [...new Set(errs)].join('\n   ') : ''));
