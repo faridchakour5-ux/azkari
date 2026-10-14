@@ -1533,7 +1533,7 @@
   <div class="list" id="az-list"></div>
 </section>
 
-<!-- ===== الوِرد ===== -->
+<!-- ===== القرآن (كان يُسمّى «الوِرد») ===== -->
 <section id="s-wird" class="screen active">
   <div class="head">
     <h1 id="wird-h1">المصحف الكريم</h1>
@@ -1829,7 +1829,7 @@
       <div class="qcolor-swatches" id="qcolor-seg">
         <button data-r="normal" title="عادي"><i style="background:var(--text)"></i></button>
         <button data-r="blue"  title="أزرق"><i style="background:var(--qc-blue)"></i></button>
-        <button data-r="blue2" class="on" title="أزرق أقل غموقاً"><i style="background:var(--qc-blue2)"></i></button>
+        <button data-r="blue2" class="on" title="أزرق أقلّ قتامةً"><i style="background:var(--qc-blue2)"></i></button>
         <button data-r="navy"  title="أزرق غامق"><i style="background:var(--qc-navy)"></i></button>
         <button data-r="g1" title="زمرّديّ 1 — فاتح"><i style="background:var(--qc-g1)"></i></button>
         <button data-r="g2" title="زمرّديّ 2 — متوسط"><i style="background:var(--qc-g2)"></i></button>
@@ -1960,7 +1960,7 @@
     </div>
     <div class="gnote web-only" id="push-note"></div>
     <div class="btn-row b-blue web-only" id="push-test" style="display:none">تجربة الإشعار من الخادم الآن</div>
-    <div class="gnote" id="adhan-exact" style="display:none">تنبيه: لم يُؤذَن للتطبيق بالمنبّهات الدقيقة، فقد يتأخّر الأذانُ دقائق عن وقته. <b id="adhan-exact-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">اسمح بها الآن</b></div>
+    <div class="gnote" id="adhan-exact" style="display:none">تنبيه: لم يُسمَح للتطبيق باستعمال المنبّهات الدقيقة، فقد يتأخّر الأذانُ دقائق عن وقته. <b id="adhan-exact-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">اسمح بها الآن</b></div>
     <div class="gnote" id="adhan-batt" style="display:none">لأعلى موثوقيّةٍ للأذان: اختر «عدم التحسين» للتطبيق في إعدادات البطارية، وتأكّد ألّا يكون في «التطبيقات النائمة» (سامسونغ) أو «حماية التطبيقات» (شاومي/هواوي). <b id="adhan-batt-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">افتح إعداد البطارية</b></div>
     <div class="btn-row b-blue svc-only" id="adhan-try" style="display:none">تجربة الأذان الآن</div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
@@ -2020,7 +2020,7 @@
   <!-- الترتيب: الوِرد (البداية)، ثمّ الاستماع، ثمّ الأذكار، ثمّ الإعدادات، ثمّ القائمة. الفقهُ والتسبيح والاختبار في القائمة الجانبيّة (زرُّ الفقه مخفيٌّ يعمل برمجيًّا فقط). -->
   <button class="tab on" data-s="s-wird">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><line x1="9" y1="7" x2="15" y2="7"/></svg>
-    <span>الوِرد</span>
+    <span>القرآن</span>
   </button>
   <button class="tab" data-s="s-listen">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2z"/><path d="M20 14a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2z"/></svg>
@@ -4572,7 +4572,7 @@ async function qzHome(){
     qzSub('تحدٍّ من صديق');
     body.innerHTML=
       '<div class="qz-chal"><div class="t">'+(ch.name?'تحدّاك «'+escapeHtml(ch.name)+'»':'تحدّاك صديقٌ')+'</div>'+
-      '<div class="d">حصل على <b>'+AR(ch.from)+' من '+AR(QZ_LEN)+'</b> في مجال «'+escapeHtml(qzCatName(ch.cat))+'».<br>العب الأسئلةَ نفسَها وحاول أن تتجاوزه!</div></div>'+
+      '<div class="d">حصل على <b>'+AR(ch.from)+' من '+AR(QZ_LEN)+'</b> في مجال «'+escapeHtml(qzCatName(ch.cat))+'».<br>أجِبْ عن الأسئلة نفسها وحاول أن تتجاوزه!</div></div>'+
       '<div class="qz-name"><label for="qz-name">اسمك (اختياري)</label><input id="qz-name" type="text" maxlength="24" autocomplete="off" value="'+escapeHtml(qzName())+'"></div>'+
       '<button class="qz-start" id="qz-start">ابدأ التحدّي</button>'+
       '<button class="qz-next" id="qz-free" style="background:var(--fill-2); color:var(--text)">اختبارٌ حرّ بدل التحدّي</button>';
@@ -4640,8 +4640,8 @@ function qzRender(){
 function qzLink(){ const n=qzName(); return QZ_URL+'?quiz=1&c='+encodeURIComponent(__qzCat)+'&s='+__qzSeed+'&f='+__qzScore+(n?'&n='+encodeURIComponent(n):''); }
 function qzShareText(){
   const n=qzName(), cat=qzCatName(__qzCat);
-  return (n ? 'نتيجة «'+n+'» في اختبار الثقافة الإسلامية («'+cat+'»): '+__qzScore+' من '+QZ_LEN+' في تطبيق «صلاتي».\nهل تستطيع تجاوزَها؟ العب الأسئلةَ نفسَها:\n'
-            : 'حصلتُ على '+__qzScore+' من '+QZ_LEN+' في اختبار الثقافة الإسلامية («'+cat+'») في تطبيق «صلاتي».\nهل تستطيع تجاوزي؟ العب الأسئلةَ نفسَها:\n')+qzLink();
+  return (n ? 'نتيجة «'+n+'» في اختبار الثقافة الإسلامية («'+cat+'»): '+__qzScore+' من '+QZ_LEN+' في تطبيق «صلاتي».\nهل تستطيع تجاوزَها؟ أجِبْ عن الأسئلة نفسها:\n'
+            : 'حصلتُ على '+__qzScore+' من '+QZ_LEN+' في اختبار الثقافة الإسلامية («'+cat+'») في تطبيق «صلاتي».\nهل تستطيع تجاوزي؟ أجِبْ عن الأسئلة نفسها:\n')+qzLink();
 }
 async function qzShare(){
   const text=qzShareText();
@@ -4841,7 +4841,7 @@ async function openTools(page){
     settings:goTab('s-settings'), info:()=>later(async()=>{ if(await loadTools()) SalTools.onboard(true); })
   };
   const GROUPS=[
-    [null,[['wird','الوِرد'],['listen','الاستماع'],['azkar','الأذكار'],['fiqh','الفقه'],['tasbih','المسبحة']]],
+    [null,[['wird','القرآن برواية حفص ورواية ورش'],['listen','الاستماع'],['azkar','الأذكار'],['fiqh','الفقه'],['tasbih','المسبحة']]],
     ['أدوات المسلم',[['qibla','القبلة'],['cal','التقويم الهجريّ'],['pt','صلواتي'],['fast','الصيام'],['rev','مراجعة الحفظ'],['sleep','مؤقّت النوم'],['bell','تذكيراتي']]],
     ['التعلّم والاستماع',[['hifz','التحفيظ'],['seera','السيرة النبوية'],['stories','قصص الأنبياء'],['hadith','الأحاديث الصحيحة'],['duat','الدعاة'],['wasaya','وصايا النبي ﷺ'],['waqf','الوقف والابتداء','waqf.html'],['quiz','اختبار الثقافة الإسلامية']]],
     ['المزيد',[['settings','الإعدادات'],['info','الجولة التعريفيّة'],['shield','سياسة الخصوصية','privacy.html'],['photo','صور القرّاء (النَّسب والتراخيص)','credits.html']]]
@@ -8053,9 +8053,9 @@ function backupStatusHtml(){
   if(window.__wirdReady && WIRD && WIRD.__riwaya===settings.riwaya){
     const N=WIRD.a.length; const pg = pos>=N?604:parseInt(WIRD.a[pos].p);
     posTxt = pos>=N ? 'أتممت الختمة' : ('صفحة '+pg+' من 604 ('+Math.round(pos/N*100)+'%)');
-  } else { posTxt = pos>0 ? ('عند الآية رقم '+pos+' — افتح الوِرد لرؤية الصفحة') : 'من البداية'; }
+  } else { posTxt = pos>0 ? ('عند الآية رقم '+pos+' — افتح القرآن لرؤية الصفحة') : 'من البداية'; }
   return FLAME_IC+' السلسلة: <b>'+(s.count||0)+'</b> يوم متتابع<br>'+
-         BOOK_IC+' موضع الوِرد ('+(settings.riwaya==='warsh'?'ورش':'حفص')+'): <b>'+posTxt+'</b><br>'+
+         BOOK_IC+' موضع القراءة في القرآن ('+(settings.riwaya==='warsh'?'ورش':'حفص')+'): <b>'+posTxt+'</b><br>'+
          CHK_IC+' أيام القراءة (آخر أسبوع): <b>'+qdays+' / 7</b>';
 }
 function renderBackupStatus(){ const el=$('#backup-status'); if(el) el.innerHTML=backupStatusHtml(); }

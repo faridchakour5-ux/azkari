@@ -307,7 +307,7 @@ PAGES.qibla = { title:'اتجاه القبلة', render(body){
   const start=()=>{
     window.addEventListener('deviceorientationabsolute', onOri, true);
     window.addEventListener('deviceorientation', onOri, true);
-    setTimeout(()=>{ if(!got){ st.textContent='لا يصل مستشعرُ البوصلة من هذا الجهاز — استعمل الزاوية المكتوبة'; st.classList.remove('ok'); } }, 2500);
+    setTimeout(()=>{ if(!got){ st.textContent='لا يتوفّر مستشعرُ البوصلة في هذا الجهاز — استعمل الزاوية المكتوبة'; st.classList.remove('ok'); } }, 2500);
   };
   st.textContent='…';
   if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){   // iOS 13+
@@ -491,7 +491,7 @@ T.reviewDue = function(){ const t=lk(new Date()); return rvAll().filter(x=>x.due
 T.addReview = async function(si,a,b){
   if(!window.WIRD_HAFS){ try{ await hzLoad(); }catch(e){} }
   const all=rvAll(); const id=si+':'+a+'-'+b;
-  if(all.some(x=>x.id===id)){ toast('هذا المقطع في مراجعتك أصلًا',2600); return false; }
+  if(all.some(x=>x.id===id)){ toast('هذا المقطع موجودٌ في مراجعتك مسبقًا',2600); return false; }
   all.push({ id, s:si, a, b, lvl:0, due:lk(addDays(new Date(),1)) }); rvSave(all);
   toast('أُضيف إلى مراجعتك — أوّلُ موعدٍ غدًا',3200); return true;
 };

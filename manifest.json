@@ -42,7 +42,7 @@
       "sizes": "824x1784",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "الوِرد"
+      "label": "القرآن"
     },
     {
       "src": "store/screenshots/02-listen.png",
@@ -77,7 +77,7 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "الوِرد"
+      "label": "القرآن"
     },
     {
       "src": "store/screenshots/wide/02-listen.png",
