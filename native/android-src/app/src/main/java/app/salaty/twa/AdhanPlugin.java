@@ -29,6 +29,10 @@ public class AdhanPlugin extends Plugin {
   /** المثيلُ الحاليّ: لتُبلِغ خدمةُ الاستماع الواجهةَ حين يضغط المستخدمُ «إيقاف» في الإشعار */
   private static AdhanPlugin instance;
   @Override public void load() { instance = this; }
+  /** الأذانُ بدأ/انتهى: تُوقف الواجهةُ التلاوةَ مؤقّتًا ثم تستأنفها بعد الأذان */
+  static void emitAdhanState(boolean on) {
+    try { if (instance != null) { JSObject o = new JSObject(); o.put("on", on); instance.notifyListeners("adhanState", o); } } catch (Exception ignored) {}
+  }
   static void emitListenStop() {
     try { if (instance != null) instance.notifyListeners("listenStop", new JSObject()); } catch (Exception ignored) {}
   }

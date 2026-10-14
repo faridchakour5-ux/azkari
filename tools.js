@@ -137,6 +137,20 @@ css.textContent=`
 .pt-wd i{display:flex; width:34px; height:34px; border-radius:50%; margin:4px auto 0; align-items:center; justify-content:center; font-style:normal; font-weight:800; font-size:13px; background:var(--fill-2); color:var(--text-2);}
 .pt-wd.full i{background:var(--accent); color:#fff;}
 .pt-wd.today i{outline:2px solid var(--c-repeat); outline-offset:1px;}
+.us-hero{background:linear-gradient(135deg,var(--accent),#0a4a39); color:#fff; border-radius:22px; padding:20px 18px 18px; margin:0 0 12px; box-shadow:var(--shadow-1); position:relative; overflow:hidden;}
+.us-hero:after{content:''; position:absolute; inset-inline-end:-40px; top:-40px; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,.08);}
+.us-hero small{display:block; opacity:.85; font-size:12.5px; font-weight:600;}
+.us-hero .big{display:flex; align-items:baseline; gap:6px; margin:4px 0 2px;} html:not([lang="ar"]) .us-hero .big{direction:ltr;}
+.us-hero .big .n{font-size:44px; line-height:1.1; font-weight:800; letter-spacing:-.5px;} .us-hero .big u{text-decoration:none; font-size:15px; font-weight:700; opacity:.9;}
+.us-kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:0 0 12px;}
+.us-kpis div{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 6px 10px; text-align:center; font-size:12px; color:var(--text-2); box-shadow:var(--shadow-1);}
+.us-kpis b{display:block; line-height:1.35; white-space:nowrap;} .us-kpis .n{font-size:21px; font-weight:800; color:var(--c-repeat);} .us-kpis u{text-decoration:none; font-size:12px; font-weight:700; color:var(--text-2); margin-inline:2px 4px;}
+.us-bars{display:flex; align-items:flex-end; justify-content:space-between; gap:6px; height:132px; margin-top:8px;}
+.us-bar{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; font-size:11px; color:var(--text-2);}
+.us-bar i{display:block; width:100%; max-width:30px; border-radius:9px 9px 5px 5px; background:var(--fill-2); min-height:4px;} .us-bar.today i{background:var(--accent);}
+.us-bar b{font-size:11px; color:var(--text-3); font-weight:700; margin-bottom:3px;} .us-bar span{margin-top:5px;}
+.us-split{display:flex; height:10px; border-radius:6px; overflow:hidden; background:var(--fill-2); margin:10px 0 8px;} .us-split i{display:block; background:var(--accent);}
+.us-leg{display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-2);} .us-leg b{color:var(--text);}
 .pt-stat{display:flex; gap:8px; margin-bottom:12px;}
 .pt-stat div{flex:1; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:10px 6px; text-align:center; font-size:12px; color:var(--text-2);}
 .pt-stat b{display:block; font-size:22px; color:var(--c-repeat); line-height:1.4;}
@@ -170,6 +184,7 @@ const IC = {
   pray:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>',
   fast:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',
   rev:'<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2M3 12A9 9 0 0 1 18.5 5.8"/><path d="M18.5 2v4h-4M5.5 22v-4h4"/></svg>',
+  clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></svg>',
   bell:'<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>'
 };
 
@@ -218,6 +233,7 @@ PAGES.hub = { title:'أدوات المسلم', render(body){
     ['pt','صلواتي','pray','تابِع صلواتك اليوم'],
     ['fast','الصيام','fast','التطوّع ووقت الفجر'],
     ['rev','مراجعة الحفظ','rev',due?('عندك '+AR(due)+' للمراجعة'):'تذكيرٌ متباعد'],
+    ['use','وقتي','clock','يوميًّا وأسبوعيًّا وشهريًّا'],
     ['rem','تذكيراتي','bell','الجمعة والمراجعة']
   ];
   body.innerHTML=(now.getDay()===5?fridayHtml():'')+hd+'<div class="tl-grid">'+tiles.map(t=>
@@ -439,6 +455,30 @@ PAGES.pt = { title:'صلواتي', render(body){
     });
   };
   draw();
+}};
+
+/* ============ وقتي في التطبيق ============ */
+const usMin = s => Math.round((s||0)/60);
+function usUnit(m){   // رقمٌ + وحدتُه في عقدتين منفصلتين ليُترجَما
+  return m>=60 ? ['<span class="n">'+AR(Math.floor(m/60))+'</span><u>س</u> <span class="n">'+AR(m%60)+'</span><u>د</u>'] : ['<span class="n">'+AR(m)+'</span><u>د</u>'];
+}
+PAGES.use = { title:'وقتي', render(body){
+  let D={}; try{ D=(window.usageSnapshot&&window.usageSnapshot())||sget('az_usage',{}); }catch(e){ D=sget('az_usage',{}); }
+  const now=new Date(), tk=lk(now);
+  const sec=(k,i)=>((D[k]||[])[i]||0);
+  let w=0, wl=0, m=0, ml=0, mDays=0; const bars=[];
+  for(let i=6;i>=0;i--){ const d=addDays(now,-i), k=lk(d); w+=sec(k,0); wl+=sec(k,1); bars.push({k,m:usMin(sec(k,0)),d,t:i===0}); }
+  Object.keys(D).forEach(k=>{ const dd=new Date(k+'T12:00:00'); if(dd.getMonth()===now.getMonth() && dd.getFullYear()===now.getFullYear()){ m+=sec(k,0); ml+=sec(k,1); if(sec(k,0)>0) mDays++; } });
+  const td=sec(tk,0), tdl=sec(tk,1);
+  const mx=Math.max(1,...bars.map(b=>b.m));
+  const avg=mDays?Math.round(usMin(m)/mDays):0;
+  const totM=usMin(m), lisM=usMin(ml), pct=totM?Math.min(100,Math.round(lisM*100/totM)):0;
+  body.innerHTML=
+   '<div class="us-hero"><small>اليوم</small><div class="big">'+usUnit(usMin(td)).join('')+'</div><small><span>استماعٌ</span> <b>'+AR(usMin(tdl))+'</b> <span>د</span></small></div>'+
+   '<div class="us-kpis"><div><b>'+usUnit(usMin(w)).join('')+'</b><span>آخر 7 أيّام</span></div><div><b>'+usUnit(totM).join('')+'</b><span>هذا الشهر</span></div><div><b>'+usUnit(avg).join('')+'</b><span>معدّل اليوم</span></div></div>'+
+   '<div class="tl-card"><h3>آخر 7 أيّام</h3><div class="us-bars">'+bars.map(b=>'<div class="us-bar'+(b.t?' today':'')+'"><b>'+(b.m?AR(b.m):'')+'</b><i style="height:'+Math.max(4,Math.round(b.m*100/mx))+'%"></i><span>'+['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'][b.d.getDay()]+'</span></div>').join('')+'</div></div>'+
+   '<div class="tl-card"><h3>هذا الشهر</h3><div class="us-split"><i style="width:'+pct+'%"></i></div><div class="us-leg"><span><span>استماعٌ</span> <b>'+AR(pct)+'%</b></span><span><span>نسبةُ الاستماع من وقت هذا الشهر</span></span></div></div>'+
+   '<div class="tl-note">يُحسب الوقتُ حين تكون شاشةُ التطبيق أمامك أو حين تعمل تلاوةٌ أو تحفيظ. كلُّه محفوظٌ على هاتفك فقط، ولا يُرسَل إلى أحد.</div>';
 }};
 
 /* ============ الصيام ووقت الفجر ============ */

@@ -7049,6 +7049,61 @@ function listenKeepAlive(on, title, text){
   if(on){ __kaOn=true; P.listenKeepAlive({ on:true, title:title||'الاستماع', text:text||'صلاتي' }).catch(()=>{}); }
   else if(__kaOn){ __kaT=setTimeout(()=>{ __kaOn=false; P.listenKeepAlive({ on:false }).catch(()=>{}); }, 6000); }
 }
+/* ===== وقتي في التطبيق (محلّيٌّ بالكامل: لا يُرسَل إلى أيّ خادم) =====
+   يُحسب الوقتُ حين تكون الواجهةُ ظاهرةً أو يعمل صوتٌ (تلاوة/تحفيظ/ذكر)، ويُحفظ بالثواني لكلّ يومٍ: [الكلّ، منه ما كان استماعًا].
+   لا يُحفظ إلا آخرُ 400 يوم. تقرؤه صفحةُ «وقتي» في أدوات المسلم. */
+const USAGE_KEY='az_usage';
+let __uData=null, __uLast=Date.now(), __uDirty=false;
+function usageKey(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function usageData(){ if(!__uData){ const v=store.get(USAGE_KEY,{}); __uData=(v&&typeof v==='object'&&!Array.isArray(v))?v:{}; } return __uData; }
+function usageFlush(){
+  if(!__uDirty) return; __uDirty=false;
+  const D=usageData(), ks=Object.keys(D).sort(); while(ks.length>400) delete D[ks.shift()];
+  store.set(USAGE_KEY, D);
+}
+function usageTick(){
+  const now=Date.now(), dt=Math.max(0,(now-__uLast)/1000); __uLast=now;
+  const playing=['reciter-audio','hifz-audio','dhikr-audio'].some(id=>{ const e=document.getElementById(id); return e && e.src && !e.paused && !e.ended; });
+  const vis=document.visibilityState==='visible';
+  if(!vis && !playing) return;
+  const sec=Math.min(dt, playing?90:10);          // المؤقّتاتُ تُخنَق في الخلفيّة: نسقف ما يُضاف في الدورة الواحدة
+  if(sec<=0) return;
+  const D=usageData(), k=usageKey(), r=D[k]||(D[k]=[0,0]);
+  r[0]=Math.round((r[0]+sec)*10)/10; if(playing) r[1]=Math.round((r[1]+sec)*10)/10;
+  __uDirty=true;
+}
+setInterval(usageTick, 5000);
+setInterval(usageFlush, 30000);
+document.addEventListener('visibilitychange', ()=>{ usageTick(); if(document.visibilityState==='hidden') usageFlush(); __uLast=Date.now(); });
+window.addEventListener('pagehide', ()=>{ usageTick(); usageFlush(); });
+window.usageSnapshot=()=>{ usageTick(); usageFlush(); return usageData(); };
+
+/* الأذانُ أولى من التلاوة: حين يبدأ (من الخدمة الأصليّة) نوقف ما يُسمَع من تلاوةٍ أو تحفيظٍ أو ذكر، ونستأنفه بعد انتهاء الأذان بقليل.
+   ولا نستأنف إلا ما كان يعمل فعلًا، ولا ما أوقفه المستمعُ بنفسه أثناء الأذان. */
+let __adhanHold=null, __adhanT=null, __adhanFail=null;
+function adhanYield(on){
+  clearTimeout(__adhanT); clearTimeout(__adhanFail);
+  const r=$('#reciter-audio'), d=$('#dhikr-audio'), h=$('#hifz-audio');
+  const live=el=>!!(el && el.src && !el.paused && !el.ended);
+  if(on){
+    if(__adhanHold) return;
+    const hold={ rec:live(r) || (__wantPlay && !!(r&&r.src&&!r.ended)), hz:!!(__hz && !__hz.paused), dk:live(d) };
+    if(!(hold.rec||hold.hz||hold.dk)) return;
+    __adhanHold=hold;
+    try{ setWantPlay(false); if(r && !r.paused) r.pause(); }catch(e){}
+    try{ if(hold.hz) hzToggle(); }catch(e){}
+    try{ if(d && !d.paused) d.pause(); }catch(e){}
+    __adhanFail=setTimeout(()=>{ __adhanHold=null; if(!__wantPlay) listenKeepAlive(false); }, 8*60*1000);   // أمانٌ إن لم يصلنا خبرُ انتهاء الأذان
+  } else {
+    const hold=__adhanHold; if(!hold) return;
+    __adhanT=setTimeout(()=>{
+      __adhanHold=null;
+      try{ if(hold.rec && r && r.src && r.paused){ setWantPlay(true); r.play().catch(()=>{ try{ recoverReciter(true); }catch(e){} }); } }catch(e){}
+      try{ if(hold.hz && __hz && __hz.paused) hzToggle(); }catch(e){}
+      try{ if(hold.dk && d && d.src && d.paused && !d.ended) d.play().catch(()=>{}); }catch(e){}
+    }, 1500);
+  }
+}
 function listenTitle(){
   const t=($('#reciter-sura')&&$('#reciter-sura').textContent||'').trim();
   let r=''; try{ const i=currentReciterInfo(); r=(i&&i.name)||''; }catch(e){}
@@ -7058,7 +7113,7 @@ function listenTitle(){
   const a=$('#reciter-audio'), h=$('#hifz-audio');
   if(a){
     a.addEventListener('playing', ()=>{ const x=listenTitle(); listenKeepAlive(true, x.title, x.text); });
-    a.addEventListener('pause', ()=>{ if(!__wantPlay) listenKeepAlive(false); });   // وقفةٌ من النظام: نُبقيها ليستأنف الحارس
+    a.addEventListener('pause', ()=>{ if(!__wantPlay && !__adhanHold) listenKeepAlive(false); });   // وقفةٌ من النظام: نُبقيها ليستأنف الحارس؛ ووقفةُ الأذان تُبقي الخدمةَ حيّةً لنستأنف بعده
     a.addEventListener('ended', ()=> listenKeepAlive(false));
   }
   if(h){
@@ -7069,8 +7124,9 @@ function listenTitle(){
     try{ P.addListener('listenStop', ()=>{
       try{ setWantPlay(false); const r=$('#reciter-audio'); if(r && !r.paused) r.pause(); }catch(e){}
       try{ if(__hz) hzStop(); }catch(e){}
-      __kaOn=false;
+      __adhanHold=null; __kaOn=false;
     }); }catch(e){}
+    try{ P.addListener('adhanState', ev=>{ adhanYield(!!(ev&&ev.on)); }); }catch(e){}
   }
   /* عاد الاتّصال: نستأنف فورًا بدل انتظار مهلة إعادة المحاولة */
   window.addEventListener('online', ()=>{

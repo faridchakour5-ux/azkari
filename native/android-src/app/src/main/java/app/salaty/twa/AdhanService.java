@@ -89,6 +89,7 @@ public class AdhanService extends Service {
     requestFocus();
     play();
     if (player != null && volStop()) startVolumeKeyStop();
+    if (player != null && !signalled) { signalled = true; AdhanPlugin.emitAdhanState(true); }   // الأذانُ أولى: تُوقَف التلاوةُ مؤقّتًا
 
     guard = new Runnable() { @Override public void run() { stopEverything(); } };
     handler.postDelayed(guard, MAX_MS);
@@ -286,7 +287,11 @@ public class AdhanService extends Service {
 
   /* ===== الإنهاء ===== */
 
+  /** أُبلغت الواجهةُ ببدء الأذان (فتُبلَّغ بانتهائه مرّةً واحدة) */
+  private boolean signalled = false;
+
   private void stopEverything() {
+    if (signalled) { signalled = false; AdhanPlugin.emitAdhanState(false); }   // تستأنف التلاوةُ بعد الأذان
     if (guard != null) { handler.removeCallbacks(guard); guard = null; }
     stopVolumeKeyStop();
     if (watch != null) { handler.removeCallbacks(watch); watch = null; }
