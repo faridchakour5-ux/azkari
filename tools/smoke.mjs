@@ -34,6 +34,8 @@ for (const lang of ['ar', 'fr', 'en']) {
   await p.goto(BASE + 'khayr.html'); await p.waitForTimeout(400);
   for (const id of ['birr', 'sadaqa', 'rahim', 'jar', 'yatim', 'islah', 'adha', 'hajat', 'kalima', 'ilm', 'taam', 'rifq']) { await p.evaluate(i => document.querySelector('#d-' + i + ' > button').click(), id); await p.waitForTimeout(150); }
   await p.evaluate(() => { const b = document.querySelector('[data-do]'); if (b) b.click(); });
+  /* صفحةُ «تعلّم التجويد»: تُفتح بتبويبَيها بلا خطأ */
+  for (const h of ['hafs', 'warsh']) { await p.goto(BASE + 'tajweed.html#' + h); await p.waitForTimeout(400); }
   const ov = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   if (ov > 2) errs.push('تمرير أفقيّ: ' + ov + 'px');
   console.log((errs.length ? '✗ ' : '✓ ') + lang + ' — ' + ids.length + ' قسمًا من القائمة' + (errs.length ? '\n   ' + [...new Set(errs)].join('\n   ') : ''));
