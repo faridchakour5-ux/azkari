@@ -1,4 +1,6 @@
-# Fiche Play Store « صلاتي » — textes prêts à copier-coller
+# Fiche Play Store « صلاتي salatee » — textes prêts à copier-coller
+
+> ⚠ **Les descriptions complètes à jour (ar / fr-FR / en-US) sont dans `store/listing/*.txt`** et sont publiées via `tools/play-listing.mjs`. Les blocs ci-dessous sont d'anciens brouillons.
 
 > Langue par défaut recommandée : **Arabe (العربية)**. Ajoute le Français en langue secondaire si tu veux (textes fournis plus bas).
 

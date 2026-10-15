@@ -2,7 +2,7 @@
 /* صلاتي — يعرض أو يغيّر «عنوان صفحة المتجر والوصف القصير» (listings) عبر Google Play Developer API.
  *
  *   PLAY_SA_JSON=/path/service-account.json node tools/play-listing.mjs --show
- *   PLAY_SA_JSON=… node tools/play-listing.mjs --lang ar --title "صلاتي salatee" --short "…"
+ *   PLAY_SA_JSON=… node tools/play-listing.mjs --lang ar --title "صلاتي salatee" --short "…" --full-file وصف.txt  (و--dump مجلّد مع --show لحفظ الأوصاف الكاملة الحاليّة)
  *
  * لا يمسّ الوصفَ الكامل ولا اللقطات. ولا سرَّ في هذا الملفّ. */
 import fs from "node:fs";
@@ -33,7 +33,7 @@ const call = async (method, url, o) => {
 const edit = await call("POST", API + "/edits", {});
 const E = API + "/edits/" + edit.id;
 const L = (await call("GET", E + "/listings")).listings || [];
-console.log("الحالُ الآن:");
+console.log("الحالُ الآن:"); if (flag("dump")) { for (const l of L) fs.writeFileSync(opt("dump") + "/" + l.language + ".txt", l.fullDescription || ""); }
 for (const l of L) console.log("  [" + l.language + "] العنوان: «" + l.title + "» | القصير: «" + (l.shortDescription || "") + "»");
 if (flag("show") || !opt("lang")) { await call("DELETE", E); process.exit(0); }
 const lang = opt("lang");
@@ -41,7 +41,9 @@ const cur = L.find(l => l.language === lang) || die("لا لغة بهذا الر
 const next = { ...cur };
 if (opt("title")) next.title = opt("title");
 if (opt("short")) next.shortDescription = opt("short");
+if (opt("full-file")) next.fullDescription = fs.readFileSync(opt("full-file"), "utf8").replace(/\s+$/, "");
 if (next.title.length > 30) die("العنوان أطول من 30 حرفًا");
+if ((next.fullDescription || "").length > 4000) die("الوصف الكامل أطول من 4000 حرف");
 if (next.shortDescription.length > 80) die("الوصف القصير أطول من 80 حرفًا");
 const upd = await call("PUT", E + "/listings/" + lang, next);
 console.log("بعد التعديل: [" + lang + "] «" + upd.title + "» | «" + upd.shortDescription + "»");
