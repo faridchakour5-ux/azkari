@@ -55,7 +55,7 @@ if (!SIGN_NOTE_NOLA) throw new Error('علامة «لا» صارت موجودة�
 /* ───────────────────────── النصوص (عربيّ / فرنسيّ / إنجليزيّ) ───────────────────────── */
 const T = {
   ar: {
-    dir: 'rtl', lang: 'ar', back: 'العودة', title: 'الوقف والابتداء',
+    dir: 'rtl', lang: 'ar', qrT: 'حمِّل التطبيق من Google Play', back: 'العودة', title: 'الوقف والابتداء',
     sub: 'كيف تقرأ القرآنَ: أين تقف، وأين تصل، وأين تبدأ — برواية حفص وورش',
     tabs: ['حفص', 'ورش', 'قواعد عامّة'],
     introT: 'ما الوقف والابتداء؟',
@@ -118,7 +118,7 @@ const T = {
     src: [['ابن الجزري، «النشر» و«المقدّمة» — عن فتوى إسلام ويب 95786', 'https://www.islamweb.net/ar/fatwa/95786'], ['وقف الهبطي — فتوى إسلام ويب 58999', 'https://www.islamweb.net/ar/fatwa/58999'], ['علامات الوقف — جائزة كتارا لتلاوة القرآن', 'https://kataraquran.com/%D8%B9%D9%84%D8%A7%D9%85%D8%A7%D8%AA-%D8%A7%D9%84%D9%88%D9%82%D9%81/'], ['إدريس ريمي، «الوقف الهبطي في المصحف المغربي»، مجلة البحوث والدراسات (جامعة الوادي) 2017', 'https://archives.univ-eloued.dz/items/2584c0d3-0b6e-4c3f-bea0-a165949f76a2']],
   },
   fr: {
-    dir: 'ltr', lang: 'fr', back: 'Retour', title: 'Arrêts et reprises',
+    dir: 'ltr', lang: 'fr', qrT: 'Téléchargez l’application sur Google Play', back: 'Retour', title: 'Arrêts et reprises',
     sub: 'Comment lire le Coran : où s’arrêter, où enchaîner, où reprendre — Hafs et Warsh',
     tabs: ['Hafs', 'Warsh', 'Règles générales'],
     introT: 'Qu’est-ce que le waqf et l’ibtidâ’ ?',
@@ -181,7 +181,7 @@ const T = {
     src: [['Ibn al-Jazarî, « an-Nashr » et « al-Muqaddima » — d’après la fatwa Islamweb 95786', 'https://www.islamweb.net/ar/fatwa/95786'], ['Le waqf d’al-Habṭî — fatwa Islamweb 58999', 'https://www.islamweb.net/ar/fatwa/58999'], ['Signes d’arrêt — Prix Katara de récitation du Coran', 'https://kataraquran.com/%D8%B9%D9%84%D8%A7%D9%85%D8%A7%D8%AA-%D8%A7%D9%84%D9%88%D9%82%D9%81/'], ['Idris Rimi, « Le waqf d’al-Habṭî dans le mushaf marocain », Revue de recherches et d’études (Université d’El Oued) 2017', 'https://archives.univ-eloued.dz/items/2584c0d3-0b6e-4c3f-bea0-a165949f76a2']],
   },
   en: {
-    dir: 'ltr', lang: 'en', back: 'Back', title: 'Stopping and starting',
+    dir: 'ltr', lang: 'en', qrT: 'Get the app on Google Play', back: 'Back', title: 'Stopping and starting',
     sub: 'How to recite the Quran: where to pause, where to continue, where to resume — Hafs and Warsh',
     tabs: ['Hafs', 'Warsh', 'General rules'],
     introT: 'What are waqf and ibtida’?',
@@ -334,6 +334,7 @@ main{max-width:720px; margin:0 auto; padding:14px max(10px,env(safe-area-inset-l
 .sakt li{display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; list-style:none; padding:0; margin:8px 0;}
 .srcs a{display:block; margin:7px 0; font-size:14px; overflow-wrap:anywhere;}
 .foot{margin:24px 12px 0; text-align:center; color:var(--text-3); font-size:13px;}
+.foot .qrb{display:block; margin:10px auto 0; width:92px;} .foot .qrb svg{display:block; width:92px; height:92px; border-radius:10px; border:1px solid var(--sep);}
 .ltr-term{unicode-bidi:isolate;}
 `;
 
@@ -399,7 +400,7 @@ const BODY_JS = String.raw`
     var L = D.T[lang];
     document.documentElement.lang = L.lang; document.documentElement.dir = L.dir;
     document.title = L.title.split('(')[0].trim() + ' — صلاتي';
-    $('#back-t').textContent = L.back;
+    $('#back-t').textContent = L.back; $('#qr-t').textContent = L.qrT;
     $('h1').textContent = L.title; $('#sub').textContent = L.sub;
     var tb = $('#tabs'); tb.innerHTML = ['hafs','warsh','rules'].map(function(id,i){ return '<button role="tab" id="t-'+id+'" aria-controls="p-'+id+'" aria-selected="'+(tab===id)+'" data-t="'+id+'">'+esc(L.tabs[i])+'</button>'; }).join('');
     $('#intro').innerHTML = '<h2>'+esc(L.introT)+'</h2><p>'+esc(L.intro1)+'</p><p>'+esc(L.intro2)+'</p>';
@@ -446,7 +447,7 @@ const html = `<!DOCTYPE html>
   <section class="pane" id="p-hafs" role="tabpanel" aria-labelledby="t-hafs"></section>
   <section class="pane warsh" id="p-warsh" role="tabpanel" aria-labelledby="t-warsh" hidden></section>
   <section class="pane" id="p-rules" role="tabpanel" aria-labelledby="t-rules" hidden></section>
-  <p class="foot">صلاتي · salatee.org</p>
+  <div class="foot"><span id="qr-t"></span><span class="qrb"><svg class="qr" viewBox="-2 -2 37 37" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="QR" shape-rendering="crispEdges"><rect x="-2" y="-2" width="37" height="37" fill="#fff"/><path d="M0 0h7v1h-7zM8 0h1v1h-1zM11 0h1v1h-1zM13 0h1v1h-1zM17 0h5v1h-5zM23 0h1v1h-1zM26 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM11 1h1v1h-1zM13 1h1v1h-1zM16 1h3v1h-3zM22 1h2v1h-2zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h1v1h-1zM12 2h1v1h-1zM22 2h3v1h-3zM26 2h1v1h-1zM28 2h3v1h-3zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM14 3h2v1h-2zM17 3h1v1h-1zM23 3h2v1h-2zM26 3h1v1h-1zM28 3h3v1h-3zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM13 4h2v1h-2zM19 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM9 5h4v1h-4zM14 5h1v1h-1zM17 5h5v1h-5zM24 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h7v1h-7zM8 7h1v1h-1zM12 7h1v1h-1zM17 7h2v1h-2zM20 7h1v1h-1zM22 7h2v1h-2zM0 8h1v1h-1zM2 8h2v1h-2zM5 8h3v1h-3zM10 8h2v1h-2zM14 8h1v1h-1zM16 8h4v1h-4zM21 8h1v1h-1zM23 8h1v1h-1zM26 8h1v1h-1zM29 8h1v1h-1zM31 8h2v1h-2zM1 9h1v1h-1zM3 9h3v1h-3zM7 9h4v1h-4zM12 9h1v1h-1zM16 9h1v1h-1zM18 9h3v1h-3zM23 9h2v1h-2zM26 9h2v1h-2zM29 9h4v1h-4zM0 10h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM6 10h2v1h-2zM10 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM17 10h1v1h-1zM20 10h1v1h-1zM22 10h3v1h-3zM26 10h4v1h-4zM31 10h2v1h-2zM2 11h1v1h-1zM4 11h2v1h-2zM10 11h1v1h-1zM12 11h5v1h-5zM18 11h1v1h-1zM20 11h1v1h-1zM27 11h1v1h-1zM29 11h1v1h-1zM31 11h1v1h-1zM0 12h1v1h-1zM2 12h1v1h-1zM4 12h3v1h-3zM8 12h4v1h-4zM15 12h1v1h-1zM17 12h1v1h-1zM19 12h1v1h-1zM22 12h4v1h-4zM27 12h3v1h-3zM1 13h1v1h-1zM4 13h2v1h-2zM7 13h2v1h-2zM12 13h2v1h-2zM15 13h2v1h-2zM18 13h2v1h-2zM21 13h1v1h-1zM24 13h1v1h-1zM27 13h1v1h-1zM29 13h1v1h-1zM31 13h1v1h-1zM4 14h1v1h-1zM6 14h1v1h-1zM11 14h1v1h-1zM14 14h1v1h-1zM18 14h4v1h-4zM24 14h1v1h-1zM26 14h1v1h-1zM28 14h3v1h-3zM1 15h3v1h-3zM9 15h1v1h-1zM11 15h1v1h-1zM14 15h1v1h-1zM16 15h1v1h-1zM19 15h1v1h-1zM21 15h3v1h-3zM25 15h2v1h-2zM30 15h1v1h-1zM2 16h1v1h-1zM5 16h5v1h-5zM11 16h1v1h-1zM13 16h1v1h-1zM16 16h1v1h-1zM20 16h3v1h-3zM24 16h3v1h-3zM28 16h3v1h-3zM0 17h1v1h-1zM2 17h1v1h-1zM4 17h2v1h-2zM7 17h2v1h-2zM10 17h1v1h-1zM12 17h1v1h-1zM14 17h2v1h-2zM22 17h3v1h-3zM26 17h1v1h-1zM28 17h2v1h-2zM32 17h1v1h-1zM1 18h4v1h-4zM6 18h1v1h-1zM8 18h2v1h-2zM12 18h2v1h-2zM15 18h2v1h-2zM20 18h2v1h-2zM26 18h3v1h-3zM30 18h2v1h-2zM1 19h2v1h-2zM4 19h1v1h-1zM8 19h3v1h-3zM13 19h5v1h-5zM22 19h2v1h-2zM25 19h2v1h-2zM28 19h1v1h-1zM32 19h1v1h-1zM0 20h1v1h-1zM2 20h6v1h-6zM9 20h1v1h-1zM13 20h1v1h-1zM15 20h1v1h-1zM17 20h5v1h-5zM24 20h1v1h-1zM27 20h1v1h-1zM29 20h3v1h-3zM0 21h1v1h-1zM2 21h2v1h-2zM7 21h3v1h-3zM16 21h2v1h-2zM19 21h2v1h-2zM22 21h3v1h-3zM26 21h1v1h-1zM29 21h1v1h-1zM32 21h1v1h-1zM5 22h2v1h-2zM9 22h2v1h-2zM12 22h1v1h-1zM14 22h1v1h-1zM18 22h1v1h-1zM20 22h5v1h-5zM26 22h2v1h-2zM30 22h3v1h-3zM1 23h4v1h-4zM9 23h3v1h-3zM13 23h1v1h-1zM18 23h1v1h-1zM20 23h1v1h-1zM23 23h1v1h-1zM25 23h1v1h-1zM27 23h3v1h-3zM31 23h1v1h-1zM0 24h1v1h-1zM3 24h1v1h-1zM6 24h2v1h-2zM9 24h3v1h-3zM15 24h1v1h-1zM17 24h1v1h-1zM19 24h1v1h-1zM22 24h1v1h-1zM24 24h5v1h-5zM31 24h2v1h-2zM8 25h1v1h-1zM11 25h3v1h-3zM15 25h2v1h-2zM18 25h2v1h-2zM23 25h2v1h-2zM28 25h2v1h-2zM31 25h1v1h-1zM0 26h7v1h-7zM8 26h1v1h-1zM10 26h2v1h-2zM14 26h1v1h-1zM16 26h1v1h-1zM19 26h1v1h-1zM22 26h3v1h-3zM26 26h1v1h-1zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h3v1h-3zM13 27h1v1h-1zM15 27h2v1h-2zM20 27h2v1h-2zM23 27h2v1h-2zM28 27h4v1h-4zM0 28h1v1h-1zM2 28h3v1h-3zM6 28h1v1h-1zM9 28h4v1h-4zM16 28h1v1h-1zM19 28h10v1h-10zM30 28h1v1h-1zM32 28h1v1h-1zM0 29h1v1h-1zM2 29h3v1h-3zM6 29h1v1h-1zM8 29h1v1h-1zM10 29h3v1h-3zM15 29h1v1h-1zM27 29h1v1h-1zM29 29h1v1h-1zM32 29h1v1h-1zM0 30h1v1h-1zM2 30h3v1h-3zM6 30h1v1h-1zM8 30h2v1h-2zM11 30h5v1h-5zM17 30h2v1h-2zM22 30h2v1h-2zM26 30h2v1h-2zM30 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM15 31h4v1h-4zM20 31h1v1h-1zM22 31h1v1h-1zM24 31h2v1h-2zM27 31h2v1h-2zM32 31h1v1h-1zM0 32h7v1h-7zM8 32h1v1h-1zM11 32h2v1h-2zM15 32h1v1h-1zM17 32h3v1h-3zM21 32h1v1h-1zM23 32h1v1h-1zM25 32h1v1h-1zM28 32h1v1h-1zM30 32h1v1h-1z" fill="#000"/></svg></span></div>
 </main>
 <script>${BODY_JS.replace('__DATA__', data.replace(/<\//g, '<\\/'))}</script>
 </body>

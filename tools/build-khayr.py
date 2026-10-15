@@ -415,19 +415,19 @@ DOORS.append({
 
 # ───────────────────────── النصوص الواجهة
 UI = {
- 'ar': {'dir': 'rtl', 'back': 'العودة', 'title': 'أبواب الخير', 'sub': 'أعمالٌ بسيطة تفتح لك أبواب الأجر — ابدأ اليوم بباب واحد.',
+ 'ar': {'dir': 'rtl', 'qrT': 'حمِّل التطبيق من Google Play', 'back': 'العودة', 'title': 'أبواب الخير', 'sub': 'أعمالٌ بسيطة تفتح لك أبواب الأجر — ابدأ اليوم بباب واحد.',
         'today': 'اليوم', 'of': 'من', 'doorsDone': 'أبوابٌ أُنجزت', 'open': 'افتح', 'verses': 'من القرآن', 'hadith': 'من السنّة', 'meaning': 'المعنى',
         'steps': 'اقتراحات عمليّة', 'stepsNote': 'اقتراحاتٌ عمليّةٌ من اجتهاد التطبيق، وليست نصًّا شرعيًّا.',
         'did': 'فعلتُها اليوم ✓', 'undo': 'تراجع', 'month': 'أيّام هذا الشهر', 'streak': 'أيّامٌ متتالية',
         'foot': 'نصوص الأحاديث منقولةٌ من «صحيح البخاريّ» و«صحيح مسلم» نصًّا، ونصُّ الآيات من مصحف المدينة (برواية حفص). والشرح والاقتراحات اجتهادٌ مختصَر لا يغني عن أهل العلم. ما تسجّله هنا محفوظٌ على هاتفك فقط، ولا يُرسَل إلى أحد.',
         'by': {'both': 'متّفقٌ عليه', 'bukhari': 'رواه البخاري', 'muslim': 'رواه مسلم'}, 'narrator': 'الراوي', 'ref': 'سورة'},
- 'fr': {'dir': 'ltr', 'back': 'Retour', 'title': 'Portes du bien', 'sub': 'De petits gestes qui ouvrent des portes de récompense — commencez aujourd’hui par une seule porte.',
+ 'fr': {'dir': 'ltr', 'qrT': 'Téléchargez l’application sur Google Play', 'back': 'Retour', 'title': 'Portes du bien', 'sub': 'De petits gestes qui ouvrent des portes de récompense — commencez aujourd’hui par une seule porte.',
         'today': 'Aujourd’hui', 'of': 'sur', 'doorsDone': 'portes accomplies', 'open': 'Ouvrir', 'verses': 'Du Coran', 'hadith': 'De la Sunna', 'meaning': 'Sens',
         'steps': 'Idées concrètes', 'stepsNote': 'Suggestions de l’application pour passer à l’action ; ce n’est pas un texte religieux.',
         'did': 'Je l’ai fait aujourd’hui ✓', 'undo': 'Annuler', 'month': 'jours ce mois-ci', 'streak': 'jours consécutifs',
         'foot': 'Les textes des hadiths sont repris tels quels du Sahih al-Bukhari et du Sahih Muslim ; les versets viennent du Mushaf de Médine (Hafs). Les explications et suggestions sont un effort personnel résumé qui ne remplace pas les savants. Ce que vous cochez reste uniquement sur votre téléphone et n’est jamais envoyé.',
         'by': {'both': 'Muttafaqun ‘alayh (Bukhari et Muslim)', 'bukhari': 'Rapporté par al-Bukhari', 'muslim': 'Rapporté par Muslim'}, 'narrator': 'Rapporteur', 'ref': 'Sourate'},
- 'en': {'dir': 'ltr', 'back': 'Back', 'title': 'Doors of Goodness', 'sub': 'Simple deeds that open doors of reward — start today with just one door.',
+ 'en': {'dir': 'ltr', 'qrT': 'Get the app on Google Play', 'back': 'Back', 'title': 'Doors of Goodness', 'sub': 'Simple deeds that open doors of reward — start today with just one door.',
         'today': 'Today', 'of': 'of', 'doorsDone': 'doors done', 'open': 'Open', 'verses': 'From the Quran', 'hadith': 'From the Sunnah', 'meaning': 'Meaning',
         'steps': 'Practical ideas', 'stepsNote': 'Suggestions from the app to put it into practice; not a religious text.',
         'did': 'Done today ✓', 'undo': 'Undo', 'month': 'days this month', 'streak': 'days in a row',

@@ -22,6 +22,7 @@ public final class AdhanScheduler {
   private static final String PREFS   = "salaty_adhan";
   private static final String K_TIMES = "times";     // JSONArray [{at:long, name:String, fajr:bool}]
   private static final String K_ON    = "enabled";
+  private static final String K_PRE   = "pre";       // JSONArray [{at:long, title:String, body:String}] — تذكيراتُ «قبل الصلاة بعشر دقائق»
   private static final int    REQ     = 7301;
 
   private AdhanScheduler() {}
@@ -53,11 +54,32 @@ public final class AdhanScheduler {
     return am != null && am.canScheduleExactAlarms();
   }
 
+  /** تذكيراتُ ما قبل الصلاة: تُسلَّم من الواجهة (العنوانُ والنصّ جاهزان) وتُطلَق بالمنبّه الدقيق نفسِه الذي يرفع الأذان */
+  public static void savePre(Context c, JSONArray pre) {
+    prefs(c).edit().putString(K_PRE, pre.toString()).apply();
+  }
+
+  public static JSONArray pre(Context c) {
+    try {
+      return new JSONArray(prefs(c).getString(K_PRE, "[]"));
+    } catch (Exception e) {
+      return new JSONArray();
+    }
+  }
+
   private static PendingIntent pending(Context c, String name, boolean fajr) {
+    return pending(c, name, fajr, null, null, null);
+  }
+
+  private static PendingIntent pending(Context c, String name, boolean fajr, String kind, String title, String body) {
     Intent i = new Intent(c, AdhanReceiver.class)
         .setAction(AdhanReceiver.ACTION_FIRE)
         .putExtra(AdhanReceiver.EXTRA_NAME, name)
         .putExtra(AdhanReceiver.EXTRA_FAJR, fajr);
+    if (kind != null) {
+      i.putExtra(AdhanReceiver.EXTRA_KIND, kind).putExtra(AdhanReceiver.EXTRA_TITLE, title == null ? "" : title)
+          .putExtra(AdhanReceiver.EXTRA_BODY, body == null ? "" : body);
+    }
     int flags = PendingIntent.FLAG_UPDATE_CURRENT;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;
     return PendingIntent.getBroadcast(c, REQ, i, flags);
@@ -70,27 +92,40 @@ public final class AdhanScheduler {
 
     // إلغاءُ ما سبق: الوسائطُ قد تغيّرت، وFLAG_UPDATE_CURRENT وحدَه لا يكفي بعد الإطفاء
     am.cancel(pending(c, "", false));
-    if (!enabled(c)) return;
 
-    JSONArray list = times(c);
     long now = System.currentTimeMillis();
     long bestAt = Long.MAX_VALUE;
     String bestName = "";
     boolean bestFajr = false;
+    String bestKind = null, bestTitle = null, bestBody = null;
 
-    for (int i = 0; i < list.length(); i++) {
-      JSONObject o = list.optJSONObject(i);
+    if (enabled(c)) {
+      JSONArray list = times(c);
+      for (int i = 0; i < list.length(); i++) {
+        JSONObject o = list.optJSONObject(i);
+        if (o == null) continue;
+        long at = o.optLong("at", 0L);
+        // هامشُ دقيقةٍ: منبّهٌ في اللحظة عينِها قد يَسبقه الاستدعاء بأجزاءِ ثانية
+        if (at <= now + 1000L || at >= bestAt) continue;
+        bestAt   = at;
+        bestName = o.optString("name", "");
+        bestFajr = o.optBoolean("fajr", false);
+      }
+    }
+    /* تذكيرُ ما قبل الصلاة بعشر دقائق: مستقلٌّ عن تفعيل الأذان، وأقربُ المنبّهين يُسلَّح أوّلًا. كان يمرّ عبر
+       إشعارات Capacitor فيتأخّر في الخمول العميق فيصل وقتَ الأذان؛ وهنا يعتمد المنبّهَ الدقيقَ نفسَه. */
+    JSONArray pre = pre(c);
+    for (int i = 0; i < pre.length(); i++) {
+      JSONObject o = pre.optJSONObject(i);
       if (o == null) continue;
       long at = o.optLong("at", 0L);
-      // هامشُ دقيقةٍ: منبّهٌ في اللحظة عينِها قد يَسبقه الاستدعاء بأجزاءِ ثانية
       if (at <= now + 1000L || at >= bestAt) continue;
-      bestAt   = at;
-      bestName = o.optString("name", "");
-      bestFajr = o.optBoolean("fajr", false);
+      bestAt = at; bestKind = "pre"; bestName = ""; bestFajr = false;
+      bestTitle = o.optString("title", ""); bestBody = o.optString("body", "");
     }
     if (bestAt == Long.MAX_VALUE) return;
 
-    PendingIntent p = pending(c, bestName, bestFajr);
+    PendingIntent p = pending(c, bestName, bestFajr, bestKind, bestTitle, bestBody);
     try {
       if (canExact(c)) {
         /* setAlarmClock أقوى منبّهٍ في أندرويد: يوقظ الهاتفَ من الخمول العميق، ولا تُؤخّره

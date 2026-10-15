@@ -1,5 +1,9 @@
 package app.salaty.twa;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,10 +22,18 @@ public class AdhanReceiver extends BroadcastReceiver {
   public static final String ACTION_FIRE = "app.salaty.twa.ADHAN_FIRE";
   public static final String EXTRA_NAME  = "name";
   public static final String EXTRA_FAJR  = "fajr";
+  public static final String EXTRA_KIND  = "kind";     // "pre" = تذكيرُ ما قبل الصلاة (لا أذان)
+  public static final String EXTRA_TITLE = "title";
+  public static final String EXTRA_BODY  = "body";
 
   @Override
   public void onReceive(Context context, Intent intent) {
     Context app = context.getApplicationContext();
+    if (intent != null && "pre".equals(intent.getStringExtra(EXTRA_KIND))) {
+      try { showPre(app, intent.getStringExtra(EXTRA_TITLE), intent.getStringExtra(EXTRA_BODY)); } catch (Exception ignored) {}
+      try { AdhanScheduler.arm(app); } catch (Exception ignored) {}
+      return;
+    }
     try {
       if (AdhanScheduler.enabled(app)) {
         String name = intent == null ? "" : intent.getStringExtra(EXTRA_NAME);
@@ -44,5 +56,27 @@ public class AdhanReceiver extends BroadcastReceiver {
     // الوقتُ التالي: المنبّهاتُ الدقيقة تُطلَق مرّةً واحدة، فالتسليحُ يتجدّد هنا
     try { AdhanScheduler.arm(app); } catch (Exception ignored) {}
     try { PrayerWidget.refresh(app); } catch (Exception ignored) {}
+  }
+
+  /** إشعارُ «بقي عشر دقائق على الصلاة»: صوتُه صوتُ الإشعارات العاديّ (لا أذان) وقناتُه «التذكيرات» */
+  private static void showPre(Context app, String title, String body) {
+    NotificationManager nm = (NotificationManager) app.getSystemService(Context.NOTIFICATION_SERVICE);
+    if (nm == null) return;
+    String channel = "reminders";
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm.getNotificationChannel(channel) == null) {
+      NotificationChannel ch = new NotificationChannel(channel, "التذكيرات", NotificationManager.IMPORTANCE_HIGH);
+      nm.createNotificationChannel(ch);
+    }
+    Intent open = new Intent(app, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    int f = PendingIntent.FLAG_UPDATE_CURRENT;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) f |= PendingIntent.FLAG_IMMUTABLE;
+    PendingIntent pi = PendingIntent.getActivity(app, 7311, open, f);
+    int icon = app.getResources().getIdentifier("ic_stat_icon", "drawable", app.getPackageName());
+    Notification.Builder b = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) ? new Notification.Builder(app, channel) : new Notification.Builder(app);
+    b.setContentTitle(title == null ? "" : title).setContentText(body == null ? "" : body)
+        .setStyle(new Notification.BigTextStyle().bigText(body == null ? "" : body))
+        .setSmallIcon(icon != 0 ? icon : android.R.drawable.ic_lock_idle_alarm)
+        .setContentIntent(pi).setAutoCancel(true);
+    nm.notify((int) (System.currentTimeMillis() / 60000L % 100000L) + 800000, b.build());
   }
 }

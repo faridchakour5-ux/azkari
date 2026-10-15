@@ -1100,6 +1100,9 @@
   .share-shot .ss-foot{margin-top:18px; padding-top:14px; border-top:1px solid var(--sep);
     text-align:center; font-size:14px; font-weight:700; color:var(--text-2);}
   .share-shot .ss-foot span{color:var(--accent);}
+  .share-shot .ss-foot{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .share-shot .ss-fl small{display:block; font-size:11.5px; color:var(--text-3); font-weight:600;}
+  .share-shot .ss-qr svg{display:block; border-radius:8px; border:1px solid var(--sep);}
   .share-shot .tick, .share-shot .dhikr-play, .share-shot .info-btn, .share-shot .fq-share{display:none !important;}
   .share-shot .t-aya{margin-bottom:14px;}
   .share-shot .t-txt, .share-shot .t-intro{font-size:15px; line-height:2;}
@@ -1487,6 +1490,24 @@
   .reciter-box{margin-inline:var(--gx);}
   .tafsir-body{padding-inline:14px;}
   .share-shot .card, .share-shot .fq-card{margin:0;}
+
+  /* ===== أذكار: بتصميم الصفحتين المرجعيّتين (الوقف والابتداء، أبواب الخير) =====
+     قاعدةٌ ثابتةٌ من فريد (15 أكتوبر 2026): ترويسةٌ خضراءٌ متدرّجةٌ بخطٍّ ذهبيّ، أقراصٌ للتبويبات، بطاقاتٌ بزوايا 20 وظلٍّ ناعم. */
+  #s-azkar .head{background:linear-gradient(160deg,#0E6B52 0%,#0A5441 48%,#063D30 100%); color:#fff; margin:0 0 4px;
+    padding:calc(env(safe-area-inset-top,0px) + 16px) 18px 26px; overflow:hidden;}
+  #s-azkar .head::before{content:''; position:absolute; inset-inline-end:-60px; top:-60px; width:230px; height:230px; border-radius:50%; pointer-events:none;
+    border:1.5px solid rgba(255,255,255,.14); box-shadow:0 0 0 26px rgba(255,255,255,.05), 0 0 0 52px rgba(255,255,255,.03);}
+  #s-azkar .head::after{content:''; position:absolute; inset-inline:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#D9B15C 30%,#D9B15C 70%,transparent);}
+  #s-azkar .head h1{position:relative; color:#fff; margin:38px 0 6px; font-size:clamp(26px,7.4vw,34px); line-height:1.35; font-weight:800; letter-spacing:0;}
+  #s-azkar .az-source{position:relative; color:rgba(255,255,255,.86); font-size:14.5px; font-weight:500; margin-top:0;}
+  #s-azkar .riwaya-quick{top:calc(env(safe-area-inset-top,0px) + 16px); background:rgba(255,255,255,.12); border-radius:999px; padding:3px;}
+  #s-azkar .riwaya-quick button{color:#fff; border-radius:999px; padding:5px 12px; font-size:12.5px; font-weight:600;}
+  #s-azkar .riwaya-quick button.on{background:#fff; color:#063D30;}
+  #s-azkar .prayerbar, #s-azkar .qp-open, #s-azkar .inst-row{border-radius:20px; box-shadow:var(--shadow-1); border:1px solid var(--line);}
+  #s-azkar #time-seg{background:transparent; padding:2px 0; gap:8px; margin:18px 16px 8px; border-radius:0;}
+  #s-azkar #time-seg button{flex:0 0 auto; border:1px solid var(--line); background:var(--card); color:var(--text-2); font-weight:700; font-size:14.5px;
+    padding:9px 18px; border-radius:20px; min-height:44px; box-shadow:none;}
+  #s-azkar #time-seg button.on{background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:none;}
 </style>
 </head>
 <body>
@@ -3744,7 +3765,7 @@ function buildShotNode(innerHTML, title, sub){
     '<div class="ss-head"><span class="ss-ttl">'+escapeHtml(title||'صلاتي')+'</span>'+
       (sub?'<span class="ss-sub">'+escapeHtml(sub)+'</span>':'')+'</div>'+
     '<div class="ss-body">'+innerHTML+'</div>'+
-    '<div class="ss-foot">صلاتي — أذكار ومصحف · <span>www.salatee.org</span></div>';
+    '<div class="ss-foot"><span class="ss-fl">صلاتي — أذكار ومصحف<small>حمِّل التطبيق من Google Play</small></span><span class="ss-qr">'+qrSvg(58)+'</span></div>';
   return el;
 }
 /* دقّةُ صورة المشاركة وPDF: ثلاثةُ أضعاف الشاشة ما أمكن (كانت ضعفين) — فيخرج النصُّ العربيُّ ومعه التشكيلُ حادًّا عند التكبير والطباعة.
@@ -3865,16 +3886,16 @@ function drawPdfBands(g, W, pageH, HEAD, FOOT, S, no, total){
   g.font='700 '+Math.round(13*S)+"px 'PlexAr',sans-serif";
   g.textAlign='right'; g.fillStyle=t2;
   g.fillText('صلاتي — أذكار ومصحف', W-PAD, HEAD-Math.round(12*S));
-  g.textAlign='left'; g.fillStyle=acc;
-  g.fillText('www.salatee.org', PAD, HEAD-Math.round(12*S));
   // التذييل
   const fy=pageH-FOOT;
   g.fillStyle=bg; g.fillRect(0,fy,W,FOOT);
   g.beginPath(); g.moveTo(PAD,fy+0.5*S); g.lineTo(W-PAD,fy+0.5*S); g.stroke();
   const by=fy+Math.round(25*S);
   g.font='700 '+Math.round(13.5*S)+"px 'PlexAr',sans-serif";
+  const qs=Math.round(Math.min(FOOT-12*S, 46*S));
+  qrDraw(g, W-PAD-qs, fy+Math.round((FOOT-qs)/2), qs);
   g.textAlign='right'; g.fillStyle=acc;
-  g.fillText('www.salatee.org', W-PAD, by);
+  g.fillText('حمِّل التطبيق من Google Play', W-PAD-qs-Math.round(10*S), by);
   if(total>1){
     g.font='600 '+Math.round(12*S)+"px 'PlexAr',sans-serif";
     g.textAlign='left'; g.fillStyle=t2;
@@ -4552,6 +4573,22 @@ applyListenMode('quran');
 /* ==================== اختبار الثقافة الإسلامية ==================== */
 /* الاختبار: 20 سؤالًا في الجولة فتكون النتيجةُ «من 20». ولكلّ جولةٍ رقمُ بذرةٍ يُرتّب الأسئلةَ والخيارات
    ترتيبًا ثابتًا، فإذا أرسلتَ نتيجتَك لصديقٍ فتح الرابطَ لعب الأسئلةَ نفسَها بالترتيب نفسِه (تحدٍّ عادل). */
+/* QR لصفحة التطبيق في متجر Google Play — يحلّ محلَّ كتابة عنوان الموقع داخل التطبيق (أمرٌ من فريد، 15 أكتوبر 2026).
+   المصفوفةُ ثابتةٌ مولَّدةٌ مرّةً واحدة (النسخة 4، تصحيحُ الخطأ M)، فلا مكتبةَ ولا شبكة. */
+const PLAY_URL='https://play.google.com/store/apps/details?id=app.salaty.twa';
+const QR_ROWS=["111111101001010001111101001111111", "100000101001010011100011001000001", "101110100100100000000011101011101", "101110101100001101000001101011101", "101110100100011000010010101011101", "100000100111101001111100101000001", "111111101010101010101010101111111", "000000001000100001101011000000000", "101101110011001011110101001001011", "010111011110100010111001101101111", "101010110010101001001011101111011", "001011000010111110101000000101010", "101011101111000101010011110111000", "010011011000110110110100100101010", "000010100001001000111100101011100", "011100000101001010010111011000100", "001001111101010010001110111011100", "101011011010101100000011101011001", "011110101100110110001100001110110", "011010001110011111000011011010001", "101111110100010101111100100101110", "101100011100000011011011101001001", "000001100110101000101111101100111", "011110000111010000101001010111010", "100100110111000101010010111110011", "000000001001110110110001100011010", "111111101011001010010011101010000", "100000101110010110001101100011110", "101110100111100010011111111110101", "101110101011100100000000000101001", "101110101101111101100011001100100", "100000100000000111101010110110001", "111111101001100101110101010010100"];
+function qrSvg(px){
+  const n=QR_ROWS.length; let d='';
+  QR_ROWS.forEach((r,y)=>{ let x=0; while(x<n){ if(r[x]==='1'){ let e=x; while(e<n && r[e]==='1') e++; d+='M'+x+' '+y+'h'+(e-x)+'v1h-'+(e-x)+'z'; x=e; } else x++; } });
+  return '<svg class="qr" width="'+px+'" height="'+px+'" viewBox="-2 -2 '+(n+4)+' '+(n+4)+'" shape-rendering="crispEdges" role="img" aria-label="QR"><rect x="-2" y="-2" width="'+(n+4)+'" height="'+(n+4)+'" fill="#fff"/><path d="'+d+'" fill="#000"/></svg>';
+}
+/* يرسم الـQR على لوحة canvas داخل مربّعٍ أبيضَ بهامشٍ هادئ */
+function qrDraw(g, x, y, size){
+  const n=QR_ROWS.length, cell=size/(n+4);
+  g.save(); g.fillStyle='#fff'; g.fillRect(x,y,size,size); g.fillStyle='#000';
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(QR_ROWS[r][c]==='1') g.fillRect(Math.round(x+(c+2)*cell), Math.round(y+(r+2)*cell), Math.ceil(cell), Math.ceil(cell));
+  g.restore();
+}
 const QZ_LEN=20, QZ_URL='https://salatee.org/';
 let __qzLoading=null, __qzCat='all', __qzSet=[], __qzI=0, __qzScore=0, __qzAnswered=false, __qzSeed=0, __qzChal=null;
 function loadQuiz(){
@@ -7641,7 +7678,7 @@ async function buildQuickPopImage(){
   const h2 = kind==='hadith' ? (IN + l2.length*LH1 + 10 + srcLines.length*21 + IN) : (kind==='salat' ? hBox(l2) : 0);
   const QGAP = maghribi ? 24 : 10;             // فراغ يمنع تداخل علامات الوقف مع العنوان
   const h3 = q ? (IN + 28 + QGAP + qLines.length*LHQ + IN) : 0;
-  const H = PAD + 44 + 30 + 16 + (h2 ? h2+14 : 0) + (q? h3+14 : 0) + 26 + 46 + PAD;
+  const H = PAD + 44 + 30 + 16 + (h2 ? h2+14 : 0) + (q? h3+14 : 0) + 26 + 124 + PAD;
 
   // ---- تمرير ثانٍ: الرسم ----
   const cv=document.createElement('canvas');
@@ -7713,8 +7750,9 @@ async function buildQuickPopImage(){
   c.beginPath(); c.moveTo(PAD,y-20); c.lineTo(W-PAD,y-20); c.stroke();
   c.font="700 17px 'PlexAr',sans-serif"; c.fillStyle=cText;
   c.fillText('صلاتي — أذكار ومصحف', W/2, y);
-  c.font="700 15px 'PlexAr',sans-serif"; c.fillStyle=cAcc;
-  c.fillText('www.salatee.org', W/2, y+24);
+  c.font="600 13px 'PlexAr',sans-serif"; c.fillStyle=cText2;
+  c.fillText('حمِّل التطبيق من Google Play', W/2, y+26);
+  qrDraw(c, W/2-36, y+38, 72);
   return cv;
 }
 
@@ -7803,7 +7841,7 @@ $('#qp-share')  && $('#qp-share').addEventListener('click', ()=>{ vibrate(8); qp
 $('#quick-pop') && $('#quick-pop').addEventListener('click', e=>{ if(e.target.id==='quick-pop') closeQuickPop(); });
 
 /* ================= التحدّي اليومي ================= */
-const APP_LINK = 'https://www.salatee.org';
+const APP_LINK = PLAY_URL;
 const WA_SVG   = '<svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.7.2s-.7 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.2 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
 const CHK_IC   = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>';
 const BOOK_IC  = '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>';
@@ -7969,6 +8007,7 @@ async function scheduleNativeNotifs(){
        ولا نَجمع بينهما البتّةَ وإلّا ارتفع أذانان معًا. */
     const ADHAN_SVC = adhanPlugin();
     const adhanTimes = [];
+    const preList = [];   // تذكيراتُ «قبل الصلاة بعشر دقائق» للمنبّه الدقيق الأصليّ (تصل في وقتها لا وقتَ الأذان)
     /* أفُقان مختلفان عن قصد:
        - الإشعاراتُ ثمانيةُ أيّام: كلُّ واحدٍ منها منبّهٌ في النظام، وأندرويد
          يَخنق كثرتَها، وثمانيةٌ تَضمن تغطيةَ جمعةٍ قادمةٍ كاملةً دائمًا.
@@ -8001,7 +8040,9 @@ async function scheduleNativeNotifs(){
           const rem=new Date(at.getTime()-10*60000);
           if(rem.getTime() > nowMs+60000 && inNotifWindow(rem, pt)){
             const mg=preMsg(nm,d,prayers.findIndex(x=>x[0]===k));
-            notifs.push({ id:id++, channelId:'reminders', title:mg.title, body:mg.body, largeBody:mg.body,
+            /* الأصليّ: بالمنبّه الدقيق نفسِه الذي يرفع الأذان — إشعاراتُ Capacitor كانت تتأخّر في الخمول العميق فيصل التذكيرُ وقتَ الأذان */
+            if(ADHAN_SVC) preList.push({ at:rem.getTime(), title:mg.title, body:mg.body });
+            else notifs.push({ id:id++, channelId:'reminders', title:mg.title, body:mg.body, largeBody:mg.body,
               schedule:{ at:rem, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
           }
         }
@@ -8026,7 +8067,7 @@ async function scheduleNativeNotifs(){
       /* المواقيتُ تُحسَب هنا بـ adhan.min.js — مصدرٌ واحدٌ لا يَختلف عمّا يَراه
          المستخدمُ في شريط المواقيت — وتُسلَّم إلى النظام أرقامًا مطلقة. */
       try{
-        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true, voice: adhanPref() });
+        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, pre: preList, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true, voice: adhanPref() });
         paintAdhanNote(); paintVoiceRow();
       }catch(e){}
     }
@@ -8413,7 +8454,7 @@ $('#ish-yes') && $('#ish-yes').addEventListener('click', async ()=>{
       try{ const ta=document.createElement('textarea'); ta.value=url; ta.style.position='fixed'; ta.style.opacity='0';
            document.body.appendChild(ta); ta.select(); ok=document.execCommand('copy'); ta.remove(); }catch(e2){}
     }
-    showToast(ok ? 'نُسخ الرابط — الصِقْه في المتصفّح' : 'الرابط: www.salatee.org', 4200);
+    showToast(ok ? 'نُسخ الرابط — الصِقْه في المتصفّح' : 'تعذّر نسخ الرابط', 4200);
     ishSnooze(1); closeInstallSheet(); return;
   }
   ishSnooze(2); closeInstallSheet();   // قُرئت التعليمات

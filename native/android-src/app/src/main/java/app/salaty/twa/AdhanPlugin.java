@@ -79,6 +79,22 @@ public class AdhanPlugin extends Plugin {
         clean.put(e);
       }
 
+      /* تذكيراتُ «قبل الصلاة بعشر دقائق» (اختياريّة): تُسلَّم جاهزةً من الواجهة وتُطلَق بالمنبّه الدقيق نفسِه */
+      JSArray preIn = call.getArray("pre", new JSArray());
+      JSONArray preClean = new JSONArray();
+      for (int i = 0; i < preIn.length(); i++) {
+        JSONObject o = preIn.optJSONObject(i);
+        if (o == null) continue;
+        long pat = o.optLong("at", 0L);
+        if (pat <= now) continue;
+        JSONObject e = new JSONObject();
+        e.put("at", pat);
+        e.put("title", o.optString("title", ""));
+        e.put("body", o.optString("body", ""));
+        preClean.put(e);
+      }
+      AdhanScheduler.savePre(getContext(), preClean);
+
       Boolean vs = call.getBoolean("volStop", Boolean.FALSE);
       String voice = call.getString("voice", "wadee");
       AdhanScheduler.prefs(getContext()).edit()
