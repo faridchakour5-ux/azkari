@@ -380,19 +380,16 @@
   html:not([lang="ar"]) .drawer{direction:ltr; inset-inline-start:auto; left:0; right:auto; border-radius:0 26px 26px 0; box-shadow:10px 0 36px rgba(0,0,0,.28); transform:translateX(-105%);}
   html:not([lang="ar"]) .drawer.show{transform:none;}
   html:not([lang="ar"]) .dr-head{border-radius:0 26px 0 0;}
-  .dr-head{position:relative; overflow:hidden; border-radius:26px 0 0 0; color:#FFF3D6; padding:calc(env(safe-area-inset-top,0px) + 22px) 20px 18px; min-height:236px; display:flex; flex-direction:column;
-    background:linear-gradient(180deg,rgba(25,16,4,0) 0%,rgba(25,16,4,0) 38%,rgba(25,16,4,.72) 78%,rgba(25,16,4,.86) 100%), #2a1d0c url(icons/drawer-mosaic.jpg) center 50%/cover no-repeat;}
-  .dr-txt{margin-top:auto;}
-  .dr-head::before{display:none; content:''; position:absolute; inset-inline-end:-46px; top:-46px; width:190px; height:190px; opacity:.13;
-    background:
-      conic-gradient(from 0deg, #fff 0 8%, transparent 8% 25%, #fff 25% 33%, transparent 33% 50%, #fff 50% 58%, transparent 58% 75%, #fff 75% 83%, transparent 83%);
-    border-radius:50%; mask:radial-gradient(circle, transparent 38%, #000 39% 41%, transparent 42% 60%, #000 61% 62%, transparent 63%); -webkit-mask:radial-gradient(circle, transparent 38%, #000 39% 41%, transparent 42% 60%, #000 61% 62%, transparent 63%);}
-  .dr-head::after{content:''; position:absolute; inset-inline:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#E3BF72 30%,#E3BF72 70%,transparent);}
-  .dr-logo{width:58px; height:58px; border-radius:18px; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 22px rgba(30,20,6,.42);}
+  .dr-head{position:relative; overflow:hidden; border-radius:26px 0 0 0; color:#fff; padding:calc(env(safe-area-inset-top,0px) + 22px) 20px 20px; display:flex; flex-direction:column;
+    background:linear-gradient(160deg,#0E6B52 0%,#0A5441 48%,#063D30 100%);}
+  .dr-txt{position:relative; z-index:1;}
+  .dr-head::before{content:''; position:absolute; inset-inline-end:-58px; top:-58px; width:150px; height:150px; border-radius:50%; border:1.5px solid rgba(255,255,255,.14); box-shadow:0 0 0 26px rgba(255,255,255,.05), 0 0 0 52px rgba(255,255,255,.03); pointer-events:none;}
+  .dr-head::after{content:''; position:absolute; inset-inline:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#D9B15C 30%,#D9B15C 70%,transparent);}
+  .dr-logo{position:relative; z-index:1; width:58px; height:58px; border-radius:18px; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,.28);}
   .dr-logo img{width:46px; height:46px; border-radius:12px; display:block;}
-  .dr-name{font-size:24px; font-weight:800; margin:12px 0 2px; letter-spacing:.2px; color:#FFF3D6; text-shadow:0 2px 10px rgba(20,12,2,.65);}
-  .dr-sub{font-size:13px; line-height:1.9; color:#F4E4BC; font-weight:600; text-shadow:0 1px 8px rgba(20,12,2,.7);}
-  .dr-sub b{color:#F6D77E; font-weight:800;}
+  .dr-name{font-size:24px; font-weight:800; margin:12px 0 2px; letter-spacing:.2px; color:#fff;}
+  .dr-sub{font-size:13px; line-height:1.9; color:rgba(255,255,255,.86); font-weight:600;}
+  .dr-sub b{color:#F0D48E; font-weight:800;}
   .dr-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:8px 10px calc(18px + env(safe-area-inset-bottom,0px));}
   .dr-g{font-size:12.5px; font-weight:800; color:var(--c-repeat); padding:16px 16px 6px; letter-spacing:.2px;}
   .dr-sep{height:1px; background:var(--sep); margin:8px 12px;}
