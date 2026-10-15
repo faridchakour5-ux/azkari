@@ -126,7 +126,7 @@ add([[`تعلّم التجويد`,`Learn Tajweed`],[`حمِّل التطبيق �
 [`المصحف كامل`,`Full Mushaf`],
 [`القرآن الكريم`,`The Holy Quran`],
 [`القرآن`,`Quran`],
-[`صلاتي`,`Salati`],
+[`صلاتي`,`Salatee`],
 [`أدوات المسلم`,`Muslim tools`],
 [`القبلة · التقويم الهجري · صلواتي · الصيام · الزكاة`,`Qibla · Hijri calendar · My prayers · Fasting · Zakat`],
 [`اليوم الجمعة — سورة الكهف والصلاة على النبيّ ﷺ وساعة الإجابة`,`Today is Friday — Surah Al-Kahf, prayers upon the Prophet ﷺ and the hour of response`],
@@ -246,7 +246,7 @@ add([[`تعلّم التجويد`,`Learn Tajweed`],[`حمِّل التطبيق �
 [`يُطبَّق النمط على نصّ الأذكار. آيات القرآن تبقى بخطّها المعتمد لكل رواية.`,`The style applies to the adhkar text. Quran verses keep their standard script for each recitation.`],
 [`التطبيق`,`App`],
 [`أضِف إلى الشاشة الرئيسية`,`Add to home screen`],
-[`ثبِّت «صلاتي» على هاتفك`,`Install “Salati” on your phone`],
+[`ثبِّت «صلاتي» على هاتفك`,`Install “Salatee” on your phone`],
 [`يُفتح بلا متصفّح، والأذكارُ والمصحفُ دون إنترنت`,`Opens without a browser; adhkar and Quran work offline`],
 [`تثبيت`,`Install`],
 [`ثبِّت الآن`,`Install now`],
@@ -639,7 +639,7 @@ add([[`تعلّم التجويد`,`Learn Tajweed`],[`حمِّل التطبيق �
 [`جيّد، وفي الإعادة إفادة.`,`Good; retaking the quiz is worthwhile.`],
 [`لا بأس، العلم بالتعلّم — أعِد المحاولة.`,`No worries, knowledge comes by learning — try again.`],
 [`ما شاء الله! إجابات كاملة`,`Mashallah! All answers correct`],
-[`تحدّي صلاتي`,`Salati challenge`],
+[`تحدّي صلاتي`,`Salatee challenge`],
 [`اضغط «رجوع» مرّة أخرى للخروج من التطبيق`,`Press “Back” once more to exit the app`],
 [`حُدِّثت المواقيت حسب موقعك الجديد ✓`,`Prayer times updated for your new location ✓`],
 [`موقعك لم يتغيّر — المواقيت محدَّثة`,`Your location has not changed — times are up to date`],
@@ -656,8 +656,8 @@ add([[`تعلّم التجويد`,`Learn Tajweed`],[`حمِّل التطبيق �
 [`يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته`,`The adhan is playing — tap “Stop” in the notification to silence it`],
 [`تعذّر حفظ الملف`,`Could not save the file`],
 [`تمت استعادة تقدّمك بنجاح ✓ سيُعاد تحميل التطبيق.`,`Progress restored ✓ The app will reload.`],
-[`تعذّرت قراءة الملف. تأكد أنه ملف نسخة احتياطية صحيح لتطبيق صلاتي.`,`Could not read the file. Make sure it is a valid Salati backup.`],
-[`هذا الملف لا يبدو نسخةً من تطبيق صلاتي. هل تريد المتابعة؟`,`This file does not look like a Salati backup. Continue?`],
+[`تعذّرت قراءة الملف. تأكد أنه ملف نسخة احتياطية صحيح لتطبيق صلاتي.`,`Could not read the file. Make sure it is a valid Salatee backup.`],
+[`هذا الملف لا يبدو نسخةً من تطبيق صلاتي. هل تريد المتابعة؟`,`This file does not look like a Salatee backup. Continue?`],
 [`جارٍ التنزيل — اضغط للإيقاف`,`Downloading — tap to stop`],
 [`نزّل التلاوة على الجهاز`,`Download the recitation to the device`],
 [`احذف التلاوة من الجهاز`,`Delete the recitation from the device`],
@@ -864,5 +864,5 @@ add([
 SURA.clear();   // أسماءُ السور تبقى بالعربيّة (القرآن بالعربيّة وحدَها)
 for(const k in GM) D.set(key(k), GM[k]);
 for(const k in HM) D.set(key(k), HM[k]);
-window.I18N=C.make({ lang:'en', lookup:find, abbr:v=>mapLook(ABBR,v), title:'Salati — Adhkar & Quran' });
+window.I18N=C.make({ lang:'en', lookup:find, abbr:v=>mapLook(ABBR,v), title:'Salatee — Adhkar & Quran' });
 })();

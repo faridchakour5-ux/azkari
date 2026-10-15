@@ -11,7 +11,7 @@
 <meta name="description" content="صلاتي — أذكار الصباح والمساء، المصحف كامل برواية حفص وورش، المسبحة ومواقيت الصلاة. يعمل دون إنترنت عدا صفحة الاستماع.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="صلاتي">
+<meta name="apple-mobile-web-app-title" content="صلاتي salatee">
 <link rel="canonical" href="https://salatee.org/">
 <!-- بطاقةُ المشاركة: أكثرُ من يصل إليه الرابطُ يصله من واتساب وتيليغرام،
      وكان يظهر عاريًا بلا عنوانٍ ولا وصفٍ ولا صورة. -->
@@ -35,7 +35,7 @@
 <link rel="preload" href="fonts/amiri-quran.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<title>صلاتي</title>
+<title>صلاتي salatee</title>
 <style>
   @font-face{font-family:'PlexAr'; src:url('fonts/ui-400.woff2') format('woff2'); font-weight:400; font-display:swap;}
   @font-face{font-family:'PlexAr'; src:url('fonts/ui-600.woff2') format('woff2'); font-weight:600; font-display:swap;}
@@ -387,6 +387,8 @@
   .dr-head::after{content:''; position:absolute; inset-inline:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#D9B15C 30%,#D9B15C 70%,transparent);}
   .dr-logo{position:relative; z-index:1; width:58px; height:58px; border-radius:18px; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,.28);}
   .dr-logo img{width:46px; height:46px; border-radius:12px; display:block;}
+  html:not([lang="ar"]) .dr-name .lt-nm{display:none;}
+  .dr-name .lt-nm{direction:ltr; unicode-bidi:isolate; font-size:.82em; font-weight:700; color:#F0D48E; letter-spacing:.3px;}
   .dr-name{font-size:24px; font-weight:800; margin:12px 0 2px; letter-spacing:.2px; color:#fff;}
   .dr-sub{font-size:13px; line-height:1.9; color:rgba(255,255,255,.86); font-weight:600;}
   .dr-sub b{color:#F0D48E; font-weight:800;}
@@ -4931,7 +4933,7 @@ async function openTools(page){
       const inner=IC[id]+'<span class="t">'+label+'</span>'+bdg;
       return href ? '<a class="dr-i" href="'+href+'">'+inner+'</a>' : '<button type="button" class="dr-i'+on+'" data-a="'+id+'">'+inner+'</button>';
     };
-    let h='<div class="dr-head"><div class="dr-logo"><img src="icons/icon-192.png" alt="" width="46" height="46"></div><div class="dr-txt"><div class="dr-name">صلاتي</div>'+
+    let h='<div class="dr-head"><div class="dr-logo"><img src="icons/icon-192.png" alt="" width="46" height="46"></div><div class="dr-txt"><div class="dr-name"><span>صلاتي</span> <span class="lt-nm">salatee</span></div>'+
       '<div class="dr-sub" id="dr-np">'+nextPrayerHtml()+'</div><div class="dr-sub" id="dr-hj"></div></div></div><div class="dr-body">';
     GROUPS.forEach((g,gi)=>{
       if(g[0]) h+='<div class="dr-g">'+g[0]+'</div>'; else if(gi) h+='<div class="dr-sep"></div>';
