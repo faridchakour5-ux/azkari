@@ -9,8 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.net.wifi.WifiManager;
+import android.media.AudioManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 
 /**
@@ -32,6 +35,39 @@ public class ListenService extends Service {
   private static final int    NOTIF_ID = 7312;
   /** حدٌّ أقصى للأقفال: لا تبقى ممسوكةً إن نُسي الإيقافُ لسببٍ ما */
   private static final long   MAX_MS   = 6 * 60 * 60 * 1000L;
+
+  /* ===== التلاوةُ تُوقَف عند المكالمات وعند الأذان =====
+     الصوتُ يعمل في الـWebView فلا يُوقفه أندرويد وحدَه. فنراقب وضعَ الصوت في النظام (بلا أيّ إذن):
+     رنينُ المكالمة أو المكالمةُ الجارية ← kind=cell؛ ومكالماتُ التطبيقات (واتساب…) ← kind=voip.
+     ونُعيد إبلاغَ الواجهة بالأذان من هنا أيضًا، تحوُّطًا إن فاتتها الإشارةُ الأولى من خدمة الأذان. */
+  private final Handler poll = new Handler(Looper.getMainLooper());
+  private AudioManager am;
+  private String lastCall = "";      // "" | cell | voip
+  private boolean lastAdhan = false;
+  private final Runnable pollTask = new Runnable() {
+    @Override public void run() {
+      try {
+        if (am == null) am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (am != null) {
+          int m = am.getMode();
+          String kind = "";
+          if (m == AudioManager.MODE_RINGTONE || m == AudioManager.MODE_IN_CALL
+              || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && m == AudioManager.MODE_CALL_SCREENING)) kind = "cell";
+          else if (m == AudioManager.MODE_IN_COMMUNICATION) kind = "voip";
+          if (!kind.equals(lastCall)) {
+            if (!lastCall.isEmpty()) AdhanPlugin.emitCallState(false, lastCall);
+            if (!kind.isEmpty()) AdhanPlugin.emitCallState(true, kind);
+            lastCall = kind;
+          }
+        }
+        boolean a = AdhanService.playing;
+        if (a != lastAdhan) { lastAdhan = a; AdhanPlugin.emitAdhanState(a); }
+      } catch (Exception ignored) {}
+      poll.postDelayed(this, 700);
+    }
+  };
+  private void startPoll() { poll.removeCallbacks(pollTask); lastCall = ""; lastAdhan = false; poll.postDelayed(pollTask, 700); }
+  private void stopPoll() { poll.removeCallbacks(pollTask); }
 
   private PowerManager.WakeLock wake;
   private WifiManager.WifiLock wifi;
@@ -57,6 +93,7 @@ public class ListenService extends Service {
       }
     } catch (Exception e) { stopSelf(); return START_NOT_STICKY; }
     acquireLocks();
+    startPoll();
     return START_NOT_STICKY;
   }
 
@@ -124,6 +161,7 @@ public class ListenService extends Service {
   }
 
   private void stopEverything() {
+    stopPoll();
     try { if (wake != null && wake.isHeld()) wake.release(); } catch (Exception ignored) {}
     try { if (wifi != null && wifi.isHeld()) wifi.release(); } catch (Exception ignored) {}
     wake = null; wifi = null;
@@ -134,6 +172,7 @@ public class ListenService extends Service {
 
   @Override
   public void onDestroy() {
+    stopPoll();
     try { if (wake != null && wake.isHeld()) wake.release(); } catch (Exception ignored) {}
     try { if (wifi != null && wifi.isHeld()) wifi.release(); } catch (Exception ignored) {}
     super.onDestroy();

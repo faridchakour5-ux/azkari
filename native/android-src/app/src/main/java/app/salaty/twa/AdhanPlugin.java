@@ -33,6 +33,10 @@ public class AdhanPlugin extends Plugin {
   static void emitAdhanState(boolean on) {
     try { if (instance != null) { JSObject o = new JSObject(); o.put("on", on); instance.notifyListeners("adhanState", o); } } catch (Exception ignored) {}
   }
+  /** مكالمةٌ بدأت/انتهت (kind: cell = اتّصالٌ هاتفيّ، voip = تطبيقُ مكالماتٍ): تُوقف الواجهةُ التلاوةَ ثم تستأنفها */
+  static void emitCallState(boolean on, String kind) {
+    try { if (instance != null) { JSObject o = new JSObject(); o.put("on", on); o.put("kind", kind); instance.notifyListeners("callState", o); } } catch (Exception ignored) {}
+  }
   static void emitListenStop() {
     try { if (instance != null) instance.notifyListeners("listenStop", new JSObject()); } catch (Exception ignored) {}
   }

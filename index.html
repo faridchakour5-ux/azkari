@@ -383,7 +383,8 @@
   .dr-head{position:relative; overflow:hidden; border-radius:26px 0 0 0; color:#fff; padding:calc(env(safe-area-inset-top,0px) + 22px) 20px 20px; display:flex; flex-direction:column;
     background:linear-gradient(160deg,#0E6B52 0%,#0A5441 48%,#063D30 100%);}
   .dr-txt{position:relative; z-index:1;}
-  .dr-head::before{content:''; position:absolute; inset-inline-end:-58px; top:-58px; width:150px; height:150px; border-radius:50%; border:1.5px solid rgba(255,255,255,.14); box-shadow:0 0 0 26px rgba(255,255,255,.05), 0 0 0 52px rgba(255,255,255,.03); pointer-events:none;}
+  .dr-head::before{content:''; position:absolute; inset-inline-end:0; top:-40px; width:330px; height:330px; background:url(icons/drawer-zellige.png) no-repeat center/contain; pointer-events:none;}
+  html[lang="ar"] .dr-head::before{transform:scaleX(-1);}
   .dr-head::after{content:''; position:absolute; inset-inline:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#D9B15C 30%,#D9B15C 70%,transparent);}
   .dr-logo{position:relative; z-index:1; width:58px; height:58px; border-radius:18px; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,.28);}
   .dr-logo img{width:46px; height:46px; border-radius:12px; display:block;}
@@ -7249,24 +7250,31 @@ document.addEventListener('visibilitychange', ()=>{ usageTick(); if(document.vis
 window.addEventListener('pagehide', ()=>{ usageTick(); usageFlush(); });
 window.usageSnapshot=()=>{ usageTick(); usageFlush(); return usageData(); };
 
-/* الأذانُ أولى من التلاوة: حين يبدأ (من الخدمة الأصليّة) نوقف ما يُسمَع من تلاوةٍ أو تحفيظٍ أو ذكر، ونستأنفه بعد انتهاء الأذان بقليل.
-   ولا نستأنف إلا ما كان يعمل فعلًا، ولا ما أوقفه المستمعُ بنفسه أثناء الأذان. */
+/* الأذانُ والمكالماتُ أولى من التلاوة: حين يبدأ أحدُهما (إشارةٌ من الخدمة الأصليّة) نوقف ما يُسمَع من تلاوةٍ أو تحفيظٍ أو ذكر،
+   ونستأنفه بعد انتهائه بقليل. ولا نستأنف إلا ما كان يعمل فعلًا، ولا ما أوقفه المستمعُ بنفسه أثناء ذلك.
+   قد يتداخل السببان (مكالمةٌ وقتَ الأذان) فلا نستأنف إلا حين يزول كلاهما. */
 let __adhanHold=null, __adhanT=null, __adhanFail=null;
-function adhanYield(on){
+const __yReasons=new Set();
+function audioYield(reason,on){
   clearTimeout(__adhanT); clearTimeout(__adhanFail);
   const r=$('#reciter-audio'), d=$('#dhikr-audio'), h=$('#hifz-audio');
   const live=el=>!!(el && el.src && !el.paused && !el.ended);
+  const arm=()=>{ __adhanFail=setTimeout(()=>{ __adhanHold=null; __yReasons.clear(); if(!__wantPlay) listenKeepAlive(false); }, [...__yReasons].every(x=>x==='adhan') ? 8*60*1000 : 3*3600*1000); };   // أمانٌ إن لم يصلنا خبرُ الانتهاء (المكالمةُ قد تطول)
   if(on){
-    if(__adhanHold) return;
-    const hold={ rec:live(r) || (__wantPlay && !!(r&&r.src&&!r.ended)), hz:!!(__hz && !__hz.paused), dk:live(d) };
-    if(!(hold.rec||hold.hz||hold.dk)) return;
-    __adhanHold=hold;
-    try{ setWantPlay(false); if(r && !r.paused) r.pause(); }catch(e){}
-    try{ if(hold.hz) hzToggle(); }catch(e){}
-    try{ if(d && !d.paused) d.pause(); }catch(e){}
-    __adhanFail=setTimeout(()=>{ __adhanHold=null; if(!__wantPlay) listenKeepAlive(false); }, 8*60*1000);   // أمانٌ إن لم يصلنا خبرُ انتهاء الأذان
+    __yReasons.add(reason);
+    if(!__adhanHold){
+      const hold={ rec:live(r) || (__wantPlay && !!(r&&r.src&&!r.ended)), hz:!!(__hz && !__hz.paused), dk:live(d) };
+      if(!(hold.rec||hold.hz||hold.dk)) return;
+      __adhanHold=hold;
+      try{ setWantPlay(false); if(r && !r.paused) r.pause(); }catch(e){}
+      try{ if(hold.hz) hzToggle(); }catch(e){}
+      try{ if(d && !d.paused) d.pause(); }catch(e){}
+    }
+    arm();
   } else {
+    __yReasons.delete(reason);
     const hold=__adhanHold; if(!hold) return;
+    if(__yReasons.size){ arm(); return; }
     __adhanT=setTimeout(()=>{
       __adhanHold=null;
       try{ if(hold.rec && r && r.src && r.paused){ setWantPlay(true); r.play().catch(()=>{ try{ recoverReciter(true); }catch(e){} }); } }catch(e){}
@@ -7275,6 +7283,7 @@ function adhanYield(on){
     }, 1500);
   }
 }
+function adhanYield(on){ audioYield('adhan', on); }
 function listenTitle(){
   const t=($('#reciter-sura')&&$('#reciter-sura').textContent||'').trim();
   let r=''; try{ const i=currentReciterInfo(); r=(i&&i.name)||''; }catch(e){}
@@ -7295,9 +7304,10 @@ function listenTitle(){
     try{ P.addListener('listenStop', ()=>{
       try{ setWantPlay(false); const r=$('#reciter-audio'); if(r && !r.paused) r.pause(); }catch(e){}
       try{ if(__hz) hzStop(); }catch(e){}
-      __adhanHold=null; __kaOn=false;
+      __adhanHold=null; __yReasons.clear(); __kaOn=false;
     }); }catch(e){}
     try{ P.addListener('adhanState', ev=>{ adhanYield(!!(ev&&ev.on)); }); }catch(e){}
+    try{ P.addListener('callState', ev=>{ const k=(ev&&ev.kind)||'cell'; if(k==='voip' && __hzMic) return; audioYield('call-'+k, !!(ev&&ev.on)); }); }catch(e){}   // مكالمةٌ هاتفيّة (cell) أو من تطبيق (voip؛ يُتجاهَل أثناء تسجيل «ردِّد وقارِن» لأنّ الميكروفون نفسَه يرفع وضعَ الصوت)
   }
   /* عاد الاتّصال: نستأنف فورًا بدل انتظار مهلة إعادة المحاولة */
   window.addEventListener('online', ()=>{

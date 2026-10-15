@@ -46,6 +46,8 @@ public class AdhanService extends Service {
   /** حدٌّ أقصى للتشغيل: لو تعذّر بلوغُ النهاية لسببٍ ما لم تَبقَ الخدمةُ عالقة. */
   private static final long   MAX_MS  = 8 * 60 * 1000L;
 
+  /** الأذانُ يُسمَع الآن (تقرؤه خدمةُ الاستماع لتُوقف التلاوةَ ولو فاتتها الإشارةُ الأولى) */
+  static volatile boolean playing = false;
   private MediaPlayer player;
   private PowerManager.WakeLock wake;
   private AudioManager audio;
@@ -89,6 +91,7 @@ public class AdhanService extends Service {
     requestFocus();
     play();
     if (player != null && volStop()) startVolumeKeyStop();
+    if (player != null) playing = true;
     if (player != null && !signalled) { signalled = true; AdhanPlugin.emitAdhanState(true); }   // الأذانُ أولى: تُوقَف التلاوةُ مؤقّتًا
 
     guard = new Runnable() { @Override public void run() { stopEverything(); } };
@@ -291,6 +294,7 @@ public class AdhanService extends Service {
   private boolean signalled = false;
 
   private void stopEverything() {
+    playing = false;
     if (signalled) { signalled = false; AdhanPlugin.emitAdhanState(false); }   // تستأنف التلاوةُ بعد الأذان
     if (guard != null) { handler.removeCallbacks(guard); guard = null; }
     stopVolumeKeyStop();
