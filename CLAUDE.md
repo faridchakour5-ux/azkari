@@ -54,6 +54,7 @@
 | كلمةُ سرّ المفتاح | `gp/signing-key-info.txt` (فيه سطر «Key store password: …») | يُعيد إرسالَه فريد |
 | حسابُ خدمة Play | `gp/service-account.json` (الحساب `salatee-publisher@salatee.iam.gserviceaccount.com`، المشروع `salatee`) | لا يُستعاد من Google: يُنشئ فريد مفتاحًا جديدًا (Google Cloud Console ← IAM & Admin ← Service Accounts ← الحساب ← Keys ← Add key ← JSON) ويُرسله؛ وصلاحيّاتُه في Play Console باقية |
 | الأذان الثاني | `adhan_alt.m4a` (في `~/.salatee-private/` مباشرةً) | يُعيد فريد إرسال تسجيل سعيد بلقاضي الكامل (3:38، mp3) فأقصّه: `ffmpeg -ss 26.2 -to 194.35 -i الأصل.mp3 -af loudnorm=I=-14:TP=-1.5:LRA=11 (مرّتان: قياسٌ ثم linear=true) -c:a aac -b:a 128k adhan_alt.m4a` ثم تلاشٍ قصير في الطرفين |
+**⛔ لا تُكتب الأسرارُ نفسُها هنا أبدًا** (كلمةُ سرّ المفتاح، محتوى `signing.keystore`، ملفّ حساب الخدمة): المستودعُ عامّ. المكتوبُ هنا مواضعُها وبصمتُها وطريقةُ استعادتها فقط. **نسخُ AAB:** هي مُخرَجاتُ بناءٍ تُعاد من أيّ commit بـ`tools/release-aab.sh` (ومجلّد `/tmp/aab-out` يضيع بإعادة الحاوية)؛ والنسخُ المرفوعةُ كلُّها باقيةٌ عند Google في Play Console ← الإصدار ← مستكشف الحزم (App bundle explorer) ويمكن تنزيلُها. ونصيحتي لفريد أن يحفظ عنده نسخةً من `signing.keystore` و`signing-key-info.txt` و`service-account.json` (حاسوبُه أو مكانٌ خاصّ).
 وأرقامُ الجلسات: الملفّاتُ المرفقة تُحفظ في `/root/.claude/uploads/<id>/` ومنها أنسخها.
 
 ### ب) أدواتُ البناء (تُثبَّت من جديد)
