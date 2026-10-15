@@ -157,6 +157,8 @@ const PERMS = `
          التطبيقات التي جوهرُها منبّهات — راجع CAPACITOR-BUILD.md قبل النشر. -->
     <!-- الميكروفون: لوضع «ردِّد وقارِن» في التحفيظ فقط؛ يُسجَّل ترديدُ المستخدم على جهازه ثم يُحذف ولا يُرسَل. وليس لازمًا للتثبيت (بلا مستشعرٍ يُحجَب الخيار). -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Capacitor يطلب مع RECORD_AUDIO إذنَ MODIFY_AUDIO_SETTINGS (عاديّ، يُمنح تلقائيًّا) حين يطلب الـWebView الميكروفون؛ وإن لم يكن مُعلَنًا هنا رُفض الطلبُ كلُّه ولو سمح المستخدمُ — فكان «ردِّد وقارِن» يقول «تعذّر استعمال الميكروفون». -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
