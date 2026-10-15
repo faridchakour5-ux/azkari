@@ -8,7 +8,7 @@
 
 ### Nom de l'application (30 caractères max)
 ```
-صلاتي salatee - أذكار ومصحف
+صلاتي salatee
 ```
 
 ### Description courte (80 caractères max)
