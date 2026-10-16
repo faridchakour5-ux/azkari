@@ -2909,7 +2909,7 @@ function applyNotifNavigation(data){
           if(!(await hzLoad())) return;
           const si=Math.min(Math.max((+data.s||1)-1,0),113), n=hzCount(si), a=Math.min(Math.max(+data.a||1,1),n);
           __hzSel={ si, from:a, to:a };
-          const pr=HZ_PRESETS.find(x=>x.id==='echo'); if(pr){ settings.hifz=Object.assign(hzCfg(), pr.c); saveSettings(); }
+          const pr=HZ_PRESETS.find(x=>x.id==='echo'); if(pr){ settings.hifz=Object.assign(hzCfg(), pr.c, {riw:'hafs'}); saveSettings(); }
           const t=document.querySelector('.tab[data-s="s-listen"]'); if(t) t.click();
           applyListenMode('hifz');
         }catch(e){}
@@ -4552,7 +4552,7 @@ const LISTEN_CATS=[
   { id:'seera',   name:'السيرة النبوية',     sub:'سيرةُ النبيّ ﷺ في سلاسلَ كاملة',
     ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>' },
   { id:'hadith',  name:'الأحاديث الصحيحة',   sub:'من الصحيحين — والمصدرُ مذكورٌ مع كلّ كتاب', ic:IC_BOOK },
-  { id:'hifz',    name:'التحفيظ',            sub:'كرِّر آيةً أو مقطعًا من أيّ سورةٍ لتحفظه (رواية حفص)',
+  { id:'hifz',    name:'التحفيظ',            sub:'كرِّر آيةً أو مقطعًا من أيّ سورةٍ لتحفظه (حفص، وورش في السور المفعَّلة)',
     ic:'<svg class="gh-ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>' }
 ];
 let __listenCat='quran';
@@ -5276,7 +5276,12 @@ const HZ_RECS=[
   { id:'sudais',   name:'عبد الرحمن السديس',     dir:'Abdurrahmaan_As-Sudais_192kbps' },
   { id:'alafasy',  name:'مشاري العفاسي',        dir:'Alafasy_128kbps' }
 ];
-const HZ_DEF={ rv:3, rr:1, mode:'verse', speed:1, gap:'len', rec:'ghamdi', echo:'off' };
+const HZ_DEF={ rv:3, rr:1, mode:'verse', speed:1, gap:'len', rec:'ghamdi', echo:'off', riw:'hafs' };
+/* التحفيظ بورش (أمرٌ من فريد، 16 أكتوبر 2026): تلاوةُ عبد الباسط عبد الصمد بورش آيةً آية من everyayah (ترقيمُها ترقيمُ ورش).
+   لا تُفعَّل إلا السورُ التي طابق فيها عددُ ملفّاتِ الصوت عددَ آيات مصحف ورش في التطبيق وتناسبَ طولُ كلِّ ملفٍّ مع طول آيته (انظر HZ_WARSH_OK).
+   لا «ردِّد وقارِن» بورش حتى يُسمَع الصوتُ ويُتحقَّق منه. */
+const HZ_WARSH_REC={ id:'wb', name:'عبد الباسط عبد الصمد — ورش', dir:'warsh/warsh_Abdul_Basit_128kbps' };
+const HZ_WARSH_OK=new Set([]);
 /* ثلاثُ طرائقَ جاهزةٌ تكفي أكثرَ الناس؛ والتفصيلُ لمن أراده تحت «خيارات متقدّمة» */
 const HZ_PRESETS=[
   { id:'learn',  n:'تلقين',  d:'كلُّ آيةٍ 3 مرّات مع وقفةٍ لتردّدها أنت، ثم التي بعدها', c:{ rv:3, rr:1, mode:'verse',      gap:'len', speed:1, echo:'off' } },
@@ -5287,11 +5292,15 @@ const HZ_PRESETS=[
 let __hzAdvOpen=false;
 let __hz=null, __hzSel=null;
 function hzCfg(){ return Object.assign({}, HZ_DEF, settings.hifz||{}); }
-function hzRec(c){ return HZ_RECS.find(r=>r.id===c.rec) || HZ_RECS[0]; }
+function hzRec(c){ if(c&&c.riw==='warsh') return HZ_WARSH_REC; return HZ_RECS.find(r=>r.id===c.rec) || HZ_RECS[0]; }
 function hzNo(n){ return String(n).padStart(3,'0'); }
 /* بياناتُ حفص (أرقامُ السور وعددُ الآيات) مستقلّةٌ عن الرواية المعروضة، فيعمل التحفيظ من صفحة الاستماع أيًّا كانت الرواية */
-const HZD=()=>window.WIRD_HAFS;
-async function hzLoad(){ if(!window.WIRD_HAFS){ try{ await loadScript('wird_hafs.js'); }catch(e){} } return window.WIRD_HAFS; }
+const HZD=()=>{ const c=(__hz&&__hz.c)||hzCfg(); return (c.riw==='warsh' && window.WIRD_WARSH) ? window.WIRD_WARSH : window.WIRD_HAFS; };
+async function hzLoad(){
+  if(!window.WIRD_HAFS){ try{ await loadScript('wird_hafs.js'); }catch(e){} }
+  if(hzCfg().riw==='warsh' && !window.WIRD_WARSH){ try{ await loadScript('wird_warsh.js'); }catch(e){} }
+  return HZD();
+}
 function hzUrl(c, si, no){ return 'https://everyayah.com/data/'+hzRec(c).dir+'/'+hzNo(HZD().sur[si].s)+hzNo(no)+'.mp3'; }
 function hzCount(si){ const D=HZD(), end=(si+1<D.sur.length)? D.sur[si+1].i : D.a.length; return end-D.sur[si].i; }
 
@@ -5312,28 +5321,30 @@ function renderHifzForm(body, picker, afterStart){
   const isPre=pr=>Object.keys(pr.c).every(k=>String(c[k])===String(pr.c[k]));
   const chips=(key, list, cur)=>'<div class="hz-chips" data-k="'+key+'">'+list.map(([v,l])=>'<button data-v="'+v+'"'+(String(cur)===String(v)?' class="on"':'')+'>'+l+'</button>').join('')+'</div>';
   body.innerHTML=
+    '<div class="hz-row"><div class="hz-lbl">الرواية</div>'+chips('riw',[['hafs','حفص'],['warsh','ورش']],c.riw==='warsh'?'warsh':'hafs')+
+      (c.riw==='warsh'?'<div class="hz-hint">بتلاوة عبد الباسط عبد الصمد بورش، وتعمل في السور التي تحقّقنا من مطابقة صوتِها لترقيم مصحف ورش. «ردِّد وقارِن» بحفص فقط حاليًّا.</div>':'')+'</div>'+
     (picker?'<div class="hz-row"><div class="hz-lbl">السورة</div><button class="hz-sura" id="hz-sura" type="button"><span>'+HZD().sur[t.si].n+'</span><span>▾</span></button></div>':'')+
     '<div class="hz-row"><div class="hz-lbl">المقطع</div><div class="hz-range">'+
       '<div class="hz-step"><button data-st="from-">−</button><span>من <b>'+AR(t.from)+'</b></span><button data-st="from+">+</button></div>'+
       '<div class="hz-step"><button data-st="to-">−</button><span>إلى <b>'+AR(t.to)+'</b></span><button data-st="to+">+</button></div>'+
     '</div></div>'+
     '<div class="hz-row"><div class="hz-lbl">طريقة التحفيظ</div><div class="hz-presets">'+
-      HZ_PRESETS.map(pr=>'<button type="button" class="hz-pre'+(isPre(pr)?' on':'')+'" data-p="'+pr.id+'"><b>'+pr.n+'</b><small>'+pr.d+'</small></button>').join('')+
+      HZ_PRESETS.filter(pr=>!(c.riw==='warsh' && pr.id==='echo')).map(pr=>'<button type="button" class="hz-pre'+(isPre(pr)?' on':'')+'" data-p="'+pr.id+'"><b>'+pr.n+'</b><small>'+pr.d+'</small></button>').join('')+
     '</div>'+(HZ_PRESETS.some(isPre)?'':'<div class="hz-hint">إعدادٌ مخصّص (من «خيارات متقدّمة»)</div>')+'</div>'+
-    '<div class="hz-row"><div class="hz-lbl">القارئ</div><div class="selectwrap hz-sel"><select id="hz-rec">'+HZ_RECS.map(r=>'<option value="'+r.id+'"'+(r.id===c.rec?' selected':'')+'>'+r.name+'</option>').join('')+'</select></div></div>'+
+    (c.riw==='warsh'?'':'<div class="hz-row"><div class="hz-lbl">القارئ</div><div class="selectwrap hz-sel"><select id="hz-rec">'+HZ_RECS.map(r=>'<option value="'+r.id+'"'+(r.id===c.rec?' selected':'')+'>'+r.name+'</option>').join('')+'</select></div></div>')+
     '<button class="hz-go" id="hz-go">'+(({learn:'ابدأ التلقين',echo:'ابدأ ردِّد وقارِن',build:'ابدأ تثبيت الحفظ',review:'ابدأ المراجعة'})[(HZ_PRESETS.find(isPre)||{}).id]||'ابدأ التحفيظ')+'</button>'+
-    '<button class="hz-go" id="hz-rev" style="background:var(--fill-2);color:var(--accent);border:1px solid var(--line);margin-top:8px">أضِف هذا المقطع إلى «مراجعة الحفظ»</button>'+
+    (c.riw==='warsh'?'':'<button class="hz-go" id="hz-rev" style="background:var(--fill-2);color:var(--accent);border:1px solid var(--line);margin-top:8px">أضِف هذا المقطع إلى «مراجعة الحفظ»</button>')+
     '<details class="hz-adv" id="hz-adv"'+(__hzAdvOpen?' open':'')+'><summary>خيارات متقدّمة</summary>'+
       '<div class="hz-row"><div class="hz-lbl">تكرار كلّ آية</div>'+chips('rv',[[1,'1'],[2,'2'],[3,'3'],[5,'5'],[7,'7'],[10,'10']],c.rv)+'</div>'+
       '<div class="hz-row"><div class="hz-lbl">تكرار المقطع كلِّه</div>'+chips('rr',[[1,'مرّة'],[2,'مرّتان'],[3,'3'],[5,'5'],[10,'10'],[0,'بلا حدّ']],c.rr)+'</div>'+
       '<div class="hz-row"><div class="hz-lbl">طريقة التكرار</div>'+chips('mode',[['verse','كلُّ آية ثمّ التي بعدها'],['cumulative','تراكميّ: 1 ثم 1+2 ثم 1+2+3…']],c.mode)+
         '<div class="hz-hint">التراكميّ أنفعُ للحفظ: تُعيد ما حفظتَه ثم تُضيف آيةً جديدة.</div></div>'+
       '<div class="hz-row"><div class="hz-lbl">السرعة</div>'+chips('speed',[[0.75,'0.75×'],[1,'1×'],[1.25,'1.25×']],c.speed)+'</div>'+
-      '<div class="hz-row"><div class="hz-lbl">ردِّد وقارِن</div>'+chips('echo',[['off','بلا'],['rec','يُسمِعني قراءتي'],['gate','ويسألني قبل الانتقال']],c.echo)+
-        '<div class="hz-hint">يستعمل هذا الوضعُ الميكروفونَ، وفقط حين يكون التطبيقُ مفتوحًا أمامك وهذا الوضعُ يعمل؛ فيتوقّف حين تُنهي التحفيظ أو تغادر التطبيق. يُسجَّل صوتُك على هاتفك فقط ثم يُحذف، ولا يُرسَل إلى أحد. ولا يحكم التطبيقُ على جودة التجويد: يتحقّق فقط أنك ردّدت، وأنت من تقارن وتقرّر. يساعدك هذا على التدريب بين دروسك، ولا يغني عن معلّمٍ يسمع قراءتك ويصحّحها.</div></div>'+
+      (c.riw==='warsh'?'':'<div class="hz-row"><div class="hz-lbl">ردِّد وقارِن</div>'+chips('echo',[['off','بلا'],['rec','يُسمِعني قراءتي'],['gate','ويسألني قبل الانتقال']],c.echo)+
+        '<div class="hz-hint">يستعمل هذا الوضعُ الميكروفونَ، وفقط حين يكون التطبيقُ مفتوحًا أمامك وهذا الوضعُ يعمل؛ فيتوقّف حين تُنهي التحفيظ أو تغادر التطبيق. يُسجَّل صوتُك على هاتفك فقط ثم يُحذف، ولا يُرسَل إلى أحد. ولا يحكم التطبيقُ على جودة التجويد: يتحقّق فقط أنك ردّدت، وأنت من تقارن وتقرّر. يساعدك هذا على التدريب بين دروسك، ولا يغني عن معلّمٍ يسمع قراءتك ويصحّحها.</div></div>')+
       '<div class="hz-row"><div class="hz-lbl">وقفةٌ صامتةٌ بعد كلّ آية</div>'+chips('gap',[['0','بلا وقفة'],['1','ثانية'],['2','ثانيتان'],['len','بمدّة الآية (لتردِّد أنت)']],c.gap)+'</div>'+
     '</details>'+
-    '<div class="hz-hint">يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. الصوتُ برواية حفص.</div>';
+    '<div class="hz-hint">'+(c.riw==='warsh'?'يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. الصوتُ برواية ورش.':'يحتاج إنترنت: تُجلَب تلاوةُ كلّ آية من everyayah.com. الصوتُ برواية حفص.')+'</div>';
   body.querySelectorAll('.hz-pre').forEach(b=> b.addEventListener('click', ()=>{
     const pr=HZ_PRESETS.find(x=>x.id===b.dataset.p); if(!pr) return;
     settings.hifz=Object.assign(hzCfg(), pr.c); saveSettings(); vibrate(5); again();
@@ -5344,6 +5355,19 @@ function renderHifzForm(body, picker, afterStart){
     const b=e.target.closest('button'); if(!b) return;
     const k=g.dataset.k; let v=b.dataset.v;
     if(k==='rv'||k==='rr') v=parseInt(v,10); else if(k==='speed') v=parseFloat(v);
+    if(k==='riw'){
+      hzStop(true);
+      const patch={ riw:v };
+      if(v==='warsh'){ patch.echo='off'; if(hzCfg().echo!=='off'){} }
+      settings.hifz=Object.assign(hzCfg(),patch); saveSettings(); vibrate(5);
+      (async()=>{
+        await hzLoad();
+        if(v==='warsh' && !HZ_WARSH_OK.has(t.si)){ const f=[...HZ_WARSH_OK].sort((a,b)=>a-b)[0]; t.si=f==null?0:f; t.from=1; t.to=1; }
+        const m=hzCount(t.si); t.from=Math.min(t.from,m); t.to=Math.min(Math.max(t.to,t.from),m);
+        again();
+      })();
+      return;
+    }
     settings.hifz=Object.assign(hzCfg(),{[k]:v}); saveSettings(); vibrate(5); again();
   }));
   body.querySelectorAll('[data-st]').forEach(b=> b.addEventListener('click', ()=>{
@@ -5356,9 +5380,9 @@ function renderHifzForm(body, picker, afterStart){
     again();
   }));
   const sb=$('#hz-sura');
-  if(sb) sb.addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(t.si, si=>{ closeSuraOverlay(); __hzSel={ si, from:1, to:1 }; again(); }, 'اختر السورة'); });
+  if(sb) sb.addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(t.si, si=>{ closeSuraOverlay(); if(hzCfg().riw==='warsh' && !HZ_WARSH_OK.has(si)){ showToast('هذه السورة لم تُفعَّل بعدُ بورش — اختر سورةً أخرى أو حفصًا', 4200); return; } __hzSel={ si, from:1, to:1 }; again(); }, 'اختر السورة'); });
   $('#hz-go').addEventListener('click', ()=>{ vibrate(8); afterStart && afterStart(); hzStart(t.si, t.from, t.to, hzCfg()); });
-  $('#hz-rev').addEventListener('click', async()=>{ vibrate(6); if(await loadTools()) SalTools.addReview(t.si, t.from, t.to); });
+  if($('#hz-rev')) $('#hz-rev').addEventListener('click', async()=>{ vibrate(6); if(await loadTools()) SalTools.addReview(t.si, t.from, t.to); });
 }
 
 /* خطّةُ التشغيل: قائمةٌ بالآيات بحسب النمط (دورةٌ واحدة، وتُكرَّر دوراتٍ بحسب «تكرار المقطع») */
@@ -5400,7 +5424,7 @@ function hzUi(){
   $('#hz-play').innerHTML = h.paused ? HZ_PLAY_IC : HZ_PAUSE_IC;
   document.querySelectorAll('.aya-t.hifz-live').forEach(x=>x.classList.remove('hifz-live'));
   const ai=HZD().sur[h.si].i+it.no-1;
-  const el=(settings.riwaya==='hafs') ? document.querySelector('#wird-body .aya-t[data-tai="'+ai+'"]') : null;
+  const el=(settings.riwaya==='hafs' && h.c.riw!=='warsh') ? document.querySelector('#wird-body .aya-t[data-tai="'+ai+'"]') : null;
   if(el){
     el.classList.add('hifz-live');
     if($('#s-wird').classList.contains('active')){

@@ -566,7 +566,7 @@ PAGES.rev = { title:'مراجعة الحفظ', render(body){
       if(q('.md')) q('.md').onclick=()=>upd(x=>set(x,x.lvl));
       if(q('.hd')) q('.hd').onclick=()=>upd(x=>{ x.lvl=0; x.due=lk(addDays(new Date(),1)); });
       if(q('.rm')) q('.rm').onclick=()=>{ if(confirm('حذف هذا المقطع من المراجعة؟')) upd((x,L)=>{ L.splice(L.indexOf(x),1); }); };
-      if(q('.ls')) q('.ls').onclick=async()=>{ const x=rvAll().find(z=>z.id===id); if(!x) return; T.close(); try{ __hzSel={si:x.s,from:x.a,to:x.b}; await hzLoad(); hzStart(x.s,x.a,x.b,hzCfg()); }catch(e){ toast('تعذّر التشغيل — يحتاج اتصالًا',3000); } };
+      if(q('.ls')) q('.ls').onclick=async()=>{ const x=rvAll().find(z=>z.id===id); if(!x) return; T.close(); try{ __hzSel={si:x.s,from:x.a,to:x.b}; await hzLoad(); hzStart(x.s,x.a,x.b,Object.assign(hzCfg(),{riw:'hafs'})); }catch(e){ toast('تعذّر التشغيل — يحتاج اتصالًا',3000); } };
     });
   };
   draw();
