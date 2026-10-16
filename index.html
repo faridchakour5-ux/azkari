@@ -5439,7 +5439,7 @@ function renderHifzForm(body, picker, afterStart){
       settings.hifz=Object.assign(hzCfg(),patch); saveSettings(); vibrate(5);
       (async()=>{
         await hzLoad();
-        const m=hzCount(t.si); t.from=Math.min(t.from,m); t.to=Math.min(Math.max(t.to,t.from),m);
+        t.from=1; t.to=hzCount(t.si);   // عددُ الآيات يختلف بين الروايتين: نعود إلى السورة كلِّها
         again();
       })();
       return;
@@ -5458,7 +5458,7 @@ function renderHifzForm(body, picker, afterStart){
     again();
   }));
   const sb=$('#hz-sura');
-  if(sb) sb.addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(t.si, si=>{ closeSuraOverlay(); __hzSel={ si, from:1, to:1 }; again(); }, 'اختر السورة'); });
+  if(sb) sb.addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(t.si, si=>{ closeSuraOverlay(); __hzSel={ si, from:1, to:hzCount(si) }; again(); }, 'اختر السورة'); });
   $('#hz-go').addEventListener('click', ()=>{ vibrate(8); afterStart && afterStart(); hzStart(t.si, t.from, t.to, hzCfg()); });
   if($('#hz-rev')) $('#hz-rev').addEventListener('click', async()=>{ vibrate(6); if(await loadTools()) SalTools.addReview(t.si, t.from, t.to, { riw:hzCfg().riw, wrec:hzCfg().wrec }); });
 }
@@ -5732,7 +5732,7 @@ async function openHifzListen(){
   box.innerHTML='<div class="qz-intro">…جارٍ التحميل</div>';
   const ok=await hzLoad(); try{ await ensureWirdForPop(); }catch(e){}
   if(!ok || !window.WIRD_HAFS){ box.innerHTML='<div class="qz-intro">تعذّر تحميل بيانات المصحف.</div>'; return; }
-  if(!__hzSel) __hzSel={ si:Math.min(Math.max(settings.mushafSura||0,0),113), from:1, to:1 };
+  if(!__hzSel){ const si=Math.min(Math.max(settings.mushafSura||0,0),113); __hzSel={ si, from:1, to:hzCount(si) }; }   // المقطعُ افتراضًا: السورةُ كلُّها
   renderHifzForm(box, true, null);
 }
 /* الضغط على رقم الآية: يحفظ (أو يلغي) موضع القراءة هنا بالضبط — قابل للتبديل */
