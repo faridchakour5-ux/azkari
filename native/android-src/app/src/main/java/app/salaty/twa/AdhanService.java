@@ -125,6 +125,7 @@ public class AdhanService extends Service {
      .setSmallIcon(getResources().getIdentifier("ic_stat_icon", "drawable", getPackageName()) != 0
          ? getResources().getIdentifier("ic_stat_icon", "drawable", getPackageName())
          : android.R.drawable.ic_lock_idle_alarm)
+     .setLargeIcon(AdhanReceiver.largeLogo(this))
      .setContentIntent(piOpen)
      .setOngoing(true)
      .setAutoCancel(false)

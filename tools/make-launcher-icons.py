@@ -33,6 +33,16 @@ for d,k in DENS.items():
     s=round(48*k); base=on_paper(s,.72); base.save(os.path.join(p,'ic_launcher.png'))   # الأيقونة القديمة (أندرويد < 8)
     m=Image.new('L',(s*4,s*4),0); ImageDraw.Draw(m).ellipse((0,0,s*4-1,s*4-1),fill=255); m=m.resize((s,s),Image.LANCZOS)
     r=Image.new('RGBA',(s,s),(0,0,0,0)); r.paste(base,(0,0),m); r.save(os.path.join(p,'ic_launcher_round.png'))
+# ---------- أيقونات الإشعارات (شعارُ صلاتي) ----------
+# الصغيرة: صورةٌ ظلّيّةٌ بيضاء على شفّاف (شرطُ أندرويد، يلوّنها النظام)؛ والكبيرة: الشعارُ الملوَّن على ورقٍ أبيض
+WHITE_SVG=open(os.path.join(ROOT,'tools','logo-glyph.svg'),encoding='utf8').read().replace('fill="#000"','fill="#FFFFFF"')
+for d,k in DENS.items():
+    p=os.path.join(OUT,'drawable-'+d); os.makedirs(p,exist_ok=True)
+    sz=round(24*k); png=cairosvg.svg2png(bytestring=WHITE_SVG.encode(),output_width=round(21*k))
+    g=Image.open(io.BytesIO(png)).convert('RGBA'); c=Image.new('RGBA',(sz,sz),(0,0,0,0))
+    c.alpha_composite(g,((sz-g.width)//2,(sz-g.height)//2)); c.save(os.path.join(p,'ic_stat_icon.png'))
+p=os.path.join(OUT,'drawable-nodpi'); os.makedirs(p,exist_ok=True)
+on_paper(192,.7).save(os.path.join(p,'ic_notif_large.png'))
 v=os.path.join(OUT,'values'); os.makedirs(v,exist_ok=True)
 open(os.path.join(v,'ic_launcher_background.xml'),'w').write('<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">%s</color>\n</resources>\n'%hexs(PAPER))
 print('✓ الأيقونات: حبر',hexs(INK),'على',hexs(PAPER))

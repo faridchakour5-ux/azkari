@@ -599,10 +599,10 @@ T.notifs = function(nowMs, days, nextId){
     if(R.fast && T.hijriOk()){
       const t=addDays(d,1), ev=hEvents(hijri(t),t).find(e=>e.k==='fast'||e.k==='white'||e.k==='mt');
       const a=at(20,30);
-      if(ev && a.getTime()>nowMs+60000) out.push({ id:id++, channelId:'reminders', title:'غدًا: '+ev.t, body:'يُستحبّ صيامُه — '+(ev.k==='mt'?'تقبّل الله منك':'نوِ الصيامَ إن شئت'), schedule:{ at:a, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+      if(ev && a.getTime()>nowMs+60000) out.push({ id:id++, channelId:'reminders', title:'غدًا: '+ev.t, body:'يُستحبّ صيامُه — '+(ev.k==='mt'?'تقبّل الله منك':'نوِ الصيامَ إن شئت'), schedule:{ at:a, allowWhileIdle:true }, smallIcon:'ic_stat_icon', largeIcon:'ic_notif_large' });
     }
     if(R.rev && T.reviewDue){ const a=at(20,0); const any=rvAll().length>0;
-      if(any && a.getTime()>nowMs+60000) out.push({ id:id++, channelId:'reminders', title:'مراجعة الحفظ', body:'حان وقتُ مراجعة محفوظك — افتح «مراجعة الحفظ» لترى ما حان موعدُه', schedule:{ at:a, allowWhileIdle:true }, smallIcon:'ic_stat_icon' });
+      if(any && a.getTime()>nowMs+60000) out.push({ id:id++, channelId:'reminders', title:'مراجعة الحفظ', body:'حان وقتُ مراجعة محفوظك — افتح «مراجعة الحفظ» لترى ما حان موعدُه', schedule:{ at:a, allowWhileIdle:true }, smallIcon:'ic_stat_icon', largeIcon:'ic_notif_large' });
     }
   }
   return out;

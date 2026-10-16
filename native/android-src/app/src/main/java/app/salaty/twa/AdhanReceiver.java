@@ -76,7 +76,16 @@ public class AdhanReceiver extends BroadcastReceiver {
     b.setContentTitle(title == null ? "" : title).setContentText(body == null ? "" : body)
         .setStyle(new Notification.BigTextStyle().bigText(body == null ? "" : body))
         .setSmallIcon(icon != 0 ? icon : android.R.drawable.ic_lock_idle_alarm)
+        .setLargeIcon(largeLogo(app))
         .setContentIntent(pi).setAutoCancel(true);
     nm.notify((int) (System.currentTimeMillis() / 60000L % 100000L) + 800000, b.build());
+  }
+
+  /** شعارُ «صلاتي» الملوَّن كأيقونةٍ كبيرةٍ في الإشعار */
+  static android.graphics.Bitmap largeLogo(android.content.Context c) {
+    try {
+      int id = c.getResources().getIdentifier("ic_notif_large", "drawable", c.getPackageName());
+      return id != 0 ? android.graphics.BitmapFactory.decodeResource(c.getResources(), id) : null;
+    } catch (Exception e) { return null; }
   }
 }

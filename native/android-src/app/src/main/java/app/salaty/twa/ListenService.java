@@ -112,6 +112,7 @@ public class ListenService extends Service {
     b.setContentTitle(title)
      .setContentText(text)
      .setSmallIcon(icon != 0 ? icon : android.R.drawable.ic_media_play)
+     .setLargeIcon(AdhanReceiver.largeLogo(this))
      .setContentIntent(piOpen)
      .setOngoing(true)
      .setOnlyAlertOnce(true)
