@@ -1461,6 +1461,23 @@
   .hifz-pill{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:80; display:none; align-items:center; gap:6px;
     border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow-2); border-radius:22px; padding:6px 10px; max-width:94vw;}
   .hifz-pill.show{display:flex;}
+  /* شريطُ التحفيظ: الترديد ثم نصُّ الآية ثم أزرارُ التحكّم، مكدَّسةً فوق الشريط السفليّ */
+  #hz-dock{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(84px + env(safe-area-inset-bottom)); z-index:81; display:flex; flex-direction:column; align-items:center; gap:8px; width:min(94vw,440px); pointer-events:none;}
+  #hz-dock > *{pointer-events:auto;}
+  #hz-dock .hifz-pill, #hz-dock .hz-echo{position:static; transform:none; left:auto; bottom:auto;}
+  /* نصُّ الآية أثناء التحفيظ: بأسلوب المصحف نفسِه (.wird-text: الخطُّ والحجمُ واللونُ الذي اختاره المستخدم وعلامةُ الآية)،
+     وبخطّ روايةِ التحفيظ ولو خالفت روايةَ المصحف المعروض */
+  .hz-aya{display:none; width:100%; max-height:38vh; overflow-y:auto; box-sizing:border-box; border:1px solid var(--line); background:var(--bg); box-shadow:var(--shadow-2); border-radius:20px; padding:8px 14px 10px;}
+  .hz-aya.show{display:block;}
+  .hz-aya .wird-text{text-align:center; margin:0;}
+  .hz-aya.w .wird-text{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--scale) * var(--qscale,1)); line-height:2.7; -webkit-text-stroke:0;}
+  .hz-aya.h .wird-text{font-family:'AmiriQuran',serif; font-size:calc(23px * var(--scale) * var(--qscale,1)); line-height:2.935; -webkit-text-stroke:var(--qink) currentColor;}
+  .hz-aya.h .wird-text{font-family:'NotoNaskhTashkeel','AmiriQuran',serif; font-palette:--hafsTashkeel;}
+  html[data-bg="dark"] .hz-aya.h .wird-text{font-palette:--hafsTashkeelDark;}
+  body.qc-g4 .hz-aya.h .wird-text{font-palette:--ht-g4;} body.qc-navy .hz-aya.h .wird-text{font-palette:--ht-navy;}
+  html[data-bg="dark"] body.qc-g4 .hz-aya.h .wird-text{font-palette:--htd-g4;} html[data-bg="dark"] body.qc-navy .hz-aya.h .wird-text{font-palette:--htd-navy;}
+  .hz-aya .n{font-family:'PlexAr',sans-serif; font-size:12.5px; color:var(--text-3); display:block; line-height:1.6;}
+  #hz-txt.off{opacity:.45;}
   .hz-echo{position:fixed; left:50%; bottom:calc(136px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:81; display:none; flex-direction:column; align-items:center; gap:8px; width:min(92vw,420px);
     border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow-2); border-radius:20px; padding:12px 14px; text-align:center;}
   .hz-echo.show{display:flex;}
@@ -1741,13 +1758,17 @@
     <div class="hifz-body" id="hifz-body"></div>
   </div>
 </div>
+<div id="hz-dock">
 <div class="hz-echo" id="hz-echo" role="status" aria-live="polite"><div class="hz-e-msg" id="hz-e-msg"></div><div class="hz-e-bar" id="hz-e-bar"><i id="hz-e-lvl"></i></div><div class="hz-e-btns" id="hz-e-btns"></div></div>
+<div class="hz-aya" id="hz-aya" dir="rtl" lang="ar"></div>
 <div class="hifz-pill" id="hifz-pill">
   <button id="hz-prev" aria-label="السابقة"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
   <button id="hz-play" aria-label="إيقاف مؤقّت"></button>
   <button id="hz-next" aria-label="التالية"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
   <span class="hz-info" id="hz-info"></span>
+  <button id="hz-txt" aria-label="إظهار نصّ الآية أو إخفاؤه"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
   <button id="hz-stop" aria-label="إنهاء التحفيظ"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
 </div>
 
 <div class="sura-overlay" id="search-overlay">
@@ -5439,8 +5460,19 @@ function hzPlayCurrent(){
   // نُحضِّر الآيةَ التي بعدها كي لا تتأخّر
   const nx=h.items[h.i+1]; if(nx && h.c.riw!=='warsh'){ try{ const pre=new Audio(); pre.preload='auto'; pre.src=hzUrl(h.c,h.si,nx.no); }catch(e){} }
 }
+function hzAyaPaint(){
+  const h=__hz, box=$('#hz-aya'); if(!box) return;
+  const on=!!h && hzCfg().txt!==false; $('#hz-txt') && $('#hz-txt').classList.toggle('off', hzCfg().txt===false);
+  if(!on){ box.classList.remove('show'); return; }
+  const it=hzCur(), D=HZD(); if(!it||!D){ box.classList.remove('show'); return; }
+  const ai=D.sur[h.si].i+it.no-1, row=D.a[ai]; if(!row){ box.classList.remove('show'); return; }
+  let x=qFix(row.t); if(h.c.riw==='warsh' && settings.riwaya!=='warsh'){ try{ for(const [re,rep] of QWFIX) x=x.replace(re,rep); }catch(e){} }
+  box.classList.toggle('w', h.c.riw==='warsh'); box.classList.toggle('h', h.c.riw!=='warsh');
+  box.innerHTML='<span class="n">'+escapeHtml(D.sur[h.si].n)+'</span><div class="wird-text"><span class="aya-t">'+x+'</span><span class="wird-num">۝'+AR(it.no)+'</span></div>';
+  box.classList.add('show'); box.scrollTop=0;
+}
 function hzUi(){
-  const h=__hz; if(!h) return; const it=hzCur();
+  const h=__hz; if(!h) return; const it=hzCur(); hzAyaPaint();
   $('#hz-info').textContent='آية '+AR(it.no)+' · '+AR(it.r)+'/'+AR(it.rt)+(h.c.rr!==1?' · دورة '+AR(h.cycle)+(h.c.rr?'/'+AR(h.c.rr):''):'');
   $('#hz-play').innerHTML = h.paused ? HZ_PLAY_IC : HZ_PAUSE_IC;
   document.querySelectorAll('.aya-t.hifz-live').forEach(x=>x.classList.remove('hifz-live'));
@@ -5519,6 +5551,7 @@ function hzRecord(h, vd){
       try{ rec.state!=='inactive' && rec.stop(); }catch(e){ resolve({ blob:null, spoke:false }); }
     };
     h.echoCancel=()=>{ skipped=true; finish(); };
+    h.echoDone=()=>finish();                                                     // «انتهيتُ»
     rec.start(250);
     let last=Date.now();
     const iv=setInterval(()=>{
@@ -5529,8 +5562,12 @@ function hzRecord(h, vd){
       const voiced=rms>Math.max(0.03, floor*3);
       if(voiced){ speech+=dt; lastVoice=now; } else floor=Math.min(0.02, floor*0.97+rms*0.03);
       const el=now-t0;
-      if(speech>=Math.min(900, vd*300) && lastVoice && now-lastVoice>1300) finish();          // تكلّم ثم صمت
-      else if(el>vd*2+5000) finish();                                                         // سقفٌ أقصى
+      /* لا نقطع على من يتنفّس وسط الآية: الصمتُ يُنهي التسجيلَ بعد ثانيتين إن قارب ما قاله طولَ الآية،
+         وإلّا بعد 3.5 ثوانٍ؛ والسقفُ ضعفان ونصفُ مدّة الآية + 6 ثوانٍ؛ وزرُّ «انتهيتُ» يُنهيه متى شاء */
+      const quiet=lastVoice ? now-lastVoice : 0;
+      if(speech>=Math.max(900, vd*600) && quiet>2000) finish();
+      else if(speech>=900 && quiet>3500) finish();
+      else if(el>vd*2500+6000) finish();
     }, 100);
   });
 }
@@ -5550,7 +5587,7 @@ async function hzEcho(h){
   if(dead()) return;
   if(!m){ h.echoOff=true; hzEchoHide(); showToast(__hzMicErr==='NotAllowedError' ? 'الميكروفون غير مسموح — فعِّله للتطبيق من إعدادات الهاتف. يستمرّ التحفيظ بلا ردِّد وقارِن' : 'تعذّر استعمال الميكروفون — يستمرّ التحفيظ بلا ردِّد وقارِن', 4800); hzAfterVerse(); return; }
   try{ if(m.ctx.state==='suspended') await m.ctx.resume(); }catch(e){}
-  hzEchoShow('ردِّد الآن…', { bar:true, btns:[{ t:'تخطَّ', f:()=>{ hzEchoAbort(h); hzNext(); } }] });
+  hzEchoShow('ردِّد الآن…', { bar:true, btns:[{ t:'انتهيتُ', pri:true, f:()=>{ if(h.echoDone) h.echoDone(); } }, { t:'تخطَّ', f:()=>{ hzEchoAbort(h); hzNext(); } }] });
   const res=await hzRecord(h, vd);
   if(dead()) return;
   if(res.err){ h.echoOff=true; hzEchoHide(); showToast('تعذّر التسجيل — يستمرّ التحفيظ بلا ردِّد وقارِن', 4200); hzNext(); return; }
@@ -5603,7 +5640,7 @@ function hzStop(silent){
   if(h){ clearTimeout(h.timer); hzEchoAbort(h); }
   hzMicRelease();
   try{ a.onended=null; a.onerror=null; a.pause(); a.removeAttribute('src'); a.load(); }catch(e){}
-  $('#hifz-pill').classList.remove('show');
+  $('#hifz-pill').classList.remove('show'); $('#hz-aya').classList.remove('show');
   try{ if(!__wantPlay) listenKeepAlive(false); }catch(e){}
   document.querySelectorAll('.aya-t.hifz-live').forEach(x=>x.classList.remove('hifz-live'));
   if(h && !silent){ try{ setupMediaSession(); }catch(e){} }
@@ -5621,6 +5658,7 @@ $('#hz-play').addEventListener('click', ()=>{ vibrate(6); hzToggle(); });
 $('#hz-next').addEventListener('click', ()=>{ vibrate(6); hzStep(1); });
 $('#hz-prev').addEventListener('click', ()=>{ vibrate(6); hzStep(-1); });
 $('#hz-stop').addEventListener('click', ()=>{ vibrate(8); hzStop(); });
+$('#hz-txt').addEventListener('click', ()=>{ vibrate(6); settings.hifz=Object.assign(hzCfg(),{txt: hzCfg().txt===false}); saveSettings(); hzAyaPaint(); });
 $('#hifz-close').addEventListener('click', closeHifz);
 $('#hifz-overlay').addEventListener('click', e=>{ if(e.target.id==='hifz-overlay') closeHifz(); });
 /* إن بدأت تلاوةٌ أخرى (سورةٌ، دعاة…) أُنهي التحفيظ كيلا يتداخل صوتان */
