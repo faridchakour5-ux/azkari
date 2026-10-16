@@ -1441,7 +1441,10 @@
   .hz-chips button.on{background:var(--accent); color:#fff; border-color:transparent;}
   .hz-range{display:flex; gap:12px; align-items:center; justify-content:space-between;}
   .hz-step{display:flex; align-items:center; gap:10px; background:var(--fill-2); border-radius:16px; padding:6px 8px; flex:1; justify-content:space-between;}
+  .hz-step .hz-num{width:3.4em; text-align:center; font:inherit; font-weight:800; font-size:calc(17px * var(--tscale)); border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--text); padding:6px 2px; box-sizing:border-box;}
   .hz-step b{font-size:calc(17px * var(--tscale)); min-width:2.2em; text-align:center;}
+  .hz-range{flex-direction:column; align-items:stretch; gap:8px;} .hz-range .hz-step{flex:none; box-sizing:border-box;}
+  .hz-step button.ten{width:46px; font-size:14px;}
   .hz-step button{width:38px; height:38px; border:0; border-radius:12px; background:var(--card); color:var(--accent); font-size:20px; font-weight:800; cursor:pointer;}
   .hz-go{display:block; width:100%; margin-top:18px; border:0; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:calc(16px * var(--tscale)); border-radius:16px; padding:14px; cursor:pointer;}
   .hz-sura{display:flex; justify-content:space-between; align-items:center; width:100%; border:1px solid var(--line); background:var(--fill-2); color:var(--text); font:inherit; font-weight:800; font-size:calc(16px * var(--tscale)); border-radius:16px; padding:12px 16px; cursor:pointer;}
@@ -5394,8 +5397,8 @@ function renderHifzForm(body, picker, afterStart){
       (c.riw==='warsh'?'<div class="hz-hint">تلاوةٌ كاملةٌ بورش تُقتطَع آيةً آية بتوقيت mp3quran، وترقيمُها ترقيمُ مصحف ورش في التطبيق.</div>':'')+'</div>'+
     (picker?'<div class="hz-row"><div class="hz-lbl">السورة</div><button class="hz-sura" id="hz-sura" type="button"><span>'+HZD().sur[t.si].n+'</span><span>▾</span></button></div>':'')+
     '<div class="hz-row"><div class="hz-lbl">المقطع</div><div class="hz-range">'+
-      '<div class="hz-step"><button data-st="from-">−</button><span>من <b>'+AR(t.from)+'</b></span><button data-st="from+">+</button></div>'+
-      '<div class="hz-step"><button data-st="to-">−</button><span>إلى <b>'+AR(t.to)+'</b></span><button data-st="to+">+</button></div>'+
+      '<div class="hz-step"><button data-st="from-10" class="ten">−10</button><button data-st="from-">−</button><span>من <input class="hz-num" data-k="from" type="text" inputmode="numeric" pattern="[0-9]*" value="'+AR(t.from)+'"></span><button data-st="from+">+</button><button data-st="from+10" class="ten">+10</button></div>'+
+      '<div class="hz-step"><button data-st="to-10" class="ten">−10</button><button data-st="to-">−</button><span>إلى <input class="hz-num" data-k="to" type="text" inputmode="numeric" pattern="[0-9]*" value="'+AR(t.to)+'"></span><button data-st="to+">+</button><button data-st="to+10" class="ten">+10</button></div>'+
     '</div></div>'+
     '<div class="hz-row"><div class="hz-lbl">طريقة التحفيظ</div><div class="hz-presets">'+
       HZ_PRESETS.map(pr=>'<button type="button" class="hz-pre'+(isPre(pr)?' on':'')+'" data-p="'+pr.id+'"><b>'+pr.n+'</b><small>'+pr.d+'</small></button>').join('')+
@@ -5442,13 +5445,23 @@ function renderHifzForm(body, picker, afterStart){
   }));
   body.querySelectorAll('[data-st]').forEach(b=> b.addEventListener('click', ()=>{
     const st=b.dataset.st; vibrate(5);
-    if(st==='from-') t.from=Math.max(1,t.from-1);
-    if(st==='from+') t.from=Math.min(n,t.from+1);
-    if(st==='to-')   t.to=Math.max(1,t.to-1);
-    if(st==='to+')   t.to=Math.min(n,t.to+1);
+    const m=/^(from|to)([+-])(10)?$/.exec(st), d=(m[2]==='+'?1:-1)*(m[3]?10:1);
+    t[m[1]]=Math.min(n,Math.max(1,t[m[1]]+d));
     if(t.to<t.from){ if(st.startsWith('from')) t.to=t.from; else t.from=t.to; }
     again();
   }));
+  body.querySelectorAll('.hz-num').forEach(inp=>{
+    inp.addEventListener('focus', ()=>{ try{ inp.select(); }catch(e){} });
+    const apply=()=>{
+      const k=inp.dataset.k, raw=inp.value.replace(/[\u0660-\u0669\u06F0-\u06F9]/g,d=>String(d.charCodeAt(0)%16)).replace(/\D/g,'');
+      let v=parseInt(raw,10); if(isNaN(v)){ again(); return; }
+      v=Math.min(n,Math.max(1,v)); t[k]=v;
+      if(t.to<t.from){ if(k==='from') t.to=t.from; else t.from=t.to; }
+      again();
+    };
+    inp.addEventListener('change', apply);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); inp.blur(); } });
+  });
   const sb=$('#hz-sura');
   if(sb) sb.addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(t.si, si=>{ closeSuraOverlay(); __hzSel={ si, from:1, to:hzCount(si) }; again(); }, 'اختر السورة'); });
   $('#hz-go').addEventListener('click', ()=>{ vibrate(8); afterStart && afterStart(); hzStart(t.si, t.from, t.to, hzCfg()); });
