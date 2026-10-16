@@ -1476,6 +1476,43 @@
   html[data-bg="dark"] .hz-aya.h .wird-text{font-palette:--hafsTashkeelDark;}
   body.qc-g4 .hz-aya.h .wird-text{font-palette:--ht-g4;} body.qc-navy .hz-aya.h .wird-text{font-palette:--ht-navy;}
   html[data-bg="dark"] body.qc-g4 .hz-aya.h .wird-text{font-palette:--htd-g4;} html[data-bg="dark"] body.qc-navy .hz-aya.h .wird-text{font-palette:--htd-navy;}
+  /* تلوينُ التجويد (حفص) في بطاقة التحفيظ وحدَها — صفحةُ القرآن لا تُلوَّن (أمرُ فريد). خطُّ حفص ملوَّنٌ (COLR) فيُلوَّن بلوحة خطٍّ لكلّ حكم */
+  @font-palette-values --tj-ham_wasl{ font-family:'NotoNaskhTashkeel'; override-colors:0 #9A9A9A; } @font-palette-values --tjd-ham_wasl{ font-family:'NotoNaskhTashkeel'; override-colors:0 #8C8C8C; }
+  .hz-aya .tj-ham_wasl{color:#9A9A9A; font-palette:--tj-ham_wasl;} html[data-bg="dark"] .hz-aya .tj-ham_wasl{color:#8C8C8C; font-palette:--tjd-ham_wasl;}
+  @font-palette-values --tj-slnt{ font-family:'NotoNaskhTashkeel'; override-colors:0 #9A9A9A; } @font-palette-values --tjd-slnt{ font-family:'NotoNaskhTashkeel'; override-colors:0 #8C8C8C; }
+  .hz-aya .tj-slnt{color:#9A9A9A; font-palette:--tj-slnt;} html[data-bg="dark"] .hz-aya .tj-slnt{color:#8C8C8C; font-palette:--tjd-slnt;}
+  @font-palette-values --tj-laam_shamsiyah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #9A9A9A; } @font-palette-values --tjd-laam_shamsiyah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #8C8C8C; }
+  .hz-aya .tj-laam_shamsiyah{color:#9A9A9A; font-palette:--tj-laam_shamsiyah;} html[data-bg="dark"] .hz-aya .tj-laam_shamsiyah{color:#8C8C8C; font-palette:--tjd-laam_shamsiyah;}
+  @font-palette-values --tj-madda_normal{ font-family:'NotoNaskhTashkeel'; override-colors:0 #537FFF; } @font-palette-values --tjd-madda_normal{ font-family:'NotoNaskhTashkeel'; override-colors:0 #86A6FF; }
+  .hz-aya .tj-madda_normal{color:#537FFF; font-palette:--tj-madda_normal;} html[data-bg="dark"] .hz-aya .tj-madda_normal{color:#86A6FF; font-palette:--tjd-madda_normal;}
+  @font-palette-values --tj-madda_permissible{ font-family:'NotoNaskhTashkeel'; override-colors:0 #4050FF; } @font-palette-values --tjd-madda_permissible{ font-family:'NotoNaskhTashkeel'; override-colors:0 #8E98FF; }
+  .hz-aya .tj-madda_permissible{color:#4050FF; font-palette:--tj-madda_permissible;} html[data-bg="dark"] .hz-aya .tj-madda_permissible{color:#8E98FF; font-palette:--tjd-madda_permissible;}
+  @font-palette-values --tj-madda_obligatory{ font-family:'NotoNaskhTashkeel'; override-colors:0 #2144C1; } @font-palette-values --tjd-madda_obligatory{ font-family:'NotoNaskhTashkeel'; override-colors:0 #7092FF; }
+  .hz-aya .tj-madda_obligatory{color:#2144C1; font-palette:--tj-madda_obligatory;} html[data-bg="dark"] .hz-aya .tj-madda_obligatory{color:#7092FF; font-palette:--tjd-madda_obligatory;}
+  @font-palette-values --tj-madda_necessary{ font-family:'NotoNaskhTashkeel'; override-colors:0 #000EBC; } @font-palette-values --tjd-madda_necessary{ font-family:'NotoNaskhTashkeel'; override-colors:0 #6672FF; }
+  .hz-aya .tj-madda_necessary{color:#000EBC; font-palette:--tj-madda_necessary;} html[data-bg="dark"] .hz-aya .tj-madda_necessary{color:#6672FF; font-palette:--tjd-madda_necessary;}
+  @font-palette-values --tj-qalaqah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #DD0008; } @font-palette-values --tjd-qalaqah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #FF6064; }
+  .hz-aya .tj-qalaqah{color:#DD0008; font-palette:--tj-qalaqah;} html[data-bg="dark"] .hz-aya .tj-qalaqah{color:#FF6064; font-palette:--tjd-qalaqah;}
+  @font-palette-values --tj-ikhafa{ font-family:'NotoNaskhTashkeel'; override-colors:0 #9400A8; } @font-palette-values --tjd-ikhafa{ font-family:'NotoNaskhTashkeel'; override-colors:0 #D77BEA; }
+  .hz-aya .tj-ikhafa{color:#9400A8; font-palette:--tj-ikhafa;} html[data-bg="dark"] .hz-aya .tj-ikhafa{color:#D77BEA; font-palette:--tjd-ikhafa;}
+  @font-palette-values --tj-ikhafa_shafawi{ font-family:'NotoNaskhTashkeel'; override-colors:0 #D500B7; } @font-palette-values --tjd-ikhafa_shafawi{ font-family:'NotoNaskhTashkeel'; override-colors:0 #FF78E8; }
+  .hz-aya .tj-ikhafa_shafawi{color:#D500B7; font-palette:--tj-ikhafa_shafawi;} html[data-bg="dark"] .hz-aya .tj-ikhafa_shafawi{color:#FF78E8; font-palette:--tjd-ikhafa_shafawi;}
+  @font-palette-values --tj-idgham_ghunnah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #169777; } @font-palette-values --tjd-idgham_ghunnah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #43D3AA; }
+  .hz-aya .tj-idgham_ghunnah{color:#169777; font-palette:--tj-idgham_ghunnah;} html[data-bg="dark"] .hz-aya .tj-idgham_ghunnah{color:#43D3AA; font-palette:--tjd-idgham_ghunnah;}
+  @font-palette-values --tj-idgham_wo_ghunnah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #169200; } @font-palette-values --tjd-idgham_wo_ghunnah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #56D839; }
+  .hz-aya .tj-idgham_wo_ghunnah{color:#169200; font-palette:--tj-idgham_wo_ghunnah;} html[data-bg="dark"] .hz-aya .tj-idgham_wo_ghunnah{color:#56D839; font-palette:--tjd-idgham_wo_ghunnah;}
+  @font-palette-values --tj-idgham_shafawi{ font-family:'NotoNaskhTashkeel'; override-colors:0 #58B800; } @font-palette-values --tjd-idgham_shafawi{ font-family:'NotoNaskhTashkeel'; override-colors:0 #86E536; }
+  .hz-aya .tj-idgham_shafawi{color:#58B800; font-palette:--tj-idgham_shafawi;} html[data-bg="dark"] .hz-aya .tj-idgham_shafawi{color:#86E536; font-palette:--tjd-idgham_shafawi;}
+  @font-palette-values --tj-idgham_mutajanisayn{ font-family:'NotoNaskhTashkeel'; override-colors:0 #A1A1A1; } @font-palette-values --tjd-idgham_mutajanisayn{ font-family:'NotoNaskhTashkeel'; override-colors:0 #9A9A9A; }
+  .hz-aya .tj-idgham_mutajanisayn{color:#A1A1A1; font-palette:--tj-idgham_mutajanisayn;} html[data-bg="dark"] .hz-aya .tj-idgham_mutajanisayn{color:#9A9A9A; font-palette:--tjd-idgham_mutajanisayn;}
+  @font-palette-values --tj-idgham_mutaqaribayn{ font-family:'NotoNaskhTashkeel'; override-colors:0 #A1A1A1; } @font-palette-values --tjd-idgham_mutaqaribayn{ font-family:'NotoNaskhTashkeel'; override-colors:0 #9A9A9A; }
+  .hz-aya .tj-idgham_mutaqaribayn{color:#A1A1A1; font-palette:--tj-idgham_mutaqaribayn;} html[data-bg="dark"] .hz-aya .tj-idgham_mutaqaribayn{color:#9A9A9A; font-palette:--tjd-idgham_mutaqaribayn;}
+  @font-palette-values --tj-iqlab{ font-family:'NotoNaskhTashkeel'; override-colors:0 #26BFFD; } @font-palette-values --tjd-iqlab{ font-family:'NotoNaskhTashkeel'; override-colors:0 #62D3FF; }
+  .hz-aya .tj-iqlab{color:#26BFFD; font-palette:--tj-iqlab;} html[data-bg="dark"] .hz-aya .tj-iqlab{color:#62D3FF; font-palette:--tjd-iqlab;}
+  @font-palette-values --tj-ghunnah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #FF7E1E; } @font-palette-values --tjd-ghunnah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #FFA05A; }
+  .hz-aya .tj-ghunnah{color:#FF7E1E; font-palette:--tj-ghunnah;} html[data-bg="dark"] .hz-aya .tj-ghunnah{color:#FFA05A; font-palette:--tjd-ghunnah;}
+  .hz-tjl{display:flex; flex-wrap:wrap; gap:4px 10px; justify-content:center; margin-top:4px; font-family:'PlexAr',sans-serif; font-size:11.5px; color:var(--text-2); line-height:1.6;}
+  .hz-tjl i{display:inline-block; width:9px; height:9px; border-radius:50%; margin-inline-end:4px; vertical-align:0;}
   .hz-aya .n{font-family:'PlexAr',sans-serif; font-size:12.5px; color:var(--text-3); display:block; line-height:1.6;}
   #hz-txt.off{opacity:.45;}
   .hz-echo{position:fixed; left:50%; bottom:calc(136px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:81; display:none; flex-direction:column; align-items:center; gap:8px; width:min(92vw,420px);
@@ -5331,6 +5368,7 @@ function hzNo(n){ return String(n).padStart(3,'0'); }
 const HZD=()=>{ const c=(__hz&&__hz.c)||hzCfg(); return (c.riw==='warsh' && window.WIRD_WARSH) ? window.WIRD_WARSH : window.WIRD_HAFS; };
 async function hzLoad(riw){
   if(!window.WIRD_HAFS){ try{ await loadScript('wird_hafs.js'); }catch(e){} }
+  if((riw||hzCfg().riw)!=='warsh' && hzCfg().tj==='on' && !window.HZ_TJ){ try{ await loadScript('hifz_tajweed.js'); }catch(e){} }
   if((riw||hzCfg().riw)==='warsh'){
     if(!window.WIRD_WARSH){ try{ await loadScript('wird_warsh.js'); }catch(e){} }
     if(!window.HZ_WT){ try{ await loadScript('hifz_warsh.js'); }catch(e){} }
@@ -5360,6 +5398,7 @@ function renderHifzForm(body, picker, afterStart){
   const chips=(key, list, cur)=>'<div class="hz-chips" data-k="'+key+'">'+list.map(([v,l])=>'<button data-v="'+v+'"'+(String(cur)===String(v)?' class="on"':'')+'>'+l+'</button>').join('')+'</div>';
   body.innerHTML=
     '<div class="hz-row"><div class="hz-lbl">الرواية</div>'+chips('riw',[['hafs','حفص'],['warsh','ورش']],c.riw==='warsh'?'warsh':'hafs')+
+      (c.riw!=='warsh'?'<div class="hz-lbl" style="margin-top:10px">تلوين التجويد في نصّ الآية</div>'+chips('tj',[['off','بلا تلوين'],['on','ملوَّن']],c.tj==='on'?'on':'off')+'<div class="hz-hint">في بطاقة التحفيظ فقط، وصفحةُ القرآن لا تُلوَّن. الأحكامُ من مصحف المدينة المُعلَّم بالتجويد (quran.com)، ولا يغني عن معلّم.</div>':'<div class="hz-hint">تلوينُ التجويد لحفص فقط حاليًّا، حتى نجد مصدرًا موثوقًا لورش.</div>')+
       (c.riw==='warsh'?'<div class="hz-hint">تلاوةٌ كاملةٌ بورش تُقتطَع آيةً آية بتوقيت mp3quran، وترقيمُها ترقيمُ مصحف ورش في التطبيق.</div>':'')+'</div>'+
     (picker?'<div class="hz-row"><div class="hz-lbl">السورة</div><button class="hz-sura" id="hz-sura" type="button"><span>'+HZD().sur[t.si].n+'</span><span>▾</span></button></div>':'')+
     '<div class="hz-row"><div class="hz-lbl">المقطع</div><div class="hz-range">'+
@@ -5405,7 +5444,9 @@ function renderHifzForm(body, picker, afterStart){
       })();
       return;
     }
-    settings.hifz=Object.assign(hzCfg(),{[k]:v}); saveSettings(); vibrate(5); again();
+    settings.hifz=Object.assign(hzCfg(),{[k]:v}); saveSettings(); vibrate(5);
+    if(k==='tj'){ hzLoad().then(()=>{ again(); hzAyaPaint(); }); return; }
+    again();
   }));
   body.querySelectorAll('[data-st]').forEach(b=> b.addEventListener('click', ()=>{
     const st=b.dataset.st; vibrate(5);
@@ -5460,6 +5501,25 @@ function hzPlayCurrent(){
   // نُحضِّر الآيةَ التي بعدها كي لا تتأخّر
   const nx=h.items[h.i+1]; if(nx && h.c.riw!=='warsh'){ try{ const pre=new Audio(); pre.preload='auto'; pre.src=hzUrl(h.c,h.si,nx.no); }catch(e){} }
 }
+const HZ_TJ_META={ham_wasl:['همزة الوصل','#9A9A9A','#8C8C8C'],slnt:['حرفٌ لا يُنطَق','#9A9A9A','#8C8C8C'],laam_shamsiyah:['اللام الشمسيّة','#9A9A9A','#8C8C8C'],madda_normal:['مدٌّ طبيعيّ','#537FFF','#86A6FF'],madda_permissible:['مدٌّ جائز','#4050FF','#8E98FF'],madda_obligatory:['مدٌّ واجب','#2144C1','#7092FF'],madda_necessary:['مدٌّ لازم','#000EBC','#6672FF'],qalaqah:['قلقلة','#DD0008','#FF6064'],ikhafa:['إخفاء','#9400A8','#D77BEA'],ikhafa_shafawi:['إخفاءٌ شفويّ','#D500B7','#FF78E8'],idgham_ghunnah:['إدغامٌ بغنّة','#169777','#43D3AA'],idgham_wo_ghunnah:['إدغامٌ بلا غنّة','#169200','#56D839'],idgham_shafawi:['إدغامٌ شفويّ','#58B800','#86E536'],idgham_mutajanisayn:['إدغامُ المتجانسين','#A1A1A1','#9A9A9A'],idgham_mutaqaribayn:['إدغامُ المتقاربين','#A1A1A1','#9A9A9A'],iqlab:['إقلاب','#26BFFD','#62D3FF'],ghunnah:['غنّة','#FF7E1E','#FFA05A']};
+/* يلفّ عناقيدَ نصّ التطبيق (حرفٌ أصليّ وعلاماتُه) بأحكامها من hifz_tajweed.js؛ والنصُّ نفسُه لا يتغيّر حرفًا */
+function hzTjHtml(t, ai){
+  const T=window.HZ_TJ, spec=T&&T.v[ai]; if(!spec) return null;
+  const map={}, seen=new Set();
+  spec.split(',').forEach(r=>{ const m=/^(\d+):(\d+)(?:\+(\d+))?$/.exec(r); if(!m) return; const c=T.c[+m[2]]; for(let i=0;i<+(m[3]||1);i++) map[+m[1]+i]=c; });
+  let out='', ci=-1, cur=null, buf='';
+  const flush=()=>{ if(!buf) return; out+= cur ? '<span class="tj tj-'+cur+'">'+escapeHtml(buf)+'</span>' : escapeHtml(buf); buf=''; };
+  for(const ch of t){
+    const o=ch.codePointAt(0), base=(o>=0x621&&o<=0x63A)||(o>=0x641&&o<=0x64A)||o===0x671;
+    let cls=cur; if(base){ ci++; cls=map[ci]||null; if(cls) seen.add(cls); } else if(ch===' ') cls=null;
+    if(cls!==cur){ flush(); cur=cls; } buf+=ch;
+  }
+  flush();
+  const dark=document.documentElement.getAttribute('data-bg')==='dark';
+  const leg=[...new Set([...seen].map(k=>HZ_TJ_META[k]?HZ_TJ_META[k][0]+'|'+HZ_TJ_META[k][dark?2:1]:''))].filter(Boolean)
+    .map(x=>{ const [n,c]=x.split('|'); return '<span><i style="background:'+c+'"></i>'+n+'</span>'; }).join('');
+  return { html:out.replace(/ {2,}/g,' '), legend:leg };
+}
 function hzAyaPaint(){
   const h=__hz, box=$('#hz-aya'); if(!box) return;
   const on=!!h && hzCfg().txt!==false; $('#hz-txt') && $('#hz-txt').classList.toggle('off', hzCfg().txt===false);
@@ -5468,7 +5528,8 @@ function hzAyaPaint(){
   const ai=D.sur[h.si].i+it.no-1, row=D.a[ai]; if(!row){ box.classList.remove('show'); return; }
   let x=qFix(row.t); if(h.c.riw==='warsh' && settings.riwaya!=='warsh'){ try{ for(const [re,rep] of QWFIX) x=x.replace(re,rep); }catch(e){} }
   box.classList.toggle('w', h.c.riw==='warsh'); box.classList.toggle('h', h.c.riw!=='warsh');
-  box.innerHTML='<span class="n">'+escapeHtml(D.sur[h.si].n)+'</span><div class="wird-text"><span class="aya-t">'+x+'</span><span class="wird-num">۝'+AR(it.no)+'</span></div>';
+  const tj=(h.c.riw!=='warsh' && hzCfg().tj==='on') ? hzTjHtml(row.t, ai) : null;
+  box.innerHTML='<span class="n">'+escapeHtml(D.sur[h.si].n)+'</span><div class="wird-text"><span class="aya-t">'+(tj?tj.html:x)+'</span><span class="wird-num">۝'+AR(it.no)+'</span></div>'+(tj&&tj.legend?'<div class="hz-tjl">'+tj.legend+'</div>':'');
   box.classList.add('show'); box.scrollTop=0;
 }
 function hzUi(){
