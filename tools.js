@@ -528,14 +528,15 @@ const INTV=[1,3,7,14,30,60,120];
 const rvAll = () => sget('az_hifzrev',[]);
 const rvSave = a => sset('az_hifzrev',a);
 T.reviewDue = function(){ const t=lk(new Date()); return rvAll().filter(x=>x.due<=t); };
-T.addReview = async function(si,a,b){
-  if(!window.WIRD_HAFS){ try{ await hzLoad(); }catch(e){} }
-  const all=rvAll(); const id=si+':'+a+'-'+b;
+T.addReview = async function(si,a,b,o){
+  o=o||{ riw:hzCfg().riw, wrec:hzCfg().wrec }; const w=o.riw==='warsh';
+  if(!window.WIRD_HAFS){ try{ await hzLoad(o.riw); }catch(e){} }
+  const all=rvAll(); const id=(w?'w':'')+si+':'+a+'-'+b;
   if(all.some(x=>x.id===id)){ toast('هذا المقطع موجودٌ في مراجعتك مسبقًا',2600); return false; }
-  all.push({ id, s:si, a, b, lvl:0, due:lk(addDays(new Date(),1)) }); rvSave(all);
+  all.push({ id, s:si, a, b, riw:w?'warsh':'hafs', wrec:w?(o.wrec||null):null, lvl:0, due:lk(addDays(new Date(),1)) }); rvSave(all);
   toast('أُضيف إلى مراجعتك — أوّلُ موعدٍ غدًا',3200); return true;
 };
-const rvName = x => { try{ return 'سورة '+window.WIRD_HAFS.sur[x.s].n+' ('+AR(x.a)+(x.b!==x.a?'–'+AR(x.b):'')+')'; }catch(e){ return 'مقطع'; } };
+const rvName = x => { try{ return 'سورة '+window.WIRD_HAFS.sur[x.s].n+' ('+AR(x.a)+(x.b!==x.a?'–'+AR(x.b):'')+')'+(x.riw==='warsh'?' — ورش':''); }catch(e){ return 'مقطع'; } };
 PAGES.rev = { title:'مراجعة الحفظ', render(body){
   let draftSi=null, a=1, b=1, ready=false;
   const draw=async()=>{
@@ -566,7 +567,7 @@ PAGES.rev = { title:'مراجعة الحفظ', render(body){
       if(q('.md')) q('.md').onclick=()=>upd(x=>set(x,x.lvl));
       if(q('.hd')) q('.hd').onclick=()=>upd(x=>{ x.lvl=0; x.due=lk(addDays(new Date(),1)); });
       if(q('.rm')) q('.rm').onclick=()=>{ if(confirm('حذف هذا المقطع من المراجعة؟')) upd((x,L)=>{ L.splice(L.indexOf(x),1); }); };
-      if(q('.ls')) q('.ls').onclick=async()=>{ const x=rvAll().find(z=>z.id===id); if(!x) return; T.close(); try{ __hzSel={si:x.s,from:x.a,to:x.b}; await hzLoad(); hzStart(x.s,x.a,x.b,Object.assign(hzCfg(),{riw:'hafs'})); }catch(e){ toast('تعذّر التشغيل — يحتاج اتصالًا',3000); } };
+      if(q('.ls')) q('.ls').onclick=async()=>{ const x=rvAll().find(z=>z.id===id); if(!x) return; T.close(); try{ __hzSel={si:x.s,from:x.a,to:x.b}; const rw=x.riw==='warsh'?'warsh':'hafs'; await hzLoad(rw); hzStart(x.s,x.a,x.b,Object.assign(hzCfg(),{riw:rw},x.wrec?{wrec:x.wrec}:{})); }catch(e){ toast('تعذّر التشغيل — يحتاج اتصالًا',3000); } };
     });
   };
   draw();

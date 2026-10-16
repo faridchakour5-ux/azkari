@@ -5303,14 +5303,14 @@ const HZ_PRESETS=[
 ];
 let __hzAdvOpen=false;
 let __hz=null, __hzSel=null;
-function hzCfg(){ return Object.assign({}, HZ_DEF, settings.hifz||{}); }
+function hzCfg(){ const c=Object.assign({}, HZ_DEF, settings.hifz||{}); if(!(settings.hifz&&settings.hifz.riw)) c.riw=(settings.riwaya==='hafs')?'hafs':'warsh'; return c; }   // الروايةُ الافتراضيّةُ للتحفيظ روايةُ مصحف المستخدم (ورش افتراضًا)
 function hzRec(c){ if(c&&c.riw==='warsh'){ const id=hzWrecId(c), W=window.HZ_WT&&HZ_WT[id]; return { id, name:W?W.name:'', timed:true }; } return HZ_RECS.find(r=>r.id===c.rec) || HZ_RECS[0]; }
 function hzNo(n){ return String(n).padStart(3,'0'); }
 /* بياناتُ حفص (أرقامُ السور وعددُ الآيات) مستقلّةٌ عن الرواية المعروضة، فيعمل التحفيظ من صفحة الاستماع أيًّا كانت الرواية */
 const HZD=()=>{ const c=(__hz&&__hz.c)||hzCfg(); return (c.riw==='warsh' && window.WIRD_WARSH) ? window.WIRD_WARSH : window.WIRD_HAFS; };
-async function hzLoad(){
+async function hzLoad(riw){
   if(!window.WIRD_HAFS){ try{ await loadScript('wird_hafs.js'); }catch(e){} }
-  if(hzCfg().riw==='warsh'){
+  if((riw||hzCfg().riw)==='warsh'){
     if(!window.WIRD_WARSH){ try{ await loadScript('wird_warsh.js'); }catch(e){} }
     if(!window.HZ_WT){ try{ await loadScript('hifz_warsh.js'); }catch(e){} }
   }
@@ -5323,7 +5323,7 @@ function hzCount(si){ const D=HZD(), end=(si+1<D.sur.length)? D.sur[si+1].i : D.
 
 async function openHifz(ai){
   if(!WIRD || isNaN(ai)) return;
-  if(settings.riwaya==='warsh'){ showToast('التحفيظ من المصحف برواية حفص — أو افتح «الاستماع ← التحفيظ» وأيُّ رواية', 4600); return; }
+  settings.hifz=Object.assign(hzCfg(),{riw: settings.riwaya==='warsh'?'warsh':'hafs'}); saveSettings();   // التحفيظُ من المصحف بروايته
   if(!(await hzLoad())) return;
   const si=suraOf(ai), no=ai-WIRD.sur[si].i+1;
   __hzSel={ si, from:no, to:no };
@@ -5339,25 +5339,25 @@ function renderHifzForm(body, picker, afterStart){
   const chips=(key, list, cur)=>'<div class="hz-chips" data-k="'+key+'">'+list.map(([v,l])=>'<button data-v="'+v+'"'+(String(cur)===String(v)?' class="on"':'')+'>'+l+'</button>').join('')+'</div>';
   body.innerHTML=
     '<div class="hz-row"><div class="hz-lbl">الرواية</div>'+chips('riw',[['hafs','حفص'],['warsh','ورش']],c.riw==='warsh'?'warsh':'hafs')+
-      (c.riw==='warsh'?'<div class="hz-hint">تلاوةٌ كاملةٌ بورش تُقتطَع آيةً آية بتوقيت mp3quran، وترقيمُها ترقيمُ مصحف ورش في التطبيق. «ردِّد وقارِن» بحفص فقط حاليًّا.</div>':'')+'</div>'+
+      (c.riw==='warsh'?'<div class="hz-hint">تلاوةٌ كاملةٌ بورش تُقتطَع آيةً آية بتوقيت mp3quran، وترقيمُها ترقيمُ مصحف ورش في التطبيق.</div>':'')+'</div>'+
     (picker?'<div class="hz-row"><div class="hz-lbl">السورة</div><button class="hz-sura" id="hz-sura" type="button"><span>'+HZD().sur[t.si].n+'</span><span>▾</span></button></div>':'')+
     '<div class="hz-row"><div class="hz-lbl">المقطع</div><div class="hz-range">'+
       '<div class="hz-step"><button data-st="from-">−</button><span>من <b>'+AR(t.from)+'</b></span><button data-st="from+">+</button></div>'+
       '<div class="hz-step"><button data-st="to-">−</button><span>إلى <b>'+AR(t.to)+'</b></span><button data-st="to+">+</button></div>'+
     '</div></div>'+
     '<div class="hz-row"><div class="hz-lbl">طريقة التحفيظ</div><div class="hz-presets">'+
-      HZ_PRESETS.filter(pr=>!(c.riw==='warsh' && pr.id==='echo')).map(pr=>'<button type="button" class="hz-pre'+(isPre(pr)?' on':'')+'" data-p="'+pr.id+'"><b>'+pr.n+'</b><small>'+pr.d+'</small></button>').join('')+
+      HZ_PRESETS.map(pr=>'<button type="button" class="hz-pre'+(isPre(pr)?' on':'')+'" data-p="'+pr.id+'"><b>'+pr.n+'</b><small>'+pr.d+'</small></button>').join('')+
     '</div>'+(HZ_PRESETS.some(isPre)?'':'<div class="hz-hint">إعدادٌ مخصّص (من «خيارات متقدّمة»)</div>')+'</div>'+
     (c.riw==='warsh'?'<div class="hz-row"><div class="hz-lbl">القارئ</div><div class="selectwrap hz-sel"><select id="hz-wrec">'+HZ_WREC_IDS.map(id=>'<option value="'+id+'"'+(id===hzWrecId(c)?' selected':'')+'>'+((window.HZ_WT&&HZ_WT[id]&&HZ_WT[id].name)||id)+'</option>').join('')+'</select></div></div>':'<div class="hz-row"><div class="hz-lbl">القارئ</div><div class="selectwrap hz-sel"><select id="hz-rec">'+HZ_RECS.map(r=>'<option value="'+r.id+'"'+(r.id===c.rec?' selected':'')+'>'+r.name+'</option>').join('')+'</select></div></div>')+
     '<button class="hz-go" id="hz-go">'+(({learn:'ابدأ التلقين',echo:'ابدأ ردِّد وقارِن',build:'ابدأ تثبيت الحفظ',review:'ابدأ المراجعة'})[(HZ_PRESETS.find(isPre)||{}).id]||'ابدأ التحفيظ')+'</button>'+
-    (c.riw==='warsh'?'':'<button class="hz-go" id="hz-rev" style="background:var(--fill-2);color:var(--accent);border:1px solid var(--line);margin-top:8px">أضِف هذا المقطع إلى «مراجعة الحفظ»</button>')+
+    ('<button class="hz-go" id="hz-rev" style="background:var(--fill-2);color:var(--accent);border:1px solid var(--line);margin-top:8px">أضِف هذا المقطع إلى «مراجعة الحفظ»</button>')+
     '<details class="hz-adv" id="hz-adv"'+(__hzAdvOpen?' open':'')+'><summary>خيارات متقدّمة</summary>'+
       '<div class="hz-row"><div class="hz-lbl">تكرار كلّ آية</div>'+chips('rv',[[1,'1'],[2,'2'],[3,'3'],[5,'5'],[7,'7'],[10,'10']],c.rv)+'</div>'+
       '<div class="hz-row"><div class="hz-lbl">تكرار المقطع كلِّه</div>'+chips('rr',[[1,'مرّة'],[2,'مرّتان'],[3,'3'],[5,'5'],[10,'10'],[0,'بلا حدّ']],c.rr)+'</div>'+
       '<div class="hz-row"><div class="hz-lbl">طريقة التكرار</div>'+chips('mode',[['verse','كلُّ آية ثمّ التي بعدها'],['cumulative','تراكميّ: 1 ثم 1+2 ثم 1+2+3…']],c.mode)+
         '<div class="hz-hint">التراكميّ أنفعُ للحفظ: تُعيد ما حفظتَه ثم تُضيف آيةً جديدة.</div></div>'+
       '<div class="hz-row"><div class="hz-lbl">السرعة</div>'+chips('speed',[[0.75,'0.75×'],[1,'1×'],[1.25,'1.25×']],c.speed)+'</div>'+
-      (c.riw==='warsh'?'':'<div class="hz-row"><div class="hz-lbl">ردِّد وقارِن</div>'+chips('echo',[['off','بلا'],['rec','يُسمِعني قراءتي'],['gate','ويسألني قبل الانتقال']],c.echo)+
+      ('<div class="hz-row"><div class="hz-lbl">ردِّد وقارِن</div>'+chips('echo',[['off','بلا'],['rec','يُسمِعني قراءتي'],['gate','ويسألني قبل الانتقال']],c.echo)+
         '<div class="hz-hint">يستعمل هذا الوضعُ الميكروفونَ، وفقط حين يكون التطبيقُ مفتوحًا أمامك وهذا الوضعُ يعمل؛ فيتوقّف حين تُنهي التحفيظ أو تغادر التطبيق. يُسجَّل صوتُك على هاتفك فقط ثم يُحذف، ولا يُرسَل إلى أحد. ولا يحكم التطبيقُ على جودة التجويد: يتحقّق فقط أنك ردّدت، وأنت من تقارن وتقرّر. يساعدك هذا على التدريب بين دروسك، ولا يغني عن معلّمٍ يسمع قراءتك ويصحّحها.</div></div>')+
       '<div class="hz-row"><div class="hz-lbl">وقفةٌ صامتةٌ بعد كلّ آية</div>'+chips('gap',[['0','بلا وقفة'],['1','ثانية'],['2','ثانيتان'],['len','بمدّة الآية (لتردِّد أنت)']],c.gap)+'</div>'+
     '</details>'+
@@ -5376,7 +5376,6 @@ function renderHifzForm(body, picker, afterStart){
     if(k==='riw'){
       hzStop(true);
       const patch={ riw:v };
-      if(v==='warsh'){ patch.echo='off'; if(hzCfg().echo!=='off'){} }
       settings.hifz=Object.assign(hzCfg(),patch); saveSettings(); vibrate(5);
       (async()=>{
         await hzLoad();
@@ -5399,7 +5398,7 @@ function renderHifzForm(body, picker, afterStart){
   const sb=$('#hz-sura');
   if(sb) sb.addEventListener('click', ()=>{ vibrate(6); openSuraOverlay(t.si, si=>{ closeSuraOverlay(); __hzSel={ si, from:1, to:1 }; again(); }, 'اختر السورة'); });
   $('#hz-go').addEventListener('click', ()=>{ vibrate(8); afterStart && afterStart(); hzStart(t.si, t.from, t.to, hzCfg()); });
-  if($('#hz-rev')) $('#hz-rev').addEventListener('click', async()=>{ vibrate(6); if(await loadTools()) SalTools.addReview(t.si, t.from, t.to); });
+  if($('#hz-rev')) $('#hz-rev').addEventListener('click', async()=>{ vibrate(6); if(await loadTools()) SalTools.addReview(t.si, t.from, t.to, { riw:hzCfg().riw, wrec:hzCfg().wrec }); });
 }
 
 /* خطّةُ التشغيل: قائمةٌ بالآيات بحسب النمط (دورةٌ واحدة، وتُكرَّر دوراتٍ بحسب «تكرار المقطع») */
@@ -5429,6 +5428,7 @@ function hzStart(si, from, to, c){
   hzPlayCurrent();
 }
 function hzCur(){ return __hz && __hz.items[__hz.i]; }
+function hzVerseDur(h){ const a=$('#hifz-audio'); if(h&&h.c.riw==='warsh'){ const it=hzCur(), t=it&&hzWTime(hzWrecId(h.c),HZD().sur[h.si].s,it.no); if(t) return t[1]-t[0]; } return a.duration||0; }
 function hzVerseDone(){ const h=__hz; if(!h||h._done) return; h._done=true; hzAfterVerse(); }
 function hzPlayCurrent(){
   const h=__hz; if(!h) return; const it=hzCur(), a=$('#hifz-audio');
@@ -5458,7 +5458,7 @@ function hzAfterVerse(){
   const h=__hz; if(!h || h.paused) return;
   const a=$('#hifz-audio');
   if(h.c.echo && h.c.echo!=='off' && !h.echoOff){ hzEcho(h); return; }
-  const gap = h.c.gap==='len' ? Math.round((a.duration||2)*1000/(h.c.speed||1)) : (parseFloat(h.c.gap)||0)*1000;
+  const gap = h.c.gap==='len' ? Math.round((hzVerseDur(h)||2)*1000/(h.c.speed||1)) : (parseFloat(h.c.gap)||0)*1000;
   if(gap>0) h.timer=setTimeout(hzNext, gap); else hzNext();
 }
 
@@ -5544,7 +5544,7 @@ function hzPlayBack(blob){
   });
 }
 async function hzEcho(h){
-  const a=$('#hifz-audio'), vd=Math.max(2,(a.duration||3)/(h.c.speed||1));
+  const a=$('#hifz-audio'), vd=Math.max(2,(hzVerseDur(h)||3)/(h.c.speed||1));
   const tok=h.echoTok=(h.echoTok||0)+1, dead=()=>__hz!==h || h.paused || h.echoTok!==tok;
   const m=await hzMicGet();
   if(dead()) return;
