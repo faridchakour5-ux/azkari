@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Build;
 
 import androidx.core.content.ContextCompat;
@@ -38,6 +39,14 @@ public class AdhanReceiver extends BroadcastReceiver {
       if (AdhanScheduler.enabled(app)) {
         String name = intent == null ? "" : intent.getStringExtra(EXTRA_NAME);
         boolean fajr = intent != null && intent.getBooleanExtra(EXTRA_FAJR, false);
+
+        /* مكالمةٌ جاريةٌ أو تسجيلُ صوتٍ (واتساب…): لا نرفع الأذانَ فوق صاحبِه، بل إشعارًا هادئًا باسم الصلاة */
+        if (busyAudio(app)) {
+          String t = name == null || name.isEmpty() ? "حان وقتُ الصلاة" : "حان وقتُ صلاة " + name;
+          try { showPre(app, t, "الأذانُ لم يُرفع لوجود مكالمةٍ أو تسجيلٍ صوتيّ"); } catch (Exception ignored) {}
+          try { AdhanScheduler.arm(app); } catch (Exception ignored) {}
+          return;
+        }
 
         Intent svc = new Intent(app, AdhanService.class)
             .setAction(AdhanService.ACTION_PLAY)
@@ -87,5 +96,21 @@ public class AdhanReceiver extends BroadcastReceiver {
       int id = c.getResources().getIdentifier("ic_notif_large", "drawable", c.getPackageName());
       return id != 0 ? android.graphics.BitmapFactory.decodeResource(c.getResources(), id) : null;
     } catch (Exception e) { return null; }
+  }
+
+  /** هل في الهاتف مكالمةٌ (خلويّةٌ أو تطبيق) أو تسجيلُ صوتٍ جارٍ؟ بلا أيّ إذن إضافيّ */
+  static boolean busyAudio(Context c) {
+    try {
+      AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
+      if (am == null) return false;
+      int m = am.getMode();
+      if (m == AudioManager.MODE_RINGTONE || m == AudioManager.MODE_IN_CALL || m == AudioManager.MODE_IN_COMMUNICATION) return true;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && m == AudioManager.MODE_CALL_SCREENING) return true;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        java.util.List<?> r = am.getActiveRecordingConfigurations();
+        if (r != null && !r.isEmpty()) return true;
+      }
+    } catch (Exception ignored) {}
+    return false;
   }
 }
