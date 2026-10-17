@@ -62,6 +62,14 @@ Réparations (script déjà appliqué — conservé pour référence):
    au contact 976→232. Script: tools/patch-lowstop-ring.py (cercle = 2 contours, 8 courbes
    quadratiques par cercle).
 
+7. (17 oct. 2026, demande de Farid — des frères lisant Warsh ont remarqué un
+   CERCLE là où le mushaf imprimé met un POINT) La marque d'imala U+06EA
+   («lowstop») devient un POINT PLEIN épais (diamètre 280 unités; le nukta du
+   ب = 167) au lieu de l'anneau creux du point 6. Seul le contour du glyphe
+   est remplacé (1 contour, 8 courbes quadratiques); cmap, ancrage GPOS et
+   texte inchangés. Script: tools/patch-lowstop-dot.py. Nouveau nom, d'après
+   la règle du point 5: maghribi-955dce40.woff2 (ancien: 520e7013, supprimé).
+
 Vérification: uharfbuzz (shaping) + captures Chromium sur les versets
 contenant chaque signe. Zéro caractère non couvert sur les 3 sources.
 """

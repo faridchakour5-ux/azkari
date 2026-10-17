@@ -41,7 +41,7 @@
   @font-face{font-family:'PlexAr'; src:url('fonts/ui-600.woff2') format('woff2'); font-weight:600; font-display:swap;}
   @font-face{font-family:'PlexAr'; src:url('fonts/ui-700.woff2') format('woff2'); font-weight:700; font-display:swap;}
   @font-face{font-family:'AmiriQuran'; src:url('fonts/amiri-quran.woff2') format('woff2'); font-display:swap;}
-  @font-face{font-family:'Maghribi'; src:url('fonts/maghribi-520e7013.woff2') format('woff2'); font-display:swap;}
+  @font-face{font-family:'Maghribi'; src:url('fonts/maghribi-955dce40.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fNaskh'; src:url('fonts/naskh.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fKufi'; src:url('fonts/kufi.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fCairo'; src:url('fonts/cairo.woff2') format('woff2'); font-display:swap;}
@@ -3787,7 +3787,7 @@ let __shotCss=null, __shotKey='';
 function quranFontFile(){
   const b=document.body;
   if(b.classList.contains('qtashkeel')) return { f:'NotoNaskhTashkeel', u:'fonts/naskh-tashkeel.woff2' };
-  if(settings.riwaya==='warsh') return { f:'Maghribi', u:'fonts/maghribi-520e7013.woff2' };
+  if(settings.riwaya==='warsh') return { f:'Maghribi', u:'fonts/maghribi-955dce40.woff2' };
   return { f:'AmiriQuran', u:'fonts/amiri-quran.woff2' };
 }
 async function fontDataUrl(u){

@@ -1,5 +1,5 @@
 /* صلاتي — service worker v256 */
-const CACHE = 'azkari-v314';
+const CACHE = 'azkari-v315';
 const ASSETS = [
   './',
   './index.html',
@@ -42,7 +42,7 @@ const ASSETS = [
   './fonts/ui-600.woff2',
   './fonts/ui-700.woff2',
   './fonts/amiri-quran.woff2',
-  './fonts/maghribi-520e7013.woff2',
+  './fonts/maghribi-955dce40.woff2',
   './fonts/naskh.woff2',
   './fonts/naskh-tashkeel.woff2',
   './fonts/kufi.woff2',
