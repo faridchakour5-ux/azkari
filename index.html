@@ -5536,7 +5536,7 @@ function hzAyaPaint(){
   let x=qFix(row.t); if(h.c.riw==='warsh' && settings.riwaya!=='warsh'){ try{ for(const [re,rep] of QWFIX) x=x.replace(re,rep); }catch(e){} }
   box.classList.toggle('w', h.c.riw==='warsh'); box.classList.toggle('h', h.c.riw!=='warsh');
   const tj=(h.c.riw!=='warsh' && hzCfg().tj==='on') ? hzTjHtml(row.t, ai) : null;
-  box.innerHTML='<span class="n">'+escapeHtml(D.sur[h.si].n)+'</span><div class="wird-text"><span class="aya-t">'+(tj?tj.html:x)+'</span><span class="wird-num">۝'+AR(it.no)+'</span></div>'+(tj&&tj.legend?'<div class="hz-tjl">'+tj.legend+'</div>':'');
+  box.innerHTML='<span class="n">'+escapeHtml(D.sur[h.si].n)+'</span><div class="wird-text"><span class="aya-t">'+(tj?tj.html:x)+'</span><span class="wird-num circ">'+AR(it.no)+'</span></div>'+(tj&&tj.legend?'<div class="hz-tjl">'+tj.legend+'</div>':'');
   box.classList.add('show'); box.scrollTop=0;
 }
 function hzUi(){
@@ -7754,7 +7754,7 @@ async function buildQuickPop(){
           (q.ayat.length>1 ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no)) : ('الآية '+AR(q.ayat[0].no)))+
           ' · صفحة '+AR(q.pg)+'</div>'+
         '<div class="wird-text qp-qtext">'+q.ayat.map(a=>
-          '<span class="aya-t">'+a.t+'</span><span class="wird-num">۝'+AR(a.no)+'</span> ').join('')+'</div>';
+          '<span class="aya-t">'+a.t+'</span><span class="wird-num circ">'+AR(a.no)+'</span> ').join('')+'</div>';
     });
   }
   $$('#qp-riw button').forEach(x=> x.classList.toggle('on', x.dataset.r===settings.riwaya));
@@ -8022,7 +8022,7 @@ $$('#qp-riw button').forEach(x=> x.addEventListener('click', ()=>{
         (q.ayat.length>1 ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no)) : ('الآية '+AR(q.ayat[0].no)))+
         ' · صفحة '+AR(q.pg)+'</div>'+
       '<div class="wird-text qp-qtext">'+q.ayat.map(a=>
-        '<span class="aya-t">'+a.t+'</span><span class="wird-num">۝'+AR(a.no)+'</span> ').join('')+'</div>';
+        '<span class="aya-t">'+a.t+'</span><span class="wird-num circ">'+AR(a.no)+'</span> ').join('')+'</div>';
   });
 }));
 $('#qp-open')   && $('#qp-open').addEventListener('click', ()=>{ vibrate(6); openQuickPop(); });
