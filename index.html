@@ -823,6 +823,29 @@
     padding:13px 10px; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px;}
   .install-sheet .ish-yes{background:var(--accent); color:#fff; box-shadow:0 2px 10px rgba(47,158,68,.32);}
   .install-sheet .ish-no{background:var(--fill-2); color:var(--text-2); flex:0 0 34%;}
+  /* جولة تفعيل الأذان: تظهر لمن لم يُعرِّف التطبيقَ بموقعه، فلا يُرفع له أذان */
+  .adh-tour{position:fixed; inset:0; z-index:125; display:none; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.46); opacity:0; transition:opacity .28s ease;}
+  .adh-tour.show{display:flex; opacity:1;}
+  .adh-tour .at-card{width:100%; max-width:480px; background:var(--card); color:var(--text); border-radius:24px 24px 0 0; overflow:hidden; box-shadow:0 -6px 34px rgba(0,0,0,.3); transform:translateY(26px); transition:transform .32s ease; padding-bottom:env(safe-area-inset-bottom);}
+  .adh-tour.show .at-card{transform:translateY(0);}
+  .adh-tour .at-head{position:relative; padding:12px 22px 20px; background:linear-gradient(160deg,#0E6B52,#0A5441 48%,#063D30); border-bottom:3px solid #D9B15C; color:#FBF3DF; overflow:hidden; min-height:92px;}
+  .adh-tour .at-head::before{content:''; position:absolute; inset-inline-end:0; top:-30px; width:240px; height:240px; background:url(icons/drawer-zellige.png) no-repeat center/contain; pointer-events:none; opacity:.9;}
+  html[dir="rtl"] .adh-tour .at-head::before, html:not([dir]) .adh-tour .at-head::before{transform:scaleX(-1);}
+  .adh-tour .at-grip{width:42px; height:4px; border-radius:3px; background:rgba(251,243,223,.35); margin:0 auto 14px; position:relative;}
+  .adh-tour .at-ttl{display:none; position:relative; font-size:22px; font-weight:800; line-height:1.4; font-family:'AmiriQuran',serif;}
+  .adh-tour[data-s="1"] .at-ttl[data-s="1"], .adh-tour[data-s="2"] .at-ttl[data-s="2"], .adh-tour[data-s="3"] .at-ttl[data-s="3"], .adh-tour[data-s="ok"] .at-ttl[data-s="ok"], .adh-tour[data-s="err"] .at-ttl[data-s="err"]{display:block;}
+  .adh-tour .at-body{padding:18px 22px 20px;}
+  .adh-tour .at-txt{display:none; margin:0 0 16px; font-size:16px; line-height:1.95; color:var(--text-2);}
+  .adh-tour[data-s="1"] .at-txt[data-s="1"], .adh-tour[data-s="2"] .at-txt[data-s="2"], .adh-tour[data-s="3"] .at-txt[data-s="3"], .adh-tour[data-s="ok"] .at-txt[data-s="ok"], .adh-tour[data-s="err"] .at-txt[data-s="err"]{display:block;}
+  .adh-tour .at-dots{display:flex; justify-content:center; gap:7px; margin:0 0 16px;}
+  .adh-tour .at-dots i{width:8px; height:8px; border-radius:50%; background:var(--fill); transition:background .2s, width .2s;}
+  .adh-tour[data-s="1"] .at-dots i:nth-child(1), .adh-tour[data-s="2"] .at-dots i:nth-child(2), .adh-tour[data-s="3"] .at-dots i:nth-child(3){background:#B8863B; width:22px; border-radius:6px;}
+  .adh-tour[data-s="ok"] .at-dots{display:none;}
+  .adh-tour .at-act{display:flex; gap:10px;}
+  .adh-tour .at-act button{flex:1 1 0; border:0; font:inherit; font-size:16px; font-weight:800; padding:14px 10px; border-radius:15px;}
+  .adh-tour .at-yes{background:#0A5441; color:#fff; box-shadow:0 2px 10px rgba(10,84,65,.32); flex:1.6 1 0;}
+  .adh-tour .at-next{background:var(--fill-2); color:var(--text-2);}
+  .adh-tour[data-s="ok"] .at-act{display:none;}
   .salat-toast{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
     z-index:80; background:var(--accent); color:#fff; text-align:center; font-weight:700; font-size:15px;
     padding:14px 18px; border-radius:16px; box-shadow:var(--shadow-2); max-width:480px; margin:0 auto;
@@ -1850,6 +1873,31 @@
     <div class="ish-act">
       <button class="ish-yes" id="ish-yes"><svg class="gh-ic" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>ثبِّت الآن</button>
       <button class="ish-no" id="ish-no">لاحقًا</button>
+    </div>
+  </div>
+</div>
+
+<div class="adh-tour" id="adh-tour" role="dialog" aria-modal="true">
+  <div class="at-card">
+    <div class="at-head">
+      <div class="at-grip"></div>
+      <div class="at-ttl" data-s="1">الأذان في انتظارك</div>
+      <div class="at-ttl" data-s="2">خطوةٌ واحدة</div>
+      <div class="at-ttl" data-s="3">وبعدها يطمئنّ قلبك</div>
+      <div class="at-ttl" data-s="ok">تمّ تفعيل الأذان</div>
+      <div class="at-ttl" data-s="err">لم نتمكّن من تحديد موقعك</div>
+    </div>
+    <div class="at-body">
+      <p class="at-txt" data-s="1">يرفع «صلاتي» الأذانَ في وقته، ولو كان التطبيقُ مغلقًا والهاتفُ ساكنًا. غير أنّه لا يعرف مواقيتَ مدينتك حتى تفتحه وتُعرِّفَه بمكانك.</p>
+      <p class="at-txt" data-s="2">اضغط «فعّل الأذان الآن»، واسمح للتطبيق بتحديد الموقع والإشعارات؛ فيحسب لك مواقيتَ مدينتك بدقّة.</p>
+      <p class="at-txt" data-s="3">يعمل الأذانُ وحدَه كلَّ يوم، بلا إنترنت. وتختار صوتَ المؤذّن، أو توقفُه متى شئتَ، من الإعدادات.</p>
+      <p class="at-txt" data-s="ok">جزاك الله خيرًا. سيرتفع الأذانُ في وقته بإذن الله.</p>
+      <p class="at-txt" data-s="err">اسمح للتطبيق بالوصول إلى الموقع من إعدادات الهاتف، ثم أعد المحاولة.</p>
+      <div class="at-dots" id="at-dots"><i></i><i></i><i></i></div>
+      <div class="at-act">
+        <button class="at-yes" id="at-yes" type="button">فعّل الأذان الآن</button>
+        <button class="at-next" id="at-next" type="button">التالي</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3534,7 +3582,7 @@ function buildMushaf(body){
       const b=basmalaHtml(si); if(b) parts.push(b);
     }
     if(!textOpen){ parts.push('<div class="wird-text">'); textOpen=true; }
-    parts.push('<span class="aya-t" data-tai="'+i+'">'+qFix(a.t)+'</span><span class="wird-num circ" data-ai="'+i+'">'+(i-WIRD.sur[si].i+1)+'</span> ');
+    parts.push('<span class="aya-t" data-tai="'+i+'">'+qFix(a.t)+'</span>\u00A0<span class="wird-num circ" data-ai="'+i+'">'+(i-WIRD.sur[si].i+1)+'</span> ');
   }
   if(textOpen) parts.push('</div>');
   if(pgOpen) parts.push('</div>');
@@ -7596,7 +7644,7 @@ function renderWird(){
     const atSuraStart = (i===WIRD.sur[sura].i);
     html+='<div class="wird-sura">'+suraOrn(sura)+'</div>'+(atSuraStart?basmalaHtml(sura):'')+'<div class="wird-text">';
     while(i<e && suraOf(i)===sura){
-      html+='<span class="aya-t" data-tai="'+i+'">'+qFix(WIRD.a[i].t)+'</span><span class="wird-num circ">'+ayaNoOf(i)+'</span> ';
+      html+='<span class="aya-t" data-tai="'+i+'">'+qFix(WIRD.a[i].t)+'</span>\u00A0<span class="wird-num circ">'+ayaNoOf(i)+'</span> ';
       i++;
     }
     html+='</div>';
@@ -7759,7 +7807,7 @@ async function buildQuickPop(){
           (q.ayat.length>1 ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no)) : ('الآية '+AR(q.ayat[0].no)))+
           ' · صفحة '+AR(q.pg)+'</div>'+
         '<div class="wird-text qp-qtext">'+q.ayat.map(a=>
-          '<span class="aya-t">'+a.t+'</span><span class="wird-num circ">'+AR(a.no)+'</span> ').join('')+'</div>';
+          '<span class="aya-t">'+a.t+'</span>\u00A0<span class="wird-num circ">'+AR(a.no)+'</span> ').join('')+'</div>';
     });
   }
   $$('#qp-riw button').forEach(x=> x.classList.toggle('on', x.dataset.r===settings.riwaya));
@@ -8027,7 +8075,7 @@ $$('#qp-riw button').forEach(x=> x.addEventListener('click', ()=>{
         (q.ayat.length>1 ? ('الآيات '+AR(q.ayat[0].no)+'–'+AR(q.ayat[q.ayat.length-1].no)) : ('الآية '+AR(q.ayat[0].no)))+
         ' · صفحة '+AR(q.pg)+'</div>'+
       '<div class="wird-text qp-qtext">'+q.ayat.map(a=>
-        '<span class="aya-t">'+a.t+'</span><span class="wird-num circ">'+AR(a.no)+'</span> ').join('')+'</div>';
+        '<span class="aya-t">'+a.t+'</span>\u00A0<span class="wird-num circ">'+AR(a.no)+'</span> ').join('')+'</div>';
   });
 }));
 $('#qp-open')   && $('#qp-open').addEventListener('click', ()=>{ vibrate(6); openQuickPop(); });
@@ -8390,6 +8438,48 @@ $('#loc-btn').addEventListener('click', ()=>{
   }, {enableHighAccuracy:false, timeout:10000});
 });
 
+
+/* ===== جولة تفعيل الأذان (أمرٌ من فريد، 17 أكتوبر 2026) =====
+   الأذانُ لا يُجدوَل إلا بعد أن يعرف التطبيقُ موقعَ المستخدم (az_geo). فمن لم يفعل ذلك لا يسمع أذانًا أصلًا.
+   فتخرج له جولةٌ قصيرةٌ في التطبيق الأصليّ فقط، وفيها زرٌّ يُفعِّل الأذانَ مباشرةً. إن قال «لاحقًا» عادت بعد 12 ساعة؛ وتزول نهائيًّا بالتفعيل. */
+(function adhanTour(){
+  const T=$('#adh-tour'); if(!T) return;
+  let step=1, busy=false;
+  const KEY='az_adhtour';
+  const setStep=n=>{ step=n; T.dataset.s=String(n); const nx=$('#at-next');
+    if(nx) nx.textContent = (n===3 ? 'لاحقًا' : (n==='err' ? 'لاحقًا' : 'التالي')); };
+  const close=snooze=>{ T.classList.remove('show'); if(snooze) try{ store.set(KEY, Date.now()); }catch(e){} };
+  const open=()=>{ setStep(1); T.classList.add('show'); };
+  function eligible(){
+    try{
+      if(!isNative() || geoStore() || settings.adhan===false) return false;
+      if(!store.get('az_onb', false) && !__hadSettings) return false;           // التعريفُ الأوّل لم يُنجَز بعد
+      const t=store.get(KEY, 0); if(t && Date.now()-t < 12*3600*1000) return false;
+      return true;
+    }catch(e){ return false; }
+  }
+  async function activate(){
+    if(busy) return; busy=true; vibrate(8);
+    const yes=$('#at-yes'); const old=yes.textContent; yes.textContent='…جارٍ التفعيل';
+    const done=ok=>{ busy=false; yes.textContent=old; if(ok){ setStep('ok'); setTimeout(()=>close(false), 2600); } else { setStep('err'); } };
+    if(!navigator.geolocation){ done(false); return; }
+    navigator.geolocation.getCurrentPosition(pos=>{
+      try{ store.set('az_geo',{lat:pos.coords.latitude,lng:pos.coords.longitude,t:Date.now()}); }catch(e){}
+      try{ renderPrayers(); }catch(e){}
+      try{ scheduleNativeNotifs(); }catch(e){}
+      try{ pushSyncSoon(); }catch(e){}
+      done(true);
+    }, ()=> done(false), {enableHighAccuracy:false, timeout:12000, maximumAge:0});
+  }
+  $('#at-yes').addEventListener('click', activate);
+  $('#at-next').addEventListener('click', ()=>{
+    vibrate(5);
+    if(step===1) setStep(2); else if(step===2) setStep(3); else close(true);
+  });
+  T.addEventListener('click', e=>{ if(e.target===T && !busy) close(true); });
+  if(eligible()) setTimeout(()=>{ if(eligible()) open(); }, 5500);
+  window.__openAdhanTour = open;     // للاختبار
+})();
 
 applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
 syncSeg('#riwaya-seg','riwaya'); syncSeg('#qcolor-seg','quranColor'); renderSwatches();
