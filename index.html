@@ -918,6 +918,7 @@
   .wird-num{display:inline-block; color:var(--qnum, var(--accent)); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;
     padding:1px 4px; border-radius:8px; cursor:pointer; transition:background-color .2s, color .2s, transform .15s;}
   .wird-num:active{transform:scale(.88);}
+  .wird-num.circ{display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; min-width:1.8em; height:1.8em; padding:0 .2em; border:1.6px solid currentColor; border-radius:999px; line-height:1; vertical-align:middle; margin:0 4px;}
   .wird-num.bm{background:var(--accent); color:#fff; box-shadow:0 0 0 3px var(--tab-on-bg, rgba(199,21,133,.12));}
   .wird-num.search-hit{background:var(--c-repeat); color:#fff; box-shadow:0 0 0 4px var(--c-repeat-bg);}
 
@@ -3528,7 +3529,7 @@ function buildMushaf(body){
       const b=basmalaHtml(si); if(b) parts.push(b);
     }
     if(!textOpen){ parts.push('<div class="wird-text">'); textOpen=true; }
-    parts.push('<span class="aya-t" data-tai="'+i+'">'+qFix(a.t)+'</span><span class="wird-num" data-ai="'+i+'">۝'+(i-WIRD.sur[si].i+1)+'</span> ');
+    parts.push('<span class="aya-t" data-tai="'+i+'">'+qFix(a.t)+'</span><span class="wird-num circ" data-ai="'+i+'">'+(i-WIRD.sur[si].i+1)+'</span> ');
   }
   if(textOpen) parts.push('</div>');
   if(pgOpen) parts.push('</div>');
@@ -7590,7 +7591,7 @@ function renderWird(){
     const atSuraStart = (i===WIRD.sur[sura].i);
     html+='<div class="wird-sura">'+suraOrn(sura)+'</div>'+(atSuraStart?basmalaHtml(sura):'')+'<div class="wird-text">';
     while(i<e && suraOf(i)===sura){
-      html+='<span class="aya-t" data-tai="'+i+'">'+qFix(WIRD.a[i].t)+'</span><span class="wird-num">۝'+ayaNoOf(i)+'</span> ';
+      html+='<span class="aya-t" data-tai="'+i+'">'+qFix(WIRD.a[i].t)+'</span><span class="wird-num circ">'+ayaNoOf(i)+'</span> ';
       i++;
     }
     html+='</div>';
