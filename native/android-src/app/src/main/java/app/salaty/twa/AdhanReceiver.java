@@ -102,17 +102,21 @@ public class AdhanReceiver extends BroadcastReceiver {
       1) وضعُ الصوت في النظام (رنين/مكالمة/اتّصالُ تطبيق).  2) مسارُ تشغيلٍ بغرض مكالمةٍ أو رنين (واتساب…).
       3) تسجيلٌ جارٍ من الميكروفون (رسالةٌ صوتيّة)؛ ونُهمل مصادرَ «التعرّف على الصوت/الكلمة المفتاحيّة» لأنّ المساعدَ الصوتيّ
          قد يُبقيها مفتوحةً دائمًا فيُكتم الأذانُ بلا سبب. */
-  static boolean busyAudio(Context c) {
+  static boolean busyAudio(Context c) { return !busyReason(c).isEmpty(); }
+
+  /** سببُ المنع نصًّا (للتشخيص)، أو "" إن لم يوجد مانع */
+  static String busyReason(Context c) {
+    String why = "";
+    AudioManager am = null;
+    try { am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE); } catch (Exception ignored) {}
+    if (am == null) return "";
     try {
-      AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
-      if (am == null) return false;
       int m = am.getMode();
-      if (m == AudioManager.MODE_RINGTONE || m == AudioManager.MODE_IN_CALL || m == AudioManager.MODE_IN_COMMUNICATION) return true;
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && m == AudioManager.MODE_CALL_SCREENING) return true;
+      if (m == AudioManager.MODE_RINGTONE || m == AudioManager.MODE_IN_CALL || m == AudioManager.MODE_IN_COMMUNICATION
+          || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && m == AudioManager.MODE_CALL_SCREENING)) why += "mode=" + m + " ";
     } catch (Exception ignored) {}
     try {
-      AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
-      if (am != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         java.util.List<android.media.AudioPlaybackConfiguration> pl = am.getActivePlaybackConfigurations();
         if (pl != null) for (android.media.AudioPlaybackConfiguration p : pl) {
           android.media.AudioAttributes at = p.getAudioAttributes();
@@ -120,23 +124,22 @@ public class AdhanReceiver extends BroadcastReceiver {
           int u = at.getUsage();
           if (u == android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION
               || u == android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING
-              || u == android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE) return true;
+              || u == android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE) why += "play=" + u + " ";
         }
       }
     } catch (Exception ignored) {}
     try {
-      AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
-      if (am != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         java.util.List<android.media.AudioRecordingConfiguration> rl = am.getActiveRecordingConfigurations();
         if (rl != null) for (android.media.AudioRecordingConfiguration r : rl) {
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && r.isClientSilenced()) continue;
           int src = r.getClientAudioSource();
-          if (src == android.media.MediaRecorder.AudioSource.VOICE_RECOGNITION || src >= 1998) continue;   // مساعدٌ صوتيّ/كلمةٌ مفتاحيّة
-          return true;
+          if (src == android.media.MediaRecorder.AudioSource.VOICE_RECOGNITION || src >= 1998) continue;
+          why += "rec=" + src + " ";
         }
       }
     } catch (Exception ignored) {}
-    return false;
+    return why.trim();
   }
 
   /** إشعارٌ هادئٌ بدل الأذان حين يوجد ما يمنعه (مكالمة/تسجيل) */

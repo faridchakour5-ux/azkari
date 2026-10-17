@@ -8320,7 +8320,7 @@ $('#adhan-exact-btn') && $('#adhan-exact-btn').addEventListener('click', async (
 $('#adhan-try') && $('#adhan-try').addEventListener('click', async ()=>{
   const P = adhanPlugin(); if(!P) return;
   vibrate(6);
-  try{ await P.preview({ name:'', voice: adhanVoice() }); showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200); }catch(e){}
+  try{ const r=await P.preview({ name:'', voice: adhanVoice() }); if(r && r.blocked) showToast('لم يُرفع الأذان لوجود مكالمةٍ أو تسجيلٍ صوتيّ ('+r.why+')', 6000); else showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200); }catch(e){}
 });
 function renderPrayers(){
   const g=geoStore(); const bar=$('#prayer-bar'); const btn=$('#loc-btn');

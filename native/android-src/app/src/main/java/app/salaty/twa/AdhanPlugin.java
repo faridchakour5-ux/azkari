@@ -127,6 +127,12 @@ public class AdhanPlugin extends Plugin {
   @PluginMethod
   public void preview(PluginCall call) {
     try {
+      /* اختبارٌ يراه المستخدم: إن وُجدت مكالمةٌ أو تسجيلٌ لا يُرفع الأذانُ ونُعيد السببَ */
+      String why = AdhanReceiver.busyReason(getContext());
+      if (!why.isEmpty()) {
+        AdhanReceiver.notifyQuiet(getContext(), "");
+        JSObject r = new JSObject(); r.put("blocked", true); r.put("why", why); call.resolve(r); return;
+      }
       Intent svc = new Intent(getContext(), AdhanService.class)
           .setAction(AdhanService.ACTION_PLAY)
           .putExtra(AdhanService.EXTRA_NAME, call.getString("name", ""))
@@ -137,7 +143,7 @@ public class AdhanPlugin extends Plugin {
       } else {
         getContext().startService(svc);
       }
-      call.resolve();
+      JSObject ok = new JSObject(); ok.put("blocked", false); call.resolve(ok);
     } catch (Exception e) {
       call.reject(e.getMessage() == null ? "preview failed" : e.getMessage(), e);
     }
