@@ -87,6 +87,13 @@ public class AdhanService extends Service {
     // أذانٌ يعمل بالفعل: لا نَبدأ فوقه أذانًا آخر
     if (player != null && player.isPlaying()) return START_NOT_STICKY;
 
+    /* مكالمةٌ أو تسجيلُ صوتٍ جارٍ: لا أذانَ (حتّى لو وصل الطلبُ من غير المستقبِل: معاينة…). الخدمةُ الأماميّة بدأت أعلاه فلا مخالفة */
+    if (AdhanReceiver.busyAudio(this)) {
+      AdhanReceiver.notifyQuiet(this, name);
+      stopEverything();
+      return START_NOT_STICKY;
+    }
+
     acquireWake();
     requestFocus();
     play();
@@ -247,6 +254,8 @@ public class AdhanService extends Service {
     watch = new Runnable() {
       @Override public void run() {
         try {
+          /* بدأت مكالمةٌ أو تسجيلٌ والأذانُ يعمل: يُسكَت فورًا */
+          if (player != null && AdhanReceiver.busyAudio(AdhanService.this)) { stopEverything(); return; }
           if (player != null && prepared && !player.isPlaying()) {
             int dur = player.getDuration(), pos = player.getCurrentPosition();
             if (dur > 0 && pos < dur - 1500) player.start();     // لا نُعيد ما انتهى فعلًا

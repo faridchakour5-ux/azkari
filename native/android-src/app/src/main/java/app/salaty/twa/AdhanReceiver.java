@@ -42,8 +42,7 @@ public class AdhanReceiver extends BroadcastReceiver {
 
         /* مكالمةٌ جاريةٌ أو تسجيلُ صوتٍ (واتساب…): لا نرفع الأذانَ فوق صاحبِه، بل إشعارًا هادئًا باسم الصلاة */
         if (busyAudio(app)) {
-          String t = name == null || name.isEmpty() ? "حان وقتُ الصلاة" : "حان وقتُ صلاة " + name;
-          try { showPre(app, t, "الأذانُ لم يُرفع لوجود مكالمةٍ أو تسجيلٍ صوتيّ"); } catch (Exception ignored) {}
+          notifyQuiet(app, name);
           try { AdhanScheduler.arm(app); } catch (Exception ignored) {}
           return;
         }
@@ -98,7 +97,11 @@ public class AdhanReceiver extends BroadcastReceiver {
     } catch (Exception e) { return null; }
   }
 
-  /** هل في الهاتف مكالمةٌ (خلويّةٌ أو تطبيق) أو تسجيلُ صوتٍ جارٍ؟ بلا أيّ إذن إضافيّ */
+  /** هل في الهاتف مكالمةٌ (خلويّةٌ أو تطبيق) أو تسجيلُ صوتٍ جارٍ؟ بلا أيّ إذن إضافيّ.
+      إشاراتٌ متعدّدة لأنّ كلَّ واحدةٍ قد تغيب على هاتفٍ ما:
+      1) وضعُ الصوت في النظام (رنين/مكالمة/اتّصالُ تطبيق).  2) مسارُ تشغيلٍ بغرض مكالمةٍ أو رنين (واتساب…).
+      3) تسجيلٌ جارٍ من الميكروفون (رسالةٌ صوتيّة)؛ ونُهمل مصادرَ «التعرّف على الصوت/الكلمة المفتاحيّة» لأنّ المساعدَ الصوتيّ
+         قد يُبقيها مفتوحةً دائمًا فيُكتم الأذانُ بلا سبب. */
   static boolean busyAudio(Context c) {
     try {
       AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
@@ -106,11 +109,41 @@ public class AdhanReceiver extends BroadcastReceiver {
       int m = am.getMode();
       if (m == AudioManager.MODE_RINGTONE || m == AudioManager.MODE_IN_CALL || m == AudioManager.MODE_IN_COMMUNICATION) return true;
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && m == AudioManager.MODE_CALL_SCREENING) return true;
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        java.util.List<?> r = am.getActiveRecordingConfigurations();
-        if (r != null && !r.isEmpty()) return true;
+    } catch (Exception ignored) {}
+    try {
+      AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
+      if (am != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        java.util.List<android.media.AudioPlaybackConfiguration> pl = am.getActivePlaybackConfigurations();
+        if (pl != null) for (android.media.AudioPlaybackConfiguration p : pl) {
+          android.media.AudioAttributes at = p.getAudioAttributes();
+          if (at == null) continue;
+          int u = at.getUsage();
+          if (u == android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION
+              || u == android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING
+              || u == android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE) return true;
+        }
+      }
+    } catch (Exception ignored) {}
+    try {
+      AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
+      if (am != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        java.util.List<android.media.AudioRecordingConfiguration> rl = am.getActiveRecordingConfigurations();
+        if (rl != null) for (android.media.AudioRecordingConfiguration r : rl) {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && r.isClientSilenced()) continue;
+          int src = r.getClientAudioSource();
+          if (src == android.media.MediaRecorder.AudioSource.VOICE_RECOGNITION || src >= 1998) continue;   // مساعدٌ صوتيّ/كلمةٌ مفتاحيّة
+          return true;
+        }
       }
     } catch (Exception ignored) {}
     return false;
+  }
+
+  /** إشعارٌ هادئٌ بدل الأذان حين يوجد ما يمنعه (مكالمة/تسجيل) */
+  static void notifyQuiet(Context c, String name) {
+    try {
+      String t = name == null || name.isEmpty() ? "حان وقتُ الصلاة" : "حان وقتُ صلاة " + name;
+      showPre(c.getApplicationContext(), t, "الأذانُ لم يُرفع لوجود مكالمةٍ أو تسجيلٍ صوتيّ");
+    } catch (Exception ignored) {}
   }
 }
