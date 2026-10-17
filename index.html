@@ -829,6 +829,7 @@
     opacity:0; transform:translateY(16px); pointer-events:none; transition:opacity .3s ease, transform .3s ease;
     font-family:'AmiriQuran',serif;}
   .salat-toast.show{opacity:1; transform:translateY(0);}
+  .salat-toast.up{bottom:calc(150px + env(safe-area-inset-bottom)); padding:9px 16px; font-size:14px; max-width:260px;}
   /* أيقونات موحّدة بأسلوب GitHub (خطّية أحادية اللون) */
   .gh-ic{width:1.15em; height:1.15em; flex:0 0 auto; vertical-align:-.18em; stroke:currentColor; fill:none;
     stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
@@ -3169,8 +3170,9 @@ function checkPrayerReminder(now){
   if(changed) store.set('az_prayerfired_'+todayKey(), fired);
 }
 let __toastT=null;
-function showToast(msg, ms){
+function showToast(msg, ms, up){
   const el=$('#salat-toast'); if(!el) return;
+  el.classList.toggle('up', !!up);   // فوق شريط أزرار التمرير فلا يغطّي «+/−»
   el.textContent=msg;
   el.classList.add('show'); vibrate([20,50,20]);
   clearTimeout(__toastT);
@@ -7073,7 +7075,7 @@ function stepAutoRead(dir){
   const nx=Math.min(AR_MAX, Math.max(AR_MIN, cur+dir))/10;
   settings.autoReadLevel=nx; saveSettings(); vibrate(4);
   renderAutoReadPill();
-  showToast('سرعة التمرير: '+fmtLevel(nx), 1200);
+  showToast('سرعة التمرير: '+fmtLevel(nx), 1200, true);
 }
 $('#autoread-slower') && $('#autoread-slower').addEventListener('click', ()=> stepAutoRead(-1));
 $('#autoread-faster') && $('#autoread-faster').addEventListener('click', ()=> stepAutoRead(+1));
