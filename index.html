@@ -42,6 +42,8 @@
   @font-face{font-family:'PlexAr'; src:url('fonts/ui-700.woff2') format('woff2'); font-weight:700; font-display:swap;}
   @font-face{font-family:'AmiriQuran'; src:url('fonts/amiri-quran.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'Maghribi'; src:url('fonts/maghribi-955dce40.woff2') format('woff2'); font-display:swap;}
+  /* أرقام الآيات فقط (0-9) بخطّ Reem Kufi (SIL OFL) — اختاره فريد، 19 أكتوبر 2026 */
+  @font-face{font-family:'ReemKufiNum'; src:url('fonts/reemkufi-num-0c339200.woff2') format('woff2'); font-weight:700; font-display:swap; unicode-range:U+0030-0039;}
   @font-face{font-family:'fNaskh'; src:url('fonts/naskh.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fKufi'; src:url('fonts/kufi.woff2') format('woff2'); font-display:swap;}
   @font-face{font-family:'fCairo'; src:url('fonts/cairo.woff2') format('woff2'); font-display:swap;}
@@ -943,6 +945,7 @@
     padding:1px 4px; border-radius:8px; cursor:pointer; transition:background-color .2s, color .2s, transform .15s;}
   .wird-num:active{transform:scale(.88);}
   .wird-num.circ{display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; min-width:1.55em; height:1.55em; padding:0 .18em; border:2.6px solid currentColor; font-weight:800; border-radius:999px; line-height:1; vertical-align:middle; margin:0 4px;}
+  .wird-num.circ{font-family:'ReemKufiNum','PlexAr',sans-serif; font-weight:700; font-size:.66em;}   /* أرقامٌ بخطّ Reem Kufi */
   .wird-num.circ:not(.bm):not(.search-hit){opacity:.6;}   /* أخفُّ قليلًا فلا يغطّي على نصّ القرآن؛ العلامةُ المحفوظةُ والنتيجةُ تبقيان بكامل اللون */
   .wird-num.bm{background:var(--accent); color:#fff; box-shadow:0 0 0 3px var(--tab-on-bg, rgba(199,21,133,.12));}
   .wird-num.search-hit{background:var(--c-repeat); color:#fff; box-shadow:0 0 0 4px var(--c-repeat-bg);}
