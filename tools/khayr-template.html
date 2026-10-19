@@ -12,6 +12,11 @@
 @font-face{font-family:'PlexAr'; src:url('fonts/ui-600.woff2') format('woff2'); font-weight:600; font-display:swap;}
 @font-face{font-family:'PlexAr'; src:url('fonts/ui-700.woff2') format('woff2'); font-weight:700; font-display:swap;}
 @font-face{font-family:'AmiriQuran'; src:url('fonts/amiri-quran.woff2') format('woff2'); font-display:swap;}
+  /* الأرقام اللاتينيّة 0-9 في كلّ التطبيق بخطّ Reem Kufi (اختيار فريد 19 أكتوبر 2026؛ SIL OFL): تُعلَن بعد الخطوط الأصليّة فتغلب في نطاق الأرقام وحدَه ولا تمسّ حرفًا آخر */
+  @font-face{font-family:'PlexAr'; src:url('fonts/reemkufi-num-02a01064.woff2') format('woff2'); font-weight:400; font-display:swap; unicode-range:U+0030-0039;}
+  @font-face{font-family:'PlexAr'; src:url('fonts/reemkufi-num-0c339200.woff2') format('woff2'); font-weight:600; font-display:swap; unicode-range:U+0030-0039;}
+  @font-face{font-family:'PlexAr'; src:url('fonts/reemkufi-num-0c339200.woff2') format('woff2'); font-weight:700; font-display:swap; unicode-range:U+0030-0039;}
+  @font-face{font-family:'AmiriQuran'; src:url('fonts/reemkufi-num-02a01064.woff2') format('woff2'); font-weight:normal; font-display:swap; unicode-range:U+0030-0039;}
 :root{
   --bg:#EFE6D4; --card:#F6EDDB; --text:#3A352E; --text-2:rgba(58,53,46,.62); --text-3:rgba(58,53,46,.34);
   --sep:rgba(58,53,46,.16); --line:rgba(58,53,46,.09); --fill:rgba(120,105,80,.12);

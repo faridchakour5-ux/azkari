@@ -100,6 +100,11 @@ main{max-width:720px; margin:0 auto; padding:14px max(10px,env(safe-area-inset-l
 .soon{font-size:13px; color:var(--text-3); text-align:center; margin:6px 0 0;}
 
 @font-face{font-family:'Maghribi'; src:url('fonts/maghribi-955dce40.woff2') format('woff2'); font-display:swap;}
+  /* الأرقام اللاتينيّة 0-9 في كلّ التطبيق بخطّ Reem Kufi (اختيار فريد 19 أكتوبر 2026؛ SIL OFL): تُعلَن بعد الخطوط الأصليّة فتغلب في نطاق الأرقام وحدَه ولا تمسّ حرفًا آخر */
+  @font-face{font-family:'PlexAr'; src:url('fonts/reemkufi-num-02a01064.woff2') format('woff2'); font-weight:400; font-display:swap; unicode-range:U+0030-0039;}
+  @font-face{font-family:'PlexAr'; src:url('fonts/reemkufi-num-0c339200.woff2') format('woff2'); font-weight:600; font-display:swap; unicode-range:U+0030-0039;}
+  @font-face{font-family:'PlexAr'; src:url('fonts/reemkufi-num-0c339200.woff2') format('woff2'); font-weight:700; font-display:swap; unicode-range:U+0030-0039;}
+  @font-face{font-family:'AmiriQuran'; src:url('fonts/reemkufi-num-02a01064.woff2') format('woff2'); font-weight:normal; font-display:swap; unicode-range:U+0030-0039;}
 .q.w{font-family:'Maghribi','AmiriQuran',serif; font-size:clamp(23px,6.2vw,27px); line-height:2.7; -webkit-text-stroke:0;}
 </style>
 </head>
