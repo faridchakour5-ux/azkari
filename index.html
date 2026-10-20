@@ -413,6 +413,8 @@
   .dr-i svg{flex:0 0 auto; width:24px; height:24px; fill:none; stroke:var(--accent); stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round;}
   .dr-i span.t{flex:1; min-width:0;}
   .dr-i:active{transform:scale(.98); background:var(--dr-on);}
+  .dr-i.sub{min-height:44px; padding-inline-start:44px; font-size:14.5px; font-weight:600;}
+  .dr-i.sub svg{width:20px; height:20px; opacity:.7;}
   .dr-i.on{background:var(--dr-on); color:var(--accent); font-weight:800;}
   .dr-i.on::before{content:''; position:absolute; inset-inline-start:-10px; top:12px; bottom:12px; width:4px; border-radius:4px; background:var(--c-repeat);}
   .dr-bdg{background:var(--c-repeat); color:#fff; font-size:12px; font-weight:800; min-width:22px; height:22px; border-radius:11px; display:flex; align-items:center; justify-content:center; padding:0 6px;}
@@ -869,6 +871,15 @@
   .upd-tour .at-act button{display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.25;}
   .upd-tour .at-act button .fr-sub{font-size:11.5px; font-weight:600; opacity:.8;}
   html[lang="fr"] .upd-tour .fr-sub, html[lang="en"] .upd-tour .fr-sub{display:none;}
+  /* حركةُ «صلِّ على الحبيب» عند فتح القرآن */
+  #qsal{position:fixed; inset:0; z-index:9000; display:none; align-items:center; justify-content:center; background:var(--bg); opacity:0; pointer-events:none;}
+  #qsal.go{display:flex; pointer-events:auto; animation:qsFade 2.2s ease forwards;}
+  #qsal .qs-t{font-family:'Maghribi','AmiriQuran',serif; font-size:clamp(40px,12vw,60px); line-height:1.5; color:#86A184; text-shadow:0 1px 14px rgba(134,161,132,.28); white-space:nowrap; transform:translateY(-62vh); opacity:0;}
+  #qsal.go .qs-t{animation:qsDrop 2.2s cubic-bezier(.22,.8,.3,1) forwards;}
+  html[data-bg="dark"] #qsal .qs-t{color:#A8C3A5;}
+  @keyframes qsFade{0%{opacity:0} 12%{opacity:1} 78%{opacity:1} 100%{opacity:0}}
+  @keyframes qsDrop{0%{transform:translateY(-62vh); opacity:0} 14%{opacity:1} 46%{transform:translateY(0); opacity:1} 78%{transform:translateY(0); opacity:1} 100%{transform:translateY(6px); opacity:0}}
+  @media (prefers-reduced-motion: reduce){ #qsal .qs-t{transform:none;} #qsal.go .qs-t{animation:qsFadeT 1.6s ease forwards;} @keyframes qsFadeT{0%{opacity:0} 25%{opacity:1} 75%{opacity:1} 100%{opacity:0}} }
   .salat-toast{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
     z-index:80; background:var(--accent); color:#fff; text-align:center; font-weight:700; font-size:15px;
     padding:14px 18px; border-radius:16px; box-shadow:var(--shadow-2); max-width:480px; margin:0 auto;
@@ -3313,6 +3324,7 @@ $('#salat-toast') && $('#salat-toast').addEventListener('click', ()=> $('#salat-
 
 /* ---------- tab switching ---------- */
 $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
+  const __wasOn=t.classList.contains('on');
   $$('.tab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
   { const tm=document.getElementById('tab-menu'); if(tm) tm.classList.toggle('on', t.dataset.s==='s-tasbih'); }
   $$('.screen').forEach(s=>s.classList.remove('active'));
@@ -3320,7 +3332,7 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   /* صفحةُ الوِرد تُموضِع نفسَها بعدُ على آخر موضعٍ بلغه القارئ، فلا تُصفَّر
      هنا وإلّا رجع إلى أوّل الصفحة ثمّ قفز، وربّما كُتب الصفرُ مكانَ موضعه. */
   if(t.dataset.s!=='s-wird') window.scrollTo(0,0);
-  flashSalat();
+  if(t.dataset.s==='s-wird' && !__wasOn) playQuranSalat(); else flashSalat();
   if(t.dataset.s!=='s-wird'){ ['#mushaf-jump','#q-zoom-float','#riwaya-float'].forEach(x=>{ const e=$(x); if(e) e.classList.remove('show'); }); }
   if(t.dataset.s==='s-wird') openWird();
   if(t.dataset.s==='s-listen') openListen();
@@ -3337,6 +3349,22 @@ let __splashTimer=null;
 /* لمسةٌ واحدةٌ تُغلق شاشةَ الافتتاح — لا يُنتظر من استعجل */
 (function(){ const s=document.getElementById('splash'); if(!s) return;
   s.addEventListener('click', ()=>{ s.classList.add('gone'); }, {once:true}); })();
+/* ===== «صلِّ على الحبيب ﷺ» عند فتح القرآن (طلبُ فريد، 20 أكتوبر 2026) =====
+   نصٌّ بالخطّ المغربيّ بلونٍ أخضرَ مريميّ (vert sauge) ينزل من أعلى الشاشة إلى وسطها ثم يتلاشى، فلا يملّ المستخدمُ وهو ينتظر المصحف.
+   لا يمسّ المصحفَ ولا إعداداتِه؛ طبقةٌ مستقلّةٌ تُلمَس فتزول. */
+function playQuranSalat(){
+  try{
+    let o=document.getElementById('qsal');
+    if(!o){
+      o=document.createElement('div'); o.id='qsal'; o.setAttribute('aria-hidden','true');
+      o.innerHTML='<div class="qs-t">صلِّ على الحبيب ﷺ</div>';
+      o.addEventListener('click',()=>{ o.classList.remove('go'); });
+      document.body.appendChild(o);
+    }
+    o.classList.remove('go'); void o.offsetWidth; o.classList.add('go');
+    clearTimeout(window.__qsalT); window.__qsalT=setTimeout(()=>o.classList.remove('go'), 2300);
+  }catch(e){}
+}
 function flashSalat(){
   const s=$('#splash'); if(!s) return;
   s.style.animation='none';
@@ -5050,13 +5078,18 @@ async function openTools(page){
     shield:I('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>'),
     photo:I('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 9"/>')
   };
+  IC.wirdw=IC.wird; IC.wirdh=IC.wird;
+  const drRiwaya=r=>{ if(settings.riwaya===r) return; const b=document.querySelector('#riwaya-seg button[data-r="'+r+'"]'); if(b) b.click(); try{ syncRiwayaPills(); }catch(e){} };
   const close=()=>{ sc.classList.remove('show'); dr.classList.remove('show'); dr.setAttribute('aria-hidden','true'); document.body.classList.remove('dr-open'); tabM.classList.remove('on'); };
   const isOpen=()=>dr.classList.contains('show');
   const later=fn=>{ close(); setTimeout(fn,190); };
   const goTab=(sid,fn)=>()=>later(()=>{ const t=document.querySelector('.tab[data-s="'+sid+'"]'); if(t) t.click(); if(fn) setTimeout(fn,70); });
   const tool=p=>()=>later(()=>openTools(p));
   const A={
-    wird:goTab('s-wird'), listen:goTab('s-listen'), azkar:goTab('s-azkar',()=>{ if(catMeta(currentTab).hidden) showAzkarPage('fadl'); }),
+    wird:goTab('s-wird'),
+    /* اختصاران تحت «القرآن»: يفتحان المصحفَ بالرواية المختارة (بالضغط على زرّ الرواية نفسِه فيجري كلُّ ما يجري عند تبديلها) */
+    wirdw:goTab('s-wird',()=>drRiwaya('warsh')), wirdh:goTab('s-wird',()=>drRiwaya('hafs')),
+    listen:goTab('s-listen'), azkar:goTab('s-azkar',()=>{ if(catMeta(currentTab).hidden) showAzkarPage('fadl'); }),
     wasaya:goTab('s-azkar',()=>showAzkarPage('wasaya')),
     fiqh:goTab('s-tasbih',()=>applyTasbihMode('fiqh')), tasbih:goTab('s-tasbih',()=>applyTasbihMode('tasbih')), quiz:goTab('s-tasbih',()=>applyTasbihMode('quiz')),
     qibla:tool('qibla'), cal:tool('cal'), pt:tool('pt'), fast:tool('fast'), rev:tool('rev'), bell:tool('rem'),
@@ -5066,7 +5099,7 @@ async function openTools(page){
     settings:goTab('s-settings'), info:()=>later(async()=>{ if(await loadTools()) SalTools.onboard(true); })
   };
   const GROUPS=[
-    [null,[['wird','القرآن برواية حفص ورواية ورش'],['listen','الاستماع'],['azkar','الأذكار'],['fiqh','الفقه'],['tasbih','المسبحة']]],
+    [null,[['wird','القرآن برواية حفص ورواية ورش'],['wirdw','رواية ورش'],['wirdh','رواية حفص'],['listen','الاستماع'],['azkar','الأذكار'],['fiqh','الفقه'],['tasbih','المسبحة']]],
     ['أدوات المسلم',[['qibla','القبلة'],['cal','التقويم الهجريّ'],['pt','صلواتي'],['fast','الصيام'],['rev','مراجعة الحفظ'],['sleep','مؤقّت النوم'],['bell','تذكيراتي']]],
     ['التعلّم والاستماع',[['hifz','التحفيظ'],['seera','السيرة النبوية'],['stories','قصص الأنبياء'],['hadith','الأحاديث الصحيحة'],['duat','الدعاة'],['wasaya','وصايا النبي ﷺ'],['waqf','الوقف والابتداء','waqf.html'],['khayr','أبواب الخير','khayr.html'],['tajweed','تعلّم التجويد','tajweed.html'],['quiz','اختبار الثقافة الإسلامية']]],
     ['المزيد',[['settings','الإعدادات'],['info','الجولة التعريفيّة'],['shield','سياسة الخصوصية','privacy.html'],['photo','صور القرّاء (النَّسب والتراخيص)','credits.html']]]
@@ -5092,9 +5125,11 @@ async function openTools(page){
   function render(){
     const cur=curKey(), due=dueCount(), lang=(settings.lang==='fr'||settings.lang==='en')?settings.lang:'ar';
     const row=(it)=>{
-      const [id,label,href]=it; const on=(id===cur)?' on':''; const bdg=(id==='rev'&&due)?'<span class="dr-bdg">'+due+'</span>':'';
+      const [id,label,href]=it;
+      const isSub=(id==='wirdw'||id==='wirdh');
+      const on=(isSub ? (cur==='wird' && settings.riwaya===(id==='wirdw'?'warsh':'hafs')) : (id===cur && id!=='wird')) ? ' on' : ''; const bdg=(id==='rev'&&due)?'<span class="dr-bdg">'+due+'</span>':'';
       const inner=IC[id]+'<span class="t">'+label+'</span>'+bdg;
-      return href ? '<a class="dr-i" href="'+href+'">'+inner+'</a>' : '<button type="button" class="dr-i'+on+'" data-a="'+id+'">'+inner+'</button>';
+      return href ? '<a class="dr-i" href="'+href+'">'+inner+'</a>' : '<button type="button" class="dr-i'+(isSub?' sub':'')+on+'" data-a="'+id+'">'+inner+'</button>';
     };
     let h='<div class="dr-head"><div class="dr-logo"><img src="icons/icon-192.png" alt="" width="46" height="46"></div><div class="dr-txt"><div class="dr-name"><span>صلاتي</span> <span class="lt-nm">salatee</span></div>'+
       '<div class="dr-sub" id="dr-np">'+nextPrayerHtml()+'</div><div class="dr-sub" id="dr-hj"></div></div></div><div class="dr-body">';
