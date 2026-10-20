@@ -858,6 +858,11 @@
   .adh-tour .at-yes{background:#0A5441; color:#fff; box-shadow:0 2px 10px rgba(10,84,65,.32); flex:1.6 1 0;}
   .adh-tour .at-next{background:var(--fill-2); color:var(--text-2);}
   .adh-tour[data-s="ok"] .at-act{display:none;}
+  .adh-tour[data-s="dl"] .at-ttl[data-s="dl"], .adh-tour[data-s="done"] .at-ttl[data-s="done"]{display:block;}
+  .adh-tour[data-s="dl"] .at-txt[data-s="dl"], .adh-tour[data-s="done"] .at-txt[data-s="done"]{display:block;}
+  .upd-tour .up-ver{display:inline-block; margin:0 0 10px; padding:2px 12px; border-radius:999px; background:var(--fill-2); color:#7a5518; font-weight:800; font-size:14px;}
+  .upd-tour .up-ver:empty{display:none;}
+  .upd-tour[data-s="dl"] .at-yes{display:none;}
   .salat-toast{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
     z-index:80; background:var(--accent); color:#fff; text-align:center; font-weight:700; font-size:15px;
     padding:14px 18px; border-radius:16px; box-shadow:var(--shadow-2); max-width:480px; margin:0 auto;
@@ -1910,6 +1915,27 @@
       <div class="at-act">
         <button class="at-yes" id="at-yes" type="button">فعّل الأذان الآن</button>
         <button class="at-next" id="at-next" type="button">التالي</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="adh-tour upd-tour" id="upd-tour" role="dialog" aria-modal="true">
+  <div class="at-card">
+    <div class="at-head">
+      <div class="at-grip"></div>
+      <div class="at-ttl" data-s="1">إصدارٌ جديد في انتظارك</div>
+      <div class="at-ttl" data-s="dl">يُنزَّل التحديثُ الآن</div>
+      <div class="at-ttl" data-s="done">الإصدارُ الجديد جاهز</div>
+    </div>
+    <div class="at-body">
+      <div class="up-ver" id="up-ver" dir="ltr"></div>
+      <p class="at-txt" data-s="1">صدر إصدارٌ جديدٌ من «صلاتي» فيه تحسيناتٌ وإصلاحات. يُنزَّل في الخلفيّة وأنت تواصل قراءتك.</p>
+      <p class="at-txt" data-s="dl">يُنزَّل التحديثُ في الخلفيّة. تابع قراءتك، وسنخبرك حين يكتمل.</p>
+      <p class="at-txt" data-s="done">اكتمل تنزيلُ الإصدار الجديد. أعِد تشغيل التطبيق ليبدأ العملَ به.</p>
+      <div class="at-act">
+        <button class="at-yes" id="up-yes" type="button">حدّث الآن</button>
+        <button class="at-next" id="up-next" type="button">لاحقًا</button>
       </div>
     </div>
   </div>
@@ -8492,6 +8518,67 @@ $('#loc-btn').addEventListener('click', ()=>{
   T.addEventListener('click', e=>{ if(e.target===T && !busy) close(true); });
   if(eligible()) setTimeout(()=>{ if(eligible()) open(); }, 5500);
   window.__openAdhanTour = open;     // للاختبار
+})();
+
+/* ===== إشعارُ الإصدار الجديد (طلبُ فريد، 20 أكتوبر 2026) =====
+   تحديثاتُ Google Play داخل التطبيق (النوع المرن): يسأل Play عن إصدارٍ أحدث؛ فإن وُجد تظهر بطاقةٌ تدعو إلى التحديث،
+   ويُنزَّل في الخلفيّة والمستخدمُ يتابع قراءتَه، ثم يُعاد التشغيلُ بضغطة. في التطبيق الأصليّ فقط وبعد نشره على Play (لا يعمل في المتصفّح). */
+(function appUpdate(){
+  const T=$('#upd-tour'); if(!T) return;
+  const KEY='az_upd';
+  const plug=()=>{ try{ return window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.AppUpdate; }catch(e){ return null; } };
+  let info=null, busy=false;
+  const setS=n=>{ T.dataset.s=n; const yes=$('#up-yes'), nx=$('#up-next');
+    if(n==='done'){ yes.textContent='أعِد التشغيل الآن'; nx.textContent='لاحقًا'; }
+    else if(n==='dl'){ nx.textContent='إخفاء'; }
+    else { yes.textContent='حدّث الآن'; nx.textContent='لاحقًا'; } };
+  const open=n=>{ if($('#adh-tour') && $('#adh-tour').classList.contains('show')) return; setS(n); T.classList.add('show'); };
+  const close=()=>T.classList.remove('show');
+  const snoozed=v=>{ try{ const o=store.get(KEY,null); return !!(o && String(o.v)===String(v) && Date.now()-o.t < 24*3600*1000); }catch(e){ return false; } };
+  async function check(){
+    const P=plug(); if(!isNative() || !P || !P.getAppUpdateInfo || busy) return;
+    try{
+      info=await P.getAppUpdateInfo();
+      if(info.installStatus===11){ open('done'); return; }                       // نُزِّل سابقًا وينتظر إعادةَ التشغيل
+      if(info.updateAvailability===2 && info.flexibleUpdateAllowed!==false){
+        if(snoozed(info.availableVersionCode)) return;
+        $('#up-ver').textContent = info.availableVersionName ? ('v'+info.availableVersionName) : '';
+        open('1');
+      }
+    }catch(e){}
+  }
+  async function start(){
+    const P=plug(); if(!P) return; busy=true; vibrate(8);
+    try{
+      const r=await P.startFlexibleUpdate();
+      if(r && r.code===0){ setS('dl'); }                                       // وافق المستخدمُ في نافذة Play
+      else { close(); try{ store.set(KEY,{v:info&&info.availableVersionCode,t:Date.now()}); }catch(e){} }
+    }catch(e){ close(); }
+    busy=false;
+  }
+  $('#up-yes').addEventListener('click', async ()=>{
+    if(T.dataset.s==='done'){ vibrate(8); try{ await plug().completeFlexibleUpdate(); }catch(e){} return; }
+    start();
+  });
+  $('#up-next').addEventListener('click', ()=>{
+    vibrate(5);
+    if(T.dataset.s==='1'){ try{ store.set(KEY,{v:info&&info.availableVersionCode,t:Date.now()}); }catch(e){} }
+    close();
+  });
+  T.addEventListener('click', e=>{ if(e.target===T){ if(T.dataset.s==='1'){ try{ store.set(KEY,{v:info&&info.availableVersionCode,t:Date.now()}); }catch(e2){} } close(); } });
+  try{
+    const P=plug();
+    if(P && P.addListener) P.addListener('onFlexibleUpdateStateChange', s=>{
+      if(!s) return;
+      if(s.installStatus===11){ T.classList.remove('show'); open('done'); }      // اكتمل التنزيل
+    });
+  }catch(e){}
+  if(isNative()){
+    setTimeout(check, 9000);
+    let last=Date.now();
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && Date.now()-last > 3600*1000){ last=Date.now(); check(); } });
+  }
+  window.__updCheck = check;      // للاختبار
 })();
 
 applyBg(); applyFont(); applyRiwaya(); applyDuaFont();
