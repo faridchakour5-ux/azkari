@@ -874,9 +874,9 @@
   /* حركةُ «صلِّ على الحبيب» عند فتح القرآن */
   #qsal{position:fixed; inset:0; z-index:9000; display:none; align-items:center; justify-content:center; background:var(--bg); opacity:0; pointer-events:none;}
   #qsal.go{display:flex; pointer-events:auto; animation:qsFade 2.2s ease forwards;}
-  #qsal .qs-t{font-family:'Maghribi','AmiriQuran',serif; font-size:clamp(40px,12vw,60px); line-height:1.5; color:#86A184; text-shadow:0 1px 14px rgba(134,161,132,.28); white-space:nowrap; transform:translateY(-62vh); opacity:0;}
+  #qsal .qs-t{font-family:'Maghribi','AmiriQuran',serif; font-size:clamp(40px,12vw,60px); line-height:1.5; color:#063D30; text-shadow:0 1px 14px rgba(6,61,48,.22); white-space:nowrap; transform:translateY(-62vh); opacity:0;}
   #qsal.go .qs-t{animation:qsDrop 2.2s cubic-bezier(.22,.8,.3,1) forwards;}
-  html[data-bg="dark"] #qsal .qs-t{color:#A8C3A5;}
+  html[data-bg="dark"] #qsal .qs-t{color:#35B087;}
   @keyframes qsFade{0%{opacity:0} 12%{opacity:1} 78%{opacity:1} 100%{opacity:0}}
   @keyframes qsDrop{0%{transform:translateY(-62vh); opacity:0} 14%{opacity:1} 46%{transform:translateY(0); opacity:1} 78%{transform:translateY(0); opacity:1} 100%{transform:translateY(6px); opacity:0}}
   @media (prefers-reduced-motion: reduce){ #qsal .qs-t{transform:none;} #qsal.go .qs-t{animation:qsFadeT 1.6s ease forwards;} @keyframes qsFadeT{0%{opacity:0} 25%{opacity:1} 75%{opacity:1} 100%{opacity:0}} }
