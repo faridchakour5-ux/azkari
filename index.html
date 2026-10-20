@@ -863,6 +863,12 @@
   .upd-tour .up-ver{display:inline-block; margin:0 0 10px; padding:2px 12px; border-radius:999px; background:var(--fill-2); color:#7a5518; font-weight:800; font-size:14px;}
   .upd-tour .up-ver:empty{display:none;}
   .upd-tour[data-s="dl"] .at-yes{display:none;}
+  /* سطرٌ فرنسيٌّ تحت العربيّ (كثيرون يفهمون «Mise à jour»)؛ يختفي إن كانت اللغةُ نفسُها فرنسيّةً أو إنجليزيّة */
+  .upd-tour .fr-sub{display:block; font:600 12.5px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; opacity:.85; margin-top:2px; letter-spacing:.2px;}
+  .upd-tour .at-ttl .fr-sub{text-align:right; font-size:13.5px; opacity:.92; text-shadow:0 1px 2px rgba(0,0,0,.35);}
+  .upd-tour .at-act button{display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.25;}
+  .upd-tour .at-act button .fr-sub{font-size:11.5px; font-weight:600; opacity:.8;}
+  html[lang="fr"] .upd-tour .fr-sub, html[lang="en"] .upd-tour .fr-sub{display:none;}
   .salat-toast{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
     z-index:80; background:var(--accent); color:#fff; text-align:center; font-weight:700; font-size:15px;
     padding:14px 18px; border-radius:16px; box-shadow:var(--shadow-2); max-width:480px; margin:0 auto;
@@ -1924,9 +1930,9 @@
   <div class="at-card">
     <div class="at-head">
       <div class="at-grip"></div>
-      <div class="at-ttl" data-s="1">إصدارٌ جديد في انتظارك</div>
-      <div class="at-ttl" data-s="dl">يُنزَّل التحديثُ الآن</div>
-      <div class="at-ttl" data-s="done">الإصدارُ الجديد جاهز</div>
+      <div class="at-ttl" data-s="1">إصدارٌ جديد في انتظارك<small class="fr-sub" data-noi18n dir="ltr">Mise à jour disponible</small></div>
+      <div class="at-ttl" data-s="dl">يُنزَّل التحديثُ الآن<small class="fr-sub" data-noi18n dir="ltr">Mise à jour en cours de téléchargement</small></div>
+      <div class="at-ttl" data-s="done">الإصدارُ الجديد جاهز<small class="fr-sub" data-noi18n dir="ltr">Mise à jour prête</small></div>
     </div>
     <div class="at-body">
       <div class="up-ver" id="up-ver" dir="ltr"></div>
@@ -1934,8 +1940,8 @@
       <p class="at-txt" data-s="dl">يُنزَّل التحديثُ في الخلفيّة. تابع قراءتك، وسنخبرك حين يكتمل.</p>
       <p class="at-txt" data-s="done">اكتمل تنزيلُ الإصدار الجديد. أعِد تشغيل التطبيق ليبدأ العملَ به.</p>
       <div class="at-act">
-        <button class="at-yes" id="up-yes" type="button">حدّث الآن</button>
-        <button class="at-next" id="up-next" type="button">لاحقًا</button>
+        <button class="at-yes" id="up-yes" type="button"><span class="ar">حدّث الآن</span><small class="fr-sub" data-noi18n dir="ltr">Mettre à jour</small></button>
+        <button class="at-next" id="up-next" type="button"><span class="ar">لاحقًا</span><small class="fr-sub" data-noi18n dir="ltr">Plus tard</small></button>
       </div>
     </div>
   </div>
@@ -8528,10 +8534,11 @@ $('#loc-btn').addEventListener('click', ()=>{
   const KEY='az_upd';
   const plug=()=>{ try{ return window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.AppUpdate; }catch(e){ return null; } };
   let info=null, busy=false;
+  const lab=(btn,ar,fr)=>{ const a=btn.querySelector('.ar'), f=btn.querySelector('.fr-sub'); if(a) a.textContent=ar; if(f) f.textContent=fr; };
   const setS=n=>{ T.dataset.s=n; const yes=$('#up-yes'), nx=$('#up-next');
-    if(n==='done'){ yes.textContent='أعِد التشغيل الآن'; nx.textContent='لاحقًا'; }
-    else if(n==='dl'){ nx.textContent='إخفاء'; }
-    else { yes.textContent='حدّث الآن'; nx.textContent='لاحقًا'; } };
+    if(n==='done'){ lab(yes,'أعِد التشغيل الآن','Redémarrer maintenant'); lab(nx,'لاحقًا','Plus tard'); }
+    else if(n==='dl'){ lab(nx,'إخفاء','Masquer'); }
+    else { lab(yes,'حدّث الآن','Mettre à jour'); lab(nx,'لاحقًا','Plus tard'); } };
   const open=n=>{ if($('#adh-tour') && $('#adh-tour').classList.contains('show')) return; setS(n); T.classList.add('show'); };
   const close=()=>T.classList.remove('show');
   const snoozed=v=>{ try{ const o=store.get(KEY,null); return !!(o && String(o.v)===String(v) && Date.now()-o.t < 24*3600*1000); }catch(e){ return false; } };
