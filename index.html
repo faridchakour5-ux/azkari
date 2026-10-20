@@ -3352,7 +3352,7 @@ let __splashTimer=null;
 /* ===== «صلِّ على الحبيب ﷺ» عند فتح القرآن (طلبُ فريد، 20 أكتوبر 2026) =====
    نصٌّ بالخطّ المغربيّ بلونٍ أخضرَ مريميّ (vert sauge) ينزل من أعلى الشاشة إلى وسطها ثم يتلاشى، فلا يملّ المستخدمُ وهو ينتظر المصحف.
    لا يمسّ المصحفَ ولا إعداداتِه؛ طبقةٌ مستقلّةٌ تُلمَس فتزول. */
-function playQuranSalat(){
+function playQuranSalat(ms){
   try{
     let o=document.getElementById('qsal');
     if(!o){
@@ -3362,7 +3362,7 @@ function playQuranSalat(){
       document.body.appendChild(o);
     }
     o.classList.remove('go'); void o.offsetWidth; o.classList.add('go');
-    clearTimeout(window.__qsalT); window.__qsalT=setTimeout(()=>o.classList.remove('go'), 2300);
+    clearTimeout(window.__qsalT); window.__qsalT=setTimeout(()=>o.classList.remove('go'), ms||2300);
   }catch(e){}
 }
 function flashSalat(){
@@ -6228,13 +6228,15 @@ function commitMushafJump(suraIdx, ai){
   settings.mushafSura=suraIdx; saveSettings();
   const sel=$('#sura-select'); if(sel) sel.value=suraIdx;
   closeSuraOverlay(); vibrate(6);
-  /* تُطوى الورقةُ أوّلًا ثمّ نُمرِّر في الإطار التالي، فلا يتزامن ثِقلُ
-     التمرير مع حركةِ الورقة فيظهر التقطيع. */
-  requestAnimationFrame(()=>{
+  /* «صلِّ على الحبيب ﷺ» تظهر أثناء الانتقال (طلبُ فريد، 20 أكتوبر 2026): الانتقالُ إلى سورةٍ بعيدةٍ يبطُؤ قليلًا.
+     تُرسَم الطبقةُ أوّلًا ثمّ نُمرِّر بعد إطارين، فلا يتزامن ثِقلُ التمرير مع حركةِ الورقة ولا مع ظهورها. */
+  playQuranSalat();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
     if(ai===WIRD.sur[suraIdx].i) scrollToSura(suraIdx, false); else scrollToAya(ai, false);
-  });
+  }));
 }
-$('#mushaf-jump').addEventListener('click', ()=>{ vibrate(6); openMushafPicker(); });
+/* ظهورُ قائمة السور بطيءٌ قليلًا (طلبُ فريد، 20 أكتوبر 2026): تُغطّيه «صلِّ على الحبيب ﷺ»؛ تُرسَم الطبقةُ أوّلًا ثم تُبنى القائمةُ بعد إطارين. */
+$('#mushaf-jump').addEventListener('click', ()=>{ vibrate(6); playQuranSalat(1500); requestAnimationFrame(()=>requestAnimationFrame(openMushafPicker)); });
 $('#sura-q') && $('#sura-q').addEventListener('input', e=>{ renderSuraRows(e.target.value); $('#sura-list').scrollTop=0; });
 $('#sura-overlay-back').addEventListener('click', ()=>{ openMushafPicker(); });
 $('#sura-overlay-close').addEventListener('click', closeSuraOverlay);
