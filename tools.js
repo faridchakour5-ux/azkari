@@ -615,7 +615,8 @@ const onbCss=document.createElement('style');
 onbCss.textContent=`
 .onb{position:fixed; inset:0; z-index:300; background:var(--bg); display:flex; flex-direction:column; padding:calc(env(safe-area-inset-top,0px) + 14px) 22px calc(22px + env(safe-area-inset-bottom,0px));}
 .onb .skip{align-self:flex-start; border:0; background:transparent; color:var(--text-2); font:inherit; font-size:14.5px; font-weight:700; padding:8px 4px;}
-.onb .sl{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:16px; animation:onbIn .35s ease;}
+.onb .sl{flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; align-items:center; justify-content:safe center; text-align:center; gap:16px; animation:onbIn .35s ease;}
+@media (max-height:700px){ .onb .ico{width:80px; height:80px;} .onb .ico svg{width:40px; height:40px;} .onb h2{font-size:22px;} .onb p{font-size:15px; line-height:1.85;} }
 @keyframes onbIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
 .onb .ico{width:112px; height:112px; border-radius:50%; background:var(--accent-soft,rgba(47,158,68,.14)); color:var(--accent); display:flex; align-items:center; justify-content:center;}
 .onb .ico svg{width:56px; height:56px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
@@ -629,12 +630,26 @@ T.onboard = function(force){
   if(!force && sget('az_onb',false)) return;
   if(document.getElementById('onb')) return;
   const SL=[
+    {ic:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>', t:'مرحبًا بك في صلاتي',
+     p:'لا حسابَ ولا إعلانات. في أسفل الشاشة خمسةُ أزرار: «القرآن» و«الاستماع» و«الأذكار» و«الإعدادات» و«القائمة» التي تفتح بقيّةَ الصفحات. سنمرّ سريعًا على كلّ شيء.'},
     {ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>', t:'مواقيت الصلاة والأذان',
      p:'فعِّل موقعك من صفحة «الأذكار» ليُحسب لك وقتُ كلّ صلاة حسب مدينتك، وفي المغرب بجدول وزارة الأوقاف. وفي تطبيق أندرويد يرفع التطبيقُ الأذانَ بصوت المؤذّن عند دخول الوقت حتى وهو مغلق.'},
-    {ic:'<svg viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>', t:'القرآن والاستماع والتحفيظ',
-     p:'مصحفٌ برواية ورش وحفص مع التفسير الميسّر، وتلاواتٌ بأصوات قرّاء، وتحفيظٌ بالتكرار مع مراجعةٍ متباعدة.'},
-    {ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5z"/></svg>', t:'الأذكار وأدوات المسلم',
-     p:'أذكار الصباح والمساء وغيرها، والفقه والسيرة والاختبار، والقبلة والتقويم الهجريّ ومتابعة الصلوات والصيام. المصحفُ والأذكارُ والأدواتُ تعمل دون إنترنت، والاستماعُ يحتاجه إلا ما نزّلتَه. لا حسابَ ولا إعلانات، وتقدّمُك محفوظٌ على هاتفك.'}
+    {ic:'<svg viewBox="0 0 24 24"><path d="M2 4h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>', t:'القرآن',
+     p:'مصحفٌ برواية ورش أو حفص (تبدّل بينهما من أعلى الصفحة) مع التفسير الميسّر، والبحثُ عن سورة أو كلمة، وزرّ «تابِع القراءة من حيث وصلت»، و«تمرير للقراءة» الذي يمرّر الصفحةَ لك. ومن «القائمة» تفتح القرآنَ برواية ورش أو حفص مباشرة.'},
+    {ic:'<svg viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/></svg>', t:'الاستماع',
+     p:'تلاواتٌ بأصوات قرّاء كثيرين، مع إمكان تنزيل السور للاستماع دون إنترنت. ومن اسم القسم في أعلى الصفحة تنتقل إلى: التحفيظ، والسيرة النبوية، وقصص الأنبياء، والأحاديث الصحيحة، ودروس الدعاة.'},
+    {ic:'<svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>', t:'التحفيظ ومراجعته',
+     p:'اختر سورةً ومقطعًا ورواية (ورش أو حفص) فتتكرّر الآيات لتحفظها. وبطريقة «ردِّد وقارِن» يُسجَّل صوتُك على جهازك ثم يُعاد عليك لتقارنه بالقارئ. ومن «مراجعة الحفظ» تراجع ما حفظتَه مراجعةً متباعدة. وهذا لا يغني عن معلّمٍ يسمع قراءتك.'},
+    {ic:'<svg viewBox="0 0 24 24"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>', t:'الأذكار والمسبحة',
+     p:'أذكار الصباح والمساء وبعد الصلاة والنوم والاستيقاظ وغيرها، مع «فضل الذكر». وفي «المسبحة» عدّادٌ للتسبيح بلمسة.'},
+    {ic:'<svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h7"/><path d="M8 12h7"/></svg>', t:'الفقه والثقافة الإسلاميّة',
+     p:'الفقه المبسّط: الطهارة والصلاة وفقه النساء والصيام والزكاة والحجّ، مع التنبيه على مواضع الخلاف. وفيه «اختبار الثقافة الإسلاميّة»، و«وصايا النبي ﷺ». وهو عرضٌ تعليميّ لا يغني عن سؤال أهل العلم.'},
+    {ic:'<svg viewBox="0 0 24 24"><path d="M3 8l9-4 9 4-9 4z"/><path d="M7 10v5c0 1.5 2.2 3 5 3s5-1.5 5-3v-5"/></svg>', t:'التجويد والوقف وأبواب الخير',
+     p:'«تعلّم التجويد»: درسٌ في النون الساكنة والتنوين بحفص وورش مع استماع وترديد. و«الوقف والابتداء»: أين تقف وأين تبدأ. و«أبواب الخير»: أعمالٌ بسيطة تعملها يومًا بيوم وتسجّل أنّك فعلتَها. وكلّها في «القائمة».'},
+    {ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5z"/></svg>', t:'أدوات المسلم',
+     p:'القِبلة، والتقويم الهجريّ، و«صلواتي» لمتابعة صلواتك، والصيام، و«مؤقّت النوم» لإيقاف الاستماع بعد مدّة، و«تذكيراتي» لضبط التنبيهات. وتجدها كلّها في «القائمة».'},
+    {ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>', t:'الإعدادات وخصوصيّتك',
+     p:'من «الإعدادات»: الرواية، وحجمُ الخطّ ولونُ القرآن، والخلفيّة، والأذان وتذكيراتك. المصحفُ والأذكارُ والأدواتُ تعمل دون إنترنت، والاستماعُ يحتاجه إلا ما نزّلتَه، وتقدّمُك محفوظٌ على هاتفك. ويمكنك إعادة هذه الجولة من «القائمة ← الجولة التعريفيّة».'},
   ];
   let i=0; const el=document.createElement('div'); el.className='onb'; el.id='onb'; document.body.appendChild(el);
   const done=()=>{ sset('az_onb',true); el.remove(); };
