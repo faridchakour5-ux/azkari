@@ -2991,7 +2991,7 @@ adhanToggle.addEventListener('change', ()=>{
 
 const volStopToggle = $('#adhan-volstop-toggle');
 if(volStopToggle){
-  volStopToggle.checked = settings.adhanVolStop===true;      // افتراضًا: خفضُ الصوت يخفّض الصوتَ فقط كأيّ منبّه
+  volStopToggle.checked = settings.adhanVolStop!==false;      // افتراضًا: «خفض الصوت» يوقف الأذان (أمرٌ من فريد، 21 أكتوبر 2026)
   volStopToggle.addEventListener('change', ()=>{
     settings.adhanVolStop = volStopToggle.checked; saveSettings(); vibrate(6);
     try{ scheduleNativeNotifs(); }catch(e){}
@@ -8392,7 +8392,7 @@ async function scheduleNativeNotifs(){
       /* المواقيتُ تُحسَب هنا بـ adhan.min.js — مصدرٌ واحدٌ لا يَختلف عمّا يَراه
          المستخدمُ في شريط المواقيت — وتُسلَّم إلى النظام أرقامًا مطلقة. */
       try{
-        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, pre: preList, enabled: settings.adhan!==false, volStop: settings.adhanVolStop===true, voice: adhanPref() });
+        __adhanState = await ADHAN_SVC.setSchedule({ times: adhanTimes, pre: preList, enabled: settings.adhan!==false, volStop: settings.adhanVolStop!==false, voice: adhanPref() });
         paintAdhanNote(); paintVoiceRow();
       }catch(e){}
     }

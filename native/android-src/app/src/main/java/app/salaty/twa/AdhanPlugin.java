@@ -99,7 +99,7 @@ public class AdhanPlugin extends Plugin {
       }
       AdhanScheduler.savePre(getContext(), preClean);
 
-      Boolean vs = call.getBoolean("volStop", Boolean.FALSE);
+      Boolean vs = call.getBoolean("volStop", Boolean.TRUE);
       String voice = call.getString("voice", "wadee");
       AdhanScheduler.prefs(getContext()).edit()
           .putBoolean("vol_stop", vs != null && vs)

@@ -242,9 +242,9 @@ public class AdhanService extends Service {
        • خفض الصوت  ⇐ يُوقَف الأذان.
        • رفع الصوت  ⇐ يرتفع صوتُ المنبّه درجةً كالمعتاد.
      وزرُّ «إيقاف» في الإشعار باقٍ كما كان. ولا يعمل هذا إلا إن فعّله المستخدمُ من الإعدادات؛ وافتراضًا يخفّض الزرُّ الصوتَ فقط كما في أيّ منبّه. */
-  /** خيارٌ في الإعدادات (مُطفأٌ افتراضيًّا): خفضُ الصوت يوقف الأذان بدل أن يخفّضه. */
+  /** خيارٌ في الإعدادات (مفعَّلٌ افتراضيًّا): خفضُ الصوت يوقف الأذان بدل أن يخفّضه. */
   private boolean volStop() {
-    try { return AdhanScheduler.prefs(this).getBoolean("vol_stop", false); } catch (Exception e) { return false; }
+    try { return AdhanScheduler.prefs(this).getBoolean("vol_stop", true); } catch (Exception e) { return true; }
   }
 
   /* حارسُ الاستمرار: لا نُوقف الأذانَ مؤقّتًا أبدًا (لا زرَّ إيقافٍ مؤقّت)، فإن وُجد المُشغِّلُ واقفًا وهو لم يَنتهِ فالسببُ من النظام
