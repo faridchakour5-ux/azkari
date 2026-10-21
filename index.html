@@ -3059,8 +3059,8 @@ function routeFromHash(){
   const direct={ wird:{action:'wird'}, mushaf:{action:'wird'}, kahf:{action:'kahf'},
                  tasbih:{action:'tasbih'}, listen:{action:'listen'}, settings:{action:'settings'} };
   if(direct[h]){ applyNotifNavigation(direct[h]); return true; }
-  const tq=h.match(/^talqin-(\d{1,3})-(\d{1,3})$/);   // من صفحة «تعلّم التجويد»: افتح «ردِّد وقارِن» على هذه الآية
-  if(tq){ applyNotifNavigation({action:'talqin', s:+tq[1], a:+tq[2]}); return true; }
+  const tq=h.match(/^talqin-(\d{1,3})-(\d{1,3})(-w)?$/);   // من صفحة «تعلّم التجويد»: افتح «ردِّد وقارِن» على هذه الآية
+  if(tq){ applyNotifNavigation({action:'talqin', s:+tq[1], a:+tq[2], riw:tq[3]?'warsh':'hafs'}); return true; }
   if(CATS.find(c=>c.id===h)){ applyNotifNavigation({action:'azkar', tab:h}); return true; }
   return false;
 }
@@ -3078,10 +3078,12 @@ function applyNotifNavigation(data){
     } else if(data.action==='talqin'){
       (async()=>{
         try{
-          if(!(await hzLoad())) return;
+          /* الروايةُ تُضبَط قبل التحميل وحساب الآيات (من صفحة «تعلّم التجويد»: «-w» = ورش، وإلّا حفص) */
+          const riw=data.riw==='warsh'?'warsh':'hafs';
+          const pr=HZ_PRESETS.find(x=>x.id==='echo'); if(pr){ settings.hifz=Object.assign(hzCfg(), pr.c, {riw}); saveSettings(); }
+          if(!(await hzLoad(riw))) return;
           const si=Math.min(Math.max((+data.s||1)-1,0),113), n=hzCount(si), a=Math.min(Math.max(+data.a||1,1),n);
           __hzSel={ si, from:a, to:a };
-          const pr=HZ_PRESETS.find(x=>x.id==='echo'); if(pr){ settings.hifz=Object.assign(hzCfg(), pr.c, {riw:'hafs'}); saveSettings(); }
           const t=document.querySelector('.tab[data-s="s-listen"]'); if(t) t.click();
           applyListenMode('hifz');
         }catch(e){}

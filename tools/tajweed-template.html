@@ -151,8 +151,8 @@ function exHtml(e, L, hafs){
   var why = '<span class="why">' + esc(e.why[lang]) + '</span>';
   var ref = '<span class="ref">' + esc(e.ref) + '</span>';
   var acts = '';
-  if (hafs){
-    acts = '<div class="acts"><button type="button" data-play="' + esc(e.audio) + '">' + esc(L.listen) + '</button><a href="index.html#talqin-' + e.s + '-' + e.a + '">' + esc(L.repeat) + '</a></div>';
+  if (e.audio){
+    acts = '<div class="acts"><button type="button" data-play="' + esc(e.audio) + '">' + esc(L.listen) + '</button><a href="index.html#talqin-' + e.s + '-' + e.a + (hafs ? '' : '-w') + '">' + esc(L.repeat) + '</a></div>';
   }
   return '<div class="exr">' + why + q + ref + acts + '</div>';
 }

@@ -12,6 +12,13 @@ import vm from 'node:vm';
 
 const load = f => { const w = {}; vm.runInNewContext(fs.readFileSync(f, 'utf8'), { window: w }); return w.WIRD_HAFS || w.WIRD_WARSH || w.WIRD; };
 const HAFS = load('wird_hafs.js'), WARSH = load('wird_warsh.js');
+/* تلاوةُ ورش (عمر القزابري) من mp3quran بتوقيت الآيات المعلَن؛ هي نفسُ بياناتِ التحفيظ في التطبيق (hifz_warsh.js) */
+const HW = (() => { const w = {}; vm.runInNewContext(fs.readFileSync('hifz_warsh.js', 'utf8'), { window: w }); return w.HZ_WT.qazabri; })();
+function warshClip(s, v) {
+  let prev = 0, out = null;
+  HW.t.split('|')[s - 1].split(',').forEach((p, i) => { const q = p.split(':'), a = prev + (+q[0]), b = a + (+q[1]); if (i === v - 1) out = [a / 100, b / 100]; prev = b; });
+  return out ? HW.folder + String(s).padStart(3, '0') + '.mp3#t=' + out[0].toFixed(2) + ',' + out[1].toFixed(2) : null;
+}
 const strip = s => s.replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ࣓-ࣿ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ء/g, '');
 const verse = (W, s, v) => String(W.a[W.sur[s - 1].i + v - 1].t).replace(/ {2,}/g, ' ').trim();
 const nver = (W, s) => (s < W.sur.length ? W.sur[s].i : W.a.length) - W.sur[s - 1].i;
@@ -66,7 +73,7 @@ for (const [r, l, kind, kw, s, a, win, flag] of EX) {
   const pad = n => String(n).padStart(3, '0');
   rulesEx[r].push({
     hafs: { ...h, why: why(kind, l), audio: `https://everyayah.com/data/Alafasy_128kbps/${pad(s)}${pad(h.a)}.mp3` },
-    warsh: w ? { ...w, why: why(kind, l) } : null,
+    warsh: w ? { ...w, why: why(kind, l), audio: warshClip(s, w.a) } : null,
   });
 }
 if (missing.length) console.warn('لم يُعثَر على:', missing.join(' · '));
@@ -130,15 +137,15 @@ const DATA = {
   ui: {
     ar: { dir: 'rtl', back: 'العودة', title: 'تعلّم التجويد', sub: 'دروسٌ قصيرةٌ مستقلّة: اقرأ القاعدة، ثم استمع، ثم ردِّد', tabs: ['حفص', 'ورش'],
           teacher: 'هذه الصفحة تمهيديّةٌ تساعدك على التدريب بين دروسك، ولا تغني عن معلّمٍ متقنٍ يسمع قراءتك ويصحّحها. ونصُّ القرآن في الأمثلة منقولٌ حرفيًّا من مصحف التطبيق دون أيّ تلوينٍ أو تعديل.',
-          examples: 'أمثلة', listen: 'استمع', repeat: 'ردِّد وقارِن', noAudio: 'الاستماع والترديد بصوت قارئ ورش سيُضاف بعد التحقّق من التسجيلات.', warshT: 'في رواية ورش', refs: 'المراجع',
+          examples: 'أمثلة', listen: 'استمع', repeat: 'ردِّد وقارِن', noAudio: 'الاستماع والترديد في هذا التبويب بصوت القارئ عمر القزابري (رواية ورش).', warshT: 'في رواية ورش', refs: 'المراجع',
           foot: 'الأمثلة من مصحف المدينة (حفص) والمصحف المحمّدي (ورش) كما في التطبيق. والتعريفات والحروف المتداولة في كتب التجويد؛ وما يخصّ ورشًا يراجعه معلّمٌ متقن.', qrT: 'حمِّل التطبيق من Google Play' },
     fr: { dir: 'ltr', back: 'Retour', title: 'Apprendre le tajwid', sub: 'De courtes leçons indépendantes : lisez la règle, écoutez, puis répétez', tabs: ['Hafs', 'Warsh'],
           teacher: 'Cette page est une introduction qui vous aide à vous entraîner entre vos cours ; elle ne remplace pas un enseignant qualifié qui vous écoute et vous corrige. Le texte coranique des exemples est repris tel quel du mushaf de l’application, sans aucune coloration ni modification.',
-          examples: 'Exemples', listen: 'Écouter', repeat: 'Répéter et comparer', noAudio: 'L’écoute et la répétition avec un récitant de Warsh seront ajoutées après vérification des enregistrements.', warshT: 'Dans la lecture de Warsh', refs: 'Références',
+          examples: 'Exemples', listen: 'Écouter', repeat: 'Répéter et comparer', noAudio: 'L’écoute et la répétition dans cet onglet se font avec la voix du récitant Omar Al-Qazabri (Warsh).', warshT: 'Dans la lecture de Warsh', refs: 'Références',
           foot: 'Les exemples viennent du mushaf de Médine (Hafs) et du mushaf Muhammadi (Warsh) tels qu’ils sont dans l’application. Les définitions et les lettres sont celles des livres de tajwid ; ce qui concerne Warsh est à faire relire par un enseignant qualifié.', qrT: 'Téléchargez l’application sur Google Play' },
     en: { dir: 'ltr', back: 'Back', title: 'Learn Tajweed', sub: 'Short independent lessons: read the rule, listen, then repeat', tabs: ['Hafs', 'Warsh'],
           teacher: 'This page is an introduction to help you practise between your lessons; it does not replace a qualified teacher who listens to you and corrects you. The Quran text in the examples is copied verbatim from the app’s mushaf, with no colouring or change.',
-          examples: 'Examples', listen: 'Listen', repeat: 'Repeat & compare', noAudio: 'Listening and repeating with a Warsh reciter will be added once the recordings are verified.', warshT: 'In Warsh’s recitation', refs: 'References',
+          examples: 'Examples', listen: 'Listen', repeat: 'Repeat & compare', noAudio: 'Listening and repeating in this tab use the voice of the reciter Omar Al-Qazabri (Warsh).', warshT: 'In Warsh’s recitation', refs: 'References',
           foot: 'Examples are from the Madinah mushaf (Hafs) and the Muhammadi mushaf (Warsh) as in the app. The definitions and letters are those found in tajweed textbooks; what concerns Warsh should be reviewed by a qualified teacher.', qrT: 'Get the app on Google Play' },
   },
   lesson,
