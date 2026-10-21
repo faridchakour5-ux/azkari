@@ -82,7 +82,7 @@
     /* الشريط السفليّ: الخامل رماديّ هادئ، والنشِط بلون التطبيق — لا لونَ غريبًا عنه */
     --tab-idle:rgba(58,53,46,.5); --tab-on:#2F9E44; --tab-on-bg:rgba(47,158,68,.14);
     --qc-blue:#2166D6; --qc-blue2:#16509E; --qc-navy:#0B2C66;
-    --qc-g1:#1E8566; --qc-g2:#0F6B52; --qc-g3:#0A5441; --qc-g4:#063D30;
+    --qc-g1:#1E8566; --qc-g2:#0F6B52; --qc-g3:#0A5441; --qc-g4:#063D30; --qc-g5:#042A21;
     /* ألوان زرّي «اقرأ» (أزرق) و«تكرار» (كهرماني) في صفحة الاستماع */
     --c-read:#1553CC; --c-read-bg:rgba(28,95,191,.16);
     --c-repeat:#9E6410; --c-repeat-bg:rgba(169,113,26,.17);
@@ -103,7 +103,7 @@
     --shadow-2:0 4px 14px rgba(0,0,0,.5);
     --tab-idle:rgba(230,225,214,.5); --tab-on:#34C77B; --tab-on-bg:rgba(52,199,123,.18);
     --qc-blue:#78B0FF; --qc-blue2:#5E97F2; --qc-navy:#8DB6FF;
-    --qc-g1:#8AE8C6; --qc-g2:#6FDDB4; --qc-g3:#4CC79B; --qc-g4:#52CFA2;
+    --qc-g1:#8AE8C6; --qc-g2:#6FDDB4; --qc-g3:#4CC79B; --qc-g4:#52CFA2; --qc-g5:#35B087;
     --c-read:#7FB2FF; --c-read-bg:rgba(127,178,255,.16);
     --c-repeat:#E3B25A; --c-repeat-bg:rgba(227,178,90,.16);
     color-scheme:dark;
@@ -922,6 +922,7 @@
   body.qc-g2 .wird-text, body.qc-g2 .wird-basmala, body.qc-g2 .card.quran .txt{ color:var(--qc-g2); }
   body.qc-g3 .wird-text, body.qc-g3 .wird-basmala, body.qc-g3 .card.quran .txt{ color:var(--qc-g3); }
   body.qc-g4 .wird-text, body.qc-g4 .wird-basmala, body.qc-g4 .card.quran .txt{ color:var(--qc-g4); }
+  body.qc-g5 .wird-text, body.qc-g5 .wird-basmala, body.qc-g5 .card.quran .txt{ color:var(--qc-g5); }
   /* حفص + نسخ نوتو: التشكيل أخضر دائمًا (من لوحة ألوان الخط)، ولون الحروف يتبع اختيار «لون خط القرآن» */
   /* سُمكُ خطّ المصحف: خطُّ حفص (الملك فهد) وخطُّ أميري رفيعان بجانب الخطّ
      المغربيّ، فيبدو نصُّ حفص باهتًا بجانب ورش. لا وزنَ ثقيلًا في الملفَّين
@@ -971,7 +972,7 @@
   .q-preview{padding:4px 18px 18px; text-align:center; line-height:2.84; color:var(--qink, var(--text));
     font-family:'AmiriQuran',serif; font-size:calc(22px * var(--qscale,1));}
   body.riw-warsh .q-preview{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(25px * var(--qscale,1)); line-height:2.5;}
-  body.qc-blue .q-preview{color:var(--qc-blue);} body.qc-blue2 .q-preview{color:var(--qc-blue2);} body.qc-navy .q-preview{color:var(--qc-navy);} body.qc-g1 .q-preview{color:var(--qc-g1);} body.qc-g2 .q-preview{color:var(--qc-g2);} body.qc-g3 .q-preview{color:var(--qc-g3);} body.qc-g4 .q-preview{color:var(--qc-g4);}
+  body.qc-blue .q-preview{color:var(--qc-blue);} body.qc-blue2 .q-preview{color:var(--qc-blue2);} body.qc-navy .q-preview{color:var(--qc-navy);} body.qc-g1 .q-preview{color:var(--qc-g1);} body.qc-g2 .q-preview{color:var(--qc-g2);} body.qc-g3 .q-preview{color:var(--qc-g3);} body.qc-g4 .q-preview{color:var(--qc-g4);} body.qc-g5 .q-preview{color:var(--qc-g5);}
   .row .tzoom .tz-lbl{display:none;}
   .wird-num{display:inline-block; color:var(--qnum, var(--accent)); font-family:'PlexAr'; font-size:.62em; font-weight:700; margin:0 3px;
     padding:1px 4px; border-radius:8px; cursor:pointer; transition:background-color .2s, color .2s, transform .15s;}
@@ -1435,16 +1436,16 @@
   .fq-si .tag.q, .fq-si .tag.h, .fq-si .tag.f, .fq-si .tag.s, .fq-si .tag.n{background:transparent; border:1px solid var(--line);}
 
   /* رقمُ الآية بلونٍ يخالف لونَ الخطّ ويلائمه: ذهبيٌّ دافئ مع الأزرق والأخضر، وزمرّديٌّ مع الأسود */
-  body.qc-blue, body.qc-blue2, body.qc-navy, body.qc-g1, body.qc-g2, body.qc-g3, body.qc-g4{ --qnum:#A8741A; }
+  body.qc-blue, body.qc-blue2, body.qc-navy, body.qc-g1, body.qc-g2, body.qc-g3, body.qc-g4, body.qc-g5{ --qnum:#A8741A; }
   body.qc-blue, body.qc-blue2, body.qc-navy{ --qnum:#B07A1C; }
   :root[data-bg="dark"] body.qc-blue, :root[data-bg="dark"] body.qc-blue2, :root[data-bg="dark"] body.qc-navy,
-  :root[data-bg="dark"] body.qc-g1, :root[data-bg="dark"] body.qc-g2, :root[data-bg="dark"] body.qc-g3, :root[data-bg="dark"] body.qc-g4{ --qnum:#E3B25A; }
+  :root[data-bg="dark"] body.qc-g1, :root[data-bg="dark"] body.qc-g2, :root[data-bg="dark"] body.qc-g3, :root[data-bg="dark"] body.qc-g4, :root[data-bg="dark"] body.qc-g5{ --qnum:#E3B25A; }
 
   /* ═══ الأزرق → زمرّديّ عميق؛ والتشكيلُ بلون الحروف نفسِه؛ والأرقامُ ذهبيّة موحَّدة ═══ */
   :root[data-bg]:not([data-bg="dark"]){ --accent:#0B5742; --accent-2:#08463A; --accent-bg:rgba(11,87,66,.10); --accent-txt:#08463A;
     --c-repeat:#A8741A; --c-repeat-bg:rgba(168,116,26,.12); --qnum:#A8741A; }
   :root[data-bg="dark"]{ --c-repeat:#E3B25A; --c-repeat-bg:rgba(227,178,90,.14); --qnum:#E3B25A; }
-  body.qc-blue, body.qc-blue2, body.qc-navy, body.qc-g1, body.qc-g2, body.qc-g3, body.qc-g4{ --qnum:var(--c-repeat); }
+  body.qc-blue, body.qc-blue2, body.qc-navy, body.qc-g1, body.qc-g2, body.qc-g3, body.qc-g4, body.qc-g5{ --qnum:var(--c-repeat); }
   @font-palette-values --ht-n{ font-family:'NotoNaskhTashkeel'; override-colors:0 #3A352E; }
   @font-palette-values --ht-blue{ font-family:'NotoNaskhTashkeel'; override-colors:0 #2166D6; }
   @font-palette-values --ht-blue2{ font-family:'NotoNaskhTashkeel'; override-colors:0 #16509E; }
@@ -1453,6 +1454,7 @@
   @font-palette-values --ht-g2{ font-family:'NotoNaskhTashkeel'; override-colors:0 #0F6B52; }
   @font-palette-values --ht-g3{ font-family:'NotoNaskhTashkeel'; override-colors:0 #0A5441; }
   @font-palette-values --ht-g4{ font-family:'NotoNaskhTashkeel'; override-colors:0 #063D30; }
+  @font-palette-values --ht-g5{ font-family:'NotoNaskhTashkeel'; override-colors:0 #042A21; }
   @font-palette-values --htd-n{ font-family:'NotoNaskhTashkeel'; override-colors:0 #E6E1D6; }
   @font-palette-values --htd-blue{ font-family:'NotoNaskhTashkeel'; override-colors:0 #78B0FF; }
   @font-palette-values --htd-blue2{ font-family:'NotoNaskhTashkeel'; override-colors:0 #5E97F2; }
@@ -1461,6 +1463,7 @@
   @font-palette-values --htd-g2{ font-family:'NotoNaskhTashkeel'; override-colors:0 #6FDDB4; }
   @font-palette-values --htd-g3{ font-family:'NotoNaskhTashkeel'; override-colors:0 #4CC79B; }
   @font-palette-values --htd-g4{ font-family:'NotoNaskhTashkeel'; override-colors:0 #52CFA2; }
+  @font-palette-values --htd-g5{ font-family:'NotoNaskhTashkeel'; override-colors:0 #35B087; }
   body.qtashkeel:not([class*="qc-"]) .wird-text, body.qtashkeel:not([class*="qc-"]) .wird-basmala, body.qtashkeel:not([class*="qc-"]) .card.quran .txt, body.qtashkeel:not([class*="qc-"]) .tafsir-body .t-aya, body.qtashkeel:not([class*="qc-"]) .search-result .sr-txt{ font-palette:--ht-n; }
   body.qtashkeel.qc-blue .wird-text, body.qtashkeel.qc-blue .wird-basmala, body.qtashkeel.qc-blue .card.quran .txt, body.qtashkeel.qc-blue .tafsir-body .t-aya, body.qtashkeel.qc-blue .search-result .sr-txt{ font-palette:--ht-blue; }
   body.qtashkeel.qc-blue2 .wird-text, body.qtashkeel.qc-blue2 .wird-basmala, body.qtashkeel.qc-blue2 .card.quran .txt, body.qtashkeel.qc-blue2 .tafsir-body .t-aya, body.qtashkeel.qc-blue2 .search-result .sr-txt{ font-palette:--ht-blue2; }
@@ -1469,6 +1472,7 @@
   body.qtashkeel.qc-g2 .wird-text, body.qtashkeel.qc-g2 .wird-basmala, body.qtashkeel.qc-g2 .card.quran .txt, body.qtashkeel.qc-g2 .tafsir-body .t-aya, body.qtashkeel.qc-g2 .search-result .sr-txt{ font-palette:--ht-g2; }
   body.qtashkeel.qc-g3 .wird-text, body.qtashkeel.qc-g3 .wird-basmala, body.qtashkeel.qc-g3 .card.quran .txt, body.qtashkeel.qc-g3 .tafsir-body .t-aya, body.qtashkeel.qc-g3 .search-result .sr-txt{ font-palette:--ht-g3; }
   body.qtashkeel.qc-g4 .wird-text, body.qtashkeel.qc-g4 .wird-basmala, body.qtashkeel.qc-g4 .card.quran .txt, body.qtashkeel.qc-g4 .tafsir-body .t-aya, body.qtashkeel.qc-g4 .search-result .sr-txt{ font-palette:--ht-g4; }
+  body.qtashkeel.qc-g5 .wird-text, body.qtashkeel.qc-g5 .wird-basmala, body.qtashkeel.qc-g5 .card.quran .txt, body.qtashkeel.qc-g5 .tafsir-body .t-aya, body.qtashkeel.qc-g5 .search-result .sr-txt{ font-palette:--ht-g5; }
   html[data-bg="dark"] body.qtashkeel:not([class*="qc-"]) .wird-text, html[data-bg="dark"] body.qtashkeel:not([class*="qc-"]) .wird-basmala, html[data-bg="dark"] body.qtashkeel:not([class*="qc-"]) .card.quran .txt, html[data-bg="dark"] body.qtashkeel:not([class*="qc-"]) .tafsir-body .t-aya, html[data-bg="dark"] body.qtashkeel:not([class*="qc-"]) .search-result .sr-txt{ font-palette:--htd-n; }
   html[data-bg="dark"] body.qtashkeel.qc-blue .wird-text, html[data-bg="dark"] body.qtashkeel.qc-blue .wird-basmala, html[data-bg="dark"] body.qtashkeel.qc-blue .card.quran .txt, html[data-bg="dark"] body.qtashkeel.qc-blue .tafsir-body .t-aya, html[data-bg="dark"] body.qtashkeel.qc-blue .search-result .sr-txt{ font-palette:--htd-blue; }
   html[data-bg="dark"] body.qtashkeel.qc-blue2 .wird-text, html[data-bg="dark"] body.qtashkeel.qc-blue2 .wird-basmala, html[data-bg="dark"] body.qtashkeel.qc-blue2 .card.quran .txt, html[data-bg="dark"] body.qtashkeel.qc-blue2 .tafsir-body .t-aya, html[data-bg="dark"] body.qtashkeel.qc-blue2 .search-result .sr-txt{ font-palette:--htd-blue2; }
@@ -1477,6 +1481,7 @@
   html[data-bg="dark"] body.qtashkeel.qc-g2 .wird-text, html[data-bg="dark"] body.qtashkeel.qc-g2 .wird-basmala, html[data-bg="dark"] body.qtashkeel.qc-g2 .card.quran .txt, html[data-bg="dark"] body.qtashkeel.qc-g2 .tafsir-body .t-aya, html[data-bg="dark"] body.qtashkeel.qc-g2 .search-result .sr-txt{ font-palette:--htd-g2; }
   html[data-bg="dark"] body.qtashkeel.qc-g3 .wird-text, html[data-bg="dark"] body.qtashkeel.qc-g3 .wird-basmala, html[data-bg="dark"] body.qtashkeel.qc-g3 .card.quran .txt, html[data-bg="dark"] body.qtashkeel.qc-g3 .tafsir-body .t-aya, html[data-bg="dark"] body.qtashkeel.qc-g3 .search-result .sr-txt{ font-palette:--htd-g3; }
   html[data-bg="dark"] body.qtashkeel.qc-g4 .wird-text, html[data-bg="dark"] body.qtashkeel.qc-g4 .wird-basmala, html[data-bg="dark"] body.qtashkeel.qc-g4 .card.quran .txt, html[data-bg="dark"] body.qtashkeel.qc-g4 .tafsir-body .t-aya, html[data-bg="dark"] body.qtashkeel.qc-g4 .search-result .sr-txt{ font-palette:--htd-g4; }
+  html[data-bg="dark"] body.qtashkeel.qc-g5 .wird-text, html[data-bg="dark"] body.qtashkeel.qc-g5 .wird-basmala, html[data-bg="dark"] body.qtashkeel.qc-g5 .card.quran .txt, html[data-bg="dark"] body.qtashkeel.qc-g5 .tafsir-body .t-aya, html[data-bg="dark"] body.qtashkeel.qc-g5 .search-result .sr-txt{ font-palette:--htd-g5; }
   /* أرقامُ الأذكار والفقه بالذهبيّ نفسِه الذي في أرقام الآيات */
   .badge .rem, .fq-fn .k{ background:var(--c-repeat); color:#fff; }
   .card.done .rem{ background:var(--text-3); }
@@ -1539,7 +1544,9 @@
   .hz-aya.h .wird-text{font-family:'NotoNaskhTashkeel','AmiriQuran',serif; font-palette:--hafsTashkeel;}
   html[data-bg="dark"] .hz-aya.h .wird-text{font-palette:--hafsTashkeelDark;}
   body.qc-g4 .hz-aya.h .wird-text{font-palette:--ht-g4;} body.qc-navy .hz-aya.h .wird-text{font-palette:--ht-navy;}
+  body.qc-g5 .hz-aya.h .wird-text{font-palette:--ht-g5;}
   html[data-bg="dark"] body.qc-g4 .hz-aya.h .wird-text{font-palette:--htd-g4;} html[data-bg="dark"] body.qc-navy .hz-aya.h .wird-text{font-palette:--htd-navy;}
+  html[data-bg="dark"] body.qc-g5 .hz-aya.h .wird-text{font-palette:--htd-g5;}
   /* تلوينُ التجويد (حفص) في بطاقة التحفيظ وحدَها — صفحةُ القرآن لا تُلوَّن (أمرُ فريد). خطُّ حفص ملوَّنٌ (COLR) فيُلوَّن بلوحة خطٍّ لكلّ حكم */
   @font-palette-values --tj-qalqalah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #DD0008; } @font-palette-values --tjd-qalqalah{ font-family:'NotoNaskhTashkeel'; override-colors:0 #FF6064; }
   .hz-aya .tj-qalqalah{color:#DD0008; font-palette:--tj-qalqalah;} html[data-bg="dark"] .hz-aya .tj-qalqalah{color:#FF6064; font-palette:--tjd-qalqalah;}
@@ -2021,6 +2028,7 @@
     <div class="row"><span class="k">لون خطّ القرآن</span>
       <div class="qcolor-swatches" id="qcolor-seg">
         <button data-r="g4" class="on" title="زمرّديّ غامق"><i style="background:var(--qc-g4)"></i></button>
+        <button data-r="g5" title="زمرّديّ أغمق"><i style="background:var(--qc-g5)"></i></button>
         <button data-r="navy"  title="أزرق غامق جدًّا"><i style="background:var(--qc-navy)"></i></button>
         <button data-r="normal" title="أسود"><i style="background:var(--text)"></i></button>
       </div>
@@ -2394,8 +2402,8 @@ function applyHafsFont(){
 }
 function applyQuranColor(){
   const c = settings.quranColor||'normal';
-  document.body.classList.remove('qc-blue','qc-blue2','qc-navy','qc-g1','qc-g2','qc-g3','qc-g4');
-  if(/^g[1-4]$/.test(c)) document.body.classList.add('qc-'+c);
+  document.body.classList.remove('qc-blue','qc-blue2','qc-navy','qc-g1','qc-g2','qc-g3','qc-g4','qc-g5');
+  if(/^g[1-5]$/.test(c)) document.body.classList.add('qc-'+c);
   if(c==='blue')  document.body.classList.add('qc-blue');
   else if(c==='blue2') document.body.classList.add('qc-blue2');
   else if(c==='navy')  document.body.classList.add('qc-navy');

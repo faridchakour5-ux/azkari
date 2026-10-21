@@ -130,7 +130,7 @@ main{max-width:720px; margin:0 auto; padding:14px max(10px,env(safe-area-inset-l
   var bg = settings.bg==='white'||settings.bg==='dark' ? settings.bg : 'sepia';
   document.documentElement.setAttribute('data-bg', bg);
   /* لونُ القرآن كما اختاره المستخدم في الإعدادات (قراءةٌ فقط) */
-  var QC = {light:{g1:'#1E8566',g2:'#0F6B52',g3:'#0A5441',g4:'#063D30',blue:'#2166D6',blue2:'#16509E',navy:'#0B2C66'}, dark:{g1:'#8AE8C6',g2:'#6FDDB4',g3:'#4CC79B',g4:'#35B087',blue:'#7FB0FF',blue2:'#6A9CF0',navy:'#8FB3F5'}};
+  var QC = {light:{g1:'#1E8566',g2:'#0F6B52',g3:'#0A5441',g4:'#063D30',g5:'#042A21',blue:'#2166D6',blue2:'#16509E',navy:'#0B2C66'}, dark:{g1:'#8AE8C6',g2:'#6FDDB4',g3:'#4CC79B',g4:'#35B087',g5:'#35B087',blue:'#7FB0FF',blue2:'#6A9CF0',navy:'#8FB3F5'}};
   var qc = settings.quranColor, pal = bg==='dark' ? QC.dark : QC.light;
   if(qc && pal[qc]) document.documentElement.style.setProperty('--qtext', pal[qc]);
   var lang = 'ar'; try{ lang = sessionStorage.getItem('waqf_lang') || (settings.lang==='fr'||settings.lang==='en' ? settings.lang : 'ar'); }catch(e){ lang = (settings.lang==='fr'||settings.lang==='en') ? settings.lang : 'ar'; }
