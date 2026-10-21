@@ -6246,7 +6246,15 @@ function commitMushafJump(suraIdx, ai){
   }));
 }
 /* ظهورُ قائمة السور بطيءٌ قليلًا (طلبُ فريد، 20 أكتوبر 2026): تُغطّيه «صلِّ على الحبيب ﷺ»؛ تُرسَم الطبقةُ أوّلًا ثم تُبنى القائمةُ بعد إطارين. */
-$('#mushaf-jump').addEventListener('click', ()=>{ vibrate(6); playQuranSalat(1500); requestAnimationFrame(()=>requestAnimationFrame(openMushafPicker)); });
+/* المرّةُ الأولى تبني القائمةَ كاملةً فتُجمِّد الخيطَ الرئيسيّ وتنتهي مهلةُ الحركة قبل أن تُرى. فنُمهل الحركةَ 450ms لتظهر أوّلًا، ثم نبني القائمة، ثم نُبقي الحركةَ ظاهرةً 900ms بعد انتهاء البناء (يُحسَب الزمنُ بعد البناء لا قبله). */
+$('#mushaf-jump').addEventListener('click', ()=>{
+  vibrate(6); playQuranSalat(8000);
+  setTimeout(()=>{
+    openMushafPicker();
+    clearTimeout(window.__qsalT);
+    window.__qsalT=setTimeout(()=>{ const o=document.getElementById('qsal'); if(o) o.classList.remove('go'); }, 900);
+  }, 450);
+});
 $('#sura-q') && $('#sura-q').addEventListener('input', e=>{ renderSuraRows(e.target.value); $('#sura-list').scrollTop=0; });
 $('#sura-overlay-back').addEventListener('click', ()=>{ openMushafPicker(); });
 $('#sura-overlay-close').addEventListener('click', closeSuraOverlay);
