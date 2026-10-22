@@ -8932,6 +8932,9 @@ $('#install-btn') && $('#install-btn').addEventListener('click', async ()=>{
 let __swWaiting=null, __updWanted=false;
 function showUpdBar(w){
   __swWaiting=w;
+  /* في تطبيق أندرويد ملفّاتُ الواجهة داخل الحزمة نفسِها، والتحديثُ يأتي من Google Play (انظر #upd-tour)؛
+     فلا معنى لشريط «تحديثٌ جديد جاهز» هناك (طلبُ فريد، 22 أكتوبر 2026). نُفعّل النسخةَ الجديدةَ بصمتٍ بلا إعادة تحميل. */
+  if(isNative()){ try{ w.postMessage({type:'skipWaiting'}); }catch(e){} return; }
   const b=$('#upd-bar'); if(b) b.classList.add('show');
 }
 if('serviceWorker' in navigator){
