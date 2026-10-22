@@ -3971,8 +3971,24 @@ function buildShotNode(innerHTML, title, sub){
     '<div class="ss-head"><span class="ss-ttl">'+escapeHtml(title||'صلاتي')+'</span>'+
       (sub?'<span class="ss-sub">'+escapeHtml(sub)+'</span>':'')+'</div>'+
     '<div class="ss-body">'+innerHTML+'</div>'+
-    '<div class="ss-foot"><span class="ss-fl">صلاتي — أذكار ومصحف<small><span>حمِّل التطبيق من Google Play</span> '+playLogoSvg(13)+'</small></span><span class="ss-qr">'+qrSvg(58)+'</span></div>';
+    '<div class="ss-foot"><span class="ss-fl">صلاتي salatee<small><span>حمِّل التطبيق من Google Play</span> '+playLogoSvg(13)+'</small></span><span class="ss-qr">'+qrSvg(58)+'</span></div>';
+  shotStyleAya(el);
   return el;
+}
+/* الآيةُ في بطاقة المشاركة بخطّ الرواية التي يقرأ بها المستخدم ولونِه كما في ورقة التفسير (طلبُ فريد، 22 أكتوبر 2026):
+   قواعدُ `.tafsir-body .t-aya` لا تنطبق داخل `.share-shot`، فكانت الآيةُ تخرج بخطٍّ عاديٍّ أسود. ورش ← المغربيّ، وحفص ← AmiriQuran أو NotoNaskhTashkeel كما في القرآن. */
+function shotStyleAya(el){
+  const b=document.body, warsh=settings.riwaya==='warsh', tash=b.classList.contains('qtashkeel');
+  const qc=(String(b.className).match(/\bqc-(\w+)\b/)||[])[1]||'';
+  const dark=document.documentElement.getAttribute('data-bg')==='dark';
+  const color = qc ? 'var(--qc-'+qc+')' : 'var(--accent)';
+  el.querySelectorAll('.t-aya').forEach(a=>{
+    let st='color:'+color+';font-size:'+(warsh?'25px':'22px')+';line-height:2.1;';
+    if(warsh) st+="font-family:'Maghribi','AmiriQuran',serif;";
+    else if(tash) st+="font-family:'NotoNaskhTashkeel','AmiriQuran',serif;font-palette:--"+(qc?(dark?'htd-':'ht-')+qc:(dark?'hafsTashkeelDark':'hafsTashkeel'))+";-webkit-text-stroke:var(--qink) currentColor;";
+    else st+="font-family:'AmiriQuran',serif;-webkit-text-stroke:var(--qink) currentColor;";
+    a.style.cssText+=st;
+  });
 }
 /* دقّةُ صورة المشاركة وPDF: ثلاثةُ أضعاف الشاشة ما أمكن (كانت ضعفين) — فيخرج النصُّ العربيُّ ومعه التشكيلُ حادًّا عند التكبير والطباعة.
    وتنخفض الدقّةُ تلقائيًّا للمحتوى الطويل جدًّا حتى لا تتجاوز مساحةُ اللوحة (≈ 16 مليون بكسل) حدَّ المتصفّحات، فتفشل الصورة. */
@@ -4091,7 +4107,7 @@ function drawPdfBands(g, W, pageH, HEAD, FOOT, S, no, total){
   g.beginPath(); g.moveTo(PAD,HEAD-0.5*S); g.lineTo(W-PAD,HEAD-0.5*S); g.stroke();
   g.font='700 '+Math.round(13*S)+"px 'PlexAr',sans-serif";
   g.textAlign='right'; g.fillStyle=t2;
-  g.fillText('صلاتي — أذكار ومصحف', W-PAD, HEAD-Math.round(12*S));
+  g.fillText('صلاتي salatee', W-PAD, HEAD-Math.round(12*S));
   // التذييل
   const fy=pageH-FOOT;
   g.fillStyle=bg; g.fillRect(0,fy,W,FOOT);
@@ -8093,7 +8109,7 @@ async function buildQuickPopImage(){
   c.strokeStyle=cFill; c.lineWidth=1;
   c.beginPath(); c.moveTo(PAD,y-20); c.lineTo(W-PAD,y-20); c.stroke();
   c.font="700 17px 'PlexAr',sans-serif"; c.fillStyle=cText;
-  c.fillText('صلاتي — أذكار ومصحف', W/2, y);
+  c.fillText('صلاتي salatee', W/2, y);
   c.font="600 13px 'PlexAr',sans-serif"; c.fillStyle=cText2;
   { const tx='حمِّل التطبيق من Google Play', tw=c.measureText(tx).width, ls=16, sh=(ls+6)/2; c.fillText(tx, W/2+sh, y+26); playLogoDraw(c, W/2+sh-tw/2-ls-6, y+26-13, ls); }
   qrDraw(c, W/2-36, y+38, 72);
