@@ -282,6 +282,7 @@
   .tapzone{position:absolute; inset:0; cursor:pointer; border-radius:50%;}
 
   /* Settings (grouped list) */
+  .use-kpi{margin:12px 16px 0;} .use-kpi .us-hero{margin-bottom:10px;} .use-kpi .us-kpis{margin-bottom:0;}   /* بطاقاتُ «وقتي» في الإعدادات */
   .group{background:var(--card); border-radius:18px; margin:12px 16px 20px; overflow:hidden;
     border:1px solid var(--line); border-inline-start:4px solid var(--accent);
     box-shadow:var(--shadow-1);}
@@ -2172,11 +2173,9 @@
   <div class="gnote">التلاوات التي نزّلتَها من صفحة «الاستماع» تُسمَع دون إنترنت. يمكنك حذفها من هنا لتوفير المساحة.</div>
 
   <div class="gtitle">وقتك في التطبيق</div>
-  <div class="group">
-    <div class="row"><span class="k">اليوم</span><span class="v" id="use-today">—</span></div>
-    <div class="row"><span class="k">المجموع منذ بدأتَ</span><span class="v" id="use-total">—</span></div>
-  </div>
-  <div class="gnote">يُحسَب الوقتُ والتطبيقُ ظاهرٌ على شاشتك فقط، ويبقى على جهازك ولا يُرسَل إلى أحد.</div>
+  <div id="use-kpi" class="use-kpi"></div>
+  <div class="group"><div class="btn-row" id="use-more">عرض التفاصيل</div></div>
+  <div class="gnote">يُحسب الوقتُ حين تكون شاشةُ التطبيق أمامك أو حين تعمل تلاوةٌ أو تحفيظ. كلُّه محفوظٌ على هاتفك فقط، ولا يُرسَل إلى أحد.</div>
 
   <div class="gtitle">النسخ الاحتياطي</div>
   <div class="group">
@@ -7549,7 +7548,7 @@ function listenKeepAlive(on, title, text){
 const USAGE_KEY='az_usage';
 let __uData=null, __uLast=Date.now(), __uDirty=false;
 function usageKey(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function usageData(){ if(!__uData){ const v=store.get(USAGE_KEY,{}); __uData=(v&&typeof v==='object'&&!Array.isArray(v))?v:{}; } return __uData; }
+function usageData(){ if(!__uData){ const v=store.get(USAGE_KEY,{}); __uData=(v&&typeof v==='object'&&!Array.isArray(v))?v:{}; Object.keys(__uData).forEach(k=>{ if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) delete __uData[k]; }); } return __uData; }   // يُسقِط حقولَ العدّاد القديم (t,f,d,dm) التي كانت تُكتب في المفتاح نفسِه
 function usageFlush(){
   if(!__uDirty) return; __uDirty=false;
   const D=usageData(), ks=Object.keys(D).sort(); while(ks.length>400) delete D[ks.shift()];
@@ -8678,36 +8677,19 @@ try{ renderPrayers(); }catch(e){} refreshInstallUI(); initRiwayaPills();
 try{ setTimeout(()=>refreshGeo(false), 4000); }catch(e){}
 try{ renderWirdKpi(); $$('#wird-mode-seg button').forEach(b=>b.classList.toggle('on', b.dataset.m===wirdMode())); }catch(e){}
 
-/* ================= وقتُ الاستعمال (على الجهاز وحده) ================= */
+/* ================= وقتُك في الإعدادات (21 أكتوبر 2026) =================
+   حُذف العدّادُ القديم (اليوم/المجموع منذ بدأتَ): كان يكتب في المفتاح نفسِه `az_usage` الذي تكتب فيه «وقتي» فيُفسد بياناتِها، ولا يعطي فكرةً صحيحة.
+   الآن تُعرَض في الإعدادات بطاقاتُ «وقتي» نفسُها (اليوم، آخر 7 أيّام، هذا الشهر، المعدّل) ومنها زرُّ التفاصيل. */
 (function(){
-  const KEY='az_usage';
-  let t0=document.hidden?null:Date.now();
-  const get=()=>{ const u=store.get(KEY,null); return (u && typeof u.t==='number') ? u : { t:0, f:Date.now(), d:todayKey(), dm:0 }; };
-  function flush(){
-    if(t0==null) return;
-    const now=Date.now(), dt=Math.max(0, Math.min(now-t0, 70*1000)); t0=now;   // سقفٌ يمنع احتسابَ جهازٍ نام والتطبيقُ ظاهر
-    if(!dt) return;
-    const u=get(); if(u.d!==todayKey()){ u.d=todayKey(); u.dm=0; }
-    u.t+=dt; u.dm+=dt; store.set(KEY,u);
+  async function paint(){
+    const el=$('#use-kpi'); if(!el) return;
+    if(!(await loadTools()) || !window.SalTools || !SalTools.usageKpi) return;
+    SalTools.usageKpi(el);
   }
-  /* بلا ثوانٍ: أيّامٌ وساعاتٌ ودقائق فقط */
-  function fmt(ms){
-    const lang=(settings.lang==='fr'||settings.lang==='en')?settings.lang:'ar';
-    const U={ar:['يوم','س','د'],en:['d','h','m'],fr:['j','h','min']}[lang];
-    const min=Math.floor(ms/60000), d=Math.floor(min/1440), h=Math.floor((min%1440)/60), m=min%60;
-    const out=[]; if(d) out.push(AR(d)+' '+U[0]); if(d||h) out.push(AR(h)+' '+U[1]); out.push(AR(m)+' '+U[2]);
-    return out.join(' ');
-  }
-  function paint(){
-    const a=$('#use-today'), b=$('#use-total'); if(!a||!b) return;
-    flush(); const u=get();
-    a.textContent=fmt(u.d===todayKey()?u.dm:0); b.textContent=fmt(u.t);
-  }
-  document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ flush(); t0=null; } else { t0=Date.now(); paint(); } });
-  window.addEventListener('pagehide', flush);
-  setInterval(()=>{ if(!document.hidden){ flush(); const st=$('#s-settings'); if(st && st.classList.contains('active')) paint(); } }, 30*1000);
-  const tab=document.querySelector('.tab[data-s="s-settings"]'); if(tab) tab.addEventListener('click', ()=>setTimeout(paint,50));
-  window.paintUsage=paint; paint();
+  const more=$('#use-more'); if(more) more.addEventListener('click', ()=>openTools('use'));
+  const tab=document.querySelector('.tab[data-s="s-settings"]'); if(tab) tab.addEventListener('click', ()=>setTimeout(paint,60));
+  setInterval(()=>{ if(!document.hidden){ const st=$('#s-settings'); if(st && st.classList.contains('active')) paint(); } }, 30*1000);
+  window.paintUsage=paint;
 })();
 
 /* ================= BACKUP / RESTORE ================= */

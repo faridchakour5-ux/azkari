@@ -462,7 +462,7 @@ const usMin = s => Math.round((s||0)/60);
 function usUnit(m){   // رقمٌ + وحدتُه في عقدتين منفصلتين ليُترجَما
   return m>=60 ? ['<span class="n">'+AR(Math.floor(m/60))+'</span><u>س</u> <span class="n">'+AR(m%60)+'</span><u>د</u>'] : ['<span class="n">'+AR(m)+'</span><u>د</u>'];
 }
-PAGES.use = { title:'وقتي', render(body){
+function usageCalc(){
   let D={}; try{ D=(window.usageSnapshot&&window.usageSnapshot())||sget('az_usage',{}); }catch(e){ D=sget('az_usage',{}); }
   const now=new Date(), tk=lk(now);
   const sec=(k,i)=>((D[k]||[])[i]||0);
@@ -473,9 +473,17 @@ PAGES.use = { title:'وقتي', render(body){
   const mx=Math.max(1,...bars.map(b=>b.m));
   const avg=mDays?Math.round(usMin(m)/mDays):0;
   const totM=usMin(m), lisM=usMin(ml), pct=totM?Math.min(100,Math.round(lisM*100/totM)):0;
-  body.innerHTML=
-   '<div class="us-hero"><small>اليوم</small><div class="big">'+usUnit(usMin(td)).join('')+'</div><small><span>استماعٌ</span> <b>'+AR(usMin(tdl))+'</b> <span>د</span></small></div>'+
-   '<div class="us-kpis"><div><b>'+usUnit(usMin(w)).join('')+'</b><span>آخر 7 أيّام</span></div><div><b>'+usUnit(totM).join('')+'</b><span>هذا الشهر</span></div><div><b>'+usUnit(avg).join('')+'</b><span>معدّل اليوم</span></div></div>'+
+  return { td, tdl, w, totM, avg, bars, mx, pct };
+}
+function usageKpiHtml(c){
+  const { td, tdl, w, totM, avg }=c;
+  return '<div class="us-hero"><small>اليوم</small><div class="big">'+usUnit(usMin(td)).join('')+'</div><small><span>استماعٌ</span> <b>'+AR(usMin(tdl))+'</b> <span>د</span></small></div>'+
+   '<div class="us-kpis"><div><b>'+usUnit(usMin(w)).join('')+'</b><span>آخر 7 أيّام</span></div><div><b>'+usUnit(totM).join('')+'</b><span>هذا الشهر</span></div><div><b>'+usUnit(avg).join('')+'</b><span>معدّل اليوم</span></div></div>';
+}
+T.usageKpi = function(el){ el.innerHTML=usageKpiHtml(usageCalc()); };
+PAGES.use = { title:'وقتي', render(body){
+  const c=usageCalc(), { bars, mx, pct, totM }=c, lisM=0;
+  body.innerHTML=usageKpiHtml(c)+
    '<div class="tl-card"><h3>آخر 7 أيّام</h3><div class="us-bars">'+bars.map(b=>'<div class="us-bar'+(b.t?' today':'')+'"><b>'+(b.m?AR(b.m):'')+'</b><i style="height:'+Math.max(4,Math.round(b.m*100/mx))+'%"></i><span>'+['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'][b.d.getDay()]+'</span></div>').join('')+'</div></div>'+
    '<div class="tl-card"><h3>هذا الشهر</h3><div class="us-split"><i style="width:'+pct+'%"></i></div><div class="us-leg"><span><span>استماعٌ</span> <b>'+AR(pct)+'%</b></span><span><span>نسبةُ الاستماع من وقت هذا الشهر</span></span></div></div>'+
    '<div class="tl-note">يُحسب الوقتُ حين تكون شاشةُ التطبيق أمامك أو حين تعمل تلاوةٌ أو تحفيظ. كلُّه محفوظٌ على هاتفك فقط، ولا يُرسَل إلى أحد.</div>';
