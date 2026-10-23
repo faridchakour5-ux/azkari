@@ -983,6 +983,7 @@
   .wird-num.circ:not(.bm):not(.search-hit){opacity:.6;}   /* أخفُّ قليلًا فلا يغطّي على نصّ القرآن؛ العلامةُ المحفوظةُ والنتيجةُ تبقيان بكامل اللون */
   .wird-num.bm{background:var(--accent); color:#fff; box-shadow:0 0 0 3px var(--tab-on-bg, rgba(199,21,133,.12));}
   .wird-num.search-hit{background:var(--c-repeat); color:#fff; box-shadow:0 0 0 4px var(--c-repeat-bg);}
+  .aya-t.search-hit-t{background:var(--c-repeat-bg); border-radius:8px; box-shadow:0 0 0 3px var(--c-repeat-bg); -webkit-box-decoration-break:clone; box-decoration-break:clone;}
 
   /* pastille flottante: aller à une سورة sans remonter en haut */
   .mushaf-jump{position:fixed; top:calc(env(safe-area-inset-top) + 10px); left:50%; transform:translateX(-50%) translateY(-8px);
@@ -6338,7 +6339,11 @@ function runQuranSearch(q){
   wrap.innerHTML = html || '<div class="search-hint">لم يُعثر على نتائج</div>';
 }
 function closeSearchOverlay(){ $('#search-overlay').classList.remove('show'); }
-function flashSearchHit(el){ el.classList.add('search-hit'); setTimeout(()=> el.classList.remove('search-hit'), 2500); }
+function flashSearchHit(el){
+  const t=el.parentElement && el.parentElement.querySelector('.aya-t[data-tai="'+el.dataset.ai+'"]');
+  el.classList.add('search-hit'); if(t) t.classList.add('search-hit-t');
+  setTimeout(()=>{ el.classList.remove('search-hit'); if(t) t.classList.remove('search-hit-t'); }, 4000);
+}
 function jumpToSuraFromSearch(idx){
   closeSearchOverlay(); vibrate(6);
   settings.mushafSura=idx; saveSettings();
@@ -6350,11 +6355,15 @@ function jumpToAyaFromSearch(ai){
   const si=suraOf(ai);
   settings.mushafSura=si; saveSettings();
   const sel=$('#sura-select'); if(sel) sel.value=si;
-  setTimeout(()=>{
-    const el=document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]');
-    if(el){ el.scrollIntoView({block:'center', behavior:'smooth'}); flashSearchHit(el); }
-    else scrollToSura(si, true);
-  }, 250);
+  /* الانتقالُ الدقيق إلى الآية (طلبُ فريد، 22 أكتوبر 2026): scrollIntoView وحدَه لا يصيب الموضعَ في مصحفٍ طولُه مليون بكسل
+     لأنّ الكتلَ البعيدةَ لا تُرسَم قبل الوصول؛ فنستعمل mushafGoto (يصحّح الموضعَ حتى يستقرّ) ثم نُبرز نصَّ الآية ورقمَها بلونٍ ظاهرٍ. */
+  const go=n=>{
+    const num=document.querySelector('#wird-body .wird-num[data-ai="'+ai+'"]');
+    if(!num){ if(n<10) setTimeout(()=>go(n+1),150); else scrollToSura(si, true); return; }
+    scrollToAya(ai, false);
+    setTimeout(()=>{ scrollToAya(ai, false); flashSearchHit(num); }, 450);
+  };
+  setTimeout(()=>go(0), 250);
 }
 $('#search-results') && $('#search-results').addEventListener('click', e=>{
   const btn=e.target.closest('.search-result'); if(!btn) return;
