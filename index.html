@@ -1628,6 +1628,12 @@
   #s-azkar #time-seg button{flex:0 0 auto; border:1px solid var(--line); background:var(--card); color:var(--text-2); font-weight:700; font-size:14.5px;
     padding:9px 18px; border-radius:20px; min-height:44px; box-shadow:none;}
   #s-azkar #time-seg button.on{background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:none;}
+  #s-azkar .np-row{display:flex; align-items:center; gap:8px; margin-top:6px;}
+  #s-azkar .np-row .geo-refresh{margin-top:0;}
+  #s-azkar .qb-mini{display:inline-flex; align-items:center; gap:6px; border:0; background:var(--fill-2); color:var(--text-2); font:inherit; height:34px; padding:0 11px 0 6px; border-radius:999px; font-size:12px; font-weight:700;}
+  #s-azkar .qb-mini b{color:var(--c-repeat); font-weight:800; font-size:12.5px;}
+  #s-azkar .qb-mini svg{width:26px; height:26px; flex:none;}
+  #s-azkar .qb-mini.ok{background:var(--accent); color:#fff;} #s-azkar .qb-mini.ok b{color:#fff;}
 </style>
 </head>
 <body>
@@ -8509,6 +8515,50 @@ $('#adhan-try') && $('#adhan-try').addEventListener('click', async ()=>{
   vibrate(6);
   try{ const r=await P.preview({ name:'', voice: adhanVoice() }); if(r && r.blocked) showToast('لم يُرفع الأذان لوجود مكالمةٍ أو تسجيلٍ صوتيّ ('+r.why+')', 6000); else showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200); }catch(e){}
 });
+/* بوصلة القبلة المصغَّرة في شريط المواقيت (صفحةُ «اتجاه القبلة» الكاملة في الأدوات لم تُمَسّ) */
+function qiblaBrg(lat,lng){ const d=Math.PI/180, f1=lat*d, f2=21.4225*d, dl=(39.8262-lng)*d;
+  return (Math.atan2(Math.sin(dl)*Math.cos(f2), Math.cos(f1)*Math.sin(f2)-Math.sin(f1)*Math.cos(f2)*Math.cos(dl))*180/Math.PI+360)%360; }
+function miniQiblaHtml(g){
+  const qb=qiblaBrg(g.lat,g.lng);
+  return '<button class="qb-mini" id="qb-mini" aria-label="بوصلة القبلة"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>'+
+    '<g id="qbm-rot"><path d="M20 2 L22.4 8 L17.6 8 Z" fill="var(--c-repeat)"/><g id="qbm-k" transform="rotate('+qb.toFixed(1)+' 20 20)"><path d="M20 8 L22.6 20 L17.4 20 Z" fill="var(--accent)"/><rect x="16.5" y="3.5" width="7" height="7" rx="1.4" fill="#1a1a1a"/><rect x="16.5" y="5.6" width="7" height="1.2" fill="#C9A24A"/></g></g>'+
+    '<circle cx="20" cy="20" r="2" fill="var(--text-2)"/></svg><span>القبلة</span><b>'+AR(Math.round(qb))+'°</b></button>';
+}
+let __qbmOff=null;
+function bindMiniQibla(g){
+  if(__qbmOff){ __qbmOff(); __qbmOff=null; }
+  const btn=$('#qb-mini'); if(!btn) return;
+  const qb=qiblaBrg(g.lat,g.lng), rot=$('#qbm-rot'), kk=$('#qbm-k');
+  let on=false, cur=null, wasOk=false, tm=null, onOri=null;
+  const stop=()=>{ if(onOri){ window.removeEventListener('deviceorientationabsolute',onOri,true); window.removeEventListener('deviceorientation',onOri,true); }
+    onOri=null; on=false; clearTimeout(tm); btn.classList.remove('ok'); rot.setAttribute('transform',''); cur=null; };
+  __qbmOff=stop;
+  btn.addEventListener('click', async()=>{
+    vibrate(6);
+    if(on){ stop(); return; }
+    if(!(await loadTools())||!window.SalTools) return;
+    if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
+      try{ if((await DeviceOrientationEvent.requestPermission())!=='granted'){ showToast('لم يُسمح بالمستشعر',3000); return; } }catch(e){ showToast('تعذّر تفعيل المستشعر',3000); return; }
+    }
+    let got=false; on=true;
+    onOri=ev=>{
+      if(!$('#s-azkar').classList.contains('active')){ stop(); return; }
+      let h=null;
+      if(typeof ev.webkitCompassHeading==='number') h=ev.webkitCompassHeading;
+      else if(ev.alpha!=null && (ev.absolute===true || ev.type==='deviceorientationabsolute')) h=SalTools.compassHeading(ev.alpha, ev.beta||0, ev.gamma||0);
+      if(h==null) return; got=true;
+      if(cur==null) cur=h; else { const d=((h-cur+540)%360)-180; cur=(cur+d*0.25+360)%360; }
+      rot.setAttribute('transform','rotate('+(-cur).toFixed(1)+' 20 20)');
+      const diff=Math.abs(((qb-cur+540)%360)-180), ok=Math.min(diff,360-diff)<4;
+      btn.classList.toggle('ok',ok); if(ok&&!wasOk) vibrate(25); wasOk=ok;
+    };
+    window.addEventListener('deviceorientationabsolute',onOri,true);
+    window.addEventListener('deviceorientation',onOri,true);
+    showToast('أدِر الهاتفَ حتى تقع الكعبةُ في أعلى البوصلة',3500);
+    setTimeout(()=>{ if(on && !got){ stop(); showToast('لا يتوفّر مستشعرُ البوصلة في هذا الجهاز — افتح «القبلة» في أدوات المسلم',4500); } },2500);
+    tm=setTimeout(stop,90000);   // توفيرًا للبطاريّة
+  });
+}
 function renderPrayers(){
   const g=geoStore(); const bar=$('#prayer-bar'); const btn=$('#loc-btn');
   if(!g){ bar.style.display='none'; btn.style.display='block'; return; }
@@ -8536,9 +8586,10 @@ function renderPrayers(){
   let times='';
   PRAYERS.forEach(([k,nm])=>{ const tv=pt[k]; if(!tv) return; const isCur=cur===k; const isNext=(k===nextKey); times+='<div class="t'+(isCur?' cur':'')+(isNext?' next-p':'')+'"><span class="nm">'+nm+'</span><span class="vl">'+fmtTime(tv)+'</span></div>'; });
   bar.innerHTML='<div class="next"><b>'+nextName+'</b><span><span class="next-lbl">الصلاة القادمة</span> <span class="next-time">'+nextTime+'</span></span>'+
-    '<button class="geo-refresh" id="geo-refresh" title="تحديث موقعي" aria-label="تحديث موقعي">'+
+    '<div class="np-row"><button class="geo-refresh" id="geo-refresh" title="تحديث موقعي" aria-label="تحديث موقعي">'+
     '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></button>'+
-    '</div><div class="times">'+times+'</div>';
+    miniQiblaHtml(g)+'</div></div><div class="times">'+times+'</div>';
+  bindMiniQibla(g);
   const gr=$('#geo-refresh');
   if(gr) gr.addEventListener('click', e=>{
     e.stopPropagation(); vibrate(8);
