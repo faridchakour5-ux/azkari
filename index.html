@@ -8475,7 +8475,15 @@ const ADHAN_DL=[
   {id:'zahrani', name:'منصور الزهراني', mb:'2.3'},
   {id:'abdulbasit', name:'عبد الباسط عبد الصمد — القاهرة', mb:'2.5'},
   {id:'refaat',  name:'محمد رفعت — القاهرة', mb:'2.5'},
-  {id:'suhaib',  name:'صهيب هاني — فلسطين', mb:'2.2'}
+  {id:'suhaib',  name:'صهيب هاني — فلسطين', mb:'2.2'},
+  {id:'naina',   name:'أحمد نعينع — القاهرة', mb:'2.6'},
+  {id:'alafasi', name:'مشاري العفاسي', mb:'2.9'},
+  {id:'almalki', name:'حمدان المالكي', mb:'3.3'},
+  {id:'qatami',  name:'ناصر القطامي', mb:'1.7'},
+  {id:'arkani',  name:'إبراهيم الأركاني', mb:'2.9'},
+  {id:'hamathani', name:'ماجد الهمذاني', mb:'2.8'},
+  {id:'deghreri', name:'حمد الدغريري', mb:'2.0'},
+  {id:'menshawy', name:'محمد المنشاوي', mb:'3.0'}
 ];
 function adhanPref(){ const v=settings.adhanVoice; return v==='alt' ? 'alt' : (/^dl_[a-z0-9]{3,24}$/.test(v||'') ? v : 'wadee'); }
 function adhanVoice(){
@@ -8524,7 +8532,7 @@ function paintVoiceRow(){
       __adhanState=await P.downloadVoice({id, url:'https://salatee.org/adhan/'+id+'.m4a'});
       settings.adhanVoice='dl_'+id; saveSettings(); try{ scheduleNativeNotifs(); }catch(_){}
       paintVoiceRow(); showToast('تمّ التنزيل — صار هذا المؤذّنُ صوتَ الأذان',4200);
-    }catch(err){ paintVoiceRow(); showToast('تعذّر التنزيل — تأكّد من اتّصالك بالإنترنت',3800); }
+    }catch(err){ paintVoiceRow(); const why=String((err&&(err.message||err))||'').slice(0,60); showToast('تعذّر التنزيل — تأكّد من اتّصالك بالإنترنت'+(why?' ('+why+')':''),5200); }
   });
 })();
 /* ملحقُ الأذان الأصليّ، أو null في الويب وفي نسخةٍ أصليّةٍ لم تُزرَع فيها الطبقة */

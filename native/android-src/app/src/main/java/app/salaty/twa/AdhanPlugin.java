@@ -128,25 +128,34 @@ public class AdhanPlugin extends Plugin {
     new Thread(() -> {
       File dir = AdhanService.voiceDir(getContext());
       File part = new File(dir, id + ".part"), out = new File(dir, id + ".m4a");
-      HttpURLConnection c = null;
-      try {
-        dir.mkdirs();
-        c = (HttpURLConnection) new URL(url).openConnection();
-        c.setConnectTimeout(15000); c.setReadTimeout(30000);
-        if (c.getResponseCode() != 200) throw new Exception("HTTP " + c.getResponseCode());
-        long total = 0;
-        try (InputStream in = c.getInputStream(); FileOutputStream fo = new FileOutputStream(part)) {
-          byte[] buf = new byte[16384]; int n;
-          while ((n = in.read(buf)) > 0) { fo.write(buf, 0, n); total += n; if (total > 12L * 1024 * 1024) throw new Exception("too big"); }
-        }
-        if (total < 100 * 1024) throw new Exception("too small");
-        if (out.exists()) out.delete();
-        if (!part.renameTo(out)) throw new Exception("rename");
-        call.resolve(status());
-      } catch (Exception e) {
-        try { part.delete(); } catch (Exception ignored) {}
-        call.reject(e.getMessage() == null ? "download failed" : e.getMessage());
-      } finally { if (c != null) c.disconnect(); }
+      String err = "";
+      /* محاولتان: انقطاعُ الشبكة وسط الملفّ كان يُبقي ملفًّا ناقصًا يبدو مُنزَّلًا */
+      for (int attempt = 0; attempt < 2; attempt++) {
+        HttpURLConnection c = null;
+        try {
+          dir.mkdirs();
+          c = (HttpURLConnection) new URL(url).openConnection();
+          c.setConnectTimeout(15000); c.setReadTimeout(30000);
+          c.setRequestProperty("Accept-Encoding", "identity");
+          if (c.getResponseCode() != 200) throw new Exception("HTTP " + c.getResponseCode());
+          long want = c.getContentLengthLong(), total = 0;
+          try (InputStream in = c.getInputStream(); FileOutputStream fo = new FileOutputStream(part)) {
+            byte[] buf = new byte[16384]; int n;
+            while ((n = in.read(buf)) > 0) { fo.write(buf, 0, n); total += n; if (total > 12L * 1024 * 1024) throw new Exception("too big"); }
+            fo.getFD().sync();
+          }
+          if (total < 100 * 1024) throw new Exception("too small " + total);
+          if (want > 0 && total != want) throw new Exception("incomplete " + total + "/" + want);
+          if (out.exists()) out.delete();
+          if (!part.renameTo(out)) throw new Exception("rename");
+          call.resolve(status());
+          return;
+        } catch (Exception e) {
+          err = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
+          try { part.delete(); } catch (Exception ignored) {}
+        } finally { if (c != null) c.disconnect(); }
+      }
+      call.reject(err);
     }).start();
   }
 
@@ -246,7 +255,7 @@ public class AdhanPlugin extends Plugin {
     /* هل في هذا البناء صوتٌ ثانٍ؟ — لا نعرضُ خيارًا لا ملفَّ له */
     r.put("altAvailable", getContext().getResources().getIdentifier("adhan_alt", "raw", getContext().getPackageName()) != 0);
     JSArray vs = new JSArray();
-    try { File[] fs = AdhanService.voiceDir(getContext()).listFiles(); if (fs != null) for (File f : fs) { String nm = f.getName(); if (nm.endsWith(".m4a")) vs.put(nm.substring(0, nm.length() - 4)); } } catch (Exception ignored) {}
+    try { File[] fs = AdhanService.voiceDir(getContext()).listFiles(); if (fs != null) for (File f : fs) { String nm = f.getName(); if (nm.endsWith(".m4a") && f.length() > 100 * 1024) vs.put(nm.substring(0, nm.length() - 4)); } } catch (Exception ignored) {}
     r.put("voices", vs);
     return r;
   }
