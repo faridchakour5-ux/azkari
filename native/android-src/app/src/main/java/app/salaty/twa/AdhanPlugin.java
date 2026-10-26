@@ -13,6 +13,12 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -103,7 +109,7 @@ public class AdhanPlugin extends Plugin {
       String voice = call.getString("voice", "wadee");
       AdhanScheduler.prefs(getContext()).edit()
           .putBoolean("vol_stop", vs != null && vs)
-          .putString("voice", "alt".equals(voice) ? "alt" : "wadee").apply();
+          .putString("voice", AdhanService.cleanVoice(voice)).apply();
       AdhanScheduler.save(getContext(), clean, enabled);
       AdhanScheduler.arm(getContext());
       PrayerWidget.refresh(getContext());
@@ -111,6 +117,44 @@ public class AdhanPlugin extends Plugin {
     } catch (Exception e) {
       call.reject(e.getMessage() == null ? "setSchedule failed" : e.getMessage(), e);
     }
+  }
+
+  /** مؤذّنٌ إضافيّ يُنزَّل إلى مساحة التطبيق (لا يكون في الحزمة): يعمل بلا إنترنت وقت الأذان. */
+  @PluginMethod
+  public void downloadVoice(PluginCall call) {
+    final String id = call.getString("id", "");
+    final String url = call.getString("url", "");
+    if (!id.matches("[a-z0-9]{3,24}") || !url.startsWith("https://salatee.org/adhan/")) { call.reject("bad voice"); return; }
+    new Thread(() -> {
+      File dir = AdhanService.voiceDir(getContext());
+      File part = new File(dir, id + ".part"), out = new File(dir, id + ".m4a");
+      HttpURLConnection c = null;
+      try {
+        dir.mkdirs();
+        c = (HttpURLConnection) new URL(url).openConnection();
+        c.setConnectTimeout(15000); c.setReadTimeout(30000);
+        if (c.getResponseCode() != 200) throw new Exception("HTTP " + c.getResponseCode());
+        long total = 0;
+        try (InputStream in = c.getInputStream(); FileOutputStream fo = new FileOutputStream(part)) {
+          byte[] buf = new byte[16384]; int n;
+          while ((n = in.read(buf)) > 0) { fo.write(buf, 0, n); total += n; if (total > 12L * 1024 * 1024) throw new Exception("too big"); }
+        }
+        if (total < 100 * 1024) throw new Exception("too small");
+        if (out.exists()) out.delete();
+        if (!part.renameTo(out)) throw new Exception("rename");
+        call.resolve(status());
+      } catch (Exception e) {
+        try { part.delete(); } catch (Exception ignored) {}
+        call.reject(e.getMessage() == null ? "download failed" : e.getMessage());
+      } finally { if (c != null) c.disconnect(); }
+    }).start();
+  }
+
+  @PluginMethod
+  public void deleteVoice(PluginCall call) {
+    String id = call.getString("id", "");
+    if (id.matches("[a-z0-9]{3,24}")) { try { new File(AdhanService.voiceDir(getContext()), id + ".m4a").delete(); } catch (Exception ignored) {} }
+    call.resolve(status());
   }
 
   /** يُسكِت أذانًا يُرفع الآن. */
@@ -201,6 +245,9 @@ public class AdhanPlugin extends Plugin {
     r.put("battery", ignoringBattery());
     /* هل في هذا البناء صوتٌ ثانٍ؟ — لا نعرضُ خيارًا لا ملفَّ له */
     r.put("altAvailable", getContext().getResources().getIdentifier("adhan_alt", "raw", getContext().getPackageName()) != 0);
+    JSArray vs = new JSArray();
+    try { File[] fs = AdhanService.voiceDir(getContext()).listFiles(); if (fs != null) for (File f : fs) { String nm = f.getName(); if (nm.endsWith(".m4a")) vs.put(nm.substring(0, nm.length() - 4)); } } catch (Exception ignored) {}
+    r.put("voices", vs);
     return r;
   }
 }

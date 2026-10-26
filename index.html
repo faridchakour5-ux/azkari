@@ -1634,6 +1634,13 @@
   #s-azkar .qb-mini b{color:var(--c-repeat); font-weight:800; font-size:12.5px;}
   #s-azkar .qb-mini svg{width:26px; height:26px; flex:none;}
   #s-azkar .qb-mini.ok{background:var(--accent); color:#fff;} #s-azkar .qb-mini.ok b{color:#fff;}
+  .adl{margin:6px 16px 4px; border:1px solid var(--line); border-radius:16px; background:var(--card); overflow:hidden;}
+  .adl-h{padding:11px 14px 9px; font-weight:800; font-size:14px; color:var(--text);}
+  .adl-h small{display:block; font-weight:500; font-size:12px; color:var(--text-2); margin-top:2px;}
+  .adl-r{display:flex; align-items:center; gap:10px; padding:9px 14px; border-top:1px solid var(--line);}
+  .adl-r .nm{flex:1; font-size:14px; font-weight:700; color:var(--text);} .adl-r .nm small{display:block; font-weight:500; font-size:11.5px; color:var(--text-3);}
+  .adl-r button{border:0; border-radius:999px; padding:7px 14px; font:inherit; font-size:12.5px; font-weight:700; min-height:34px; background:var(--accent); color:#fff;}
+  .adl-r button.del{background:var(--fill-2); color:var(--text-2);} .adl-r button:disabled{opacity:.55;}
 </style>
 </head>
 <body>
@@ -2150,6 +2157,10 @@
           <option value="alt"></option>
         </select>
       </div>
+    </div>
+    <div class="adl native-only" id="adhan-dl" style="display:none">
+      <div class="adl-h">مؤذّنون آخرون<small>يُنزَّل المؤذّنُ على هاتفك فيعمل بلا إنترنت</small></div>
+      <div id="adhan-dl-list"></div>
     </div>
     <div class="row native-only" style="display:none"><span class="k">زرّ «خفض الصوت» يوقف الأذان</span>
       <label class="sw"><input type="checkbox" id="adhan-volstop-toggle"><span class="track"></span><span class="knob"></span></label>
@@ -8459,22 +8470,61 @@ async function scheduleNativeNotifs(){
 /* الصوتُ الثاني الاختياريّ للأذان: يُسمّى هنا حين يُضاف ملفُّه (انظر native/apply-android.js)؛ فارغٌ = لا خيار */
 const ADHAN_ALT_NAME = 'سعيد بلقاضي — المغربي';
 /* أذانُ وادي اليمني هو الافتراضيّ؛ «alt» (المغربيّ) لا يُستعمل إلا إن اختاره المستخدمُ صراحةً (وإن غاب الملفّ رجع النظامُ إلى وادي) */
-function adhanPref(){ return settings.adhanVoice==='alt' ? 'alt' : 'wadee'; }
+const ADHAN_DL=[
+  {id:'makkah',  name:'مكة المكرمة', mb:'2.4'},
+  {id:'zahrani', name:'منصور الزهراني', mb:'2.3'},
+  {id:'abdulbasit', name:'عبد الباسط عبد الصمد — القاهرة', mb:'2.5'},
+  {id:'refaat',  name:'محمد رفعت — القاهرة', mb:'2.5'},
+  {id:'suhaib',  name:'صهيب هاني — فلسطين', mb:'2.2'}
+];
+function adhanPref(){ const v=settings.adhanVoice; return v==='alt' ? 'alt' : (/^dl_[a-z0-9]{3,24}$/.test(v||'') ? v : 'wadee'); }
 function adhanVoice(){
-  return (adhanPref()==='alt' && ADHAN_ALT_NAME && __adhanState && __adhanState.altAvailable) ? 'alt' : 'wadee';
+  const v=adhanPref(), st=__adhanState||{};
+  if(v==='alt') return (ADHAN_ALT_NAME && st.altAvailable) ? 'alt' : 'wadee';
+  if(v.startsWith('dl_')) return (st.voices||[]).includes(v.slice(3)) ? v : 'wadee';
+  return 'wadee';
 }
 function paintVoiceRow(){
-  const row=$('#adhan-voice-row'), sel=$('#adhan-voice'); if(!row||!sel) return;
-  const ok = !!(ADHAN_ALT_NAME && __adhanState && __adhanState.altAvailable);
-  row.style.display = ok ? '' : 'none';
-  if(ok){ const o=sel.querySelector('option[value="alt"]'); if(o) o.textContent=ADHAN_ALT_NAME; sel.value = adhanPref(); }
+  const row=$('#adhan-voice-row'), sel=$('#adhan-voice'), box=$('#adhan-dl'), list=$('#adhan-dl-list'); if(!row||!sel) return;
+  const st=__adhanState||{}, ok=!!(ADHAN_ALT_NAME && st.altAvailable), have=st.voices||[];
+  const opts=[['wadee','أذان وادي (الافتراضي)']]; if(ok) opts.push(['alt',ADHAN_ALT_NAME]);
+  ADHAN_DL.forEach(d=>{ if(have.includes(d.id)) opts.push(['dl_'+d.id,d.name]); });
+  sel.innerHTML=''; opts.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; sel.appendChild(o); });
+  sel.value=adhanVoice();
+  row.style.display = (opts.length>1) ? '' : 'none';
+  if(box && list){
+    box.style.display = adhanPlugin() ? '' : 'none';
+    list.innerHTML='';
+    ADHAN_DL.forEach(d=>{
+      const r=document.createElement('div'); r.className='adl-r';
+      const got=have.includes(d.id);
+      r.innerHTML='<span class="nm">'+d.name+'<small>'+(got?'مُنزَّل على هاتفك':d.mb+' ميغابايت')+'</small></span><button class="'+(got?'del':'')+'" data-id="'+d.id+'">'+(got?'حذف':'تنزيل')+'</button>';
+      list.appendChild(r);
+    });
+  }
 }
 (function(){
   const sel=$('#adhan-voice'); if(!sel) return;
   sel.addEventListener('change', ()=>{
-    settings.adhanVoice = sel.value==='alt' ? 'alt' : 'wadee'; saveSettings(); vibrate(6);
+    const v=sel.value; settings.adhanVoice = (v==='alt'||v.startsWith('dl_')) ? v : 'wadee'; saveSettings(); vibrate(6);
     try{ scheduleNativeNotifs(); }catch(e){}      // يُحفَظ الصوتُ في الجدول الأصليّ
     const P=adhanPlugin(); if(P) P.preview({ name:'', voice:adhanVoice() }).then(()=>showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200)).catch(()=>{});
+  });
+  const list=$('#adhan-dl-list'); if(!list) return;
+  list.addEventListener('click', async e=>{
+    const b=e.target.closest('button[data-id]'); if(!b) return;
+    const P=adhanPlugin(); if(!P) return; const id=b.dataset.id; vibrate(6);
+    try{
+      if(b.classList.contains('del')){
+        __adhanState=await P.deleteVoice({id});
+        if(settings.adhanVoice==='dl_'+id){ settings.adhanVoice='wadee'; saveSettings(); try{ scheduleNativeNotifs(); }catch(_){} }
+        paintVoiceRow(); showToast('حُذف المؤذّن من هاتفك',2500); return;
+      }
+      b.disabled=true; b.textContent='…جارٍ التنزيل';
+      __adhanState=await P.downloadVoice({id, url:'https://salatee.org/adhan/'+id+'.m4a'});
+      settings.adhanVoice='dl_'+id; saveSettings(); try{ scheduleNativeNotifs(); }catch(_){}
+      paintVoiceRow(); showToast('تمّ التنزيل — صار هذا المؤذّنُ صوتَ الأذان',4200);
+    }catch(err){ paintVoiceRow(); showToast('تعذّر التنزيل — تأكّد من اتّصالك بالإنترنت',3800); }
   });
 })();
 /* ملحقُ الأذان الأصليّ، أو null في الويب وفي نسخةٍ أصليّةٍ لم تُزرَع فيها الطبقة */

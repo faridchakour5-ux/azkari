@@ -22,6 +22,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 
+import java.io.File;
+
 /**
  * خدمةٌ أماميّةٌ ترفع الأذانَ كاملًا — ثلاثَ دقائقَ لا ثلاثين ثانية.
  *
@@ -169,12 +171,27 @@ public class AdhanService extends Service {
     try { return AdhanScheduler.prefs(this).getString("voice", "wadee"); } catch (Exception e) { return "wadee"; }
   }
 
+  /** مجلّدُ المؤذّنين المُنزَّلين (داخل مساحة التطبيق الخاصّة) */
+  static File voiceDir(Context c) { return new File(c.getFilesDir(), "adhan"); }
+  /** «alt» أو «dl_<id>» صالحٌ، وغيرُه ← الافتراضيّ */
+  static String cleanVoice(String v) {
+    if ("alt".equals(v)) return "alt";
+    if (v != null && v.matches("dl_[a-z0-9]{3,24}")) return v;
+    return "wadee";
+  }
+
   private void play() {
     /* "alt": صوتٌ ثانٍ اختياريّ (adhan_alt) لا يوجد إلّا في بناءٍ وُضع له الملفّ؛ فإن غاب رجعنا إلى الصوت الافتراضيّ */
     int res = 0;
-    if ("alt".equals(voice())) res = getResources().getIdentifier("adhan_alt", "raw", getPackageName());
-    if (res == 0) res = getResources().getIdentifier("adhan_wadee", "raw", getPackageName());
-    if (res == 0) { stopEverything(); return; }   // لا ملفَّ صوت: لا نُبقي الخدمةَ عالقة
+    File dl = null;
+    String v = cleanVoice(voice());
+    if (v.startsWith("dl_")) {   /* مؤذّنٌ مُنزَّل: إن غاب الملفُّ أو تلف رجعنا إلى الافتراضيّ */
+      File f = new File(voiceDir(this), v.substring(3) + ".m4a");
+      if (f.isFile() && f.length() > 100 * 1024) dl = f;
+    }
+    if (dl == null && "alt".equals(v)) res = getResources().getIdentifier("adhan_alt", "raw", getPackageName());
+    if (dl == null && res == 0) res = getResources().getIdentifier("adhan_wadee", "raw", getPackageName());
+    if (dl == null && res == 0) { stopEverything(); return; }   // لا ملفَّ صوت: لا نُبقي الخدمةَ عالقة
     /* نبني المُشغِّلَ يدويًّا ولا نستعمل MediaPlayer.create: تلك تُحضِّر الملفَّ
        فورًا، وضبطُ خصائصِ الصوت بعد التحضير يرمي IllegalStateException. وضبطُها
        قبلَه هو ما يجعل الأذانَ يخرج على مسار المنبّه لا على مسار الوسائط. */
@@ -189,9 +206,13 @@ public class AdhanService extends Service {
       } else {
         player.setAudioStreamType(AudioManager.STREAM_ALARM);
       }
-      afd = getResources().openRawResourceFd(res);
-      if (afd == null) { stopEverything(); return; }
-      player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+      if (dl != null) {
+        player.setDataSource(dl.getAbsolutePath());
+      } else {
+        afd = getResources().openRawResourceFd(res);
+        if (afd == null) { stopEverything(); return; }
+        player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+      }
       player.setLooping(false);
       player.setOnCompletionListener(mp -> stopEverything());
       player.setOnErrorListener((mp, what, extra) -> { stopEverything(); return true; });
