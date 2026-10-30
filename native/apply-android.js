@@ -149,7 +149,9 @@ const PERMS = `
          الـWebView فيظهر «تعذّر تحديد الموقع» ولا تُجدوَل الأذانات. Capacitor يطلب
          الإذنَ وقتَ التشغيل من تلقاء نفسه متى كان مُعلَنًا هنا. تقريبيٌّ يكفي. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- الدقيقُ لأندرويد 11 وما دونه فقط (maxSdkVersion=30): هناك لا يمنح Capacitor الموقعَ في الـWebView بلا الإذنين؛
+         ومن أندرويد 12 يكفي التقريبيّ (سياسةُ Play للموقع، إلزاميّةٌ من 27 يناير 2027 لمن يستهدف API 37). -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
 
     <!-- المنبّهاتُ الدقيقة. SCHEDULE_EXACT_ALARM يَطلبه المستخدمُ من الإعدادات
          (والتطبيقُ يَفتح له الشاشةَ بنفسه عبر openExactAlarmSettings).
