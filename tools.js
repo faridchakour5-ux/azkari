@@ -142,6 +142,10 @@ css.textContent=`
 .us-hero small{display:block; opacity:.85; font-size:12.5px; font-weight:600;}
 .us-hero .big{display:flex; align-items:baseline; gap:6px; margin:4px 0 2px;} html:not([lang="ar"]) .us-hero .big{direction:ltr;}
 .us-hero .big .n{font-size:44px; line-height:1.1; font-weight:800; letter-spacing:-.5px;} .us-hero .big u{text-decoration:none; font-size:15px; font-weight:700; opacity:.9;}
+.rl-day{font-size:12.5px; font-weight:800; color:var(--text-2); margin:14px 4px 6px;}
+.rl-i{display:flex; gap:10px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:10px 12px; margin-bottom:7px; box-shadow:var(--shadow-1);}
+.rl-i .tm{font-size:13px; font-weight:800; color:var(--c-repeat); min-width:46px; text-align:center;}
+.rl-i .tx{flex:1; font-size:14px; font-weight:700; color:var(--text); line-height:1.7;} .rl-i .tx small{display:block; font-size:12px; font-weight:500; color:var(--text-2);}
 .us-kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:0 0 12px;}
 .us-kpis div{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 6px 10px; text-align:center; font-size:12px; color:var(--text-2); box-shadow:var(--shadow-1);}
 .us-kpis b{display:block; line-height:1.35; white-space:nowrap;} .us-kpis .n{font-size:21px; font-weight:800; color:var(--c-repeat);} .us-kpis u{text-decoration:none; font-size:12px; font-weight:700; color:var(--text-2); margin-inline:2px 4px;}
@@ -229,6 +233,7 @@ PAGES.hub = { title:'أدوات المسلم', render(body){
   const due=T.reviewDue().length;
   const tiles=[
     ['qibla','القبلة','qibla','بوصلةٌ نحو الكعبة'],
+    ['rlog','سجلّ القراءة','rev','كم قرأتَ ومتى'],
     ['cal','التقويم الهجريّ','cal','الأيّام والمناسبات'],
     ['pt','صلواتي','pray','تابِع صلواتك اليوم'],
     ['fast','الصيام','fast','التطوّع ووقت الفجر'],
@@ -489,6 +494,35 @@ PAGES.use = { title:'وقتي', render(body){
    '<div class="tl-note">يُحسب الوقتُ حين تكون شاشةُ التطبيق أمامك أو حين تعمل تلاوةٌ أو تحفيظ. كلُّه محفوظٌ على هاتفك فقط، ولا يُرسَل إلى أحد.</div>';
 }};
 
+
+/* ============ سجلّ القراءة ============ */
+PAGES.rlog = { title:'سجلّ القراءة', render(body){
+  const log=(sget('az_readlog',[])||[]).slice().reverse();
+  if(!log.length){
+    body.innerHTML='<div class="tl-card"><h3>لا قراءةَ مسجَّلةً بعد</h3><div class="tl-note">في صفحة القرآن اضغط على رقم الآية التي وصلتَ إليها، ثم على رقم آيةٍ أبعدَ بعد أن تقرأ: يظهر لك كم آيةً قرأتَ وكم استغرق ذلك، ويُسجَّل هنا باليوم والساعة. كلُّه محفوظٌ على هاتفك فقط.</div></div>';
+    return;
+  }
+  const now=new Date(), todayK=lk(now), yK=lk(addDays(now,-1));
+  const weekAgo=addDays(now,-6); weekAgo.setHours(0,0,0,0);
+  let td=0, wk=0, tot=0;
+  log.forEach(e=>{ tot+=e.n||0; const d=new Date(e.t); if(lk(d)===todayK) td+=e.n||0; if(d>=weekAgo) wk+=e.n||0; });
+  let html='<div class="us-kpis"><div><b class="n">'+AR(td)+'</b><span>آياتُ اليوم</span></div><div><b class="n">'+AR(wk)+'</b><span>آخر 7 أيّام</span></div><div><b class="n">'+AR(tot)+'</b><span>المجموع</span></div></div>';
+  let lastK='';
+  log.forEach(e=>{
+    const d=new Date(e.t), k=lk(d);
+    if(k!==lastK){ lastK=k; html+='<div class="rl-day">'+(k===todayK?'اليوم':(k===yK?'أمس':gLabel(d,true)))+'</div>'; }
+    const hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const same=e.fa===e.ta;
+    const where=same ? ('سورة '+esc(e.fa)+(e.fv===e.tv?' · الآية '+AR(e.fv):' · من الآية '+AR(e.fv)+' إلى '+AR(e.tv)))
+                     : ('من سورة '+esc(e.fa)+' آية '+AR(e.fv)+' إلى سورة '+esc(e.ta)+' آية '+AR(e.tv));
+    const m=e.d!=null ? Math.max(0,Math.round(e.d/60)) : null;
+    const dur=m==null ? '' : ' · '+(m<1?'أقلّ من دقيقة':AR(m)+' د');
+    html+='<div class="rl-i"><span class="tm">'+hm+'</span><span class="tx">'+where+'<small>'+AR(e.n)+' '+(e.n===1?'آية':'آيات')+dur+'</small></span></div>';
+  });
+  html+='<button class="tl-btn alt" id="rl-clear">حذف السجلّ</button><div class="tl-note">يُسجَّل كلُّ انتقالٍ للعلامة إلى آيةٍ أبعدَ. وتُعرض المدّةُ إن لم تزد على ساعة. السجلُّ على هاتفك فقط، ولا يُرسَل إلى أحد.</div>';
+  body.innerHTML=html;
+  body.querySelector('#rl-clear').addEventListener('click',()=>{ if(confirm('حذف سجلّ القراءة كلِّه؟')){ sset('az_readlog',[]); vib(8); T.go('rlog'); } });
+}};
 /* ============ الصيام ووقت الفجر ============ */
 function nextFastDays(limit, horizon){
   const out=[]; const now=new Date();

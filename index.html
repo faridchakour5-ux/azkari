@@ -2165,6 +2165,9 @@
     <div class="row native-only" style="display:none"><span class="k">زرّ «خفض الصوت» يوقف الأذان</span>
       <label class="sw"><input type="checkbox" id="adhan-volstop-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
+    <div class="row native-only" style="display:none"><span class="k">تذكيرٌ إن مضى يومٌ بلا قراءة القرآن</span>
+      <label class="sw"><input type="checkbox" id="readrem-toggle"><span class="track"></span><span class="knob"></span></label>
+    </div>
     <div class="gnote native-only" id="adhan-note" style="display:none"></div>
     <div class="gnote web-only" id="adhan-web-note">الأذانُ بصوته كاملًا لا يرفعه المتصفّحُ والتطبيقُ مغلقٌ — وهو قيدٌ في المتصفّح نفسِه لا في التطبيق. وبإمكانك أن يصلك إشعارٌ نصّيٌّ عند دخول كلّ وقتٍ بالخيار أدناه.</div>
     <div class="row web-only" id="push-row"><span class="k">تصلني التذكيرات والتطبيق مغلق</span>
@@ -3023,6 +3026,16 @@ if(volStopToggle){
     settings.adhanVolStop = volStopToggle.checked; saveSettings(); vibrate(6);
     try{ scheduleNativeNotifs(); }catch(e){}
     showToast(settings.adhanVolStop ? 'سيُوقَف الأذانُ بضغط «خفض الصوت» ✓' : 'زرُّ «خفض الصوت» يخفّض صوتَ الأذان فقط', 3200);
+  });
+}
+
+const readRemToggle = $('#readrem-toggle');
+if(readRemToggle){
+  readRemToggle.checked = settings.readRem!==false;
+  readRemToggle.addEventListener('change', ()=>{
+    settings.readRem = readRemToggle.checked; saveSettings(); vibrate(6);
+    try{ planReadReminder(); }catch(e){}
+    showToast(settings.readRem ? 'سيصلك تذكيرٌ إن مضى يومٌ بلا قراءة ✓' : 'أُوقِف تذكيرُ القراءة', 2800);
   });
 }
 
@@ -5131,7 +5144,7 @@ async function openTools(page){
     shield:I('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>'),
     photo:I('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 9"/>')
   };
-  IC.wirdw=IC.wird; IC.wirdh=IC.wird;
+  IC.wirdw=IC.wird; IC.wirdh=IC.wird; IC.rlog=IC.wird;
   const drRiwaya=r=>{ if(settings.riwaya===r) return; const b=document.querySelector('#riwaya-seg button[data-r="'+r+'"]'); if(b) b.click(); try{ syncRiwayaPills(); }catch(e){} };
   const close=()=>{ sc.classList.remove('show'); dr.classList.remove('show'); dr.setAttribute('aria-hidden','true'); document.body.classList.remove('dr-open'); tabM.classList.remove('on'); };
   const isOpen=()=>dr.classList.contains('show');
@@ -5145,7 +5158,7 @@ async function openTools(page){
     listen:goTab('s-listen'), azkar:goTab('s-azkar',()=>{ if(catMeta(currentTab).hidden) showAzkarPage('fadl'); }),
     wasaya:goTab('s-azkar',()=>showAzkarPage('wasaya')),
     fiqh:goTab('s-tasbih',()=>applyTasbihMode('fiqh')), tasbih:goTab('s-tasbih',()=>applyTasbihMode('tasbih')), quiz:goTab('s-tasbih',()=>applyTasbihMode('quiz')),
-    qibla:tool('qibla'), cal:tool('cal'), pt:tool('pt'), fast:tool('fast'), rev:tool('rev'), bell:tool('rem'),
+    qibla:tool('qibla'), rlog:tool('rlog'), cal:tool('cal'), pt:tool('pt'), fast:tool('fast'), rev:tool('rev'), bell:tool('rem'),
     sleep:goTab('s-listen',async()=>{ if(await loadTools()) SalTools.sleep(); }),
     hifz:goTab('s-listen',()=>applyListenMode('hifz')), seera:goTab('s-listen',()=>applyListenMode('seera')), stories:goTab('s-listen',()=>applyListenMode('stories')),
     hadith:goTab('s-listen',()=>applyListenMode('hadith')), duat:goTab('s-listen',()=>applyListenMode('duat')),
@@ -5153,7 +5166,7 @@ async function openTools(page){
   };
   const GROUPS=[
     [null,[['wird','القرآن برواية حفص ورواية ورش'],['wirdw','رواية ورش'],['wirdh','رواية حفص'],['listen','الاستماع'],['azkar','الأذكار'],['fiqh','الفقه'],['tasbih','المسبحة']]],
-    ['أدوات المسلم',[['qibla','القبلة'],['cal','التقويم الهجريّ'],['pt','صلواتي'],['fast','الصيام'],['rev','مراجعة الحفظ'],['sleep','مؤقّت النوم'],['bell','تذكيراتي']]],
+    ['أدوات المسلم',[['qibla','القبلة'],['rlog','سجلّ القراءة'],['cal','التقويم الهجريّ'],['pt','صلواتي'],['fast','الصيام'],['rev','مراجعة الحفظ'],['sleep','مؤقّت النوم'],['bell','تذكيراتي']]],
     ['التعلّم والاستماع',[['hifz','التحفيظ'],['seera','السيرة النبوية'],['stories','قصص الأنبياء'],['hadith','الأحاديث الصحيحة'],['duat','الدعاة'],['wasaya','وصايا النبي ﷺ'],['waqf','الوقف والابتداء','waqf.html'],['khayr','أبواب الخير','khayr.html'],['tajweed','تعلّم التجويد','tajweed.html'],['quiz','اختبار الثقافة الإسلامية']]],
     ['المزيد',[['settings','الإعدادات'],['info','الجولة التعريفيّة'],['shield','سياسة الخصوصية','privacy.html'],['photo','صور القرّاء (النَّسب والتراخيص)','credits.html']]]
   ];
@@ -5928,6 +5941,77 @@ async function openHifzListen(){
   if(!__hzSel){ const si=Math.min(Math.max(settings.mushafSura||0,0),113); __hzSel={ si, from:1, to:hzCount(si) }; }   // المقطعُ افتراضًا: السورةُ كلُّها
   renderHifzForm(box, true, null);
 }
+/* ===== سجلّ القراءة (طلبُ فريد، 26 أكتوبر 2026): كلُّ نقلٍ للعلامة إلى آيةٍ أبعدَ قراءةٌ تُحسب وتُسجَّل على الجهاز فقط ===== */
+const READ_LOG_KEY='az_readlog', READ_LOG_MAX=600, READ_MAX_SECS=3600, READ_REM_ID=7777;
+function uiLang(){ return document.documentElement.lang==='fr' ? 'fr' : (document.documentElement.lang==='en' ? 'en' : 'ar'); }
+function ayaWord(n){
+  const L=uiLang();
+  if(L==='en') return n===1 ? '1 verse' : n+' verses';
+  if(L==='fr') return n===1 ? '1 verset' : n+' versets';
+  if(n===1) return 'آية واحدة'; if(n===2) return 'آيتين'; if(n>=3 && n<=10) return n+' آيات'; return n+' آية';
+}
+function minWord(secs){
+  const L=uiLang(), m=Math.round(secs/60);
+  if(m<1) return L==='en' ? 'less than a minute' : (L==='fr' ? 'moins d’une minute' : 'أقلّ من دقيقة');
+  if(L==='en') return m===1 ? '1 minute' : m+' minutes';
+  if(L==='fr') return m===1 ? '1 minute' : m+' minutes';
+  if(m===1) return 'دقيقة'; if(m===2) return 'دقيقتين'; if(m>=3 && m<=10) return m+' دقائق'; return m+' دقيقة';
+}
+function readStepMsg(n, secs){
+  const L=uiLang(), a=ayaWord(n);
+  if(secs==null) return L==='en' ? 'You read '+a : (L==='fr' ? 'Vous avez lu '+a : 'قرأتَ '+a);
+  const m=minWord(secs);
+  return L==='en' ? 'You read '+a+' in '+m : (L==='fr' ? 'Vous avez lu '+a+' en '+m : 'قرأتَ '+a+' في '+m);
+}
+function ayaRef(ai){
+  const si=suraOf(ai); return { n:WIRD.sur[si].n, v:ai-WIRD.sur[si].i+1 };
+}
+function recordReadStep(mk, ai){
+  if(!mk || ai<=mk.ai || !WIRD || !WIRD.sur) return;          // أوّلُ علامةٍ أو رجوعٌ للخلف: لا قراءةَ تُحسب
+  const n=ai-mk.ai, now=Date.now();
+  let secs = mk.t ? Math.round((now-mk.t)/1000) : null;
+  if(secs!=null && (secs<=0 || secs>READ_MAX_SECS)) secs=null;   // فوق ساعةٍ لا تُعرض المدّة (نمتَ أو أغلقتَ التطبيق)
+  showToast(readStepMsg(n, secs), 4000, true);
+  const from=ayaRef(mk.ai+1), to=ayaRef(ai);
+  const log=store.get(READ_LOG_KEY,[])||[];
+  log.push({ t:now, fa:from.n, fv:from.v, ta:to.n, tv:to.v, n:n, d:secs });
+  while(log.length>READ_LOG_MAX) log.shift();
+  store.set(READ_LOG_KEY, log);
+}
+/* آخرُ قراءةٍ: أحدثُ ما بين آخر سجلّ ووقتِ العلامة الحاليّة */
+function lastReadAt(){
+  let t=0;
+  try{ const log=store.get(READ_LOG_KEY,[])||[]; if(log.length) t=log[log.length-1].t||0; }catch(e){}
+  const mk=settings.mushafMark; if(mk && mk.t && mk.t>t) t=mk.t;
+  return t;
+}
+/* تذكيرٌ واحدٌ بعد 24 ساعةً من آخر قراءة، داخل نافذة التنبيهات (الفجر+50د ← 22:00)؛ لا يُعاد إن مضت المهلةُ ولم تقرأ (لا إلحاح) */
+function readReminderAt(){
+  if(settings.readRem===false) return 0;
+  const last=lastReadAt(); if(!last) return 0;
+  let at=last+24*3600*1000;
+  if(at<=Date.now()+60000) return 0;
+  const b=notifBounds(new Date(at));
+  if(at<+b.from) at=+b.from;
+  else if(at>+b.to){ const nb=notifBounds(new Date(at+24*3600*1000)); at=+nb.from; }
+  return at;
+}
+function readReminderBody(){
+  const mk=settings.mushafMark;
+  try{ if(mk && mk.ai!=null && WIRD && WIRD.sur){ const r=ayaRef(mk.ai); return 'تابِع من سورة '+r.n+' · الآية '+r.v; } }catch(e){}
+  return 'تابِع قراءتك من حيث وصلت';
+}
+async function planReadReminder(){
+  if(!isNative()) return;
+  const LN=Capacitor.Plugins && Capacitor.Plugins.LocalNotifications; if(!LN) return;
+  try{
+    await LN.cancel({ notifications:[{ id:READ_REM_ID }] });
+    const at=readReminderAt(); if(!at) return;
+    await LN.createChannel({ id:'reminders', name:'التذكيرات', description:'تذكير الأذكار والصلاة على النبي', importance:4, visibility:1 });
+    await LN.schedule({ notifications:[{ id:READ_REM_ID, channelId:'reminders', title:'لم تقرأ القرآن منذ يوم 📖', body:readReminderBody(), largeBody:readReminderBody(),
+      schedule:{ at:new Date(at), allowWhileIdle:true }, smallIcon:'ic_stat_icon', largeIcon:'ic_notif_large' }] });
+  }catch(e){}
+}
 /* الضغط على رقم الآية: يحفظ (أو يلغي) موضع القراءة هنا بالضبط — قابل للتبديل */
 document.addEventListener('click', e=>{
   const num=e.target.closest('.wird-num');
@@ -5937,6 +6021,7 @@ document.addEventListener('click', e=>{
   // أثناء التتبّع تصير الضغطةُ ضبطًا للمزامنة؛ والعلامةُ تعود بإيقاف التتبّع
   if(__follow && audioPlaying() && qsAnchorToAya(ai)) return;
   const wasOn=num.classList.contains('bm');
+  const old_mk = settings.mushafMark && settings.mushafMark.ai!=null ? { ai:settings.mushafMark.ai, t:settings.mushafMark.t||0 } : null;
   const old=document.querySelector('#wird-body .wird-num.bm'); if(old) old.classList.remove('bm');
   clearTimeout(__scrollSaveT);
   __tapSaveUntil=Date.now()+800;
@@ -5951,10 +6036,13 @@ document.addEventListener('click', e=>{
   const si=suraOf(ai);
   num.classList.add('bm');
   settings.mushafSura=si;
-  /* العلامةُ اليدويّة تُحفظ برقم الآية وحدَه في حقلٍ مستقلّ، فلا يمحوها
+  /* قبل نقل العلامة: إن كانت لك علامةٌ سابقةٌ وتقدّمتَ عنها فهذه قراءةٌ تُحسب وتُسجَّل */
+  try{ recordReadStep(old_mk, ai); }catch(e){}
+  /* العلامةُ اليدويّة تُحفظ برقم الآية ووقتِها في حقلٍ مستقلّ، فلا يمحوها
      الحفظُ التلقائيُّ للتمرير — وكان يمحوها قبلُ فيضيع اسمُ السورة والآية. */
-  settings.mushafMark={ ai:ai };
+  settings.mushafMark={ ai:ai, t:Date.now() };
   saveSettings();
+  try{ planReadReminder(); }catch(e){}
   updateResumeBtn();
   vibrate([10,30,10]);
 });
@@ -6078,7 +6166,7 @@ function suraAyaCount(idx){
 }
 function ayaCountLabel(n){
   if(n===1) return 'آية واحدة';
-  if(n===2) return 'آيتان';
+  if(n===2) return 'آيتين';
   if(n<=10) return AR(n)+' آيات';
   return AR(n)+' آية';
 }
@@ -8393,6 +8481,7 @@ async function scheduleNativeNotifs(){
     if(pending && pending.notifications && pending.notifications.length){
       await LN.cancel({ notifications: pending.notifications.map(n=>({ id:n.id })) });
     }
+    try{ await planReadReminder(); }catch(e){}   // إلغاءُ الكلّ أعلاه يشمل تذكيرَ القراءة فنُعيده
     const g = geoStore(); if(!g) return;
     const prayers=[['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
     const notifs=[]; let id=1000; const nowMs=Date.now();
