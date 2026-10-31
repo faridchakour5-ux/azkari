@@ -3105,6 +3105,16 @@ function applyNotifNavigation(data){
         $$('#time-seg button').forEach(b=>b.classList.toggle('on', b.dataset.t===data.tab));
         renderAzkar();
       }
+    } else if(data.action==='resume'){
+      /* إشعارُ «تابِع القراءة»: يفتح القرآنَ عند علامتك بالضبط (لا عند أوّل المصحف) */
+      const t=document.querySelector('.tab[data-s="s-wird"]'); if(t) t.click();
+      let tries=0;
+      const go=()=>{
+        const mk=settings.mushafMark; if(!mk || mk.ai==null) return;
+        if(WIRD && WIRD.sur && document.querySelector('#wird-body .wird-num[data-ai]')){ jumpToMark(mk.ai); return; }
+        if(++tries<25) setTimeout(go, 250);
+      };
+      setTimeout(go, 400);
     } else if(data.action==='talqin'){
       (async()=>{
         try{
@@ -6009,7 +6019,7 @@ async function planReadReminder(){
     const at=readReminderAt(); if(!at) return;
     await LN.createChannel({ id:'reminders', name:'التذكيرات', description:'تذكير الأذكار والصلاة على النبي', importance:4, visibility:1 });
     await LN.schedule({ notifications:[{ id:READ_REM_ID, channelId:'reminders', title:'لم تقرأ القرآن منذ يوم 📖', body:readReminderBody(), largeBody:readReminderBody(),
-      schedule:{ at:new Date(at), allowWhileIdle:true }, smallIcon:'ic_stat_icon', largeIcon:'ic_notif_large' }] });
+      schedule:{ at:new Date(at), allowWhileIdle:true }, smallIcon:'ic_stat_icon', largeIcon:'ic_notif_large', extra:{ open:{ action:'resume' } } }] });
   }catch(e){}
 }
 /* الضغط على رقم الآية: يحفظ (أو يلغي) موضع القراءة هنا بالضبط — قابل للتبديل */
