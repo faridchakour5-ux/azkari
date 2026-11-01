@@ -898,7 +898,7 @@
   .wird-amount button.on{background:var(--accent); color:#fff;}
   .wird-card{background:var(--card); border-radius:18px; margin:12px 16px; padding:20px 18px;
     border:1px solid var(--line); box-shadow:var(--shadow-1);}
-  .wird-sura{color:var(--accent); font-weight:800; font-size:15px; margin:10px 0 6px; text-align:center;}
+  .wird-sura{color:var(--c-repeat); font-weight:800; font-size:15px; margin:10px 0 6px; text-align:center; cursor:pointer; -webkit-tap-highlight-color:transparent;}   /* اسمُ السورة ذهبيّ فيتميّز عن النصّ؛ والضغطُ عليه يعرض بطاقتَها */
   .wird-basmala{font-family:'AmiriQuran',serif; text-align:center; color:var(--accent);
     font-size:calc(20px * var(--scale) * var(--qscale,1)); line-height:2; margin:2px 0 10px;}
   body.riw-warsh .wird-basmala{font-family:'Maghribi','AmiriQuran',serif; font-size:calc(22px * var(--scale) * var(--qscale,1));}
@@ -980,9 +980,14 @@
   .wird-num:active{transform:scale(.88);}
   .wird-num.circ{display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; min-width:1.55em; height:1.55em; padding:0 .18em; border:2.1px solid currentColor; font-weight:800; border-radius:999px; line-height:1; vertical-align:middle; margin:0 4px;}
   .wird-num.circ{font-family:'ReemKufiNum','PlexAr',sans-serif; font-weight:700; font-size:.53em;}   /* أرقامٌ بخطّ Reem Kufi؛ أصغرُ بـ20٪ (طلبُ فريد 20 أكتوبر 2026): الدائرةُ بالـem فتصغر معه */
-  .wird-num.circ:not(.bm):not(.search-hit){opacity:.6;}   /* أخفُّ قليلًا فلا يغطّي على نصّ القرآن؛ العلامةُ المحفوظةُ والنتيجةُ تبقيان بكامل اللون */
-  .wird-num.bm{background:var(--accent); color:#fff; box-shadow:0 0 0 3px var(--tab-on-bg, rgba(199,21,133,.12));}
-  .wird-num.search-hit{background:var(--c-repeat); color:#fff; box-shadow:0 0 0 4px var(--c-repeat-bg);}
+  /* شكلُ رقم الآية (طلبُ فريد، 1 نوفمبر 2026): دائرةٌ ممتلئةٌ ذهبيّةٌ ورقمٌ فاتح وحلقةٌ خفيفة هي الأصل لكلّ الآيات؛
+     وعلامةُ موضع القراءة المحفوظة بالشكل نفسِه لكنّها زمرّديّة، فيظهر الفرقُ بينها وبين بقيّة الآيات */
+  .wird-num.circ{background:var(--c-repeat); border-color:var(--c-repeat); color:#fff; box-shadow:0 0 0 3px var(--tab-on-bg, rgba(47,158,68,.14));}
+  :root[data-bg="dark"] .wird-num.circ{color:#1a1308;}
+  .wird-num.circ:not(.bm):not(.search-hit){opacity:.92;}
+  .wird-num.bm{background:var(--qc-g3); border-color:var(--qc-g3); color:#fff; box-shadow:0 0 0 3px var(--tab-on-bg, rgba(47,158,68,.14));}
+  :root[data-bg="dark"] .wird-num.bm{color:#06231b;}
+  .wird-num.search-hit{background:var(--c-repeat); color:#fff; box-shadow:0 0 0 5px var(--c-repeat-bg), 0 0 0 9px var(--tab-on-bg, rgba(47,158,68,.14)); transform:scale(1.25);}
   .aya-t.search-hit-t{background:var(--c-repeat-bg); border-radius:8px; box-shadow:0 0 0 3px var(--c-repeat-bg); -webkit-box-decoration-break:clone; box-decoration-break:clone;}
 
   /* pastille flottante: aller à une سورة sans remonter en haut */
@@ -1489,7 +1494,7 @@
   .card.done .rem{ background:var(--text-3); }
   .fq-step .n{ color:var(--c-repeat); border:1px solid var(--c-repeat); background:transparent; font-weight:800; }
   .fq-tag.f{ background:var(--c-repeat); color:#fff; }
-  .wird-num.bm{ background:var(--c-repeat); }
+  .wird-num.bm{ background:var(--qc-g3); border-color:var(--qc-g3); }
 
   /* كتابةُ صفحتَي الأذكار والفقه بالزمرّديّ الأغمق في التطبيق (#063D30) لتتّحد هويّةُ التطبيق.
      المتغيّراتُ تُعرَّف على الشاشتين فتنسحب على كلّ ما فيهما، وللخلفيّة الداكنة حبرُها الفاتح كما هو. */
@@ -1641,6 +1646,23 @@
   .adl-r .nm{flex:1; font-size:14px; font-weight:700; color:var(--text);} .adl-r .nm small{display:block; font-weight:500; font-size:11.5px; color:var(--text-3);}
   .adl-r button{border:0; border-radius:999px; padding:7px 14px; font:inherit; font-size:12.5px; font-weight:700; min-height:34px; background:var(--accent); color:#fff;}
   .adl-r button.del{background:var(--fill-2); color:var(--text-2);} .adl-r button:disabled{opacity:.55;}
+  /* تلميحُ «تمرير للقراءة»: يومض 20 ثانيةً لمن بدأ يتصفّح يدويًّا ولم يضغطه */
+  @keyframes arHint{0%,100%{transform:scale(1); box-shadow:0 0 0 0 var(--accent-bg);} 50%{transform:scale(1.1); box-shadow:0 0 0 7px var(--accent-bg);}}
+  .autoread-pill .ar-main.ar-hint{animation:arHint 1.2s ease-in-out infinite; color:var(--accent); background:var(--accent-bg); border-radius:12px;}
+  @media (prefers-reduced-motion:reduce){ .autoread-pill .ar-main.ar-hint{animation:none;} }
+  /* بطاقةُ السورة */
+  .sinfo-ov{position:fixed; inset:0; z-index:130; background:rgba(0,0,0,.42); display:none; align-items:flex-end; justify-content:center;}
+  .sinfo-ov.show{display:flex;}
+  .sinfo{width:min(100%,520px); background:var(--card); border-radius:22px 22px 0 0; padding:18px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow:var(--shadow-2); border:1px solid var(--line);}
+  .sinfo h3{margin:0 0 4px; text-align:center; color:var(--c-repeat); font-size:19px; font-weight:800;}
+  .sinfo .sub{text-align:center; color:var(--text-2); font-size:12.5px; margin-bottom:12px;}
+  .sinfo .g{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .sinfo .g div{background:var(--fill-2); border-radius:14px; padding:10px 8px; text-align:center; font-size:12px; color:var(--text-2);}
+  .sinfo .g b{display:block; font-size:16px; color:var(--text); margin-bottom:2px;}
+  .sinfo .nt{font-size:11.5px; color:var(--text-3); line-height:1.8; margin:10px 2px 0;}
+  .sinfo .acts{display:flex; gap:8px; margin-top:12px;}
+  .sinfo .acts button{flex:1; border:0; border-radius:14px; padding:12px; font:inherit; font-weight:800; font-size:14px; background:var(--fill-2); color:var(--accent);}
+  .sinfo .acts button.pri{background:var(--accent); color:#fff;}
 </style>
 </head>
 <body>
@@ -3711,7 +3733,7 @@ function buildMushaf(body){
     if(si!==curSura){
       curSura=si;
       if(textOpen){ parts.push('</div>'); textOpen=false; }
-      parts.push('<div class="wird-sura" id="msura-'+si+'">'+suraOrn(si)+'</div>');
+      parts.push('<div class="wird-sura" id="msura-'+si+'" data-si="'+si+'">'+suraOrn(si)+'</div>');
       const b=basmalaHtml(si); if(b) parts.push(b);
     }
     if(!textOpen){ parts.push('<div class="wird-text">'); textOpen=true; }
@@ -7370,6 +7392,50 @@ function stopAutoRead(){
   renderAutoReadPill();
 }
 $('#autoread-toggle') && $('#autoread-toggle').addEventListener('click', ()=>{ vibrate(6); __autoRead ? stopAutoRead() : startAutoRead(); });
+/* ===== تلميحُ «تمرير للقراءة» (طلبُ فريد، 1 نوفمبر 2026): من يتصفّح الصفحاتِ بيده ولم يضغط الزرَّ يومض الزرُّ 20 ثانيةً ثم يهدأ؛ ولا يتكرّر قبل نصف ساعة ===== */
+let __arHintLastY=null, __arHintAcc=0, __arHintAt=0, __arHintT=null;
+function arHintStop(){ clearTimeout(__arHintT); const b=$('#autoread-toggle'); if(b) b.classList.remove('ar-hint'); }
+function arHintStart(){
+  const b=$('#autoread-toggle'); if(!b) return;
+  b.classList.add('ar-hint'); clearTimeout(__arHintT); __arHintT=setTimeout(arHintStop, 20000);
+}
+window.addEventListener('scroll', ()=>{
+  try{
+    const y=window.scrollY, last=__arHintLastY; __arHintLastY=y;
+    if(last==null || __autoRead || __autoScrolling || __progScroll || !wirdScreenActive()) return;
+    const d=Math.abs(y-last); if(d>700) return;                      // قفزةٌ برمجيّة لا قراءة
+    __arHintAcc+=d;
+    if(__arHintAcc>=500 && Date.now()-__arHintAt>30*60000){ __arHintAcc=0; __arHintAt=Date.now(); arHintStart(); }
+  }catch(e){}
+}, {passive:true});
+(function(){ const b=$('#autoread-toggle'); if(b) b.addEventListener('click', arHintStop); })();
+
+/* ===== بطاقةُ السورة: الضغطُ على اسمها يعرض ما نعرفه يقينًا (النوع وعدد الآيات والصفحة) ===== */
+function openSuraInfo(si){
+  if(!WIRD || !WIRD.sur || !WIRD.sur[si]) return;
+  let ov=$('#sinfo-ov');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='sinfo-ov'; ov.className='sinfo-ov';
+    ov.innerHTML='<div class="sinfo" role="dialog" aria-modal="true"></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('show'); });
+  }
+  const s=WIRD.sur[si], kind=SURA_KIND.charAt(si)==='d' ? 'مدنيّة' : 'مكّيّة', cnt=suraAyaCount(si), pg=WIRD.a[s.i].p;
+  const box=ov.querySelector('.sinfo');
+  box.innerHTML='<h3>﴾ سورة '+escapeHtml(s.n)+' ﴿</h3><div class="sub">'+kind+' · '+ayaCountLabel(cnt)+'</div>'+
+    '<div class="g"><div><b>'+AR(si+1)+'</b>ترتيبها في المصحف</div><div><b>'+kind+'</b>نوعُها</div><div><b>'+AR(cnt)+'</b>عددُ الآيات</div><div><b>'+AR(pg)+'</b>تبدأ في الصفحة</div></div>'+
+    '<div class="nt">التصنيفُ المكّيّ والمدنيّ على المشهور، وقد يُختلَف في بعض السور. وعددُ الآيات حسبَ الروايةِ المختارة.</div>'+
+    '<div class="acts"><button type="button" id="sinfo-listen">استمع إلى السورة</button><button type="button" class="pri" id="sinfo-close">إغلاق</button></div>';
+  box.querySelector('#sinfo-close').onclick=()=>ov.classList.remove('show');
+  box.querySelector('#sinfo-listen').onclick=()=>{ ov.classList.remove('show'); try{ const t=document.querySelector('.tab[data-s="s-listen"]'); if(t) t.click(); }catch(e){} };
+  ov.classList.add('show'); vibrate(6);
+}
+document.addEventListener('click', e=>{
+  const h=e.target.closest && e.target.closest('.wird-sura'); if(!h) return;
+  const si=parseInt(h.dataset.si); if(isNaN(si)) return;
+  openSuraInfo(si);
+});
+
 function stepAutoRead(dir){
   const cur=Math.round(autoReadLevel()*10);
   const nx=Math.min(AR_MAX, Math.max(AR_MIN, cur+dir))/10;
@@ -7891,7 +7957,7 @@ function renderWird(){
   while(i<e){
     const sura=suraOf(i);
     const atSuraStart = (i===WIRD.sur[sura].i);
-    html+='<div class="wird-sura">'+suraOrn(sura)+'</div>'+(atSuraStart?basmalaHtml(sura):'')+'<div class="wird-text">';
+    html+='<div class="wird-sura" data-si="'+sura+'">'+suraOrn(sura)+'</div>'+(atSuraStart?basmalaHtml(sura):'')+'<div class="wird-text">';
     while(i<e && suraOf(i)===sura){
       html+='<span class="aya-t" data-tai="'+i+'">'+qFix(WIRD.a[i].t)+'</span>\u00A0<span class="wird-num circ">'+ayaNoOf(i)+'</span> ';
       i++;
