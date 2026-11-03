@@ -475,6 +475,7 @@
   /* القُرّاء: بطاقاتٌ بحرفٍ في دائرة بدل أزرارٍ مرصوفة */
   .reciter-chips{display:flex; gap:10px; overflow-x:auto; padding:2px; scrollbar-width:none;}
   .reciter-chips::-webkit-scrollbar{display:none;}
+  .reciter-chips .rc-sec{flex:0 0 auto; align-self:center; max-width:104px; padding:6px 10px; margin-inline:4px; font-size:11.5px; font-weight:800; line-height:1.5; text-align:center; color:var(--c-repeat); border:1px dashed var(--c-repeat); border-radius:14px;}
   .reciter-chips button{flex:0 0 auto; width:92px; border:1px solid var(--line); background:var(--card);
     color:var(--text); font:inherit; padding:12px 8px 11px; border-radius:18px; box-shadow:var(--shadow-1);
     display:flex; flex-direction:column; align-items:center; gap:8px;
@@ -6587,6 +6588,14 @@ const RECITERS=[
   {id:'juhani',      name:'عبد الله الجهني',   exact:'عبدالله عواد الجهني', match:['الجهني']},
   {id:'ayyub',       name:'محمد أيوب',         exact:'محمد أيوب',     match:['أيوب'], prefer:/حفص.*مرتل/},
   {id:'hudhaifi',    name:'علي الحذيفي',       exact:'علي بن عبدالرحمن الحذيفي', match:['علي بن عبدالرحمن الحذيفي'], prefer:/حفص/},
+  /* قسمُ «قالون عن نافع» (طلبُ فريد، 3 نوفمبر 2026) — قرّاءُ تونس، الاستماعُ فقط. المصدر assabile.com (أذن به صاحبُ السبيل
+     لفريد)، والروابطُ في qalun.js المولَّد بـ tools/build-qalun.py. لا CORS عندهم فلا تنزيلَ للجهاز. */
+  {id:'qalun-barrak',   name:'علي البرّاق',        qalun:1},
+  {id:'qalun-munir',    name:'منير التونسي',       qalun:1},
+  {id:'qalun-gardelli', name:'جوهر القردلي',       qalun:1},
+  {id:'qalun-snina',    name:'محمد أبو سنينة',     qalun:1},
+  {id:'qalun-kthiri',   name:'العربي الكثيري',     qalun:1},
+  {id:'qalun-saadaoui', name:'عبد المانع السعداوي', qalun:1},
 ];
 const normName = s => (s||'').replace(/\s+/g,'');
 /* هل يملك القارئ مصحفًا كاملًا (114 سورة)؟ لتفادي التسجيلات الجزئية (جزء عمّ...) */
@@ -6669,8 +6678,11 @@ async function fetchReciterCatalog(){
       const data=await res.json();
       const list=data.reciters||[];
       const map={};
+      if(!window.QALUN){ try{ await loadScript('qalun.js'); }catch(e){} }
       RECITERS.forEach(r=>{
         if(r.external) return;
+        if(r.qalun){ const q=window.QALUN && window.QALUN[r.id]; if(q){ map[r.id]={ server:'', files:q.files, name:r.name,
+          moshaf:'قالون عن نافع — مرتّل', noDl:true, list:new Set(Object.keys(q.files).map(Number)) }; } return; }
         /* قارئٌ بخريطةِ ملفّاتٍ صريحة (من غير mp3quran): سورُه ما في الخريطة وحدَها */
         if(r.files){ map[r.id]={ server:'', files:r.files, name:r.name, moshaf:r.moshaf||'',
           list:new Set(Object.keys(r.files).map(Number)) }; return; }
@@ -6717,7 +6729,7 @@ function reciterSuraUrl(info, num){
   return info.server + pad3(num) + '.mp3';
 }
 function qdlUrl(info, si){
-  if(!info || !(info.server || info.files)) return null;
+  if(!info || info.noDl || !(info.server || info.files)) return null;
   if(!reciterHasSura(info, si)) return null;
   return reciterSuraUrl(info, suraNumOf(si));
 }
@@ -6880,9 +6892,11 @@ const RC_PHOTO={ghamdi:'ghamdi',shur:'shur',minshawi:'minshawi','minshawi-mjwd':
 function renderReciterChips(){
   const wrap=$('#reciter-chips'); if(!wrap) return;
   const playing=audioPlaying();
+  let qHead=false;
   wrap.innerHTML = RECITERS.map(r=>{
     const on = settings.reciter===r.id;
-    return '<button type="button" data-id="'+r.id+'" class="'+(on?'on':'')+'">'+
+    const head = (r.qalun && !qHead) ? (qHead=true, '<div class="rc-sec">قالون عن نافع — قرّاء من تونس</div>') : '';
+    return head+'<button type="button" data-id="'+r.id+'" class="'+(on?'on':'')+'">'+
       '<span class="rc-av'+(RC_PHOTO[r.id]?' ph':'')+'">'+ (on && playing && !RC_PHOTO[r.id] ? EQZ : escapeHtml(reciterMonogram(r.name))) +
         (RC_PHOTO[r.id]?'<img class="rc-ph" '+'src'+'="reciters/'+RC_PHOTO[r.id]+'.webp" alt="" width="46" height="46" decoding="async" onerror="this.remove()">'+(on&&playing?'<span class="rc-eq">'+EQZ+'</span>':''):'')+
         (r.external?'<span class="ext">↗</span>':'')+'</span>'+
@@ -7535,12 +7549,13 @@ function renderListenList(){
     const sub = na ? ('لم تُسجَّل بصوت '+escapeHtml(inf.name)) : (kind+' • '+ayaCountLabel(suraAyaCount(idx)));
     const u = inf ? qdlUrl(inf, idx) : null;
     const dl = u && qdlHas(u);
+    const dlb = (inf && inf.noDl) ? '' : '<span class="ls-dl'+(dl?' on':'')+'" role="button" data-dl="'+idx+'" aria-label="'+
+        (dl?'احذف التلاوة من الجهاز':'نزّل التلاوة على الجهاز')+'">'+(dl?QDL_OK:QDL_DOWN)+'</span>';
     return '<button type="button" class="listen-sura'+(na?' na':'')+'" data-si="'+idx+'">'+
       '<span class="ls-num">'+AR(idx+1)+'</span>'+
       '<span class="ls-mid"><span class="ls-name">'+escapeHtml(s.n)+'</span>'+
       '<span class="ls-sub">'+sub+'</span></span>'+
-      '<span class="ls-dl'+(dl?' on':'')+'" role="button" data-dl="'+idx+'" aria-label="'+
-        (dl?'احذف التلاوة من الجهاز':'نزّل التلاوة على الجهاز')+'">'+(dl?QDL_OK:QDL_DOWN)+'</span>'+
+      dlb+
       '<span class="ls-ic">'+ICON_PLAY+'</span>'+
     '</button>';
   }).join('');
