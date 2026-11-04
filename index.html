@@ -475,7 +475,7 @@
   /* القُرّاء: بطاقاتٌ بحرفٍ في دائرة بدل أزرارٍ مرصوفة */
   .reciter-chips{display:flex; gap:10px; overflow-x:auto; padding:2px; scrollbar-width:none;}
   .reciter-chips::-webkit-scrollbar{display:none;}
-  .reciter-chips .rc-sec{flex:0 0 auto; align-self:center; max-width:104px; padding:6px 10px; margin-inline:4px; font-size:11.5px; font-weight:800; line-height:1.5; text-align:center; color:var(--c-repeat); border:1px dashed var(--c-repeat); border-radius:14px;}
+  .reciter-chips .rc-sec{flex:0 0 auto; align-self:center; max-width:104px; padding:8px 12px; margin-inline:4px; font-size:11.5px; font-weight:800; line-height:1.5; text-align:center; color:var(--c-repeat); border:1px dashed var(--c-repeat); border-radius:14px;}
   .reciter-chips button{flex:0 0 auto; width:92px; border:1px solid var(--line); background:var(--card);
     color:var(--text); font:inherit; padding:12px 8px 11px; border-radius:18px; box-shadow:var(--shadow-1);
     display:flex; flex-direction:column; align-items:center; gap:8px;
@@ -6895,7 +6895,7 @@ function renderReciterChips(){
   let qHead=false;
   wrap.innerHTML = RECITERS.map(r=>{
     const on = settings.reciter===r.id;
-    const head = (r.qalun && !qHead) ? (qHead=true, '<div class="rc-sec">قالون عن نافع — قرّاء من تونس</div>') : '';
+    const head = (r.qalun && !qHead) ? (qHead=true, '<div class="rc-sec">قالون عن نافع</div>') : '';
     return head+'<button type="button" data-id="'+r.id+'" class="'+(on?'on':'')+'">'+
       '<span class="rc-av'+(RC_PHOTO[r.id]?' ph':'')+'">'+ (on && playing && !RC_PHOTO[r.id] ? EQZ : escapeHtml(reciterMonogram(r.name))) +
         (RC_PHOTO[r.id]?'<img class="rc-ph" '+'src'+'="reciters/'+RC_PHOTO[r.id]+'.webp" alt="" width="46" height="46" decoding="async" onerror="this.remove()">'+(on&&playing?'<span class="rc-eq">'+EQZ+'</span>':''):'')+
