@@ -1,5 +1,5 @@
 /* صلاتي — service worker v256 */
-const CACHE = 'azkari-v348';
+const CACHE = 'azkari-v349';
 const ASSETS = [
   './',
   './index.html',
@@ -44,6 +44,7 @@ const ASSETS = [
   './reciters/ajmi.webp',
   './reciters/juhani.webp',
   './reciters/barrak.webp',
+  './reciters/hudhaifi.webp',
   './fonts/ui-400.woff2',
   './fonts/ui-600.woff2',
   './fonts/ui-700.woff2',
