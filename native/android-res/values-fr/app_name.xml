@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- اسمُ التطبيق تحت الأيقونة لهاتفٍ بالفرنسيّة/الإنجليزيّة (طلبُ فريد، 6 نوفمبر 2026)؛ وبالعربيّة وغيرها «صلاتي» من capacitor.config.json -->
+<resources>
+    <string name="app_name">Salatee</string>
+    <string name="title_activity_main">Salatee</string>
+</resources>
