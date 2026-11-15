@@ -214,4 +214,17 @@ if (fs.existsSync(VER) && fs.existsSync(GRADLE)) {
   fs.writeFileSync(GRADLE, a, 'utf8');
   console.log('✓ رقمُ الإصدار: versionCode ' + v.versionCode + ' · versionName "' + v.versionName + '"');
 }
+/* 5) مستوى أندرويد المستهدَف (اختياريّ): إن وُجد targetSdk/compileSdk في android-version.json
+      كُتبا في android/variables.gradle؛ وإلّا بقي ما يضعه Capacitor (36). يُستعمل في فرع تجربة API 37. */
+{
+  const VG = path.join(HERE, 'android', 'variables.gradle');
+  const v = fs.existsSync(VER) ? JSON.parse(fs.readFileSync(VER, 'utf8')) : {};
+  if ((v.targetSdk || v.compileSdk) && fs.existsSync(VG)) {
+    let g = fs.readFileSync(VG, 'utf8');
+    if (v.compileSdk) { if (!/compileSdkVersion\s*=\s*\d+/.test(g)) die('لم أجد compileSdkVersion في variables.gradle'); g = g.replace(/compileSdkVersion\s*=\s*\d+/, 'compileSdkVersion = ' + v.compileSdk); }
+    if (v.targetSdk)  { if (!/targetSdkVersion\s*=\s*\d+/.test(g))  die('لم أجد targetSdkVersion في variables.gradle');  g = g.replace(/targetSdkVersion\s*=\s*\d+/, 'targetSdkVersion = ' + v.targetSdk); }
+    fs.writeFileSync(VG, g, 'utf8');
+    console.log('✓ مستوى أندرويد: compileSdk ' + (v.compileSdk || '—') + ' · targetSdk ' + (v.targetSdk || '—'));
+  }
+}
 console.log('\nتمّت زراعةُ طبقةِ الأذان ✓  — افتح الآن:  npx cap open android\n');
