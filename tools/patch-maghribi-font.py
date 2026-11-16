@@ -68,7 +68,7 @@ Réparations (script déjà appliqué — conservé pour référence):
    ب = 167) au lieu de l'anneau creux du point 6. Seul le contour du glyphe
    est remplacé (1 contour, 8 courbes quadratiques); cmap, ancrage GPOS et
    texte inchangés. Script: tools/patch-lowstop-dot.py. Nouveau nom, d'après
-   la règle du point 5: maghribi-955dce40.woff2 (ancien: 520e7013, supprimé).
+   la règle du point 5: maghribi-129a5580.woff2 (ancien: 520e7013, supprimé).
 
 Vérification: uharfbuzz (shaping) + captures Chromium sur les versets
 contenant chaque signe. Zéro caractère non couvert sur les 3 sources.
