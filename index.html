@@ -6903,6 +6903,7 @@ function renderReciterChips(){
       '<span class="rc-nm">'+escapeHtml(r.name)+'</span>'+
     '</button>';
   }).join('');
+  rcHintArm();
   if(!wrap.__rcBound){
     wrap.__rcBound=1;
     wrap.addEventListener('click', e=>{
@@ -6910,6 +6911,35 @@ function renderReciterChips(){
       const r=RECITERS.find(x=>x.id===b.dataset.id); if(r) onReciterPick(r);
     });
   }
+}
+/* تلميحٌ: يتحرّك شريطُ القرّاء إلى آخره ثم يعود، ليفهم الناسُ أنّ فيه قرّاءَ كثيرين (طلبُ فريد، 16 نوفمبر 2026) */
+let __rcHintAt=0, __rcHintRaf=0, __rcHintObs=null;
+function rcHintStop(){ if(__rcHintRaf){ cancelAnimationFrame(__rcHintRaf); __rcHintRaf=0; } }
+function rcHintRun(){
+  const w=$('#reciter-chips'); if(!w || w.offsetParent===null) return;
+  const max=w.scrollWidth-w.clientWidth; if(max<80) return;
+  if(Date.now()-__rcHintAt<10*60000) return; __rcHintAt=Date.now();
+  const rtl=getComputedStyle(w).direction==='rtl', s0=w.scrollLeft, end=rtl?-max:max;
+  const T1=3200, T2=1500, ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  let t0=0; rcHintStop();
+  const stop=()=>{ rcHintStop(); ['touchstart','pointerdown','wheel'].forEach(ev=>w.removeEventListener(ev,stop)); };
+  ['touchstart','pointerdown','wheel'].forEach(ev=>w.addEventListener(ev,stop,{passive:true,once:true}));
+  const step=ts=>{
+    if(!t0) t0=ts; const d=ts-t0;
+    if(d<T1) w.scrollLeft=s0+(end-s0)*ease(d/T1);
+    else if(d<T1+500) w.scrollLeft=end;
+    else if(d<T1+500+T2) w.scrollLeft=end+(s0-end)*ease((d-T1-500)/T2);
+    else { w.scrollLeft=s0; stop(); return; }
+    __rcHintRaf=requestAnimationFrame(step);
+  };
+  __rcHintRaf=requestAnimationFrame(step);
+}
+function rcHintArm(){
+  const w=$('#reciter-chips'); if(!w || __rcHintObs || !('IntersectionObserver' in window)) return;
+  __rcHintObs=new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting && e.intersectionRatio>.6) setTimeout(rcHintRun,700); else rcHintStop(); });
+  },{threshold:[0,.6]});
+  __rcHintObs.observe(w);
 }
 let __audioSura=null; // فهرس السورة المختارة للاستماع
 async function onReciterPick(r){
