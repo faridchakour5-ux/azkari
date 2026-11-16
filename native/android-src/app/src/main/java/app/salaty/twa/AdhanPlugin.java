@@ -202,6 +202,12 @@ public class AdhanPlugin extends Plugin {
     }
   }
 
+  /** سجلُّ تشخيصِ الأذان الأخير (نصٌّ) */
+  @PluginMethod
+  public void getLog(PluginCall call) {
+    JSObject r = new JSObject(); r.put("log", AdhanService.readLog(getContext())); call.resolve(r);
+  }
+
   /** حالةُ الجدول: كم وقتًا مسلَّحًا، ومتى القادم، وهل يُسمح بالمنبّهات الدقيقة. */
   @PluginMethod
   public void getStatus(PluginCall call) {
