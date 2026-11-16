@@ -60,6 +60,24 @@ public class AdhanService extends Service {
   private MediaSession session;
   private boolean prepared = false;
   private Runnable watch;
+  private int busyTicks = 0, stallTicks = 0, lastPos = -1;
+  private android.content.BroadcastReceiver screenRx;
+
+  /** سجلُّ تشخيصٍ قصير (آخر 40 سطرًا) يُعرَض في الإعدادات: لمعرفة سببِ انقطاعِ الأذان على بعض الهواتف */
+  static void log(Context c, String m) {
+    try {
+      android.content.SharedPreferences sp = AdhanScheduler.prefs(c);
+      String old = sp.getString("alog", "");
+      String line = new java.text.SimpleDateFormat("dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date()) + " " + m + "\n";
+      String[] ls = (old + line).split("\n");
+      StringBuilder sb = new StringBuilder();
+      for (int i = Math.max(0, ls.length - 40); i < ls.length; i++) sb.append(ls[i]).append('\n');
+      sp.edit().putString("alog", sb.toString()).apply();
+    } catch (Exception ignored) {}
+  }
+  static String readLog(Context c) {
+    try { return AdhanScheduler.prefs(c).getString("alog", ""); } catch (Exception e) { return ""; }
+  }
 
   @Override public IBinder onBind(Intent i) { return null; }
 
@@ -96,8 +114,11 @@ public class AdhanService extends Service {
       return START_NOT_STICKY;
     }
 
+    busyTicks = 0; stallTicks = 0; lastPos = -1;
+    log(this, "start " + name + " sdk=" + Build.VERSION.SDK_INT + " " + Build.MANUFACTURER);
     acquireWake();
     requestFocus();
+    startScreenLog();
     play();
     if (player != null && volStop()) startVolumeKeyStop();
     if (player != null) playing = true;
@@ -214,8 +235,8 @@ public class AdhanService extends Service {
         player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
       }
       player.setLooping(false);
-      player.setOnCompletionListener(mp -> stopEverything());
-      player.setOnErrorListener((mp, what, extra) -> { stopEverything(); return true; });
+      player.setOnCompletionListener(mp -> { log(this, "completed"); stopEverything(); });
+      player.setOnErrorListener((mp, what, extra) -> { log(this, "error " + what + "/" + extra); stopEverything(); return true; });
       try { player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK); } catch (Exception ignored) {}
       player.setOnPreparedListener(mp -> { prepared = true; mp.start(); startWatch(); });
       player.prepareAsync();
@@ -236,15 +257,43 @@ public class AdhanService extends Service {
                 .setUsage(AudioAttributes.USAGE_ALARM)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build())
-            .setOnAudioFocusChangeListener(change -> {})
+            .setOnAudioFocusChangeListener(this::onFocus)
             .build();
         audio.requestAudioFocus(focusReq);
       } else {
-        focusLegacy = change -> {};
+        focusLegacy = this::onFocus;
         audio.requestAudioFocus(focusLegacy, AudioManager.STREAM_ALARM,
             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
       }
     } catch (Exception ignored) {}
+  }
+
+  /** الأذانُ لا يتوقّف لأنّ غيرَه أخذ التركيز: نسجّل ونُعيد الطلبَ ونتأكّد من الصوت والتشغيل */
+  private void onFocus(int change) {
+    log(this, "focus=" + change);
+    if (change == AudioManager.AUDIOFOCUS_GAIN) return;
+    handler.post(() -> {
+      try {
+        if (player == null) return;
+        player.setVolume(1f, 1f);
+        if (prepared && !player.isPlaying()) player.start();
+        if (change == AudioManager.AUDIOFOCUS_LOSS || change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) requestFocus();
+      } catch (Exception ignored) {}
+    });
+  }
+
+  private void startScreenLog() {
+    try {
+      screenRx = new android.content.BroadcastReceiver() {
+        @Override public void onReceive(Context c, Intent i) {
+          log(AdhanService.this, "screen " + (Intent.ACTION_SCREEN_ON.equals(i.getAction()) ? "on" : "off"));
+          try { if (player != null && prepared && !player.isPlaying()) player.start(); if (player != null) player.setVolume(1f, 1f); } catch (Exception ignored) {}
+        }
+      };
+      android.content.IntentFilter f = new android.content.IntentFilter(Intent.ACTION_SCREEN_ON);
+      f.addAction(Intent.ACTION_SCREEN_OFF);
+      registerReceiver(screenRx, f);
+    } catch (Exception ignored) { screenRx = null; }
   }
 
   private void acquireWake() {
@@ -275,11 +324,23 @@ public class AdhanService extends Service {
     watch = new Runnable() {
       @Override public void run() {
         try {
-          /* بدأت مكالمةٌ أو تسجيلٌ والأذانُ يعمل: يُسكَت فورًا */
-          if (player != null && AdhanReceiver.busyAudio(AdhanService.this)) { stopEverything(); return; }
-          if (player != null && prepared && !player.isPlaying()) {
+          /* بدأت مكالمةٌ أو تسجيلٌ والأذانُ يعمل: يُسكَت — بعد ثلاثِ ثوانٍ متتاليةٍ، كي لا تقطعه إشارةٌ عابرةٌ (يحدث على بعض الهواتف) */
+          if (player != null) {
+            String why = AdhanReceiver.busyReason(AdhanService.this);
+            if (!why.isEmpty()) {
+              if (++busyTicks >= 3) { log(AdhanService.this, "busy-stop " + why); stopEverything(); return; }
+            } else busyTicks = 0;
+          }
+          if (player != null && prepared) {
+            player.setVolume(1f, 1f);
             int dur = player.getDuration(), pos = player.getCurrentPosition();
-            if (dur > 0 && pos < dur - 1500) player.start();     // لا نُعيد ما انتهى فعلًا
+            if (!player.isPlaying()) {
+              if (dur > 0 && pos < dur - 1500) { log(AdhanService.this, "restart paused pos=" + pos); player.start(); }   // لا نُعيد ما انتهى فعلًا
+            } else if (pos == lastPos && dur > 0 && pos < dur - 1500) {
+              /* يقول إنّه يعمل لكنّ الموضعَ لا يتقدّم (يحدث حين يوقف النظامُ المخرجَ بصمت): نُعيد تشغيلَه من موضعه */
+              if (++stallTicks >= 3) { stallTicks = 0; log(AdhanService.this, "stall-kick pos=" + pos); player.pause(); player.seekTo(pos); player.start(); }
+            } else stallTicks = 0;
+            lastPos = pos;
           }
         } catch (Exception ignored) {}
         if (player != null && watch != null) handler.postDelayed(this, 1000);
@@ -326,6 +387,8 @@ public class AdhanService extends Service {
 
   private void stopEverything() {
     playing = false;
+    try { log(this, "stop pos=" + (player != null && prepared ? player.getCurrentPosition() : -1) + (player != null && prepared ? "/" + player.getDuration() : "")); } catch (Exception ignored) {}
+    if (screenRx != null) { try { unregisterReceiver(screenRx); } catch (Exception ignored) {} screenRx = null; }
     if (signalled) { signalled = false; AdhanPlugin.emitAdhanState(false); }   // تستأنف التلاوةُ بعد الأذان
     if (guard != null) { handler.removeCallbacks(guard); guard = null; }
     stopVolumeKeyStop();

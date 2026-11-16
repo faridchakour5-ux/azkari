@@ -2204,6 +2204,7 @@
     <div class="gnote" id="adhan-exact" style="display:none">تنبيه: لم يُسمَح للتطبيق باستعمال المنبّهات الدقيقة، فقد يتأخّر الأذانُ دقائق عن وقته. <b id="adhan-exact-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">اسمح بها الآن</b></div>
     <div class="gnote" id="adhan-batt" style="display:none">لأعلى موثوقيّةٍ للأذان: اختر «عدم التحسين» للتطبيق في إعدادات البطارية، وتأكّد ألّا يكون في «التطبيقات النائمة» (سامسونغ) أو «حماية التطبيقات» (شاومي/هواوي). <b id="adhan-batt-btn" style="color:var(--accent); cursor:pointer; text-decoration:underline">افتح إعداد البطارية</b></div>
     <div class="btn-row b-blue svc-only" id="adhan-try" style="display:none">تجربة الأذان الآن</div>
+    <div class="btn-row svc-only" id="adhan-log" style="display:none">سجلّ الأذان الأخير (للتشخيص)</div>
     <div class="btn-row b-blue" id="notif-test">تجربة الإشعار الآن</div>
   </div>
 
@@ -8794,6 +8795,17 @@ $('#adhan-try') && $('#adhan-try').addEventListener('click', async ()=>{
   const P = adhanPlugin(); if(!P) return;
   vibrate(6);
   try{ const r=await P.preview({ name:'', voice: adhanVoice() }); if(r && r.blocked) showToast('لم يُرفع الأذان لوجود مكالمةٍ أو تسجيلٍ صوتيّ ('+r.why+')', 6000); else showToast('يُرفع الأذان الآن — اضغط «إيقاف» في الإشعار لإسكاته', 4200); }catch(e){}
+});
+$('#adhan-log') && $('#adhan-log').addEventListener('click', async ()=>{
+  const P = adhanPlugin(); if(!P || !P.getLog) return;
+  let t=''; try{ t=(await P.getLog()).log||''; }catch(e){}
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+  const bx=document.createElement('div'); bx.style.cssText='background:var(--card);color:var(--ink);border-radius:18px;padding:16px;max-width:520px;width:100%;max-height:80vh;display:flex;flex-direction:column;gap:10px';
+  const pre=document.createElement('pre'); pre.style.cssText='margin:0;overflow:auto;font:12px/1.6 monospace;direction:ltr;text-align:left;white-space:pre-wrap;flex:1';
+  pre.textContent=t||'لا سجلَّ بعد — يُسجَّل عند أوّل أذانٍ يُرفع.';
+  const x=document.createElement('div'); x.className='btn-row b-blue'; x.textContent='إغلاق'; x.onclick=()=>d.remove();
+  bx.append(pre,x); d.append(bx); d.onclick=e=>{ if(e.target===d) d.remove(); }; document.body.append(d);
 });
 /* بوصلة القبلة المصغَّرة في شريط المواقيت (صفحةُ «اتجاه القبلة» الكاملة في الأدوات لم تُمَسّ) */
 function qiblaBrg(lat,lng){ const d=Math.PI/180, f1=lat*d, f2=21.4225*d, dl=(39.8262-lng)*d;
