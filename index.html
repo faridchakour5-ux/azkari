@@ -2116,6 +2116,16 @@
   <div class="gtitle">نمط الكتابة</div>
   <div class="group">
     <div class="selectrow">
+      <span class="k">إبقاء الشاشة مضيئة</span>
+      <div class="selectwrap">
+        <select id="awake-select">
+          <option value="play">أثناء التلاوة والتحفيظ والتمرير (افتراضي)</option>
+          <option value="always">ما دام التطبيق مفتوحًا</option>
+          <option value="off">لا</option>
+        </select>
+      </div>
+    </div>
+    <div class="selectrow">
       <span class="k">الخط</span>
       <div class="selectwrap">
         <select id="font-select">
@@ -3052,6 +3062,33 @@ if(volStopToggle){
     showToast(settings.adhanVolStop ? 'سيُوقَف الأذانُ بضغط «خفض الصوت» ✓' : 'زرُّ «خفض الصوت» يخفّض صوتَ الأذان فقط', 3200);
   });
 }
+
+/* ===== إبقاءُ الشاشة مضيئة (طلبُ فريد، 17 نوفمبر 2026): افتراضًا أثناء التلاوة/التحفيظ/الذكر المسموع/«تمرير للقراءة»، أو ما دام التطبيقُ مفتوحًا، أو لا ===== */
+let __awakeOn=false, __awakeLastActive=0, __wakeLock=null;
+function awakeWanted(){
+  const m=settings.awake||'play';
+  if(m==='off' || document.hidden) return false;
+  if(m==='always') return true;
+  const playing=['reciter-audio','hifz-audio','dhikr-audio'].some(id=>{ const a=document.getElementById(id); return a && !a.paused && !a.ended && a.currentTime>0; });
+  if(playing || __autoRead) __awakeLastActive=Date.now();
+  return Date.now()-__awakeLastActive < 8000;      // مهلةٌ قصيرةٌ للفواصل بين الآيات
+}
+async function awakeApply(want){
+  if(want===__awakeOn) return; __awakeOn=want;
+  try{
+    const P=adhanPlugin();
+    if(P && P.keepScreenOn){ await P.keepScreenOn({ on:want }); return; }
+    if('wakeLock' in navigator){
+      if(want){ __wakeLock=await navigator.wakeLock.request('screen'); __wakeLock.addEventListener('release',()=>{ __awakeOn=false; }); }
+      else if(__wakeLock){ await __wakeLock.release(); __wakeLock=null; }
+    }
+  }catch(e){ __awakeOn=false; }
+}
+function awakeTick(){ try{ awakeApply(awakeWanted()); }catch(e){} }
+setInterval(awakeTick, 2000);
+document.addEventListener('visibilitychange', awakeTick);
+const awakeSel=$('#awake-select');
+if(awakeSel){ awakeSel.value=settings.awake||'play'; awakeSel.addEventListener('change', ()=>{ settings.awake=awakeSel.value; saveSettings(); vibrate(6); awakeTick(); }); }
 
 const readRemToggle = $('#readrem-toggle');
 if(readRemToggle){

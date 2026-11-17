@@ -202,6 +202,21 @@ public class AdhanPlugin extends Plugin {
     }
   }
 
+  /** إبقاءُ الشاشة مضيئة ما دامت نافذةُ التطبيق ظاهرة (لا يمنع القفلَ اليدويّ ولا يعمل في الخلفيّة) */
+  @PluginMethod
+  public void keepScreenOn(PluginCall call) {
+    final boolean on = Boolean.TRUE.equals(call.getBoolean("on", Boolean.FALSE));
+    try {
+      getActivity().runOnUiThread(() -> {
+        try {
+          if (on) getActivity().getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+          else getActivity().getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } catch (Exception ignored) {}
+      });
+    } catch (Exception ignored) {}
+    call.resolve();
+  }
+
   /** سجلُّ تشخيصِ الأذان الأخير (نصٌّ) */
   @PluginMethod
   public void getLog(PluginCall call) {
