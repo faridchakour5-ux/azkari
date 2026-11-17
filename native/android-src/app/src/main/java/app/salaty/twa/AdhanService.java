@@ -60,7 +60,7 @@ public class AdhanService extends Service {
   private MediaSession session;
   private boolean prepared = false;
   private Runnable watch;
-  private int busyTicks = 0, stallTicks = 0, lastPos = -1;
+  private int busyTicks = 0, stallTicks = 0, lastPos = -1, snapTicks = 0;
   private android.content.BroadcastReceiver screenRx;
 
   /** سجلُّ تشخيصٍ قصير (آخر 40 سطرًا) يُعرَض في الإعدادات: لمعرفة سببِ انقطاعِ الأذان على بعض الهواتف */
@@ -71,7 +71,7 @@ public class AdhanService extends Service {
       String line = new java.text.SimpleDateFormat("dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date()) + " " + m + "\n";
       String[] ls = (old + line).split("\n");
       StringBuilder sb = new StringBuilder();
-      for (int i = Math.max(0, ls.length - 40); i < ls.length; i++) sb.append(ls[i]).append('\n');
+      for (int i = Math.max(0, ls.length - 150); i < ls.length; i++) sb.append(ls[i]).append('\n');
       sp.edit().putString("alog", sb.toString()).apply();
     } catch (Exception ignored) {}
   }
@@ -114,7 +114,7 @@ public class AdhanService extends Service {
       return START_NOT_STICKY;
     }
 
-    busyTicks = 0; stallTicks = 0; lastPos = -1;
+    busyTicks = 0; stallTicks = 0; lastPos = -1; snapTicks = 0;
     log(this, "start " + name + " sdk=" + Build.VERSION.SDK_INT + " " + Build.MANUFACTURER);
     acquireWake();
     requestFocus();
@@ -282,6 +282,30 @@ public class AdhanService extends Service {
     });
   }
 
+  /** لقطةُ حالةِ الصوت في النظام: لمعرفة هل يكتم النظامُ الصوتَ والمشغّلُ يعمل */
+  private void snapshot() {
+    try {
+      AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+      StringBuilder sb = new StringBuilder("snap");
+      if (am != null) {
+        sb.append(" alarm=").append(am.getStreamVolume(AudioManager.STREAM_ALARM)).append('/').append(am.getStreamMaxVolume(AudioManager.STREAM_ALARM));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) sb.append(" mute=").append(am.isStreamMute(AudioManager.STREAM_ALARM));
+        sb.append(" ringer=").append(am.getRingerMode()).append(" mode=").append(am.getMode());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          java.util.List<android.media.AudioPlaybackConfiguration> pl = am.getActivePlaybackConfigurations();
+          sb.append(" players=");
+          if (pl != null) for (android.media.AudioPlaybackConfiguration c : pl) { android.media.AudioAttributes a = c.getAudioAttributes(); sb.append(a == null ? "?" : String.valueOf(a.getUsage())).append(','); }
+        }
+      }
+      android.app.NotificationManager nm = (android.app.NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+      if (nm != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) sb.append(" dnd=").append(nm.getCurrentInterruptionFilter());
+      PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+      if (pm != null) { sb.append(" idle=").append(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && pm.isDeviceIdleMode()).append(" scr=").append(pm.isInteractive()); }
+      if (player != null) sb.append(" pos=").append(player.getCurrentPosition() / 1000);
+      log(this, sb.toString());
+    } catch (Exception ignored) {}
+  }
+
   private void startScreenLog() {
     try {
       screenRx = new android.content.BroadcastReceiver() {
@@ -331,6 +355,7 @@ public class AdhanService extends Service {
               if (++busyTicks >= 3) { log(AdhanService.this, "busy-stop " + why); stopEverything(); return; }
             } else busyTicks = 0;
           }
+          if (player != null && prepared && (snapTicks++ % 10) == 0) snapshot();
           if (player != null && prepared) {
             player.setVolume(1f, 1f);
             int dur = player.getDuration(), pos = player.getCurrentPosition();
