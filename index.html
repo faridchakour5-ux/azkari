@@ -438,6 +438,7 @@
   .prayerbar .next span{font-size:13px; color:var(--text-2);}
   .prayerbar .next .next-lbl{color:var(--c-read);}
   .prayerbar .next .next-time{color:var(--c-repeat); font-weight:800;}
+  .prayerbar .next .next-left{display:inline-block; margin-top:3px; padding:2px 10px; border-radius:999px; background:var(--accent-bg,rgba(11,87,66,.10)); color:var(--accent); font-size:12.5px; font-weight:800;}
   .pt-note{margin:6px 20px 0; font-size:12px; line-height:1.7; color:var(--text-3);}
   .prayerbar .times{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
   .prayerbar .t{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:42px;}
@@ -874,14 +875,29 @@
   .upd-tour .at-act button .fr-sub{font-size:11.5px; font-weight:600; opacity:.8;}
   html[lang="fr"] .upd-tour .fr-sub, html[lang="en"] .upd-tour .fr-sub{display:none;}
   /* حركةُ «صلِّ على الحبيب» عند فتح القرآن */
+  /* «صلِّ على الحبيب ﷺ» تُغطّي كلَّ انتظار (طلبُ فريد، 24 نوفمبر 2026): تنزل العبارةُ ثم تبقى ظاهرةً حتى تجهز الصفحة فعلًا (لا تتلاشى وحدَها)، وتحتها الصلاةُ القادمة عند فتح القرآن */
   #qsal{position:fixed; inset:0; z-index:9000; display:none; align-items:center; justify-content:center; background:var(--bg); opacity:0; pointer-events:none;}
-  #qsal.go{display:flex; pointer-events:auto; animation:qsFade 2.2s ease forwards;}
+  #qsal.go{display:flex; pointer-events:auto; animation:qsIn .22s ease forwards;}
+  #qsal.go.out{animation:qsOut .28s ease forwards; pointer-events:none;}
+  #qsal .qs-box{display:flex; flex-direction:column; align-items:center; gap:14px; padding:0 18px;}
   #qsal .qs-t{font-family:'Maghribi','AmiriQuran',serif; font-size:clamp(40px,12vw,60px); line-height:1.5; color:#063D30; text-shadow:0 1px 14px rgba(6,61,48,.22); white-space:nowrap; transform:translateY(-62vh); opacity:0;}
-  #qsal.go .qs-t{animation:qsDrop 2.2s cubic-bezier(.22,.8,.3,1) forwards;}
+  #qsal.go .qs-t{animation:qsDrop 1.1s cubic-bezier(.22,.8,.3,1) forwards;}
+  #qsal .qs-np{opacity:0; text-align:center; font-family:'PlexAr',system-ui,sans-serif; font-size:16px; font-weight:600; color:var(--text-2); line-height:1.7;}
+  #qsal .qs-np b{color:var(--accent); font-weight:800;}
+  #qsal .qs-np .qs-left{display:inline-block; margin-top:4px; padding:3px 14px; border-radius:999px; background:var(--accent-bg,rgba(11,87,66,.10)); color:var(--accent); font-weight:800; font-size:17px;}
+  #qsal.go .qs-np{animation:qsIn .4s ease .95s forwards;}
   html[data-bg="dark"] #qsal .qs-t{color:#35B087;}
-  @keyframes qsFade{0%{opacity:0} 12%{opacity:1} 78%{opacity:1} 100%{opacity:0}}
-  @keyframes qsDrop{0%{transform:translateY(-62vh); opacity:0} 14%{opacity:1} 46%{transform:translateY(0); opacity:1} 78%{transform:translateY(0); opacity:1} 100%{transform:translateY(6px); opacity:0}}
-  @media (prefers-reduced-motion: reduce){ #qsal .qs-t{transform:none;} #qsal.go .qs-t{animation:qsFadeT 1.6s ease forwards;} @keyframes qsFadeT{0%{opacity:0} 25%{opacity:1} 75%{opacity:1} 100%{opacity:0}} }
+  @keyframes qsIn{from{opacity:0} to{opacity:1}}
+  @keyframes qsOut{from{opacity:1} to{opacity:0}}
+  @keyframes qsDrop{0%{transform:translateY(-62vh); opacity:0} 25%{opacity:1} 100%{transform:translateY(0); opacity:1}}
+  @media (prefers-reduced-motion: reduce){ #qsal .qs-t{transform:none;} #qsal.go .qs-t{animation:qsIn .4s ease forwards;} }
+  /* تلميحُ صفحة القرآن (طلبُ فريد، 24 نوفمبر 2026): 3 ثوانٍ تُعرِّف بالتفسير وبحفظ موضع القراءة */
+  .q-hint{position:fixed; left:14px; right:14px; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:85; max-width:460px; margin:0 auto;
+    background:var(--card); color:var(--text); border:1px solid var(--line); border-inline-start:4px solid var(--accent); border-radius:18px;
+    box-shadow:var(--shadow-2); padding:12px 14px; font-size:15px; line-height:1.75; font-weight:600;
+    opacity:0; transform:translateY(14px); transition:opacity .3s ease, transform .3s ease; pointer-events:none;}
+  .q-hint.show{opacity:1; transform:translateY(0); pointer-events:auto;}
+  .q-hint b{color:var(--accent); font-weight:800;}
   .salat-toast{position:fixed; left:16px; right:16px; bottom:calc(84px + env(safe-area-inset-bottom));
     z-index:80; background:var(--accent); color:#fff; text-align:center; font-weight:700; font-size:15px;
     padding:14px 18px; border-radius:16px; box-shadow:var(--shadow-2); max-width:480px; margin:0 auto;
@@ -2299,13 +2315,12 @@
 <script src="data.js" onerror="document.querySelector('#az-list').innerHTML='<div style=\'padding:30px;text-align:center;color:#c0392b\'>تعذّر تحميل الأذكار. افتح الإعدادات في المتصفح وامسح البيانات ثم أعِد الفتح.</div>'"></script>
 <script src="adhan.min.js"></script>
 <script src="ma-habous.js"></script>
-<script src="pt-regions.js"></script>
 <script>
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const AR = n => String(n);
-const todayKey = () => new Date().toISOString().slice(0,10);
+const todayKey = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };   // اليومُ المحلّيّ لا UTC
 function vibrate(ms){ try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} }
 
 const store = {
@@ -2505,7 +2520,7 @@ function applyRiwaya(){
     ? 'رواية ورش عن نافع — عن المصحف المحمدي، بالخطّ المغربي. الأدعية موحَّدة في الروايتين.'
     : 'رواية حفص عن عاصم — عن مصحف الملك فهد، بخطّه ورموزِه.';
   if(currentTab==='evening'||currentTab==='morning') renderAzkar();
-  if(window.__wirdReady){ WIRD=null; if($('#s-wird').classList.contains('active')) openWird(); }
+  if(window.__wirdReady){ WIRD=null; if($('#s-wird').classList.contains('active')) qsalHold(async()=>{ openWird(); await waitFor(mushafReady, 12000); }, 1100); }
   if(typeof syncRiwayaPills==='function') syncRiwayaPills();
   document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh');
 }
@@ -2824,9 +2839,13 @@ fontSelect.addEventListener('change', ()=>{
 /* طريقة حساب المواقيت (خارج المغرب فقط — المغرب يبقى بالأوقاف دائمًا) */
 (function(){
   const sel=$('#ptm-select'), asr=$('#pta-select'), note=$('#pt-set-note'); if(!sel||!asr) return;
-  const M=window.PT_METHODS||{};
-  sel.innerHTML='<option value="auto">تلقائي (حسب بلدك)</option>'+Object.keys(M).map(k=>'<option value="'+k+'">'+M[k].s+'</option>').join('');
-  sel.value=settings.ptMethod||'auto'; asr.value=settings.ptAsr||'auto';
+  /* pt-regions.js (222KB) لا يُحمَّل عند الإقلاع: يلزم خارج المغرب فقط (انظر ptEnsure)، فتُملأ القائمةُ حين يصل */
+  window.fillPtSelect=function(){
+    const M=window.PT_METHODS||{};
+    sel.innerHTML='<option value="auto">تلقائي (حسب بلدك)</option>'+Object.keys(M).map(k=>'<option value="'+k+'">'+M[k].s+'</option>').join('');
+    sel.value=settings.ptMethod||'auto';
+  };
+  fillPtSelect(); asr.value=settings.ptAsr||'auto';
   function refreshNote(){
     const g=geoStore(); const inMA=g && g.lat>=20.7&&g.lat<=35.95&&g.lng>=-17.3&&g.lng<=-0.9;
     note.textContent = inMA
@@ -3453,9 +3472,11 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
   /* صفحةُ الوِرد تُموضِع نفسَها بعدُ على آخر موضعٍ بلغه القارئ، فلا تُصفَّر
      هنا وإلّا رجع إلى أوّل الصفحة ثمّ قفز، وربّما كُتب الصفرُ مكانَ موضعه. */
   if(t.dataset.s!=='s-wird') window.scrollTo(0,0);
-  if(t.dataset.s==='s-wird' && !__wasOn) playQuranSalat(); else flashSalat();
   if(t.dataset.s!=='s-wird'){ ['#mushaf-jump','#q-zoom-float','#riwaya-float'].forEach(x=>{ const e=$(x); if(e) e.classList.remove('show'); }); }
-  if(t.dataset.s==='s-wird') openWird();
+  if(t.dataset.s==='s-wird'){
+    if(!__wasOn) qsalHold(async()=>{ openWird(); await waitFor(mushafReady, 12000); }, nextPrayerInfo()?2700:1300, true).then(quranHint);
+    else openWird();
+  }
   if(t.dataset.s==='s-listen') openListen();
   if(t.dataset.s==='s-settings'){ try{ renderBackupStatus(); }catch(e){} try{ renderQdlBar(); }catch(e){} }
   if(t.dataset.s==='s-tasbih'){
@@ -3469,37 +3490,83 @@ $$('.tab').forEach(t=> t.addEventListener('click', ()=>{
 let __splashTimer=null;
 /* لمسةٌ واحدةٌ تُغلق شاشةَ الافتتاح — لا يُنتظر من استعجل */
 (function(){ const s=document.getElementById('splash'); if(!s) return;
+  /* بعد زوالها تُزال من العرض تمامًا، فلا تبقى نجمتُها تدور خفيّةً طوالَ الجلسة (تستهلك البطارية) */
+  const off=()=>{ s.style.display='none'; };
+  s.addEventListener('animationend', e=>{ if(e.target===s && (e.animationName==='splashAuto'||e.animationName==='splashOut')) off(); });
+  setTimeout(off, 5000);
   s.addEventListener('click', ()=>{ s.classList.add('gone'); }, {once:true}); })();
 /* ===== «صلِّ على الحبيب ﷺ» عند فتح القرآن (طلبُ فريد، 20 أكتوبر 2026) =====
    نصٌّ بالخطّ المغربيّ بلونٍ أخضرَ مريميّ (vert sauge) ينزل من أعلى الشاشة إلى وسطها ثم يتلاشى، فلا يملّ المستخدمُ وهو ينتظر المصحف.
    لا يمسّ المصحفَ ولا إعداداتِه؛ طبقةٌ مستقلّةٌ تُلمَس فتزول. */
-function playQuranSalat(ms){
+let __qsAt=0;
+function qsalEl(){
+  let o=document.getElementById('qsal');
+  if(!o){
+    o=document.createElement('div'); o.id='qsal'; o.setAttribute('aria-hidden','true');
+    o.innerHTML='<div class="qs-box"><div class="qs-t">صلِّ على الحبيب ﷺ</div><div class="qs-np" data-noi18n></div></div>';
+    o.addEventListener('click',()=>qsalHide(0));
+    document.body.appendChild(o);
+  }
+  return o;
+}
+/* سطرُ الصلاة القادمة تحت العبارة (طلبُ فريد، 24 نوفمبر 2026): أيُّ صلاةٍ وكم بقي عليها بالساعة والدقيقة */
+function qsalNextHtml(){
+  const np=nextPrayerInfo(); if(!np) return '';
+  const L=uiLang();
+  const nm = L==='fr' ? {fajr:'Fajr',dhuhr:'Dhuhr',asr:'‘Asr',maghrib:'Maghrib',isha:'‘Isha'}[np.key]
+           : L==='en' ? {fajr:'Fajr',dhuhr:'Dhuhr',asr:'Asr',maghrib:'Maghrib',isha:'Isha'}[np.key] : np.name;
+  const lbl = L==='fr' ? 'Prochaine prière' : L==='en' ? 'Next prayer' : 'الصلاة القادمة';
+  return lbl+' · <b>'+nm+'</b> '+fmtTime(np.at)+'<br><span class="qs-left">'+fmtLeft(np.at-new Date())+'</span>';
+}
+function qsalShow(withNext){
   try{
-    let o=document.getElementById('qsal');
-    if(!o){
-      o=document.createElement('div'); o.id='qsal'; o.setAttribute('aria-hidden','true');
-      o.innerHTML='<div class="qs-t">صلِّ على الحبيب ﷺ</div>';
-      o.addEventListener('click',()=>{ o.classList.remove('go'); });
-      document.body.appendChild(o);
-    }
-    o.classList.remove('go'); void o.offsetWidth; o.classList.add('go');
-    clearTimeout(window.__qsalT); window.__qsalT=setTimeout(()=>o.classList.remove('go'), ms||2300);
+    const o=qsalEl(), np=o.querySelector('.qs-np');
+    if(np) np.innerHTML = withNext ? qsalNextHtml() : '';
+    o.classList.remove('go','out'); void o.offsetWidth; o.classList.add('go');
+    __qsAt=Date.now();
+    clearTimeout(window.__qsalT); window.__qsalT=setTimeout(()=>qsalHide(0), 15000);   // حارس: لا تبقى الطبقةُ أبدًا
   }catch(e){}
 }
-function flashSalat(){
-  const s=$('#splash'); if(!s) return;
-  s.style.animation='none';
-  s.style.transition='opacity .26s ease';
-  s.style.visibility='visible';
-  s.style.opacity='1';
-  clearTimeout(__splashTimer);
-  __splashTimer=setTimeout(()=>{
-    s.style.opacity='0';
-    /* بعد التلاشي تُخفى الطبقةُ تمامًا، فلا تبقى شاشةٌ كاملةٌ معلّقةً فوق التطبيق */
-    setTimeout(()=>{ if(s.style.opacity==='0') s.style.visibility='hidden'; }, 320);
-  }, 550);
+/* تُخفى بعد أن تكون قد ظهرت minMs على الأقلّ (فتُقرأ)، بتلاشٍ قصير */
+function qsalHide(minMs){
+  const o=document.getElementById('qsal'); if(!o || !o.classList.contains('go')) return;
+  const wait=Math.max(0, (minMs||0)-(Date.now()-__qsAt));
+  clearTimeout(window.__qsalT);
+  window.__qsalT=setTimeout(()=>{ o.classList.add('out'); setTimeout(()=>{ if(o.classList.contains('out')) o.classList.remove('go','out'); }, 300); }, wait);
 }
-
+function playQuranSalat(ms){ qsalShow(false); qsalHide(ms||1500); }
+/* تُظهر العبارةَ، وتُنفِّذ العملَ البطيء بعد أن تُرسَم، ولا تُخفيها إلا بعد انتهائه */
+async function qsalHold(fn, minMs, withNext){
+  qsalShow(!!withNext);
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  try{ await fn(); }catch(e){}
+  qsalHide(minMs==null ? 1300 : minMs);
+}
+/* بعد زوال «صلِّ على الحبيب ﷺ» تظهر بطاقةٌ 3 ثوانٍ: التفسيرُ بلمس الآية، وحفظُ موضع القراءة بلمس رقمها.
+   تظهر في أوّل 10 مرّاتٍ يُفتح فيها القرآن ثم تكفّ (az_qhint)، ولمسةٌ تُخفيها. */
+async function quranHint(){
+  try{
+    const n=store.get('az_qhint',0)||0; if(n>=10) return;
+    await waitFor(()=>!document.querySelector('#qsal.go'), 6000);
+    if(!$('#s-wird').classList.contains('active') || !mushafReady()) return;
+    store.set('az_qhint', n+1);
+    const L=uiLang();
+    const html = L==='fr' ? '📖 Touchez un verset pour voir son <b>tafsir</b>.<br>🔖 Touchez son <b>numéro</b> pour enregistrer où vous êtes arrivé.'
+               : L==='en' ? '📖 Tap a verse to see its <b>tafsir</b>.<br>🔖 Tap its <b>number</b> to save where you stopped.'
+               : '📖 اضغط على الآية لترى <b>تفسيرها</b>.<br>🔖 واضغط على <b>رقمها</b> لتحفظ أين وصلت في القراءة.';
+    let h=document.getElementById('q-hint');
+    if(!h){ h=document.createElement('div'); h.id='q-hint'; h.className='q-hint'; h.setAttribute('data-noi18n',''); h.setAttribute('role','status'); document.body.appendChild(h); h.addEventListener('click',()=>h.classList.remove('show')); }
+    h.innerHTML=html; h.dir = L==='ar' ? 'rtl' : 'ltr';
+    void h.offsetWidth; h.classList.add('show');
+    clearTimeout(window.__qHintT); window.__qHintT=setTimeout(()=>h.classList.remove('show'), 3000);
+  }catch(e){}
+}
+/* الرجوعُ إلى التطبيق من صفحةٍ مستقلّة (ذاكرة المتصفّح): لا تبقى الطبقةُ ظاهرة */
+window.addEventListener('pageshow', ()=>{ try{ qsalHide(0); }catch(e){} });
+function waitFor(cond, maxMs){
+  return new Promise(res=>{ const t0=Date.now(); (function chk(){ let ok=false; try{ ok=!!cond(); }catch(e){} if(ok || Date.now()-t0>(maxMs||10000)) return res(ok); setTimeout(chk, 60); })(); });
+}
+const mushafReady = () => !!(window.__wirdReady && __mushafRenderedRiwaya===settings.riwaya && document.querySelector('#wird-body .aya-t'));
 /* quick riwaya switcher on every page */
 function syncRiwayaPills(){
   $$('.riwaya-quick button').forEach(b=> b.classList.toggle('on', b.dataset.r===settings.riwaya));
@@ -3541,11 +3608,17 @@ function saveWirdState(s){ store.set('az_wird', s); }
 function wirdFile(){ return settings.riwaya==='warsh' ? 'wird_warsh.js' : 'wird_hafs.js'; }
 function wirdGlobal(){ return settings.riwaya==='warsh' ? window.WIRD_WARSH : window.WIRD_HAFS; }
 
-function loadScript(src){ return new Promise((res,rej)=>{
-  // Remove any stale element (covers the case where a previous load failed)
-  [...document.scripts].filter(s=>s.src.endsWith(src)).forEach(s=>s.remove());
-  const el=document.createElement('script'); el.src=src; el.onload=res; el.onerror=rej; document.body.appendChild(el);
-});}
+/* تحميلٌ واحدٌ لكلّ ملفّ: طلبان متزامنان يتشاركان الوعدَ نفسَه فلا يُنزَّل الملفُّ (1.5MB للمصحف) ويُحلَّل مرّتين؛ والفاشلُ يُعاد */
+const __lsCache={};
+function loadScript(src){
+  if(__lsCache[src]) return __lsCache[src];
+  return (__lsCache[src]=new Promise((res,rej)=>{
+    // Remove any stale element (covers the case where a previous load failed)
+    [...document.scripts].filter(s=>s.src.endsWith(src)).forEach(s=>s.remove());
+    const el=document.createElement('script'); el.src=src; el.onload=res;
+    el.onerror=e=>{ delete __lsCache[src]; rej(e); }; document.body.appendChild(el);
+  }));
+}
 
 const WIRD_AMOUNTS=[
   {id:'lines4', label:'4 أسطر', kind:'lines', n:4},
@@ -3589,7 +3662,7 @@ function renderWirdKpi(){
   let week='';
   for(let off=6; off>=0; off--){
     const dd=new Date(now); dd.setDate(now.getDate()-off);
-    const key=dd.toISOString().slice(0,10);
+    const key=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
     week+='<i class="'+(d[key]?'on':'')+'"></i>';
   }
   el.className='wird-kpi'+(read?' read':'');
@@ -5179,7 +5252,9 @@ function loadTools(){
   return __toolsLoading || (__toolsLoading=loadScriptOnce('tools.js').then(ok=>{ if(!ok) __toolsLoading=null; return ok; }));
 }
 async function openTools(page){
-  if(!(await loadTools())){ showToast('تعذّر تحميل الأدوات — جرّب ثانيةً', 3200); return; }
+  let ok=!!window.SalTools;
+  if(!ok) await qsalHold(async()=>{ ok=await loadTools(); }, 900);   // أوّلُ تحميلٍ للأدوات: «صلِّ على الحبيب ﷺ» تُغطّيه
+  if(!ok){ showToast('تعذّر تحميل الأدوات — جرّب ثانيةً', 3200); return; }
   vibrate(6); SalTools.open(page);
 }
 /* ===== القائمة الجانبيّة (هامبورغر): كلُّ صفحاتِ التطبيق وأدواتِه في مكانٍ واحد ===== */
@@ -5252,12 +5327,8 @@ async function openTools(page){
   const NAMES={fajr:'الفجر',sunrise:'الشروق',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
   function nextPrayerHtml(){
     try{
-      const g=geoStore(); if(!g) return '';
-      const pt=computePrayers(g.lat,g.lng); if(!pt) return '';
-      let np=pt.nextPrayer(), tm;
-      if(np==='none'){ const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1); const p2=computePrayers(g.lat,g.lng,tomorrow); np='fajr'; tm=p2&&p2.fajr; } else tm=pt.timeForPrayer(np);
-      if(!tm) return '';
-      return '<span>الصلاة القادمة</span> · <b>'+NAMES[np]+'</b> <b>'+fmtTime(tm)+'</b>';
+      const np=nextPrayerInfo(); if(!np) return '';
+      return '<span>الصلاة القادمة</span> · <b>'+np.name+'</b> <b>'+fmtTime(np.at)+'</b> <span data-noi18n>'+fmtLeft(np.at-new Date())+'</span>';
     }catch(e){ return ''; }
   }
   function render(){
@@ -5280,7 +5351,7 @@ async function openTools(page){
     const v=document.getElementById('app-ver'); h+='<div class="dr-ver">'+(v?v.textContent:'')+'</div></div>';
     dr.innerHTML=h;
     dr.querySelectorAll('[data-a]').forEach(b=>b.addEventListener('click',()=>{ vibrate(6); const f=A[b.dataset.a]; if(f) f(); }));
-    dr.querySelectorAll('a.dr-i').forEach(a=>a.addEventListener('click',()=>vibrate(5)));
+    dr.querySelectorAll('a.dr-i').forEach(a=>a.addEventListener('click',()=>{ vibrate(5); qsalShow(false); }));   // صفحةٌ مستقلّة: «صلِّ على الحبيب ﷺ» حتى تُفتح
     dr.querySelectorAll('#dr-lang button').forEach(b=>b.addEventListener('click',()=>{ const v2=b.dataset.l; if(v2===lang) return; settings.lang=v2; saveSettings(); vibrate(6); location.reload(); }));
     // التاريخ الهجريّ: يأتي بعد تحميل tools.js (صغير ومُخزَّن)
     loadTools().then(ok=>{ const el=document.getElementById('dr-hj'); if(ok && el && window.SalTools && SalTools.hijriOk()) el.textContent=SalTools.hLabel(SalTools.hijri(new Date())); });
@@ -5471,8 +5542,7 @@ async function openFiqh(){
   const box=$('#fiqh-body'); if(!box) return;
   if(window.FIQH) return renderFiqh();
   box.innerHTML='<div class="search-hint">…جارٍ التحميل</div>';
-  await loadFiqh();
-  renderFiqh();
+  await qsalHold(async()=>{ await loadFiqh(); renderFiqh(); }, 900);
 }
 
 function applyTasbihMode(mode){
@@ -6443,20 +6513,13 @@ function commitMushafJump(suraIdx, ai){
   closeSuraOverlay(); vibrate(6);
   /* «صلِّ على الحبيب ﷺ» تظهر أثناء الانتقال (طلبُ فريد، 20 أكتوبر 2026): الانتقالُ إلى سورةٍ بعيدةٍ يبطُؤ قليلًا.
      تُرسَم الطبقةُ أوّلًا ثمّ نُمرِّر بعد إطارين، فلا يتزامن ثِقلُ التمرير مع حركةِ الورقة ولا مع ظهورها. */
-  playQuranSalat();
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    if(ai===WIRD.sur[suraIdx].i) scrollToSura(suraIdx, false); else scrollToAya(ai, false);
-  }));
+  qsalHold(()=>{ if(ai===WIRD.sur[suraIdx].i) scrollToSura(suraIdx, false); else scrollToAya(ai, false); }, 1100);
 }
 /* ظهورُ قائمة السور بطيءٌ قليلًا (طلبُ فريد، 20 أكتوبر 2026): تُغطّيه «صلِّ على الحبيب ﷺ»؛ تُرسَم الطبقةُ أوّلًا ثم تُبنى القائمةُ بعد إطارين. */
 /* المرّةُ الأولى تبني القائمةَ كاملةً فتُجمِّد الخيطَ الرئيسيّ وتنتهي مهلةُ الحركة قبل أن تُرى. فنُمهل الحركةَ 450ms لتظهر أوّلًا، ثم نبني القائمة، ثم نُبقي الحركةَ ظاهرةً 900ms بعد انتهاء البناء (يُحسَب الزمنُ بعد البناء لا قبله). */
 $('#mushaf-jump').addEventListener('click', ()=>{
-  vibrate(6); playQuranSalat(8000);
-  setTimeout(()=>{
-    openMushafPicker();
-    clearTimeout(window.__qsalT);
-    window.__qsalT=setTimeout(()=>{ const o=document.getElementById('qsal'); if(o) o.classList.remove('go'); }, 900);
-  }, 450);
+  vibrate(6);
+  qsalHold(async()=>{ await new Promise(r=>setTimeout(r,350)); openMushafPicker(); }, 1100);
 });
 $('#sura-q') && $('#sura-q').addEventListener('input', e=>{ renderSuraRows(e.target.value); $('#sura-list').scrollTop=0; });
 $('#sura-overlay-back').addEventListener('click', ()=>{ openMushafPicker(); });
@@ -8566,6 +8629,16 @@ function ptMethodNote(lat,lng){
   if(!window.PT_NOTE) return '';
   return window.PT_NOTE(window.PT_KEY(lat,lng,settings.ptMethod), settings.ptAsr);
 }
+/* تحميلُ pt-regions.js عند الحاجة (خارج المغرب أو في الإعدادات)، ثم إعادةُ الحساب والجدولة مرّةً واحدة */
+function ptEnsure(){
+  if(window.PT_PARAMS || window.__ptReq) return; window.__ptReq=1;
+  setTimeout(()=>{ loadScript('pt-regions.js').then(()=>{
+    try{ fillPtSelect(); }catch(e){}
+    try{ renderPrayers(); }catch(e){}
+    try{ scheduleNativeNotifs(); }catch(e){}
+  }, ()=>{ window.__ptReq=0; }); }, 0);
+}
+setTimeout(()=>{ try{ ptEnsure(); }catch(e){} }, 9000);   // لقائمة الإعدادات: بعد الإقلاع بهدوء
 function computePrayers(lat,lng,date){
   try{
     const A=window.adhan; if(!A) return null;
@@ -8579,6 +8652,10 @@ function computePrayers(lat,lng,date){
       params=new A.CalculationParameters('Other',19,17);
       params.madhab=A.Madhab.Shafi;
       params.adjustments=maHabousAdj(lat,lng);
+    } else if(!window.PT_PARAMS){
+      ptEnsure();   // خارج المغرب: تُحمَّل طرقُ البلدان ثم يُعاد الحساب
+      params=new A.CalculationParameters('Other',19,17);
+      params.madhab=A.Madhab.Shafi;
     } else if(window.PT_PARAMS){
       /* خارج المغرب: طريقةُ البلد تلقائيًّا (pt-regions.js)، أو ما اختاره المستخدمُ في الإعدادات */
       params=window.PT_PARAMS(A, window.PT_KEY(lat,lng,settings.ptMethod), coords, settings.ptAsr);
@@ -8588,6 +8665,25 @@ function computePrayers(lat,lng,date){
     }
     return new A.PrayerTimes(coords, date||new Date(), params);
   }catch(e){ return null; }
+}
+/* الصلاة القادمة (طلبُ فريد، 24 نوفمبر 2026): الشروقُ ليس صلاةً، فبين الفجر والشروق القادمةُ الظهر؛ وبعد العشاء فجرُ الغد. */
+const NEXT_NAMES={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
+function nextPrayerInfo(now){
+  try{
+    const g=geoStore(); if(!g) return null;
+    now=now||new Date();
+    const pt=computePrayers(g.lat,g.lng,now); if(!pt) return null;
+    for(const k of ['fajr','dhuhr','asr','maghrib','isha']){ const t=pt[k]; if(t && t>now) return {key:k, name:NEXT_NAMES[k], at:t}; }
+    const tm=new Date(now); tm.setDate(tm.getDate()+1);
+    const p2=computePrayers(g.lat,g.lng,tm);
+    return (p2 && p2.fajr) ? {key:'fajr', name:NEXT_NAMES.fajr, at:p2.fajr} : null;
+  }catch(e){ return null; }
+}
+/* «بعد 1 س و20 د» — بالساعة والدقيقة، وبلغة الواجهة */
+function fmtLeft(ms){
+  const m=Math.max(1,Math.ceil(ms/60000)), h=Math.floor(m/60), mm=m%60, L=uiLang();
+  if(L==='fr'||L==='en') return (L==='fr'?'dans ':'in ')+(h?h+' h'+(mm?' '+mm+' min':''):mm+' min');
+  return 'بعد '+(h? h+' س'+(mm?' و'+mm+' د':'') : mm+' د');
 }
 /* ===== جدولة الأذان على مستوى النظام (تطبيق Capacitor الأصلي) =====
    تعمل حتى والتطبيق مغلق تمامًا وبلا إنترنت، عبر إشعارات مجدوَلة محليًّا */
@@ -8896,26 +8992,14 @@ function renderPrayers(){
   btn.style.display='none'; bar.style.display='flex'; prayerToday=pt;
   try{ const n=$('#pt-note'); if(n){ const t=ptMethodNote(g.lat,g.lng); n.textContent=t; n.style.display=t?'':'none'; } }catch(e){}
   const A=window.adhan;
-  let nextName='—', nextTime='', nextKey=null;
-  try{
-    const np=pt.nextPrayer();
-    const map={fajr:'الفجر',sunrise:'الشروق',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء',none:'الفجر'};
-    nextName=map[np]||'—';
-    if(np==='none'){
-      // بعد العشاء: القادمة فجر الغد
-      nextKey='fajr';
-      const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1);
-      const ptTomorrow=computePrayers(g.lat,g.lng,tomorrow);
-      if(ptTomorrow && ptTomorrow.fajr) nextTime=fmtTime(ptTomorrow.fajr);
-    } else {
-      nextKey=np;
-      const nt=pt.timeForPrayer(np); if(nt) nextTime=fmtTime(nt);
-    }
-  }catch(e){}
+  let nextName='—', nextTime='', nextKey=null, nextLeft='';
+  const npi=nextPrayerInfo(); window.__np=npi; window.__npDay=new Date().toDateString();
+  if(npi){ nextName=npi.name; nextKey=npi.key; nextTime=fmtTime(npi.at); nextLeft=fmtLeft(npi.at-new Date()); }
   const cur = (()=>{ try{ return pt.currentPrayer(); }catch(e){ return null; } })();
   let times='';
   PRAYERS.forEach(([k,nm])=>{ const tv=pt[k]; if(!tv) return; const isCur=cur===k; const isNext=(k===nextKey); times+='<div class="t'+(isCur?' cur':'')+(isNext?' next-p':'')+'"><span class="nm">'+nm+'</span><span class="vl">'+fmtTime(tv)+'</span></div>'; });
   bar.innerHTML='<div class="next"><b>'+nextName+'</b><span><span class="next-lbl">الصلاة القادمة</span> <span class="next-time">'+nextTime+'</span></span>'+
+    (nextLeft?'<span class="next-left" data-noi18n>'+nextLeft+'</span>':'')+
     '<div class="np-row"><button class="geo-refresh" id="geo-refresh" title="تحديث موقعي" aria-label="تحديث موقعي">'+
     '<svg class="gh-ic" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></button>'+
     miniQiblaHtml(g)+'</div></div><div class="times">'+times+'</div>';
@@ -8932,6 +9016,17 @@ function renderPrayers(){
   // auto morning/evening by Asr
   autoTimeByPrayer(pt);
 }
+/* العدّادُ يتحدّث وحدَه: كلَّ 30 ثانية وعند العودة إلى التطبيق؛ وإن مضى وقتُ الصلاة أو تغيّر اليوم أُعيد رسمُ الشريط كلّه */
+function tickPrayerBar(){
+  try{
+    if(!geoStore()) return;
+    const np=window.__np, now=new Date();
+    if(!np || now>=np.at || window.__npDay!==now.toDateString()){ renderPrayers(); return; }
+    const el=document.querySelector('#prayer-bar .next-left'); if(el) el.textContent=fmtLeft(np.at-now);
+  }catch(e){}
+}
+setInterval(tickPrayerBar, 30000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) tickPrayerBar(); });
 function autoTimeByPrayer(pt){
   // لا نُبدّل التبويب إلا إذا كان المستخدم في الصباح أو المساء أصلًا
   if(currentTab!=='morning' && currentTab!=='evening') return;
