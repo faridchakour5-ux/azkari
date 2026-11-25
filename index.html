@@ -877,7 +877,8 @@
   /* حركةُ «صلِّ على الحبيب» عند فتح القرآن */
   /* «صلِّ على الحبيب ﷺ» تُغطّي كلَّ انتظار (طلبُ فريد، 24 نوفمبر 2026): تنزل العبارةُ ثم تبقى ظاهرةً حتى تجهز الصفحة فعلًا (لا تتلاشى وحدَها)، وتحتها الصلاةُ القادمة عند فتح القرآن */
   #qsal{position:fixed; inset:0; z-index:9000; display:flex; visibility:hidden; align-items:center; justify-content:center; background:var(--bg); opacity:0; pointer-events:none; contain:strict;}   /* مُخطَّطةٌ دائمًا (visibility لا display) فلا يُحسَب شيءٌ لحظةَ اللمس */
-  #qsal.go{visibility:visible; pointer-events:auto; opacity:1;}   /* تظهر فورًا بلا تلاشٍ عند اللمس (طلبُ فريد، 25 نوفمبر 2026) */
+  #qsal.go{visibility:visible; pointer-events:none; opacity:1;}   /* لا تلتقط اللمسةَ التي أظهرتها (وإلّا ذهبت «الضغطة» إليها لا إلى الزرّ — خللُ 2.0.121) */
+  #qsal.go.block{pointer-events:auto;}   /* بعد أن يصل الضغطُ إلى الزرّ: تُلمَس فتزول */   /* تظهر فورًا بلا تلاشٍ عند اللمس (طلبُ فريد، 25 نوفمبر 2026) */
   #qsal.go.out{animation:qsOut .28s ease forwards; pointer-events:none;}
   #qsal .qs-box{display:flex; flex-direction:column; align-items:center; gap:14px; padding:0 18px;}
   #qsal .qs-t{font-family:'Maghribi','AmiriQuran',serif; font-size:clamp(40px,12vw,60px); line-height:1.5; color:#063D30; text-shadow:0 1px 14px rgba(6,61,48,.22); white-space:nowrap; transform:translateY(-38vh); will-change:transform;}
@@ -3523,7 +3524,7 @@ function qsalShow(withNext){
     const o=qsalEl(), np=o.querySelector('.qs-np');
     if(np){ const h=withNext ? qsalNextHtml() : ''; if(np.innerHTML!==h) np.innerHTML=h; }
     if(o.classList.contains('go') && !o.classList.contains('out') && Date.now()-__qsAt<2000){ clearTimeout(window.__qsalT); window.__qsalT=setTimeout(()=>qsalHide(0), 15000); return; }   // ظهرت عند اللمس: لا تُعاد
-    if(o.classList.contains('go')){ o.classList.remove('go','out'); requestAnimationFrame(()=>o.classList.add('go')); }   // إعادةٌ أثناء التلاشي: بلا إجبار التخطيط (كان offsetWidth يُخطِّط المصحفَ كلَّه)
+    if(o.classList.contains('go')){ o.classList.remove('go','out','block'); requestAnimationFrame(()=>o.classList.add('go')); }   // إعادةٌ أثناء التلاشي: بلا إجبار التخطيط (كان offsetWidth يُخطِّط المصحفَ كلَّه)
     else o.classList.add('go');
     __qsAt=Date.now();
     clearTimeout(window.__qsalT); window.__qsalT=setTimeout(()=>qsalHide(0), 15000);   // حارس: لا تبقى الطبقةُ أبدًا
@@ -3534,13 +3535,14 @@ function qsalHide(minMs){
   const o=document.getElementById('qsal'); if(!o || !o.classList.contains('go')) return;
   const wait=Math.max(0, (minMs||0)-(Date.now()-__qsAt));
   clearTimeout(window.__qsalT);
-  window.__qsalT=setTimeout(()=>{ o.classList.add('out'); setTimeout(()=>{ if(o.classList.contains('out')) o.classList.remove('go','out'); }, 300); }, wait);
+  window.__qsalT=setTimeout(()=>{ o.classList.add('out'); o.classList.remove('block'); setTimeout(()=>{ if(o.classList.contains('out')) o.classList.remove('go','out'); }, 300); }, wait);
 }
 function playQuranSalat(ms){ qsalShow(false); qsalHide(ms||1500); }
 /* تُظهر العبارةَ، وتُنفِّذ العملَ البطيء بعد أن تُرسَم، ولا تُخفيها إلا بعد انتهائه */
 async function qsalHold(fn, minMs, withNext){
   qsalShow(!!withNext);
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  try{ const o=document.getElementById('qsal'); if(o && o.classList.contains('go')) o.classList.add('block'); }catch(e){}
   try{ await fn(); }catch(e){}
   qsalHide(minMs==null ? 1300 : minMs);
 }
