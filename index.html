@@ -2103,7 +2103,6 @@
       <label class="sw"><input type="checkbox" id="mut-toggle"><span class="track"></span><span class="knob"></span></label>
     </div>
   </div>
-  <div class="gnote" id="riwaya-note"></div>
   <div class="gnote">يظهر الخيارُ في ورقة التفسير عند لمس الآية، ولا يمسّ صفحةَ المصحف ولا لونَ نصّه. المتشابهاتُ تشابهٌ آليٌّ من نصّ المصحف العربيّ وليست قائمةَ علماء المتشابه اللفظيّ. والقرآنُ بالعربيّة وحدَها.</div>
 
   <div class="gtitle">لغة الواجهة</div>
@@ -2276,14 +2275,11 @@
     <div class="row"><span class="k">التطبيق</span><span class="v">صلاتي</span></div>
     <div class="row"><span class="k">الإصدار</span><span class="v" id="app-ver">—</span></div>
     <div class="row"><span class="k">الأذكار</span><span class="v">حصن المسلم</span></div>
-    <div class="row"><span class="k">نص القرآن</span><span class="v" id="quran-src">رواية حفص</span></div>
-    <div class="row"><span class="k">مرجع حفص</span><span class="v">مصحف الملك فهد</span></div>
-    <div class="row"><span class="k">مرجع ورش</span><span class="v">المصحف المحمدي</span></div>
     <a class="row" href="privacy.html" style="text-decoration:none; color:inherit;"><span class="k">سياسة الخصوصية</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
     <div class="row" id="onb-again" style="cursor:pointer"><span class="k">الجولة التعريفيّة</span><span class="v" style="color:var(--accent)">عرض ‹</span></div>
     <a class="row" href="credits.html" style="text-decoration:none; color:inherit;"><span class="k">صور القرّاء (النَّسب والتراخيص)</span><span class="v" style="color:var(--accent)">عرض ↗</span></a>
   </div>
-  <div class="gnote">الأذكار من كتاب «حصن المسلم». ونصّ القرآن: رواية حفص عن <b>مصحف الملك فهد</b>، ورواية ورش عن <b>المصحف المحمدي</b>. اللهم تقبّل واغفر لنا.</div>
+  <div class="gnote">الأذكار من كتاب «حصن المسلم». اللهم تقبّل واغفر لنا.</div>
   <div style="height:30px"></div>
 </section>
 
@@ -2477,11 +2473,6 @@ function applyHafsFont(){
     __lastMaghribi=now;
   }catch(e){}
   document.body.classList.toggle('qtashkeel', settings.riwaya!=='warsh');
-  const src=$('#quran-src');
-  if(src && settings.riwaya!=='warsh') src.textContent = 'حفص — مصحف الملك فهد';
-  const note=$('#riwaya-note');
-  if(note && settings.riwaya!=='warsh')
-    note.textContent = 'رواية حفص عن عاصم — عن مصحف الملك فهد، بخطّه ورموزِه.';
 }
 function applyQuranColor(){
   const c = settings.quranColor||'normal';
@@ -2528,10 +2519,6 @@ function applyRiwaya(){
   try{ paintQPreview(); }catch(e){}
   document.body.classList.toggle('riw-warsh', settings.riwaya==='warsh');
   document.body.classList.toggle('riw-hafs', settings.riwaya==='hafs');
-  $('#quran-src').textContent = settings.riwaya==='warsh' ? 'ورش — الخط المغربي' : 'حفص — مصحف الملك فهد';
-  $('#riwaya-note').textContent = settings.riwaya==='warsh'
-    ? 'رواية ورش عن نافع — عن المصحف المحمدي، بالخطّ المغربي. الأدعية موحَّدة في الروايتين.'
-    : 'رواية حفص عن عاصم — عن مصحف الملك فهد، بخطّه ورموزِه.';
   if(currentTab==='evening'||currentTab==='morning') renderAzkar();
   if(window.__wirdReady){ WIRD=null; if($('#s-wird').classList.contains('active')) qsalHold(async()=>{ openWird(); await waitFor(mushafReady, 12000); }, 1100); }
   if(typeof syncRiwayaPills==='function') syncRiwayaPills();
@@ -2861,10 +2848,9 @@ fontSelect.addEventListener('change', ()=>{
   fillPtSelect(); asr.value=settings.ptAsr||'auto';
   function refreshNote(){
     const g=geoStore(); const inMA=g && g.lat>=20.7&&g.lat<=35.95&&g.lng>=-17.3&&g.lng<=-0.9;
-    note.textContent = inMA
-      ? 'داخل المغرب تُعتمد دائمًا مواقيتُ وزارة الأوقاف بجدولها الدقيق، ولا يغيّرها هذا الاختيار.'
-      : 'الاختيار «تلقائي» يعتمد طريقةَ بلدك من موقعك. اختر طريقةً أخرى إن كان مسجدك يعتمدها. يسري الاختيارُ خارج المغرب فقط.';
-    note.style.display='';
+    /* داخل المغرب لا يُكتب شيءٌ هنا: مصدرُ المواقيت في سياسة الخصوصية (طلبُ فريد، 26 نوفمبر 2026) */
+    note.textContent = inMA ? '' : 'الاختيار «تلقائي» يعتمد طريقةَ بلدك من موقعك. اختر طريقةً أخرى إن كان مسجدك يعتمدها.';
+    note.style.display = inMA ? 'none' : '';
   }
   function apply(){
     settings.ptMethod=sel.value; settings.ptAsr=asr.value; saveSettings(); vibrate(6);

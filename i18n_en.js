@@ -108,7 +108,7 @@ add([[`الأحاديث القدسية الصحيحة`,`Authentic Hadith Qudsi`]
 [`تركيا (الشؤون الدينية)`,`Turkey (Religious Affairs)`],
 [`طهران`,`Tehran`],
 [`داخل المغرب تُعتمد دائمًا مواقيتُ وزارة الأوقاف بجدولها الدقيق، ولا يغيّرها هذا الاختيار.`,`In Morocco, the Ministry of Habous prayer times with their precise table are always used; this choice does not change them.`],
-[`الاختيار «تلقائي» يعتمد طريقةَ بلدك من موقعك. اختر طريقةً أخرى إن كان مسجدك يعتمدها. يسري الاختيارُ خارج المغرب فقط.`,`“Automatic” uses your country’s method from your location. Choose another method if your mosque uses it. The choice applies outside Morocco only.`],
+[`الاختيار «تلقائي» يعتمد طريقةَ بلدك من موقعك. اختر طريقةً أخرى إن كان مسجدك يعتمدها.`,`“Automatic” uses your country’s method from your location. Choose another method if your mosque uses it.`],
 [`طريقة الحساب: أمريكا الشمالية (ISNA) — الفجر والعشاء 15 درجة. قد تختلف بدقائق عن مسجدك.`,`Calculation method: North America (ISNA) — Fajr and Isha at 15°. It may differ by a few minutes from your mosque.`],
 [`طريقة الحساب: رابطة العالم الإسلامي — الفجر 18 والعشاء 17 درجة. قد تختلف بدقائق عن مسجدك.`,`Calculation method: Muslim World League — Fajr at 18° and Isha at 17°. It may differ by a few minutes from your mosque.`],
 [`طريقة الحساب: إعداد وزارة الأوقاف المغربية (19 و17 درجة). قد تختلف عن الجهة المحلية في بلدك.`,`Calculation method: Moroccan Ministry of Habous setting (19° and 17°). It may differ from your country’s local authority.`],
